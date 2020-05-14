@@ -1,0 +1,22 @@
+Create your Java classes
+
+  You will have to create a number of Java files to implement a WSRF
+  service. These include
+
+  * an interface for your WSRF service
+
+  * an implementation class for the service
+
+  * an implementation of the Home interface
+
+  * a ResourceProperty class for each nontrivial resource property
+
+
+Full example
+
+  It is easiest to look at the worked example in doc/example to find out how to
+best go about it.
+
+Next step
+
+ {{{step4.html}Deploy the service}}

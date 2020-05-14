@@ -1,0 +1,7 @@
+de.fzj.unicore.wsrflite.admin.service.AdminServiceDescriptor
+
+eu.unicore.services.rest.AdminServiceDescriptor
+eu.unicore.services.rest.RegistryServiceDescriptor
+
+eu.unicore.services.ws.exampleservice.Example1Descriptor
+ 

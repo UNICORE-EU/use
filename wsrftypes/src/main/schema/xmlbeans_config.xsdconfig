@@ -1,0 +1,20 @@
+<!-- configure java package names -->
+
+<xb:config xmlns:xb="http://www.bea.com/2002/09/xbean/config">
+
+    <!-- Use the "namespace" element to map a namespace to the Java package-->
+    
+
+    
+    <!-- wsrflite types -->
+    
+    <xb:namespace uri="http://www.fz-juelich.de/unicore/wsrflite">
+        <xb:package>de.fzj.unicore.wsrflite.xmlbeans</xb:package>
+    </xb:namespace>
+    
+    <xb:namespace uri="http://unigrids.org/2006/04/types">
+        <xb:package>org.unigrids.services.atomic.types</xb:package>
+    </xb:namespace>
+    
+    
+</xb:config>

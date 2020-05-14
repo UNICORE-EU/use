@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>eu.unicore.services</groupId>
+  <artifactId>use-rest</artifactId>
+  <parent>
+    <groupId>eu.unicore.services</groupId>
+    <artifactId>use</artifactId>
+    <version>4.0.4-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <name>UNICORE Services Environment REST support</name>
+ 
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/performancetests/**</exclude>
+            <exclude>**/deployment/**</exclude>
+            <exclude>**/*Mock*</exclude>
+            <exclude>**/*$*</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <repositories>
+    <repository>
+      <id>unicore.eu</id>
+      <name>UNICORE repository</name>
+      <url>https://unicore-dev.zam.kfa-juelich.de/maven</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>eu.unicore.services</groupId>
+      <artifactId>use-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>eu.unicore.services</groupId>
+      <artifactId>use-restclient</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+    </dependency>
+    <dependency>
+     <groupId>net.java.dev.jna</groupId>
+     <artifactId>jna</artifactId>
+   </dependency>
+   <dependency>
+     <groupId>org.kohsuke</groupId>
+     <artifactId>libpam4j</artifactId>
+   </dependency>
+  </dependencies>
+
+</project>

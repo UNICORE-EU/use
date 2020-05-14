@@ -1,0 +1,140 @@
+
+[[use_security_concepts]]
+Security concepts in UNICORE Services Environment 
+-------------------------------------------------
+
+This section describes the basic security concepts and architecture used in 
+UNICORE/X. The overall procedure performed by the security infrastructure 
+can be summarised as follows:
+
+  - the incoming message is authenticated by the SSL layer
+
+  - extract the information used for authorisation from the
+    message sent to the server. This information includes: originator of the message (in
+    case the message passed through a UNICORE gateway), trust delegation tokens,
+    incoming VO membership assertions, etc.
+    
+  - deal with trust delegation
+  
+  - lookup attributes to be used used for authorisation or incarnation in the configured
+xref:use_aip[attribute sources]
+  
+  - perform policy check by executing a xref:use_pdp[PDP] request
+  
+  - lookup additional dynamically assigned incarnation attributes in the configured
+xref:use_aip[dynamic attribute sources]
+
+  - perform incarnation of the request and execute it
+  
+
+Most of these steps can be switched on/off and use pluggable components. Thus, the security level
+of a UNICORE/X server is widely configurable. Further explanations follow.
+
+Security concepts
+~~~~~~~~~~~~~~~~~
+
+==== Identity
+  
+A server has a certificate, which is used to identify the server when
+it makes a web service request. This certificate resides in the server keystore, and can be 
+configured in the usual configuration file (see the xref:use_configuration[configuration reference]).
+
+==== Consignor, User
+
+In Grid environment it is common that some agents are working on behalf of an end-user. 
+To clearly name actors in such scenarios two terms are used: _Consignor_ and
+_User_.
+
+In UNICORE Consignor is the client who directly submitted a request to the UNICORE server
+(possibly via Gateway). The User is the original initiator of the Grid operation. Of course
+each for each request sent directly by end-user the Consignor is equal to User. 
+
+Example of such situation in UNICORE is Unicore/X server downloading a job's input from a remote
+storage, after an end-user Amy submitted a job. 
+In this example Unicore/X is Consignor for the storage, and Amy is Consignor for Unicore/X. 
+For both Unicore/X and storage Amy is the User.
+
+==== Trust delegation
+  
+When the user and Consignor are not the same, UNICORE/X will check whether the Consignor
+has the right to act on behalf of the User. This is done by checking whether a trust 
+delegation assertion has been supplied and is valid. Trust delegation assertions
+must be created by the User and delegate the User's trust to the Consignor.
+
+==== Security tokens
+
+When a client makes a request to UNICORE service, a number of tokens is read from the 
+message headers. These are placed in the security context that each WSRF instance has.
+Currently, tokens are the certificates for the UNICORE consignor and user, if available.
+Also, trust delegation assertions are read, and it is checked if the message is signed.
+
+==== Resource ownership 
+
+Each service is 'owned' by some entity identified by a distinguished name (X.500 Principal).
+By default, the server is the owner. When a resource is created on user request (for example
+when submitting a job), the user is the owner.
+
+==== Attributes
+
+User's attributes are used in UNICORE for two principal purposes: to authorize the user
+and subsequently to incarnate the user's request.  
+
+UNICORE/X retrieves user attributes using either a local component or a remote service.
+In the default configuration, the XUUDB attribute service is contacted.
+
+See the xref:use_aip[attribute sources guide] for more information. 
+
+==== Virtual Organisations
+
+Virtual Organisation (VO) is a concept of a Grid-wide group of users which cooperate.
+UNICORE allows for using VOs. It is possible to simplify users management using VOs 
+(e.g. to set common authorization attributes, use a special queue for all VO members
+or to assign pool accounts) and to assign jobs to VOs in accounting. In close future 
+VO members will be able to easily share resources.
+
+See the xref:use_vo[VO attribute source guide] for more details.
+
+==== Policy checks
+
+Each request is checked based on the following information.
+  
+  - available security tokens
+  
+  - the resource owner
+  
+  - the resource accessed (e.g. service name + WSRF instance id)
+  
+  - the activity to be performed (the web method name such as GetResourceProperty)
+  
+The validation is performed by the PDP (Policy Decision Point). The default PDP uses 
+a list of rules expressed in XACML 2.0 format that are 
+configured for the server. The xref:use_pdp[PDP section] describes how to configure different 
+engines for policy evaluation.
+
+==== Authorisation
+
+A request is allowed, if PDP allows it, based on the user's attributes.
+
+==== Incarnation
+
+Incarnation is not a part of security stack, but to large degree is determined by it.
+In UNICORE, by incarnation we refer to the process of mapping an abstract Grid request 
+to a form suitable for execution on a concrete target system. 
+
+Incarnation includes operations like mapping User's Grid identity (certificate) to 
+local user (uid, gid, supplementary gids) or changing the abstract application name 
+to a local executable path.
+
+
+==== Using proxy certificates
+
+No feature in UNICORE _requires_ proxies and unless integration with other services is needed
+proxies can be fully left out. However if needed for interoperability, 
+proxy certificates support can be enabled, so clients using proxies will be correctly authenticated. 
+See <<use-secref>> or enable it in Gateway if it is used. 
+
+UNICORE clients can be configured to create a proxy certificate and send it to the server. On the
+server, the proxy can be used to invoke GSI-based tools, but this features are offered only 
+by some services.
+
+   

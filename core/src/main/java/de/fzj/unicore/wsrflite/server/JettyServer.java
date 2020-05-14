@@ -1,0 +1,221 @@
+/*********************************************************************************
+ * Copyright (c) 2006 Forschungszentrum Juelich GmbH 
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * (1) Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the disclaimer at the end. Redistributions in
+ * binary form must reproduce the above copyright notice, this list of
+ * conditions and the following disclaimer in the documentation and/or other
+ * materials provided with the distribution.
+ * 
+ * (2) Neither the name of Forschungszentrum Juelich GmbH nor the names of its 
+ * contributors may be used to endorse or promote products derived from this 
+ * software without specific prior written permission.
+ * 
+ * DISCLAIMER
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ********************************************************************************/
+
+package de.fzj.unicore.wsrflite.server;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+
+import javax.servlet.Servlet;
+
+import org.apache.log4j.Logger;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.Decorator;
+import org.eclipse.jetty.webapp.WebAppContext;
+
+import de.fzj.unicore.wsrflite.ContainerProperties;
+import de.fzj.unicore.wsrflite.Kernel;
+import de.fzj.unicore.wsrflite.KernelInjectable;
+import de.fzj.unicore.wsrflite.ServiceFactory;
+import eu.unicore.util.Log;
+import eu.unicore.util.configuration.ConfigurationException;
+import eu.unicore.util.jetty.HttpServerProperties;
+import eu.unicore.util.jetty.JettyServerBase;
+
+/**
+ * Jetty server for USE
+ * 
+ * @author schuller
+ */
+public class JettyServer extends JettyServerBase {
+	private static final Logger logger = Log.getLogger(Log.WSRFLITE, JettyServer.class);
+
+	private final Kernel kernel;
+	private final WebAppContext presetWebappCtx;
+	
+	protected static final HashMap<String, Integer> defaults = new HashMap<String, Integer>();
+
+	/**
+	 * create a jetty server using settings from the supplied Kernel 
+	 * @param kernel -  the Kernel
+	 * @throws Exception
+	 */
+	public JettyServer(Kernel kernel, HttpServerProperties jettyCfg) 
+			throws Exception {
+		this(kernel, null, jettyCfg);
+	}
+
+	/**
+	 * create a jetty server using settings from the supplied Kernel 
+	 * @param kernel -  the Kernel
+	 * @param webappCtx - a web app context to serve
+	 * @throws Exception
+	 */
+	public JettyServer(Kernel kernel, WebAppContext webappCtx, HttpServerProperties jettyCfg) throws Exception {
+		super(makeUrl(kernel), kernel.getContainerSecurityConfiguration(), jettyCfg);
+		
+		this.presetWebappCtx = webappCtx;
+		this.kernel = kernel;
+		initServer();
+	}
+
+	private static URL makeUrl(Kernel kernel) throws MalformedURLException {
+		int port = 0;
+		String host = kernel.getContainerProperties().getValue(ContainerProperties.WSRF_HOST);
+		String pString = kernel.getContainerProperties().getValue(ContainerProperties.WSRF_PORT);
+		if (pString != null) port = Integer.parseInt(pString);
+		
+		if (kernel.getContainerSecurityConfiguration().isSslEnabled())
+			return new URL("https://" + host + ":" + port);
+		else
+			return new URL("http://" + host + ":" + port);
+	}
+
+	/**
+	 * After start, if a choice of listen port was left to the server,
+	 * let's update listen port property. Also if baseUrl was not set explicitly, 
+	 * let's update its port as it has (by default) the same port as the listen port.  
+	 */
+	@Override
+	public void start() throws Exception {
+		super.start();
+		
+		URL url = getUrls()[0];
+		if ("0".equals(kernel.getContainerProperties().getValue(ContainerProperties.WSRF_PORT)))
+			kernel.getContainerProperties().setProperty(ContainerProperties.WSRF_PORT, 
+				String.valueOf(url.getPort()));
+		
+		String baseUrlS = kernel.getContainerProperties().getValue(ContainerProperties.WSRF_BASEURL);
+		URL baseUrl = new URL(baseUrlS);
+		if (baseUrl.getPort() == 0 && baseUrl.getHost().equals(url.getHost())) {
+			baseUrl = new URL(baseUrl.getProtocol(), baseUrl.getHost(), 
+					url.getPort(), baseUrl.getFile());
+			kernel.getContainerProperties().setProperty(ContainerProperties.WSRF_BASEURL, 
+					baseUrl.toExternalForm());
+		}
+	}
+
+
+	/**
+	 * Adds default handler after the provided Webapp context and returns them as HandlerCollection
+	 */
+	private Handler configureWithExistingWebAppCtx() {
+		DefaultHandler defaultHandler = new DefaultHandler();
+		HandlerCollection handlers = new HandlerCollection();
+		handlers.setHandlers(new Handler[] { presetWebappCtx, defaultHandler });
+		presetWebappCtx.getObjectFactory().addDecorator(new ServletDecorator(kernel));
+		return handlers;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void addServlets(ServletContextHandler root) throws ClassNotFoundException {
+		for (ServiceFactory f: kernel.getServiceFactories()){
+			
+			Servlet servlet=f.getServlet();
+			
+			String servletClass=f.getServletClass();
+			
+			String path=f.getServletPath();
+			String desc = servlet!=null? String.valueOf(servlet.getClass().getName()) : servletClass;
+			
+			if(servlet!=null){
+				ServletHolder sh=new ServletHolder(servlet);
+				root.addServlet(sh, path);
+			}
+			else{
+				Class<?> loadedClazz = Class.forName(servletClass);
+				if (!Servlet.class.isAssignableFrom(loadedClazz))
+					throw new ConfigurationException("Class " + servletClass + " must extend Servlet class");
+				ServletHolder sh=new ServletHolder((Class<? extends Servlet>)loadedClazz);
+				root.addServlet(sh, path);
+			}
+			if(logger.isDebugEnabled()){
+				logger.debug("Added <"+desc+"> on "+path+" for service type '"+f.getType()+"'");
+			}
+		}
+	}
+
+	public static class ServletDecorator implements Decorator {
+		private final Kernel k;
+
+		public ServletDecorator(Kernel k) {
+			this.k = k;
+		}
+
+		@Override
+		public <T> T decorate(T o) {
+			if (o instanceof KernelInjectable) {
+				((KernelInjectable) o).setKernel(k);
+			}
+			return o;
+		}
+
+		@Override
+		public void destroy(Object o) {
+			// NOP
+		}
+		
+	}
+
+	@Override
+	protected Handler createRootHandler() throws ConfigurationException {
+		if (presetWebappCtx != null)
+			return configureWithExistingWebAppCtx();
+		
+		ServletContextHandler root = new ServletContextHandler(getServer(), "/", ServletContextHandler.SESSIONS);
+		root.getObjectFactory().addDecorator(new ServletDecorator(kernel));
+		try {
+			addServlets(root);
+		} catch (ClassNotFoundException e) {
+			throw new ConfigurationException("Can't add servlet, as " +
+					"its class can not be loaded: " + e.getMessage(), e);
+		}
+		return root;
+	}
+	
+	/**
+	 * In USE we have always {@link ServletContextHandler} but it can be wrapped in {@link HandlerCollection}.
+	 * @return the root servlet handler of this Jetty server. 
+	 */
+	public ServletContextHandler getRootServletContext() 
+	{
+		if (presetWebappCtx != null)
+			return presetWebappCtx;
+		return (ServletContextHandler)super.getRootHandler();
+	}
+
+}

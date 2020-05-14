@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="uri">
+
+<!-- 
+    this file is used to provide the local locations for xsd files
+-->
+
+  <rewriteURI uriStartString="http://docs.oasis-open.org/wsrf"
+	          rewritePrefix="classpath:schemaorg_apache_xmlbeans/src"/>
+	          
+  <rewriteURI uriStartString="http://docs.oasis-open.org/wsn"
+	          rewritePrefix="classpath:schemaorg_apache_xmlbeans/src"/>
+
+   <rewriteSystem systemIdStartString="http://www.w3.org/2005/08/addressing"
+                  rewritePrefix="classpath:/schemas/wsdl"/> 
+
+  <uri name="b-2.xsd"
+	   uri="classpath:schemaorg_apache_xmlbeans/src/b-2.xsd"/>
+  
+  <uri name="bf-2.xsd"
+	   uri="classpath:schemaorg_apache_xmlbeans/src/bf-2.xsd"/>
+
+  <uri name="r-2.xsd"
+	   uri="classpath:schemaorg_apache_xmlbeans/src/r-2.xsd"/>
+  
+  <uri name="rl-2.xsd"
+	   uri="classpath:schemaorg_apache_xmlbeans/src/rl-2.xsd"/>
+	   
+  <uri name="rp-2.xsd"
+	   uri="classpath:schemaorg_apache_xmlbeans/src/rp-2.xsd"/>
+
+  <uri name="sg-2.xsd"
+	   uri="classpath:schemaorg_apache_xmlbeans/src/sg-2.xsd"/>
+
+  <uri name="t-1.xsd"
+	   uri="classpath:schemaorg_apache_xmlbeans/src/t-1.xsd"/>
+
+  <uri name="unigridsTypes-use.xsd"
+	   uri="classpath:schemaorg_apache_xmlbeans/src/unigridsTypes-use.xsd"/>
+	      
+  <uri name="wsrflite.xsd"
+	   uri="classpath:schemaorg_apache_xmlbeans/src/wsrflite.xsd"/>
+
+  <uri name="http://www.w3.org/2005/08/addressing/ws-addr.xsd"
+	   uri="classpath:schemaorg_apache_xmlbeans/src/wsa-200508.xsd"/>
+
+  <uri name="http://www.w3.org/2001/xml.xsd"
+	   uri="classpath:schemas/xml.xsd"/>
+
+</catalog>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<FindBugsFilter>
+  <LastVersion value="-1" relOp="NEQ"/>
+  <And>
+    <Or>
+      <Class name="de.fzj.unicore.wsrflite.security.UASSecurityProperties"/>
+      <Class name="de.fzj.unicore.wsrflite.security.util.SimpleSecurityProperties"/>
+    </Or>
+    <Bug pattern="CN_IDIOM_NO_SUPER_CALL"/>
+  </And>
+  <And>
+    <Bug pattern="DE_MIGHT_IGNORE"/>
+    <Method name="configureScheduler"/>
+    <Class name="de.fzj.unicore.wsrflite.ResourcePool"/>
+  </And>
+  <And>
+    <Bug pattern="DE_MIGHT_IGNORE"/>
+    <Method name="extractElementTextAsString"/>
+    <Class name="de.fzj.unicore.wsrflite.utils.Utilities"/>
+  </And>
+  <And>
+    <Bug pattern="DE_MIGHT_IGNORE"/>
+    <Method name="getPeerCertificate"/>
+    <Class name="de.fzj.unicore.wsrflite.security.SecurityManager"/>
+  </And>
+  <And>
+    <Bug pattern="DM_EXIT"/>
+    <Class name="~de\.fzj\.unicore\.wsrflite\.Kernel\$.+"/>
+    <Method name="run"/>
+  </And>
+  <And>
+    <Bug pattern="JLM_JSR166_UTILCONCURRENT_MONITORENTER"/>
+    <Class name="de.fzj.unicore.wsrflite.impl.DefaultHome"/>
+  </And>
+  <And>
+    <Bug pattern="REC_CATCH_EXCEPTION"/>
+    <Class name="de.fzj.unicore.wsrflite.security.UASSecurityProperties"/>
+    <Method name="readKeystore"/>
+  </And>
+  <And>
+    <Bug pattern="LI_LAZY_INIT_UPDATE_STATIC"/>
+    <Class name="de.fzj.unicore.wsrflite.security.SecurityManager"/>
+    <Method name="getServerCert"/>
+  </And>
+  <And>
+    <Bug pattern="LI_LAZY_INIT_STATIC"/>
+    <Class name="de.fzj.unicore.wsrflite.security.SecurityManager"/>
+    <Method name="isAccessControlEnabled"/>
+  </And>
+  <And>
+    <Or>
+      <Bug pattern="OBL_UNSATISFIED_OBLIGATION"/>
+      <Bug pattern="OS_OPEN_STREAM"/>
+    </Or>
+    <Class name="de.fzj.unicore.wsrflite.utils.deployment.ServiceConfigReader"/>
+    <Method name="configureServices"/>
+  </And>
+  <And>
+    <Or>
+      <Bug pattern="OBL_UNSATISFIED_OBLIGATION"/>
+      <Bug pattern="OS_OPEN_STREAM"/>
+    </Or>
+    <Class name="de.fzj.unicore.wsrflite.utils.deployment.DeploymentUtils"/>
+    <Method name="copyFile"/>
+  </And>
+  <And>
+    <Bug pattern="MS_PKGPROTECT"/>
+    <Class name="de.fzj.unicore.wsrflite.impl.DefaultHome"/>
+    <Field name="terminationTimes"/>
+  </And>
+  <And>
+    <Bug pattern="IS2_INCONSISTENT_SYNC"/>
+    <Class name="de.fzj.unicore.wsrflite.DeploymentManager"/>
+    <Field name="pathToServiceJars"/>
+  </And>
+  <And>
+    <Bug pattern="IS2_INCONSISTENT_SYNC"/>
+    <Class name="de.fzj.unicore.wsrflite.impl.ResourceImpl"/>
+    <Field name="initialXlogin"/>
+  </And>
+  <And>
+    <Bug pattern="EI_EXPOSE_REP"/>
+    <Class name="de.fzj.unicore.wsrflite.security.UASSecurityProperties"/>
+    <Field name="certChain"/>
+  </And>
+  <And>
+    <Bug pattern="MS_EXPOSE_REP"/>
+    <Class name="de.fzj.unicore.wsrflite.security.SecurityManager"/>
+    <Method name="getTrustedCertificateDNs"/>
+  </And>
+  <And>
+    <Bug pattern="REC_CATCH_EXCEPTION"/>
+    <Method name="getDefaultLifetime"/>
+    <Class name="de.fzj.unicore.wsrflite.impl.ResourceImpl"/>
+  </And>
+  <And>
+    <Bug pattern="DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED" />
+  </And>
+  <And>
+    <Bug pattern="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"/>
+    <Or>
+      <Class name="de.fzj.unicore.wsrflite.persistence.Persistence"/>
+      <Class name="de.fzj.unicore.wsrflite.impl.DefaultHome"/>
+    </Or>
+  </And>
+</FindBugsFilter>

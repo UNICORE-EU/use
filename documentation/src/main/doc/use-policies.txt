@@ -1,0 +1,313 @@
+[[use_policies]]
+
+Guide to XACML security policies
+--------------------------------
+
+XACML authorization policies need not to be modified on a day-to-day basis when 
+running the UNICORE server. The most common tasks as banning or allowing users 
+can be performed very easily using UNICORE Attribute Sources like XUUDB or Unity. 
+This guide is intended for advanced administrators who want to change the 
+non-standard authorization process and for developers who want to provide
+authorization policies for services they create. 
+
+The http://www.oasis-open.org/committees/tc_home.php?wg_abbrev=xacml[XACML] standard is a
+powerful way to express fine grained access control. The idea is to have XML policies 
+describing how and by whom actions on resources can be performed. A very readable introduction 
+into XACML can be found with http://sunxacml.sourceforge.net/guide.html#xacml[Sun's XACML implementation].
+
+There are several versions of XACML policy language. Currently UNICORE supports both 1.x and 2.0 
+versions. Those are quite similar and use same concepts, however note that syntax is a bit different.
+In this guide we provide examples using XACML 2.0. The same examples in the legacy XACML 1.1 format
+are available in xref:use_policies-11.
+
+UNICORE allows to choose one of several authorization back-end implementations 
+called Policy Decision Points (PDP). Among others you can decide whether to use local XACML 
+1.x policies or local XACML 2.0 policies. The xref:use_pdp[authorization section] shows how 
+to choose and configure each of the available PDPs.   
+
+In UNICORE terms XACML is used as follows. Before each operation (i.e. execution of a web
+service call), an XACML request is generated, which currently includes the following attributes:
+
+[width="100%",cols="<35%m,15%,15%<,35%<",frame="topbot",options="header"]
+|===========================================================
+|XACML attribute name								|XACML category		|XACML type		|Description
+|urn:oasis:names:tc:xacml:1.0:resource:resource-id	|Resource			|AnyURI			|WS service name
+|urn:unicore:wsresource								|Resource			|String			|Identifier of the WSRF resource instance (if any).
+|owner												|Resource			|X.500 name		|The name of the VO resource owner.
+|voMembership-VONAME								|Resource			|String			|For each VO the accessed resource is a member, there is such attribute with the 'VONAME' set to the VO, and with the value specifying allowed access type, using the same action categories as are used for the +actionType+ attribute.
+|actionType											|Action				|String			|Action type or category. Currently 'read' for read-only operation and 'modify' for others.
+|urn:oasis:names:tc:xacml:1.0:action:action-id		|Action				|String			|WS operation name.
+|urn:oasis:names:tc:xacml:1.0:subject:subject-id 	|Subject		    |X.500 name 	|User's DN.
+|role												|Subject			|String			|The user's role.
+|consignor											|Subject			|X.500 name		|Client's (consignor's) DN.
+|vo													|Subject			|Strings		|Bag with all VOs the user is member of (if any).
+|selectedVo											|Subject			|String			|The effective, selected VO (if any).
+|===========================================================
+
+Note that the above list is valid for the default local XACML 2 and legacy XACML 1.x PDPs. For others
+the attributes might be different - see the respective documentation.  
+  
+The request is processed by the server and checked against a (set of) policies. Policies
+contain rules that can either deny or permit a request, using a powerful set of functions.
+
+
+Policy sets and combining of results
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Typically, the authorization policy is stored in one file. However as this file can get long 
+and unmanageable sometimes it is better to split it into several ones. This additionally allows 
+to easily plug additional policies to the existing authorization process. In UNICORE,
+this feature is implemented in the XAML 2.0 PDP. 
+
+When policies are split in multiple files each of those files must contain (at least one) a 
+separate policy. A PDP must somehow combine result of evaluation of multiple policies. 
+This is done by so-called policy combining algorithm. The following algorithms are available,
+the part after last colon describes behaviour of each:    
+
+-------
+urn:oasis:names:tc:xacml:1.1:policy-combining-algorithm:ordered-permit-overrides
+urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:permit-overrides
+urn:oasis:names:tc:xacml:1.1:policy-combining-algorithm:ordered-deny-overrides
+urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:deny-overrides
+urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:first-applicable
+urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:only-one-applicable
+-------
+
+Each policy file can contain one or more rules, so it is important to understand how possible 
+conflicts are resolved. The so-called combining algorithm for the rules in a single policy
+file is specified in the top-level Policy element.
+   
+The XACML (from version 1.1 onwards) specification defines six algorithms:
+permit-overrides, deny-overrides, first-applicable, only-one-applicable, ordered-permit-overrides
+and ordered-deny-overrides. For example, to specify that the first matching
+rule in the policy file is used to make the decision, the Policy element must contain the
+following "RuleCombiningAlgId" attribute:
+
+-------
+<Policy xmlns="urn:oasis:names:tc:xacml:2.0:policy:schema:os"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	PolicyId="ExamplePolicy"
+	RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable">
+-------
+
+The full identifiers of the combining algorithms are as follows:
+
+-------
+urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:deny-overrides
+urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:permit-overrides
+urn:oasis:names:tc:xacml:1.1:rule-combining-algorithm:ordered-deny-overrides
+urn:oasis:names:tc:xacml:1.1:rule-combining-algorithm:ordered-permit-overrides
+urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable
+-------
+
+
+    
+Role-based access to services
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+A common use case is to allow/permit access to a certain service based on a user's role
+This can be achieved with the following XACML rule, which describes that a user with role 
+"admin" is given access to all services.
+
+----------------------
+<Rule RuleId="Permit:Admin" Effect="Permit">
+	<Description> Role "admin" may do anything. </Description>
+	<Target />
+	<Condition>
+	  <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+	    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
+		<SubjectAttributeDesignator
+		    DataType="http://www.w3.org/2001/XMLSchema#string" AttributeId="role" />
+	    </Apply>
+	    <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">admin</AttributeValue>
+	  </Apply>
+	</Condition>
+</Rule>
+----------------------
+
+If the access should be limited to a certain service, the +Target+ element must contain a
+service identifier, as follows. In this example, access to the 'DataService' is granted to those 
+who have the 'data-access' role. 
+
+---------------------
+<Rule RuleId="rule2" Effect="Permit">
+	<Description>Allow users with role "data-access" access to the DataService</Description>
+	<Target>
+	  <Resources>
+	    <Resource>
+	      <ResourceMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:anyURI-equal">
+	        <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#anyURI">DataService</AttributeValue>
+		<ResourceAttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:resource:resource-id"
+				             DataType="http://www.w3.org/2001/XMLSchema#anyURI" MustBePresent="true" />
+	      </ResourceMatch>
+	    </Resource>
+	  </Resources>
+	</Target>
+	
+	<Condition>
+	  <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+	    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
+	      <SubjectAttributeDesignator DataType="http://www.w3.org/2001/XMLSchema#string" AttributeId="role" />
+	    </Apply>
+	   <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">data-access</AttributeValue>
+	  </Apply>
+	</Condition>
+--------------------
+
+By using the <Action> tag in policies, web service access can be controlled on the method level.
+In principle, XACML supports even control based on the content of some XML document, such as 
+the incoming SOAP request. However this is not yet used in UNICORE/X.
+
+Limiting access to services to the service instance owner
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Most service instances (corresponding e.g. to jobs, or files) should only ever
+be accessed by their owner. This rule is expressed as follows:
+
+---------------------
+<Rule RuleId="Permit:AnyResource_for_its_owner" Effect="Permit">
+	<Description> Access to any resource is granted for its owner </Description>
+	<Target />
+	<Condition>
+	  <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:x500Name-equal">
+	    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:x500Name-one-and-only">
+	      <SubjectAttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+					  DataType="urn:oasis:names:tc:xacml:1.0:data-type:x500Name"
+					  MustBePresent="true" />
+            </Apply>
+	    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:x500Name-one-and-only">
+	      <ResourceAttributeDesignator
+	        AttributeId="owner" DataType="urn:oasis:names:tc:xacml:1.0:data-type:x500Name"
+		MustBePresent="true" />
+	    </Apply>
+	  </Apply>
+	</Condition>
+</Rule>
+---------------------
+
+More details on XACML use in UNICORE/X
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To get more detailed information about XACML policies (e.g. to get the list of all 
+available functions etc) consult the
+http://www.oasis-open.org/committees/tc_home.php?wg_abbrev=xacml[XACML specification].
+To get more information on XACML use in UNICORE/X it is good to set the logging level
+of security messages to DEBUG:
+
+------
+log4j.logger.unicore.security=DEBUG
+------
+
+You will be able to read what input is given to the XACML 
+engine and what is the detailed answer. 
+Alternatively, ask on the mailto:unicore-support@lists.sf.net[support mailing list].
+
+
+[[use_policies-11]]
+Policy examples in XACML 1.1 syntax 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This section contains the same examples as are contained in the 
+previous section, but using XACML 1.x syntax. For more detailed discussion 
+of each example please refer to the previous section.
+
+Policy header with first-applicable combining algorithm. 
+
+--------
+<Policy xmlns="urn:oasis:names:tc:xacml:1.0:policy" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        PolicyId="ExamplePolicy" 
+        RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable">
+--------
+
+A user with role "admin" is given access to all service.
+
+---------------------
+<Rule RuleId="rule1" Effect="Permit">
+ <Description>Allow users with role "admin" access to any service</Description>
+    <Target>
+      <Subjects>
+        <AnySubject/>
+      </Subjects>
+      <Resources>
+        <AnyResource/>
+      </Resources>
+      <Actions>
+        <AnyAction/>
+      </Actions>
+    </Target>
+ <Condition FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+   <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
+     <SubjectAttributeDesignator DataType="http://www.w3.org/2001/XMLSchema#string" AttributeId="role" />
+   </Apply>
+   <!-- here is the role value -->
+   <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">admin</AttributeValue>
+ </Condition>
+ /Rule>
+---------------------
+
+Defining which resource access is defined with the +Target+ element:
+
+---------------------
+<Rule RuleId="rule2" Effect="Permit">
+ <Description>Allow users with role "data-access" access to the DataService</Description>
+    <Target>
+      <Subjects>
+        <AnySubject/>
+      </Subjects>
+      <Resources>
+       <!-- specify the data service -->
+       <Resource>
+        <ResourceMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:anyURI-equal">
+          <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#anyURI">DataService</AttributeValue>
+          <ResourceAttributeDesignator DataType="http://www.w3.org/2001/XMLSchema#anyURI"
+                                       AttributeId="urn:oasis:names:tc:xacml:1.0:resource:resource-id"/>
+        </ResourceMatch>
+      </Resource>
+      </Resources>
+      <Actions>
+        <AnyAction/>
+      </Actions>
+    </Target>
+ <Condition FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+   <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
+     <SubjectAttributeDesignator DataType="http://www.w3.org/2001/XMLSchema#string" AttributeId="role" />
+   </Apply>
+   <!-- here is the role value -->
+   <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">data-access</AttributeValue>
+ </Condition>
+ /Rule>
+--------------------
+
+Allowing access for the resource owner:
+  
+---------------------
+
+<Rule RuleId="PermitJobManagementServiceForOwner" Effect="Permit">
+  <Description>testing</Description>
+  <Target>
+    <Subjects> <AnySubject/> </Subjects>
+    <Resources>
+      <Resource>
+        <ResourceMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:anyURI-equal">
+          <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#anyURI">JobManagementService</AttributeValue>
+          <ResourceAttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:resource:resource-id" DataType="http://www.w3.org/2001/XMLSchema#anyURI" MustBePresent="true"/>
+        </ResourceMatch>
+      </Resource>
+    </Resources>
+    <Actions> <AnyAction/> </Actions>
+  </Target>
+  <Condition FunctionId="urn:oasis:names:tc:xacml:1.0:function:x500Name-equal">
+    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:x500Name-one-and-only">
+      <SubjectAttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id" DataType="urn:oasis:names:tc:xacml:1.0:data-type:x500Name" MustBePresent="true"/>
+    </Apply>
+    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:x500Name-one-and-only">
+      <ResourceAttributeDesignator AttributeId="owner" DataType="urn:oasis:names:tc:xacml:1.0:data-type:x500Name" MustBePresent="true"/>
+    </Apply>
+  </Condition>
+</Rule>
+
+---------------------
+
+
+

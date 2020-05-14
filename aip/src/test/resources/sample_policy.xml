@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Policy xmlns="urn:oasis:names:tc:xacml:1.0:policy"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	PolicyId="testPolicy"
+	RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:ordered-permit-overrides">
+
+	<Description>testing</Description>
+	<Target>
+		<Subjects>
+			<AnySubject />
+		</Subjects>
+		<Resources>
+			<AnyResource />
+		</Resources>
+		<Actions>
+			<AnyAction />
+		</Actions>
+	</Target>
+
+	<Rule RuleId="AcceptTSF" Effect="Permit">
+		<Description>
+			Accept selected users to reach TSF
+		</Description>
+		<Target>
+			<Subjects>
+				<AnySubject />
+			</Subjects>
+			<Resources>
+				<Resource>
+					<ResourceMatch
+						MatchId="urn:oasis:names:tc:xacml:1.0:function:anyURI-equal">
+						<AttributeValue
+							DataType="http://www.w3.org/2001/XMLSchema#anyURI">TargetSystemFactoryService</AttributeValue>
+						<ResourceAttributeDesignator
+							DataType="http://www.w3.org/2001/XMLSchema#anyURI"
+							AttributeId="urn:oasis:names:tc:xacml:1.0:resource:resource-id" />
+					</ResourceMatch>
+				</Resource>
+			</Resources>
+
+			<Actions>
+				<AnyAction />
+			</Actions>
+		</Target>
+		<Condition FunctionId="urn:oasis:names:tc:xacml:1.0:function:and">
+				<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+					<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
+						<SubjectAttributeDesignator
+							DataType="http://www.w3.org/2001/XMLSchema#string"
+							AttributeId="role" />
+					</Apply>
+					<AttributeValue
+						DataType="http://www.w3.org/2001/XMLSchema#string">user</AttributeValue>
+				</Apply>
+
+				<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:any-of-all">
+					<Function FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal"/>
+					<SubjectAttributeDesignator
+							DataType="http://www.w3.org/2001/XMLSchema#string"
+							AttributeId="urn:SAML:voprofile:group" />
+					<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-bag">
+						<AttributeValue
+							DataType="http://www.w3.org/2001/XMLSchema#string">/Math-VO/UUDB/SiteA</AttributeValue>
+						<AttributeValue
+							DataType="http://www.w3.org/2001/XMLSchema#string">/Math-VO/UUDB</AttributeValue>
+						<AttributeValue
+							DataType="http://www.w3.org/2001/XMLSchema#string">/Math-VO</AttributeValue>
+					</Apply>
+				</Apply>
+		</Condition>
+	</Rule>
+
+	<Rule RuleId="FinalRule" Effect="Deny" />
+</Policy>

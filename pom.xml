@@ -1,0 +1,358 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>eu.unicore.services</groupId>
+  <artifactId>use</artifactId>
+  <packaging>pom</packaging>
+  <description>UNICORE service container</description>
+  <inceptionYear>2010</inceptionYear>
+  <version>4.0.4-SNAPSHOT</version>
+  <name>UNICORE Services Environment</name>
+ 
+  <parent>
+    <groupId>eu.unicore</groupId>
+    <artifactId>unicore-parent</artifactId>
+    <version>1.22</version>  
+  </parent>
+
+  <developers>
+    <developer>
+      <name>Bernd Schuller</name>
+      <email>bschuller at users.sourceforge.net</email>
+      <organization>Forschungszentrum Juelich</organization>
+      <organizationUrl>http://www.fz-juelich.de</organizationUrl>
+    </developer>
+    <developer>
+      <name>Krzysztof Benedyczak</name>
+      <organization>ICM Warsaw</organization>
+      <organizationUrl>http://www.icm.edu.pl</organizationUrl>
+    </developer>
+  </developers>
+
+  <contributors>
+    <contributor>
+      <name>Bastian Demuth</name>
+      <organization>Forschungszentrum Juelich</organization>
+      <organizationUrl>http://www.fz-juelich.de</organizationUrl>
+    </contributor>
+    <contributor>
+      <name>Roger Menday</name>
+      <organization>Forschungszentrum Juelich</organization>
+      <organizationUrl>http://www.fz-juelich.de</organizationUrl>
+    </contributor>
+    <contributor>
+      <name>Jason Daivandy</name>
+      <organization>Forschungszentrum Juelich</organization>
+      <organizationUrl>http://www.fz-juelich.de</organizationUrl>
+    </contributor>
+    <contributor>
+      <name>Shiraz Memon</name>
+      <organization>Forschungszentrum Juelich</organization>
+    </contributor>
+    <contributor>
+      <name>Shahbaz Memon</name>
+      <organization>Forschungszentrum Juelich</organization>
+    </contributor>
+    <contributor>
+      <name>André Hoeing</name>
+      <organization>TU Berlin</organization>
+    </contributor>
+  </contributors>
+
+  <scm>
+    <connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/wsrflite/trunk</connection>
+    <developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/wsrflite/trunk</developerConnection>
+  </scm>
+
+  <properties>
+    <compiler.fork>false</compiler.fork>
+    <secutils.version>2.0.3</secutils.version>
+    <cxf.version>3.3.1</cxf.version>
+    <ehcache.version>2.10.5</ehcache.version>
+    <jetty.version>9.4.28.v20200408</jetty.version>
+    <httpclient.version>4.5.3</httpclient.version>
+    <seclib.version>4.5.10</seclib.version>
+    <slf4j.version>1.7.13</slf4j.version>
+    <metrics.version>3.2.6</metrics.version>
+    <jwt.version>6.3</jwt.version>
+  </properties>
+
+  <modules>
+    <module>core</module>
+    <module>wsrftypes</module>
+    <module>use-cxfclient</module>
+    <module>use-cxf</module>
+    <module>restclient</module>
+    <module>rest</module>
+    <module>pdp</module> 
+    <module>aip</module>
+    <module>documentation</module>
+  </modules>
+
+  <dependencyManagement>
+   <dependencies>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.16</version>
+    </dependency>
+
+    <!-- other UNICORE components -->
+    <dependency>
+      <groupId>de.fzj.unicore</groupId>
+      <artifactId>persistence</artifactId>
+      <version>0.103</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
+      <version>${metrics.version}</version>
+    </dependency> 
+
+    <dependency>
+      <groupId>eu.unicore.security</groupId>
+      <artifactId>securityLibrary</artifactId>
+      <version>${seclib.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>eu.unicore.security</groupId>
+      <artifactId>secutils-cxf</artifactId>
+      <version>${secutils.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>${httpclient.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.xmlbeans</groupId>
+      <artifactId>xmlbeans-jdk8</artifactId>
+      <version>2.6.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>de.fzj.unicore.xuudb</groupId>
+      <artifactId>xuudb-common</artifactId>
+      <version>2.5.1</version>
+      <exclusions>
+        <exclusion>
+	  <groupId>org.apache.xmlbeans</groupId>
+	  <artifactId>xmlbeans</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- Jetty -->
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+      <version>${jetty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet</artifactId>
+      <version>${jetty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-webapp</artifactId>
+      <version>${jetty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-rewrite</artifactId>
+      <version>${jetty.version}</version>
+    </dependency>
+
+    <!-- CXF -->
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+      <version>${cxf.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-databinding-xmlbeans</artifactId>
+      <version>${cxf.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-frontend-jaxws</artifactId>
+      <version>${cxf.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-transports-http</artifactId>
+      <version>${cxf.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-features-clustering</artifactId>
+      <version>${cxf.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.ehcache</groupId>
+      <artifactId>ehcache</artifactId>
+      <version>2.10.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.4</version>
+    </dependency>
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+      <version>4.5.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.kohsuke</groupId>
+      <artifactId>libpam4j</artifactId>
+      <version>1.8</version>
+    </dependency>
+    <dependency>
+      <groupId>com.nimbusds</groupId>
+      <artifactId>nimbus-jose-jwt</artifactId>
+      <version>${jwt.version}</version>
+    </dependency>
+  </dependencies>
+ </dependencyManagement>
+
+  <repositories>
+    <repository>
+      <id>unicore.eu</id>
+      <name>UNICORE repository</name>
+      <url>https://unicore-dev.zam.kfa-juelich.de/maven</url>
+    </repository>
+  </repositories>
+
+  <build>
+    <defaultGoal>install</defaultGoal>
+    <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <inherited>true</inherited>
+          <executions>
+            <execution>
+              <id>build-source-jar</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+              <inherited>true</inherited>
+            </execution>
+          </executions>
+          <configuration>
+            <attach>true</attach>
+          </configuration>
+        </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>xmlbeans-maven-plugin</artifactId>
+          <version>2.3.3</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-release-plugin</artifactId>
+          <configuration>
+            <tagBase>https://unicore.svn.sourceforge.net/svnroot/unicore/wsrflite/tags</tagBase>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <forkCount>1</forkCount>
+	    <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+            <useSystemClassloader>true</useSystemClassloader>
+            <failIfNoTests>false</failIfNoTests>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-eclipse-plugin</artifactId>
+          <configuration>
+            <useProjectReferences>false</useProjectReferences>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>cobertura-maven-plugin</artifactId>
+          <version>2.5.2</version>
+          <configuration>
+            <instrumentation>
+              <excludes>
+                <!-- exclude generated xmlbeans code-->
+                <exclude>xmlbeans/**/*.class</exclude>
+                <exclude>org/unigrids/services/atomic/**/*.class</exclude>
+                <exclude>de/fzj/unicore/wsrflite/xmlbeans/impl/*TypeImp*.class</exclude>
+                <exclude>de/fzj/unicore/wsrflite/xmlbeans/impl/*DocumentImp*.class</exclude>
+                <exclude>org/ogf/**/*.class</exclude>
+                <exclude>org/ggf/**/*.class</exclude>
+                <exclude>org/w3/**/*.class</exclude>
+                <exclude>org/xmlsoap/**/*.class</exclude>
+                <exclude>org/oasisOpen/**/*.class</exclude>
+	        <exclude>schemaorg_apache_xmlbeans/**/*.class</exclude>
+              </excludes>
+            </instrumentation>
+            <aggregate>true</aggregate>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>clean</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>src/main/assembly/dep.xml</descriptor>
+          </descriptors>
+        </configuration>
+      </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+  
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>surefire-report-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.5.2</version>
+      </plugin>
+    </plugins>
+  </reporting>
+</project>

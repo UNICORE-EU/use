@@ -1,0 +1,59 @@
+Create the schema
+
+  First, you'll have to write an XML schema file describing the datatypes and
+  XML documents used for communicating with your services.\
+  This example mimics part of a web shop application, where users can create
+  shopping carts and manipulate them.
+
+Messages
+
+  For our example, we'll need a factory service for creating shopping
+  carts. It has the following in and out messages:
+
++----------------------------------
+ <!-- 
+  this will create a new shopping cart WS-Resource
+  -->
+  <xsd:element name="CreateShoppingCart">
+    <xsd:complexType/>
+  </xsd:element>
+
+  <!-- 
+     the response 
+     contains an EPR to the new shopping cart
+  -->
+  <xsd:element name="CreateShoppingCartResponse">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="wsa:EndpointReference"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
++---------------------------------
+
+
+Types used as resource properties
+
+  We want to expose the shopping cart as a WSRF resource
+
++----------------------------------
+<!-- a shopping cart -->
+ <xsd:element name="ShoppingCart">
+    <xsd:complexType>
+    	<xsd:sequence>
+    	   <xsd:element ref="test:Entry" maxOccurs="unbounded"/>
+    	</xsd:sequence>
+    </xsd:complexType>
+ </xsd:element>
+ 
+ <!-- the current total price of items in the shopping cart -->
+  <xsd:element name="TotalPrice" type="xsd:integer"/> 
++----------------------------------
+
+Full schema
+
+ The full schema can be found as doc/example/schema/example.xsd in the WSRFlite distribution.
+ 
+Next step
+
+ {{{step2.html}Compile the schema}}

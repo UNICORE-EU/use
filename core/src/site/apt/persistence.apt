@@ -1,0 +1,113 @@
+Persistence
+  
+  WSRFlite can optionally store its state permanently (usually using the embedded Java database HSQLDB).
+When using persistence, your WSRF instance will be loaded from the database before the request, and will
+be persisted when the request has been processed. This behaviour can be customized, however.
+
+Programming persistent services
+
+  If you want your services to work properly with activated persistence, you need to take care about two things.
+  
+  * your ResourceProperty objects have to be serializable
+  
+  * additional fields you want to persist have to be marked with the @Persist annotation
+  
+  Persisting the state information is dealt with in two methods from WSRFInstance:
+activate() and passivate(). Please check the  {{{apidocs/de/fzj/unicore/wsrflite/WSRFInstance.html}Javadoc}} of these methods, and see the example below.
+
+  If needed you can override activate() and passivate() in your own services to modify this behaviour, but usually it is not needed.
+  
++----------------------------------
+public MyWSResource extends WSResourceImpl {
+ 
+  //additional variable that must be persisted,
+  //has to be Serializable, and annotated with @Persist
+  @Persist()
+  private Foo myVar;
+
+  public Map<String, Serializable> passivate() {
+		
+	//perform service-specific things here
+	//but make sure to call super.passivate()
+	return super.passivate();
+  }
+
+  public void activate(Map<String, Serializable> map) {
+    super.activate(map);
+		
+	//perform custom activation here
+	
+  }
+   
++----------------------------------
+
+Persistence semantics
+
+  WSRFLite allows you some control about how an instance is loaded into memory. This is controlled using
+the @Persistent annotation on your service (interface or, better, implementation).
+See the {{{xref/de/fzj/unicore/wsrflite/persistence/Persistent.html}the source code}} or the {{{apidocs/de/fzj/unicore/wsrflite/persistence/Persistent.html}API docs}}
+  
+Overall persistence configuration options
+
+* Default database: H2
+
+  The default database system is H2, an embedded pre Java solution (http://www.h2database.com)
+
+  Usually, you just have to check the location where the database files will be placed.  This is done 
+in the wsrflite.xml config file.
+
+  Here's an example
+  
++----------------------------------
+ <services>
+ 
+ <!-- persistence properties -->
+   <!-- class to use-->
+   <property name="unicore.wsrflite.persistence.persist" 
+             value="de.fzj.unicore.wsrflite.persistence.Persistence"/>
+   <!-- data location -->
+   <property name="persistence.directory" value="/tmp/data"/>
+ ...
+
+ </services> 
+ 
++---------------------------------
+
+
+
+* Further persistence options
+
+
+Please check the documentation at unicore.eu/documentation/manuals/unicore6/persistence
+
+
+** Example: Using MySQL
+
+ Your database administrator has to create a database and user for use with WSRFlite.
+Also, make sure that you have the MySQL JDBC driver (mysql-connector-java) in your lib folder! 
+
+  
++----------------------------------
+ <services>
+ 
+ <!-- persistence properties for MySQL -->
+   <!-- class to use-->
+   <property name="unicore.wsrflite.persistence.persist" 
+             value="de.fzj.unicore.wsrflite.persistence.Persistence"/>
+   
+   <property name="persistence.class" 
+             value="de.fzj.unicore.persist.impl.MySQLPersist"/>
+
+   <property name="persistence.host" value="localhost"/>
+   <property name="persistence.port" value="3306"/>
+   <property name="persistence.database" value="unicore-data"/>
+   <property name="persistence.user" value="unicore"/>
+   <property name="persistence.password" value="*****"/>
+   
+ </services> 
+ 
++---------------------------------
+
+
+  <<NOTE>> You can download the MySQL JDBC driver for example 
+from {{{http://repo1.maven.org/maven2/mysql/mysql-connector-java}http://repo1.maven.org/maven2/mysql/mysql-connector-java}}

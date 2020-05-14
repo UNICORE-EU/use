@@ -1,0 +1,182 @@
+[[use_pdp]]
+
+Authorization back-end (PDP) guide
+----------------------------------
+
+The authorization process in UNICORE/X requires that nearly all operations 
+must be authorized prior to execution (exceptions may be safely ignored).
+ 
+UNICORE allows to choose which authorization back-end is used. The module which
+is responsible for this operation is called Policy Decision Point (PDP). 
+You can choose one among already available PDP modules or even develop your own engine.
+
+Local PDPs use a set of policy files to reach an authorisation decision, remote PDPs query
+a remote service.
+
+Local UNICORE PDPs use the XACML language to express the authorization policy. The XACML policy
+language is introduced in the xref:use_policies[Guide to XACML security policies].
+You can also review this guide if you want to have a deeper understanding of the authorization 
+process. 
+
+ 
+Basic configuration  
+~~~~~~~~~~~~~~~~~~~
+
+[NOTE]
+=========
+The full list of options related to PDP is available here: <<use-secref>>.
+=========
+
+
+There are three options which are relevant to all PDPs:
+  
+ - +container.security.accesscontrol+ (values: +true+ or +false+) This boolean property can be used 
+to completely turn off the authorization. This guide makes sense only if this option is set to +true+.
+Except for test scenarios this should never be switched off, otherwise every user can in principle 
+access all resources on the server.
+
+ - +container.security.accesscontrol.pdp+ (value: full class name) This property is used to choose
+which PDP module is being used.
+
+ - +container.security.accesscontrol.pdpConfig+ (value: file path) This property provides a location
+of a configuration file of the selected PDP.  
+
+
+Available PDP modules
+~~~~~~~~~~~~~~~~~~~~~
+
+==== XACML 2.0 PDP
+
+The implementation class of this module is: +eu.unicore.uas.pdp.local.LocalHerasafPDP+ so
+to enable this module use the following configuration in uas.config:
+
+--------
+container.security.accesscontrol.pdpConfig=<CONFIG_DIR>/xacml2.conf
+container.security.accesscontrol.pdp=eu.unicore.uas.pdp.local.LocalHerasafPDP
+--------
+
+The configuration file content is very simplistic as it is enough to define only few options: 
+
+--------
+# The directory where XACML 2.0 policy files are stored 
+localpdp.directory=conf/xacml2Policies
+
+# Wildcard expression to select actual policy files from the directory defined above  
+localpdp.filesWildcard=*.xml
+
+# Combining algorithm for the policies. You can use the full XACML id or its last part. 
+localpdp.combiningAlg=first-applicable
+----------
+
+The policies from the +localpdp.directory+ are always evaluated in alphabetical order,
+so it is good to name files with a number. By default the first-applicable combining algorithm is
+used and UNICORE policy is stored in two files: '01coreServices.xml' and '99finalDeny.xml'.
+The first file contains the default access policy, the latter a single fall through deny rule.
+Therefore you can put your own policies using an additional file in file named 
+e.g. '50localRules.xml'.
+
+The policies are reloaded whenever you change (or touch) the configuration file of this PDP, e.g.
+like this:
+
+--------
+touch conf/xacml2.conf
+--------
+
+
+==== Remote SAML/XACML 2.0 PDP with Argus PAP
+
+[NOTE]
+===========
+Releases 6.5.x of UNICORE offered an other Argus PDP implementation which allows for 
+off-sourcing authorisation decision to a remote Argus PDP daemon. While this implementation
+was working, in the Argus policy language it is impossible to express any rules using
+the resource owner. Therefore creation of a functional policy for UNICORE with Argus 
+is barely possible and this implementation was dropped in UNICORE 6.6.0.  
+===========
+
+
+This PDP allows for mixing local policies with policies downloaded from a remote 
+server using SAML protocol for XACML policy query. This protocol is implemented by
+Argus PAP server https://twiki.cern.ch/twiki/bin/view/EGEE/AuthorizationFramework[Argus PAP].
+Please note that under the name Argus there is a whole portfolio of services, but for purpose
+of UNICORE integration Argus PAP is the only one required.
+
+Usage of Argus PAP together with UNICORE policies is useful as Argus PAP allows
+for a quite easy editing of authorization policies with its Simplified Policy Language.
+It is less powerful then XACML but allows for performing all the typical tasks like
+banning selected users or VOs. Also if Argus is used to provide authorization rules 
+for other middleware installed at the site (as gLite or ARC), it might be desirable to 
+have a single place to store site-wide policies.   
+
+Unfortunately as Argus policy can not fully take over
+the UNICORE authorization (see the above note for details), the Argus policy must be combined with 
+the classic UNICORE XACML 2 policy, stored locally.
+
+The implementation class of this module is: +eu.unicore.uas.pdp.argus.ArgusPDP+ so
+to enable this module use the following configuration in uas.config:
+
+-------
+container.security.accesscontrol.pdpConfig=<CONFIG_DIR>/argus.config
+container.security.accesscontrol.pdp=eu.unicore.uas.pdp.argus.ArgusPAP
+--------
+
+The PDP configuration is very simple as it is only required to provide the Argus endpoint 
+and query timeout (in milliseconds). 
+
+--------
+# The directory where XACML 2.0 policy files are stored 
+#  (both local and downloaded from Argus PAP) 
+localpdp.directory=conf/xacml2PoliciesWithArgus
+
+# Wildcard expression to select actual policy files from the directory defined above  
+localpdp.filesWildcard=*.xml
+
+# Combining algorithm for the policies. You can use the full XACML id or its last part. 
+#  This algorithm will be used to combine the Argus and local policies. 
+localpdp.combiningAlg=first-applicable
+
+# Address of the Argus PAP server. Typically only the hostname needs to be changed,
+#  rarely the port.
+argus.pap.serverAddress=https://localhost:8150/pap/services/ProvisioningService
+
+# What is the name of a file to which a downloaded Argus policy is saved.
+#  Note that name of this file is very important as it determines policies evaluation order.
+#  Here the Argus policy will be evaluated first.  
+argus.pap.policysetFilename=00argus.xml
+
+# How often (in ms) the Argus PAP should be queried for a new policy
+argus.pap.queryInterval=3600000
+
+# What is the Argus query timeout in ms. 
+argus.pap.queryTimeout=15000
+
+# If Argus PAP is unavailable for that long (in ms) the PDP will black all users
+# assuming that the policy is outdated. Use negative value to disable this feature.   
+argus.pap.deny.timeout=36000000
+--------
+
+You can use both http and https addresses. In the latter case server's certificate is used 
+to make the connection. Note that all +localpdp.*+ settings are the same as in case
+of the default, local XACML 2.0 PDP.
+
+Using the available configuration options, it is possible to merge Argus policies
+in many different ways. Here we present a simple pattern, which is good for cases when 
+Argus is used to ban users (it was also applied to the example above):
+
+ - Argus policy should be saved to a file which will be evaluated first, e.g. +00argus.xml+
+ - Default XACML 2.0 policies of UNICORE local PDP should be added to the directory, 
+ without any changes.
+ - The policy combining algorithm should be +first-applicable+
+ - Argus PAP policies should include a series of deny statements (see Argus documentation
+ for details) and no final permit (or deny) fall-trough rule. 
+
+Then Argus policy will be evaluated first. If any banning rule matches the user then it 
+will be denied by the Argus policy. Otherwise it will be non-applicable and the local, default
+UNICORE policy will be evaluated. Note that if it is problematic for other (non-UNICORE) 
+services using Argus, to remove the final fall-through permit or deny rule, then you can 
+add such rule, but with a proper +resource+ statement so it will be applicable only for non-UNICORE
+components.
+
+Of course it is also possible to creatively design other patterns, when for instance Argus policy 
+is evaluated as a second one.  
+

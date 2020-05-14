@@ -1,0 +1,166 @@
+package eu.unicore.services.rest.testservice;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.io.File;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
+
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Application;
+
+import org.apache.commons.io.FileUtils;
+import org.json.JSONObject;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import de.fzj.unicore.wsrflite.ContainerProperties;
+import de.fzj.unicore.wsrflite.Home;
+import de.fzj.unicore.wsrflite.InitParameters;
+import de.fzj.unicore.wsrflite.Kernel;
+import de.fzj.unicore.wsrflite.Resource;
+import de.fzj.unicore.wsrflite.impl.DefaultHome;
+import de.fzj.unicore.wsrflite.persistence.Persistence;
+import de.fzj.unicore.wsrflite.security.TestConfigUtil;
+import de.fzj.unicore.wsrflite.utils.deployment.DeploymentDescriptorImpl;
+import eu.unicore.services.rest.RestService;
+import eu.unicore.services.rest.USEResource;
+import eu.unicore.services.rest.USERestApplication;
+import eu.unicore.services.rest.client.BaseClient;
+import eu.unicore.services.rest.impl.ServicesBase;
+
+public class TestServicesBase {
+
+	static Kernel k;
+	static String sName="counter";
+
+	@BeforeClass
+	public static void setup() throws Exception {
+		FileUtils.deleteQuietly(new File("target/data"));
+		Properties p = TestConfigUtil.getInsecureProperties();
+		p.setProperty("persistence.directory", "target/data");
+		p.setProperty("container."+ContainerProperties.WSRF_PERSIST_CLASSNAME,Persistence.class.getName());
+		p.setProperty("container.host", "localhost");
+		p.setProperty("container.port", "55333");
+		k=new Kernel(p);
+		k.start();
+		
+		DeploymentDescriptorImpl dd = new DeploymentDescriptorImpl();
+		dd.setType(RestService.TYPE);
+		dd.setImplementation(HomeApplication.class);
+		dd.setName(sName);
+		dd.setKernel(k);
+		k.getDeploymentManager().deployService(dd);
+		
+	}
+
+	@AfterClass
+	public static void stop() throws Exception {
+		if(k!=null)k.shutdown();
+	}
+
+	@Test
+	public void testPagedResults()throws Exception {
+		for(int i=0;i<10;i++){
+			HomeApplication.createTestInstance(k);
+		}
+		String url = k.getContainerProperties().getContainerURL()+"/rest";
+		
+		String base  = url+"/"+sName+"/foo";
+
+		// 1. get all with default params
+		String resource  = base;
+		BaseClient client=new BaseClient(resource,k.getClientConfiguration());
+		System.out.println("Accessing "+resource);
+		JSONObject o = client.getJSON();
+		System.out.println(o.toString(2));
+		assertEquals(10, o.getJSONArray("foo").length());
+		assertNotNull(o.optJSONObject("_links"));
+		assertNotNull(o.getJSONObject("_links").optJSONObject("self"));
+
+		// 2. get 5 elements starting at 0
+		resource  = base+"?offset=0&num=5";
+		client.setURL(resource);
+		System.out.println("Accessing "+resource);
+		o = client.getJSON();
+		System.out.println(o.toString(2));
+		assertEquals(5, o.getJSONArray("foo").length());
+		assertNotNull(o.optJSONObject("_links"));
+		assertNotNull(o.getJSONObject("_links").optJSONObject("self"));
+		assertNotNull(o.getJSONObject("_links").optJSONObject("next"));
+
+
+		// 3. get 5 elements starting at 5
+		resource  = base+"?offset=5&num=5";
+		client.setURL(resource);
+		System.out.println("Accessing "+resource);
+		o = client.getJSON();
+		System.out.println(o.toString(2));
+		assertEquals(5, o.getJSONArray("foo").length());
+		assertNotNull(o.optJSONObject("_links"));
+		assertNotNull(o.getJSONObject("_links").optJSONObject("self"));
+		assertNotNull(o.getJSONObject("_links").optJSONObject("previous"));
+
+		// 4. get 2 elements starting at 2
+		resource  = base+"?offset=2&num=2";
+		client.setURL(resource);
+		System.out.println("Accessing "+resource);
+		o = client.getJSON();
+		System.out.println(o.toString(2));
+		assertEquals(2, o.getJSONArray("foo").length());
+		assertNotNull(o.optJSONObject("_links"));
+		assertNotNull(o.getJSONObject("_links").optJSONObject("self"));
+		assertNotNull(o.getJSONObject("_links").optJSONObject("previous"));
+	}
+
+
+
+	public static class HomeApplication extends Application implements USERestApplication {
+
+		@Override
+		public Set<Class<?>> getClasses() {
+			Set<Class<?>>classes=new HashSet<Class<?>>();
+			classes.add(MockResource.class);
+			return classes;
+		}
+
+		@Override
+		public void initialize(Kernel kernel)throws Exception {
+			Home home = new MockHome();
+			home.setKernel(kernel);
+			home.activateHome("counter");
+			kernel.putHome(home);
+		}
+
+		public static void createTestInstance(Kernel k) throws Exception {
+			Home home = k.getHome("counter");
+			String id = home.createResource(new InitParameters());
+			System.out.println("Created test instance <"+id+">");
+		}
+
+	}
+
+	public static class MockHome extends DefaultHome {
+		@Override
+		protected Resource doCreateInstance() throws Exception {
+			return new CounterResource();
+		}
+	}
+
+	@Path("/foo")
+	@USEResource(home="counter")
+	public static class MockResource extends ServicesBase {
+
+		@Override
+		public CounterModel getModel(){
+			return (CounterModel)super.getModel();
+		}
+
+	}
+
+
+
+}

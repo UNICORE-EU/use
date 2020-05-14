@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>eu.unicore.services</groupId>
+    <artifactId>use</artifactId>
+    <version>4.0.4-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>use-pdp</artifactId>
+  <name>UNICORE Services Environment PDP</name>
+  <description>UNICORE Services Environment Policy Decision Point implementations</description>
+
+  <repositories>
+    <repository>
+      <id>unicore.eu</id>
+      <name>UNICORE repository</name>
+      <url>https://unicore-dev.zam.kfa-juelich.de/maven</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>eu.unicore.services</groupId>
+      <artifactId>use-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>eu.unicore.services</groupId>
+      <artifactId>use-wsrfclient</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.herasaf.xacml.core</groupId>
+      <artifactId>herasaf-xacml-core</artifactId>
+      <version>1.0.1.RELEASE</version>
+      <exclusions>
+        <!-- we require JDK 1.8 which has JAXB built in -->
+        <exclusion>
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-impl</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+     	<artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <excludePackageNames>xmlbeans.*</excludePackageNames>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>xmlbeans-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>xmlbeans</goal>
+            </goals>
+          </execution>
+        </executions>
+        <inherited>true</inherited>
+        <configuration>
+	  <javaSource>1.7</javaSource>
+          <schemaDirectory>src/main/schema</schemaDirectory>
+          <xmlConfigs>
+            <xmlConfig implementation="java.io.File">src/main/schema/xmlbeans_config.xsdconfig</xmlConfig>
+          </xmlConfigs>
+          <noUpa>true</noUpa>
+          <!--outputJar>target/samly2Xbeans-${version}.jar</outputJar>-->
+        </configuration>
+      </plugin>
+
+      <!-- less javadoc -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+     	<artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <excludePackageNames>xmlbeans.*</excludePackageNames>
+        </configuration>
+      </plugin>
+     
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/argus/pap/**/*.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fileAttributeSource>
+   <entry key="CN=Demo User,O=UNICORE,C=EU">
+      <attribute name="role"><value>user</value></attribute>
+      <attribute name="xlogin">
+         <value>somebody</value>
+         <value>nobody</value>
+      </attribute>
+   </entry>
+</fileAttributeSource>

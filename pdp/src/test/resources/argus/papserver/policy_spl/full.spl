@@ -1,0 +1,5 @@
+resource ".*" { 
+   action ".*" {
+      rule permit { subject = "C=EU, L=Testing City, O=Testing Organization, CN=localhost" }
+   }
+}

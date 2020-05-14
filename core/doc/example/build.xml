@@ -1,0 +1,83 @@
+<project name="client" default="all" basedir=".">
+  <description>
+Build file for the WSRFLite example
+  </description>
+
+ 
+<!-- 
+  classpath
+ -->
+	<path id="cp.classes">
+		<!-- distribution jars from WSRFlite -->
+		<fileset dir="../../.">
+			<include name="**/*.jar"/>
+		</fileset>
+		<!-- add xmlbeans.jar -->
+		<fileset dir=".">
+			<include name="*.jar"/>
+		</fileset>
+				
+	</path>
+
+<target name="all" depends="clean,xmlbeans,compile,test"/>
+
+	
+<target name="xmlbeans" description="create the XMLBeans classes for the WSRF xsd and wsdl files">
+<echo/>
+<echo>Step 1: Creating XMLBeans types for the example schema</echo>
+<echo/>
+<java classname="org.apache.xmlbeans.impl.tool.SchemaCompiler"
+          classpathref="cp.classes"
+          fork="true">
+      <arg value="-dl"/>
+      <arg value="-noupa"/>
+ <!--  <arg value="-src"/>
+      <arg value="xmlbeans-generated-source"/> -->
+	  <arg value="-out"/>
+   	  <arg value="myXmlBeans.jar"/>
+<!-- files to XMLBeanify follow ... -->
+      <arg value="schema/example.xsd"/>
+    </java>
+</target>
+	
+<target name="compile" description="compile Java code">
+<echo/>
+<echo>Step 3: Compile Java code</echo>
+<echo/>
+<mkdir dir="classes"/>
+<javac destdir="classes" debug="true">
+   <src>
+        <pathelement location="java"/>
+        <pathelement location="test"/>
+   </src>
+   <classpath refid="cp.classes"/>
+</javac>
+</target>
+	
+<target name="test" description="test">
+<echo/>
+<echo>Step 4: Run tests</echo>
+<echo/>
+  <junit printSummary="yes" haltonerror="true" haltonfailure="true" fork="false" dir=".">
+      <sysproperty key="basedir" value="."/>
+      <formatter type="plain" usefile="false"/>
+      <classpath>
+        <path refid="cp.classes"/>
+        <pathelement location="classes"/>
+      </classpath>
+      <batchtest todir=".">
+        <fileset dir="test">
+          <include name="**/Test*.java"/>
+          <exclude name="**/*Abstract*Test.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+ 
+
+<target name="clean">
+   <delete dir="classes"/>
+   <delete file="myXmlBeans.jar"/>
+</target>
+
+</project>

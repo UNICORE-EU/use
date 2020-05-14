@@ -1,0 +1,33 @@
+   ------
+Maven dependency guide
+   ------
+
+Maven dependency guide
+
+   WSRFlite jars are available on a public repository. 
+Using {{{http://maven.apache.org}Maven}}, you can use WSRFlite for your own projects quite easily.
+
+  The following pom.xml snippet shows which repository to use and which dependencies to include.
+  
++--------------------
+
+  <repositories>
+    <repository>
+      <id>vsgc-public</id>
+      <name>VSGC repository</name>
+      <url>http://zam904.zam.kfa-juelich.de/maven</url>
+    </repository>
+    
+  </repositories>
+
+ <dependencies>
+   <!-- wsrflite core -->
+    <dependency>
+      <groupId>de.fzj.unicore.wsrflite</groupId>
+      <artifactId>wsrflite</artifactId>
+      <version>1.6</version>
+    </dependency>
+ </dependencies>
++--------------------
+
+  This will transitively add XFire, XMLBeans and all other dependencies to your project.

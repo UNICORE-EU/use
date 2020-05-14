@@ -1,0 +1,3 @@
+# service factory for CXF
+
+eu.unicore.services.rest.RestServiceFactory

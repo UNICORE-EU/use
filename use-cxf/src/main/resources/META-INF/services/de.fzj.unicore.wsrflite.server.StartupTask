@@ -1,0 +1,4 @@
+#WSRFLite subsystem initialization
+
+eu.unicore.services.ws.WSRFStartupTask
+

@@ -1,0 +1,24 @@
+   ------
+Documentation Overview
+   ------
+
+Available Documents
+
+ {{{client.html}Clients}} - Client side code in WSRFlite
+
+ {{{security.html}Security}} - Configuring basic security
+
+ {{{persistence.html}Persistence}} - programming persistent services
+
+ {{{faults.html}Faults}} - faults and exceptions
+
+ {{{configuration.html}Configuration}} - configuring WSRFlite
+ 
+ {{{messaging.html}Messaging}} - the internal messaging system 
+ 
+ {{{wsbn.html}WS-BN}} - using WS-BaseNotification
+ 
+ {{{admin.html}Admin}} - the admin service
+ 
+ {{{maven.html}Maven}} - using WSRFlite in your own projects
+ 

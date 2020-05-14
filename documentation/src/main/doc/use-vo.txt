@@ -1,0 +1,113 @@
+[[use_vo]]
+Virtual Organisations (VO) Support
+----------------------------------
+
+VO (Virtual Organisation) is a quite broad concept. VO server software is used to store 
+identities of federated entities along with their attributes.
+Entities are managed with the usage of groups to help administration. 
+Those attributes can be used e.g. for authorization purposes. It is described here how to take
+advantage of this approach in any USE based service.
+
+Overview
+~~~~~~~~
+
+Features
+^^^^^^^^
+
+All the below features can be used in any combinations, independently:
+
+ - Unity VOs can provide all incarnation attributes, also those which are unsupported by
+ the more simple attribute sources (including full support for default and allowed attributes). 
+ Therefore it can be used as a central service for multiple sites
+ providing incarnation settings. As attributes can be assigned in a group scope, it is possible to 
+ use a central service with mappings, still having some of the values (for instance uids) which are different 
+ for each site. It is simple to assign same attribute for groups of users.
+ - It is possible to assign non-standard attributes and use them for access authorization.
+ - As it is possible (as always in UNICORE) to mix attributes from multiple attribute sources, VO can provide
+ grid wide settings (as UNICORE role), while local settings (like gids or uids) are assigned locally 
+ by particular sites. This is especially useful when using a dynamic attribute source as a complementary one to the
+ static VO attribute source: VO source provides then authorization attributes (VO membership, role) and dynamic
+ source assigns local uids/gids basing on the VO attributes.  
+ 
+The modes
+^^^^^^^^^
+
+There are two basic modes of operation supported by this subsystem:
+	
+ - *PULL mode* In this mode attributes are pulled (fetched) by the module from a VO service 
+ specified in a configuration file when a new request arrives. This mode is transparent for 
+ clients.
+ 
+ - *PUSH mode* In this mode it is user's software responsibility
+ to retrieve attributes from a VO service. The VO service must return the attributes in a digitally 
+ signed document which is called an _attribute assertion_. This assertion must be attached to the 
+ client's request. The module only verifies if the assertion is correct and if is signed by a 
+ trusted VO service.
+
+It is possible to use both modes simultaneously.
+
+VO selection
+^^^^^^^^^^^^
+
+Some of the VO features as authorization, require only information about all VO the user is the member and
+associated attributes. However in many cases it is required to assign user's request to a particular VO
+and to execute it in the VO scope. This is for instance needed when a special gid is assigned basing on the user's
+VO or when VOs should be charged for their jobs.
+
+To associate a request with a VO the user has to select one or administrator can define a default which is 
+used when user didn't select a VO. User can select an effective VO using request preference 
++selectedVirtualOrganisation+. Of course it must be one of the VOs the user is member of. Alternatively 
+user can use the push mode: if the pushed assertion contains only a single VO membership attribute, this VO is used as 
+the selected one.
+
+Administrator can configure a list of preferred VOs. If such list is provided, then the first VO from the list, 
+where the user is a member is used when user don't provide her own selection. See the general security configuration
+options for the syntax: <<use-secref>>.
+    
+If it is required that all requests should have the effective VO set, then it is possible to deny other requests
+using an additional rule in the authorization policy. The rule should deny all requests that doesn't have 
+the selectedVO authorization attribute. See <<use_policies>> for details.  
+
+
+Supported VO servers
+^^^^^^^^^^^^^^^^^^^^
+
+This module was tested and works well with the Unity system.
+
+There are other possibilities and you can try to use any SAML (2.0) Attribute service. 
+We are interested in all success/failure stories!
+
+
+[[use_VO-planning]]
+VO deployment planning
+^^^^^^^^^^^^^^^^^^^^^^
+
+First of all it must be decided which VO/group (in UNICORE case it absolutely doesn't matter whether a 
+VO or VO subgroup is used, all subgroups can be treated as a full-fledged VOs, and VOs are just a nick-name of 
+top-level groups) is used by a site. 
+
+In case when site needs only generic, grid-wide attributes from a VO, a group which is common for all sites 
+should be used. Such group can provide for instance 'role' attribute for the members. Of course if uids are the
+same across all sites, then uids can be also assigned in such VO. 
+
+In case when site needs also some site-specific attributes, a dedicated group should be created for the site, 
+as a subgroup of a VO (e.g /VO1/sites/SiteA). VO administrators should assign VO-scoped attributes in this group
+and make sure that all universal VO attributes are also replicated there. Please note that Unity allows for 
+outsourcing VO management on a per-group basis, so it is possible to assign administrative permissions to such group, 
+for a site representative. 
+
+The next issue is how to handle a situation when there are multiple Xlogins/roles available for
+the user, and how to mark the default one? To overcome this, for every incarnation attribute it is possible
+to define two VO attributes. Base one can possess many values (e.g. in case of Xlogins every value is 
+a different Xlogin) while the additional attribute holds a single default value. When there is no need
+for multiple values then the base attribute can be used alone. When default attribute is defined
+then its value is used unless a user provided some preferences. Of course such preferences must be valid, i.e. 
+be included in the allowed values of the base attribute. This is useful in PULL mode. In PUSH mode
+user has a freedom of choice. She can use the same approach as in the PULL mode or she can ignore default one, 
+select one of the base values and present only that one to the service.
+
+Details on what attributes are used for those purposes are presented in the following section.
+ 
+include::use-vo-config.txt[]
+
+include::use-vo-howto.txt[]

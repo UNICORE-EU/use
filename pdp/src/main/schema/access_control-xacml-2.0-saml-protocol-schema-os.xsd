@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema
+    targetNamespace="urn:oasis:names:tc:xacml:2.0:profile:saml2.0:v2:schema:protocol"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+    xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+    xmlns:xacml-context="urn:oasis:names:tc:xacml:2.0:context:schema:os"
+    xmlns:xacml="urn:oasis:names:tc:xacml:2.0:policy:schema:os"
+    xmlns:xacml-samlp="urn:oasis:names:tc:xacml:2.0:profile:saml2.0:v2:schema:protocol"
+    xmlns:xacml-saml="urn:oasis:names:tc:xacml:2.0:profile:saml2.0:v2:schema:assertion"
+    elementFormDefault="unqualified"
+    attributeFormDefault="unqualified"
+    blockDefault="substitution"
+    version="2.0">
+  <xs:import namespace="urn:oasis:names:tc:SAML:2.0:assertion"
+      schemaLocation="sstc-saml-schema-assertion-2.0.xsd"/>
+  <xs:import namespace="urn:oasis:names:tc:SAML:2.0:protocol"
+      schemaLocation="sstc-saml-schema-protocol-2.0.xsd"/>
+  <xs:import namespace="urn:oasis:names:tc:xacml:2.0:context:schema:os"
+      schemaLocation="access_control-xacml-2.0-context-schema-os.xsd"/>
+  <xs:import namespace="urn:oasis:names:tc:xacml:2.0:policy:schema:os"
+      schemaLocation="access_control-xacml-2.0-policy-schema-os.xsd"/>
+  <xs:import namespace="urn:oasis:names:tc:xacml:2.0:profile:saml2.0:v2:schema:assertion"
+      schemaLocation="access_control-xacml-2.0-saml-assertion-schema-os.xsd"/>
+  <xs:annotation>
+    <xs:documentation>
+        Document identifier: access_control-xacml-2.0-saml-protocol-schema-os.xsd
+        Location: http://docs.oasis-open.org/xacml/2.0/access_control-xacml-2.0-saml-protocol-schema-os.xsd
+    </xs:documentation>
+  </xs:annotation>
+  <!--    -->
+	<element name="XACMLAuthzDecisionQuery" type="xacml-samlp:XACMLAuthzDecisionQueryType" />
+	<complexType name="XACMLAuthzDecisionQueryType">
+		<complexContent>
+			<extension base="samlp:RequestAbstractType">
+				<sequence>
+					<element ref="xacml-context:Request" />
+				<!-- 	<element ref="xacml-samlp:AdditionalAttributes" minOccurs="0"
+						maxOccurs="1" />-->
+					<element ref="xacml:Policy" minOccurs="0" maxOccurs="unbounded" />
+					<element ref="xacml:PolicySet" minOccurs="0" maxOccurs="unbounded" />
+					<element ref="xacml-saml:ReferencedPolicies" minOccurs="0"
+						maxOccurs="1" />
+				</sequence>
+				<attribute name="InputContextOnly" type="boolean" use="optional"
+					default="false" />
+				<attribute name="ReturnContext" type="boolean" use="optional"
+					default="false" />
+				<attribute name="CombinePolicies" type="boolean" use="optional"
+					default="true" />
+			</extension>
+		</complexContent>
+	</complexType>
+<!-- 
+	<element name="AdditionalAttributes" type="xacml-samlp:AdditionalAttributesType" />
+	<complexType name="AdditionalAttributesType">
+		<sequence>
+			<element ref="xacml-samlp:AssignedAttributes" minOccurs="0"
+				maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<element name="AssignedAttributes" type="xacml-samlp:AssignedAttributesType" />
+	<complexType name="AssignedAttributesType">
+		<sequence>
+			<element ref="xacml-samlp:Holders" />
+			<element ref="xacml-samlp:HolderAttributes" />
+		</sequence>
+	</complexType>
+	
+	<element name="Holders" type="xacml-samlp:HoldersType" />
+	<complexType name="HoldersType">
+		<sequence>
+			<element ref="xacml:Match" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+	
+	<element name="HolderAttributes" type="xacml-samlp:HolderAttributesType" />
+	<complexType name="HolderAttributesType">
+		<sequence>
+			<element ref="xacml-context:Attribute" minOccurs="0"
+				maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+  -->
+  
+  <!--    -->
+  <xs:element name="XACMLPolicyQuery"
+           type="xacml-samlp:XACMLPolicyQueryType"/>
+  <xs:complexType name="XACMLPolicyQueryType">
+    <xs:complexContent>
+      <xs:extension base="samlp:RequestAbstractType">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="xacml-context:Request"/>
+          <xs:element ref="xacml:Target"/>
+          <xs:element ref="xacml:PolicySetIdReference"/>
+          <xs:element ref="xacml:PolicyIdReference"/>
+        </xs:choice>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</schema>

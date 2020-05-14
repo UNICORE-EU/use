@@ -1,0 +1,164 @@
+Configuring WSRFlite by config file
+
+  When running a standalone server, you can configure your services using an XML config file.
+This contains properties to be set and services to be deployed. The name of the config file 
+can be passed as a command line argument to the main() method in the Kernel class.
+
+* Hostname and port
+
+  The most important parameters to set when using WSRFlite as a standalone server
+are host and port:
+
++-------------------
+<services>
+ ...
+   <property name="de.fzj.unicore.wsrflite.host" value="myserver.org"/>
+   <property name="de.fzj.unicore.wsrflite.port" value="7777"/>
+ ...
+ 
++-----------------
+
+  If you do net specify the host, the server will listen on all network interfaces of the
+machine.
+
+* An example configuration file
+
+  Service configuration may include additional handlers, both in and out, for customizing 
+the processing pipeline.
+
++-------------------
+<services>
+
+   <!-- PROPERTIES  -->
+
+   <property name="....." value="...."/>
+
+   <!-- GLOBAL HANDLERS  -->
+
+   <globalHandler type="in|out" class="...."/>
+      
+   
+   <!-- SERVICES  -->
+   
+   <service name="shop" wsrf="false">
+   <interface class="example.PlainService" />
+   <implementation class="example.PlainServiceImpl"/>
+   <handler type="in" class="my.example.SecurityInHandler"/>
+   <handler type="in" class="my.example.TraceHandler"/>
+   <handler type="out" class="my.example.Foo"/>
+   </service>
+
+   <service name="cart" wsrf="true">
+   <interface class="example.WSRFService" />  
+   <implementation class="example.WSRFServiceImpl"/>
+   </service>
+   
+</services>
+
+
+
++-------------------
+  
+Programmatic configuration
+
+  If you want to embed WSRFlite into another application, you can deploy services and 
+configure the hosting environment programmatically.
+Several of the unit tests use these features, so make sure to check the code 
+in the src/test/java folder.
+
+* Deploying a service
+
+  You can use the following method:
+
++----------------
+import de.fzj.unicore.wsrflite.XFireKernel;
+
+Service s=XFireKernel.exposeAsService(
+				"cart",                      //service name
+				ShoppingCart.class,          //interface
+				ShoppingCartHomeImpl.class,  //impl. class
+				true);                       //WSRF yes/no
+
++----------------
+
+  If needed you can add additional handlers to the service instance that is 
+returned by this call.
+
+* Setting properties programmatically
+
+  This is easy:
+
++----------------
+import de.fzj.unicore.wsrflite.Kernel;
+
+Kernel.getKernel().setProperty("prop.name", "prop.value");
+
++----------------
+
+  make sure to do this before calling start() on the Kernel.
+
+
+* WSRF services configuration
+
+  Several paramters control lifetime and expiry checking for wsrf services. These can optionally be given "per service"
+by appending ".<servicename>".
+
+*-----------------------------------+-------------------+-------------------+-------------------+
+|<<property name>>					|<<range of values>>|<<default value>>	|<<description>>	|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|wsrflite.lifetime.default	|Integer	|86400  |Default lifetime of a service instance in seconds|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|wsrflite.lifetime.maximum	|Integer	|not set |Maximum lifetime of a service instance in seconds|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|expirycheck.initial	|Integer	|120 |Initial delay before running the expiry check|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|expirycheck.period	|Integer	|60 | Delay between expiry checks|
+*-----------------------------------+-------------------+-------------------+-------------------+
+
+
+* Additional Jetty server configuration options
+
+  The Jetty server used by WSRFlite can be configured using the following options.
+
+*-----------------------------------+-------------------+-------------------+-------------------+
+|<<property name>>					|<<range of values>>|<<default value>>	|<<description>>	|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|unicore.wsrflite.jetty.maxThreads	|Integer	|255  |Maximum number of threads for Jetty|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|unicore.wsrflite.jetty.minThreads	|Integer    |	1 |Minimum number of threads|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|unicore.wsrflite.jetty.maxIdleTime	|Integer    |	1000 |Milliseconds before an idle connection will be timed out|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|unicore.wsrflite.jetty.lowThreads	|Integer    |	50 |If the number of free threads is below this value, idle connections will be timed out quicker|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|unicore.wsrflite.jetty.lowResourceMaxIdleTime	|Integer    |	100 |under "low resource" condition, milliseconds before an idle connection will be timed out|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|unicore.wsrflite.jetty.maxIdleTime	|Integer    |	1000 |Milliseconds before an idle connection will be timed out|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|unicore.wsrflite.jetty.gzip.minGzipSize	|Integer    |	65535 |The size of the largest data chunk that will not be compressed (if the client supports gzip)|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|unicore.wsrflite.jetty.gzip.bufferSize	|Integer    |	8192 |Buffer size used for gzip compression|
+*-----------------------------------+-------------------+-------------------+-------------------+
+  
+* Additional HTTP Client configuration
+
+  Client calls can be configured using the following properties.
+
+*-----------------------------------+-------------------+-------------------+-------------------+
+|<<property name>>					|<<range of values>>|<<default value>>	|<<description>>	|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|http.connection.timeout	        |Integer	|10000  |Socket connection timeout in millis|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|http.timeout				        |Integer	|10000  |Socket read timeout in millis|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|http.proxyHost	       			|String	|  |HTTP proxy host|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|http.proxyPort	       			|Integer	|  |HTTP proxy port|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|http.proxy.user	       			|String	|  |Proxy server user|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|http.proxy.password       			|String	|  |Proxy server password|
+*-----------------------------------+-------------------+-------------------+-------------------+
+|http.nonProxyHosts       			|String	|  |Space separated list of host name fragments which are not proxied|
+*-----------------------------------+-------------------+-------------------+-------------------+
+ 

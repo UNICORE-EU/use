@@ -1,0 +1,69 @@
+Clients
+
+  WSRFlite offers support for contacting your services through HTTP and HTTPS.
+  
+The BaseWSRFClient
+
+  Basic support for WSRF operations such as GetResourceProperty() or Destroy() is provided by the
+BaseWSRFClient class. For example, to get the "current time" property on a ws-resource, you could do
+
++----------------------------------
+ import de.fzj.unicore.wsrflite.client.BaseWSRFClient;
+ import de.fzj.unicore.wsrflite.*;
+
+  //...
+  BaseWSRFClient client=new BaseWSRFClient( \
+            "http://yourserver.com/services/yourservice", //URL to the service
+            yourEPR,                                      //EPR of the service
+            securityProperties);                          //security settings
+ 
+  QName qname=ResourceLifetime.RPcurrentTimeQName;
+  System.out.println(client.getResourceProperty(qname); 
++---------------------------------
+
+ You can extend this class to create custom clients for your services.
+
+  Read more {{{security.html}here}} about configuring security such as SSL settings or WS-Security.
+
+Calling your services using a proxy
+
+  Every service must have its own Java interface. 
+
+  Usually, you will create a proxy object to call your service. Using the BaseWSRFClient, you can do
+
++----------------------------------
+  // taken from the shopping cart example 
+  // (see the 'doc/example' folder)
+ 
+ ShoppingCart cart=(ShoppingCart)client.makeProxy(ShoppingCart.class);
+   
++---------------------------------
+
+  In case of a plain web service, you can use a utility class that helps you create a proxy
+
++----------------------------------
+ // taken from the shopping cart example 
+ // (see the 'doc/example' folder)
+  
+ //create a proxy for the IShop service
+ IShop s= (IShop)(new XFireClientFactory()).createPlainWSProxy
+		(IShop.class, "http://localhost:7777/services/shop",null);
+			
+   
++---------------------------------
+
+  If you want to add extra handlers (e.g. for security purposes), you can extend the XFireClientFactory
+and override its addHandlers() method. Check the source code for details.
+ 
+ 
+Retrying failed calls
+
+  In case a web service call fails, WSRFlite will usually retry it a couple of
+times. This behaviour can be configured by using the BaseWSRFClient 
+setRetryHandler() method. Plese refer to the Java doc or the source code for details.
+ 
+Other transports
+  
+  In addition to HTTP(s), the XFire toolkit offers other transports such as JMS and Jabber. For details,
+we refer to the Xfire documentation.
+  

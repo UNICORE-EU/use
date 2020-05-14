@@ -1,0 +1,6 @@
+This is a small example to illustrate the use of WSRFlite.
+
+To build the example, go to the "example" folder and type
+
+  "ant"
+

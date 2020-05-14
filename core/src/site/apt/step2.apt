@@ -1,0 +1,32 @@
+Compile the schema using XMLBeans
+
+  XMLBeans is part of the WSRFlite distribution, so you can get started
+  quickly. With an ant script, you can compile your schemas easily.\
+  The following ant snippet compiles a schema file, writes the generated
+  binaries to the "classes" folder and the XMLbeans source files to the
+  "xmlbeans-source" folder.
+
++----
+<target name="xmlbeans">
+<java classname="org.apache.xmlbeans.impl.tool.SchemaCompiler"
+          classpathref="...TODO...."
+          fork="true">
+      <arg value="-dl"/>
+      <arg value="-noupa"/>
+      <arg value="-src"/>
+      <arg value="xmlbeans-source"/> 
+      <arg value="-d"/>
+      <arg value="classes"/>
+      <arg value="schema/example.xsd"/>
+    </java>
+</target>
++----
+  The classpath contains the jar files found in the WSRFlite lib folder. A
+working ant file can be found as "doc/example/build.xml".
+
+Next step
+
+ {{{step3.html}Create your Java code}}
+
+
+

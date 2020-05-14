@@ -1,0 +1,44 @@
+   ------
+Faults and Exceptions
+   ------
+
+Faults and Exceptions
+
+  WSRFlite supports the WS-BaseFault specification, and provides the most basic faults
+from the WSRF specifications.
+To add a custom exception for your service, your should sub-class the XFire FaultInfoException. 
+You will need to override two methods to tell WSRFlite about the QName of your fault and the details.
+
+  Here is an example. It assumes the your service xsd contains a fault named MyCustomFault with associated type
+MyCustomFaultType.
+  
++-------------------
+
+public class MyCustomFault extends FaultInfoException {
+
+private MyCustomFaultType faultDetail;
+	
+	publicMyCustomFault(String message, MyCustomFaultType details) {
+		super(message);
+		this.faultDetail=details;
+	}
+	public static QName getFaultName() {
+		return MyCustomFaultDocument.type.getDocumentElementName();
+	}
+	
+	public MyCustomFaultType getFaultInfo() {
+		return faultDetail;
+	}
+
+	//helper to create a fault with timestamp
+	public static MyCustomFault createFault(String msg){
+		MyCustomFaultType bft=MyCustomFaultType.Factory.newInstance();
+		bft.setTimestamp(Calendar.getInstance());
+		MyCustomFault f=new MyCustomFault(msg,bft);
+		return f;
+	}
+}
+
++-------------------
+
+  If you look in the exceptions package, you will find more examples.

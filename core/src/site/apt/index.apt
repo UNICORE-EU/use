@@ -1,0 +1,44 @@
+   ------
+ Introduction
+   ------
+   
+Introduction
+
+  UNICORE WSRFlite is a simple WSRF hosting environment.
+Use it to build your stateful web services for use in Grid computing,
+distributed management, ... 
+
+  It focuses on performance, scalability and ease of installation and configuration.
+
+  UNICORE WSRFlite supports the {{{http://www.oasis-open.org/committees/tc_home.php?wg_abbrev=wsrf}WSRF 1.2 specification}}.
+
+  Supported specifications
+
+ * WS-Resource, WS-ResourceProperties, WS-ResourceLifetime
+ 
+ * Service Group
+ 
+ * WS-BaseNotification
+ 
+   All mandatory and some optional elements of these specifications are supported. 
+WSRFlite is very easy to use, making it simple for you to deploy WSRF services.
+ 
+  It is built on
+
+ * the {{{http://xfire.codehaus.org}XFire}} high-performance SOAP stack
+
+ * the {{{http://xmlbeans.apache.org}XMLBeans}} data binding toolkit
+
+
+Next steps
+
+ * {{{download.html}Download}} UNICORE WSRFlite
+
+ * Look at the {{{tutorial.html}five-minute tutorial}}
+
+
+More information
+
+ * Find out more about UNICORE {{{http://www.unicore.eu}here}}
+
+ * Read more about {{{http://www.oasis-open.org/committees/tc_home.php?wg_abbrev=wsrf}WSRF}}

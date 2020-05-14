@@ -1,0 +1,126 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:unigrids="http://unigrids.org/2006/04/types" xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://unigrids.org/2006/04/types" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xsd:import namespace="http://www.w3.org/2005/08/addressing" />
+  <!--  Originally RP types moved from UAS to USE. 
+  For backwards compatibility we keep the original namespace. -->
+  <!-- holds security info like trusted CAs and accepted VOs -->
+  <xsd:element name="Security" type="unigrids:SecurityType"/>
+  <!-- holds information about VOs that the resource is shared with -->
+  <xsd:element name="VOMemberships" type="unigrids:VOMembershipsType"/>
+  <xsd:complexType name="SecurityType">
+    <xsd:sequence>
+      <xsd:element name="ServerCertificate" type="xsd:string" minOccurs="0"/>
+      <!-- deprecated -->
+      <xsd:element name="TrustedCA" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element name="AcceptedVOs" type="unigrids:AcceptedVOsType" minOccurs="0"/>
+      <xsd:element name="AcceptedCAs" type="unigrids:AcceptedCAsType" minOccurs="0"/>
+      <xsd:element name="ClientValidXlogins" type="unigrids:ValidXloginsType" minOccurs="0"/>
+      <xsd:element name="ClientValidXgroups" type="unigrids:ValidXgroupsType" minOccurs="0"/>
+      <xsd:element name="ClientValidVOs" type="unigrids:ValidVOsType" minOccurs="0"/>
+      <xsd:element name="ClientValidRoles" type="unigrids:ValidRolesType" minOccurs="0"/>
+      <xsd:element name="ClientSelectedXlogin" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="ClientSelectedXgroup" type="unigrids:SelectedXGroupType" minOccurs="0"/>
+      <xsd:element name="ClientSelectedVO" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="ClientSelectedRole" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="ClientDN" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="ServerDN" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="OwnerDN" type="xsd:string" minOccurs="0"/>
+      <xsd:any minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <!-- user controlled share -->
+  <xsd:element name="Share">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="unigrids:Permit" minOccurs="0" maxOccurs="unbounded" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- user controlled ACL entry -->
+  <xsd:element name="Permit">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="allow" type="xsd:string"/>
+        <xsd:element name="when" type="xsd:string"/>
+        <xsd:element name="is" type="xsd:string"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:complexType name="ValidVOsType">
+    <xsd:sequence>
+      <xsd:element name="VO" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="AcceptedVOsType">
+    <xsd:sequence>
+      <xsd:element name="VO" type="unigrids:VOType" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:any minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="AcceptedCAsType">
+    <xsd:sequence>
+      <xsd:element name="AcceptedCA" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:any minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ValidXloginsType">
+    <xsd:sequence>
+      <xsd:element name="Xlogin" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:any minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ValidXgroupsType">
+    <xsd:sequence>
+      <xsd:element name="Xgroup" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:any minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ValidRolesType">
+    <xsd:sequence>
+      <xsd:element name="Role" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:any minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="SelectedXGroupType">
+    <xsd:sequence>
+      <xsd:element name="UseOSDefaults" type="xsd:boolean"/>
+      <xsd:element name="PrimaryGroup" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="SupplementaryGroup" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:any minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="VOMembershipsType">
+    <xsd:sequence>
+      <xsd:element name="membership" type="unigrids:VOMembershipType" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="AllowedAccessTypesType">
+    <xsd:sequence>
+      <xsd:element name="allowedAccessType" type="xsd:string" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:element name="allowedAccessTypes" type="unigrids:AllowedAccessTypesType"/>
+  <xsd:complexType name="VOType">
+    <xsd:sequence>
+      <xsd:element name="voName" type="xsd:string"/>
+      <xsd:element name="voServer" type="xsd:anyURI" minOccurs="0"/>
+      <xsd:element name="voRegistry" type="wsa:EndpointReferenceType" minOccurs="0"/>
+      <xsd:element name="localVORegistry" type="wsa:EndpointReferenceType" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="VOWithRegistriesType">
+    <xsd:complexContent>
+      <xsd:extension base="unigrids:VOType">
+        <xsd:sequence>
+          <xsd:element name="voRegistry" type="wsa:EndpointReferenceType" minOccurs="0"/>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:complexType name="VOMembershipType">
+    <xsd:sequence>
+      <xsd:element name="vo" type="unigrids:VOWithRegistriesType"/>
+      <xsd:element ref="unigrids:allowedAccessTypes"/>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

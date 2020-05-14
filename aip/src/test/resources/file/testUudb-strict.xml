@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fileAttributeSource>
+   <entry key="CN=Stanisław Lem, C=PL">
+      <attribute name="role"><value>user</value></attribute>
+      <attribute name="notEmpty">
+      	<value>val1</value>
+      	<value>val2</value>
+      </attribute>
+      <attribute name="xlogin">
+         <value>somebody</value>
+         <value>nobody</value>
+      </attribute>
+   </entry>
+   <entry key="CN=Dead Man,C=US">
+      <attribute name="role"><value>user1</value></attribute>
+   </entry>
+</fileAttributeSource>
