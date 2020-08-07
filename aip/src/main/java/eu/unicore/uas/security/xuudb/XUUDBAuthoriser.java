@@ -64,8 +64,6 @@ public class XUUDBAuthoriser extends XUUDBAuthoriserBase implements
 		if(!cb.isOK())
 			throw new IOException("Attribute source "+name+" is temporarily unavailable");
 		
-		long begin = System.currentTimeMillis();
-		total_auth++;
 		SubjectAttributesHolder map;
 		X509Certificate cert = (X509Certificate) tokens.getEffectiveUserCertificate();
 		boolean workUsingCertificate = tokens.getUserCertificate() != null;
@@ -73,23 +71,21 @@ public class XUUDBAuthoriser extends XUUDBAuthoriserBase implements
 			map = cacheCredentials ? cache.read(cert) : null;
 			if (map == null) {
 				map = checkUserCert(tokens);
-				if (cacheCredentials)
+				if (cacheCredentials) {
 					cache.put(cert, map);
-			} else
-				cache_hits++;
+				}
+			}
 		} else {
 			map = cacheCredentials ? cache.read(tokens.getEffectiveUserName())
 					: null;
 			if (map == null) {
 				map = checkDN(tokens);
-				if (cacheCredentials)
+				if (cacheCredentials) {
 					cache.put(tokens.getEffectiveUserName(), map);
-			} else {
-				cache_hits++;
+				}
 			}
 		}
 
-		publishTime(System.currentTimeMillis() - begin);
 		return map;
 	}
 
@@ -102,7 +98,6 @@ public class XUUDBAuthoriser extends XUUDBAuthoriserBase implements
 	protected SubjectAttributesHolder checkUserCert(final SecurityTokens tokens)
 			throws IOException {
 
-		auth_by_cert++;
 		CheckCertificateDocument in = CheckCertificateDocument.Factory
 				.newInstance();
 		CheckDataType check = in.addNewCheckCertificate();
@@ -145,7 +140,6 @@ public class XUUDBAuthoriser extends XUUDBAuthoriserBase implements
 	 */
 	protected SubjectAttributesHolder checkDN(final SecurityTokens tokens)
 			throws IOException {
-		auth_by_dn++;
 		CheckDNDocument in = CheckDNDocument.Factory.newInstance();
 		CheckDNDataType check = in.addNewCheckDN();
 		check.setGcID(gcID);
@@ -233,26 +227,6 @@ public class XUUDBAuthoriser extends XUUDBAuthoriserBase implements
 					e, logger);
 			return null;
 		}
-	}
-
-	// monitoring information and query hooks
-
-	private int auth_by_cert = 0;
-	private int auth_by_dn = 0;
-
-	public int getAuthorisationsByCert() {
-		return auth_by_cert;
-	}
-
-	public int getAuthorisationsByDN() {
-		return auth_by_dn;
-	}
-
-	public void clearStatistics() {
-		super.clearStatistics();
-		auth_by_cert = 0;
-		auth_by_dn = 0;
-
 	}
 
 }

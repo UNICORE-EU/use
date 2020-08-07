@@ -115,25 +115,18 @@ public class XUUDBDynamicAttributeSource extends XUUDBAuthoriserBase implements
 		if(!cb.isOK())
 			throw new IOException("Attribute source "+name+" is temporarily unavailable");
 		
-		long begin = System.currentTimeMillis();
-		total_auth++;
 		SubjectAttributesHolder map;
 
 		map = cacheCredentials ? cache.read(getCacheKey(client)) : null;
 		if (map == null) {
 			map = getDAPAttributes(client, otherAuthoriserInfo);
-
 			if (map != null) {
-
-				if (cacheCredentials)
+				if (cacheCredentials) {
 					cache.put(getCacheKey(client), map);
+				}
 			}
-		} else {
-			cache_hits++;
 		}
-
-		publishTime(System.currentTimeMillis() - begin);
-		return map;
+return map;
 	}
 
 	private SubjectAttributesHolder getDAPAttributes(Client client,

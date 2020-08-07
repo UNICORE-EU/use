@@ -8,15 +8,18 @@
 
 package eu.unicore.uas.security.vo;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.samly2.SAMLConstants;
@@ -32,10 +35,6 @@ import eu.unicore.security.wsutil.samlclient.SAMLAttributeQueryClient;
 import eu.unicore.uas.security.vo.conf.IPullConfiguration;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.IClientConfiguration;
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
 
 /**
@@ -61,10 +60,8 @@ public class VOAttributeFetcher
 	private boolean disableIfPushed;
 	private int cacheTtl;
 
-	private CacheManager cacheMan;
-	//private static int counterForEhCache = 0;
-	private static final String UNSCOPED_CACHE = VOAttributeFetcher.class.getName()
-		+ ".unscoped";
+	private Cache<String, List<ParsedAttribute>> cache;
+	
 	public static final int MAX_ELEMS = 128;
 
 	public VOAttributeFetcher(IPullConfiguration cc, IClientConfiguration secProv) throws Exception
@@ -83,25 +80,11 @@ public class VOAttributeFetcher
 	{
 		if (cacheTtl > 0)
 		{
-			String cacheConfig="<ehcache name=\"__vo_attribute_cache__\">\n" +
-					   "<defaultCache maxElementsInMemory=\""+MAX_ELEMS+"\"\n"+
-				        "eternal=\"false\"\n"+
-				        "timeToIdleSeconds=\""+cacheTtl+"\"\n"+
-				        "timeToLiveSeconds=\""+cacheTtl+"\"\n"+
-				        "overflowToDisk=\"false\"\n"+
-				        "diskPersistent=\"false\"\n"+
-				        "diskExpiryThreadIntervalSeconds=\"240\"\n"+
-				        "memoryStoreEvictionPolicy=\"LFU\"/>\n"+
-				        "</ehcache>";
-			
-			ByteArrayInputStream bis=new ByteArrayInputStream(cacheConfig.getBytes());
-			cacheMan=CacheManager.create(bis);
-			
-			Cache unscopedCache = new Cache(
-					UNSCOPED_CACHE, 
-					MAX_ELEMS, MemoryStoreEvictionPolicy.LFU,
-					false, null, false, cacheTtl, cacheTtl, false, 240, null);
-			cacheMan.addCache(unscopedCache);
+			cache = CacheBuilder.newBuilder()
+					.maximumSize(MAX_ELEMS)
+					.expireAfterAccess(cacheTtl, TimeUnit.SECONDS)
+					.expireAfterWrite(cacheTtl, TimeUnit.SECONDS)
+					.build();
 		}
 	}
 	
@@ -174,24 +157,23 @@ public class VOAttributeFetcher
 			String comparableSubjectDN = X500NameUtils.getComparableForm(subject.getXBean().getStringValue());
 			if (cacheTtl > 0)
 			{
-				Cache c = cacheMan.getCache(UNSCOPED_CACHE);
-				Element e = c.get(comparableSubjectDN);
-				if (e != null)
+				
+				List<ParsedAttribute> cachedAttrs = cache.getIfPresent(comparableSubjectDN);
+				if (cachedAttrs != null)
 				{
-					if (log.isDebugEnabled())
-						log.debug("Returning cached attributes for " + subject);
-					List<ParsedAttribute> cachedA = (List<ParsedAttribute>) e.getObjectValue();
-					attrs = new ArrayList<ParsedAttribute>(cachedA.size());
-					attrs.addAll(cachedA);
+					if (log.isDebugEnabled())log.debug("Returning cached attributes for " + subject);
+					attrs = new ArrayList<ParsedAttribute>(cachedAttrs.size());
+					attrs.addAll(cachedAttrs);
 				} else
 				{
 					attrs = doRealReceive(subject);
-					List<ParsedAttribute> cachedAttrs = new ArrayList<ParsedAttribute>(attrs.size());
+					cachedAttrs = new ArrayList<ParsedAttribute>(attrs.size());
 					cachedAttrs.addAll(attrs);
-					c.put(new Element(comparableSubjectDN, cachedAttrs));
+					cache.put(comparableSubjectDN, cachedAttrs);
 				}
-			} else
+			} else {
 				attrs = doRealReceive(subject);
+			}
 		} catch (SAMLServerException e)
 		{
 			if (SAMLConstants.SubStatus.STATUS2_UNKNOWN_PRINCIPIAL.equals(e.getSamlSubErrorId()))

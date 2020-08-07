@@ -34,7 +34,7 @@ public class UnitySAMLAuthenticator extends UnityBaseSAMLAuthenticator {
 	@Override
 	protected Object extractCredentials(DefaultClientConfiguration clientCfg, Message message, SecurityTokens tokens) {
 		HTTPAuthNTokens http = CXFUtils.getHTTPCredentials(message);
-		if(http == null)return false;
+		if(http == null)return null;
 		
 		String username=http.getUserName();
 		String password=http.getPasswd();

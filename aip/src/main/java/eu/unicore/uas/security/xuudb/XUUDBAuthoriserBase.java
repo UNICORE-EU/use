@@ -104,19 +104,7 @@ public abstract class XUUDBAuthoriserBase implements IAttributeSourceBase, Exter
 
 	// monitoring information and query hooks
 
-	protected int total_auth = 0;
-	protected int cache_hits = 0;
-	protected float mean_access_time = 0;
-
 	private Set<String> accessorNames = new HashSet<String>();
-
-	public int getTotalAuthorisationRequests() {
-		return total_auth;
-	}
-
-	public int getCacheHits() {
-		return cache_hits;
-	}
 
 	public String[] getRequestorNames() {
 		return accessorNames.toArray(new String[accessorNames.size()]);
@@ -137,13 +125,8 @@ public abstract class XUUDBAuthoriserBase implements IAttributeSourceBase, Exter
 		cache.removeAll();
 	}
 
-	public void publishTime(long time) {
-		mean_access_time = (mean_access_time * (total_auth - 1) + time)
-				/ (total_auth);
-	}
-
-	public float getMeanAccessTime() {
-		return mean_access_time;
+	public long getCacheSize() {
+		return cache.getCacheSize();
 	}
 
 	public boolean getCachingCredentials() {
@@ -192,21 +175,10 @@ public abstract class XUUDBAuthoriserBase implements IAttributeSourceBase, Exter
 		return getXUUDBConnectionStatus();
 	}
 
-	public void clearStatistics() {
-		total_auth = 0;
-		mean_access_time = 0f;
-		cache_hits = 0;
-		accessorNames.clear();
-	}
-
 	public String getName() {
 		return name;
 	}
 
-	public int getCacheSize() {
-		return cache.getCache().getSize();
-	}
-	
 	public String getConnectionStatusMessage(){
 		return getXUUDBConnectionStatus();
 	}

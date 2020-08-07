@@ -6,7 +6,7 @@
   <packaging>pom</packaging>
   <description>UNICORE service container</description>
   <inceptionYear>2010</inceptionYear>
-  <version>4.0.4-SNAPSHOT</version>
+  <version>4.0.4</version>
   <name>UNICORE Services Environment</name>
  
   <parent>
@@ -68,7 +68,6 @@
     <compiler.fork>false</compiler.fork>
     <secutils.version>2.0.3</secutils.version>
     <cxf.version>3.3.1</cxf.version>
-    <ehcache.version>2.10.5</ehcache.version>
     <jetty.version>9.4.28.v20200408</jetty.version>
     <httpclient.version>4.5.3</httpclient.version>
     <seclib.version>4.5.10</seclib.version>
@@ -202,11 +201,6 @@
       <version>${cxf.version}</version>
     </dependency>
     <dependency>
-      <groupId>net.sf.ehcache</groupId>
-      <artifactId>ehcache</artifactId>
-      <version>2.10.5</version>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
@@ -219,7 +213,7 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.4</version>
+      <version>2.6</version>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
