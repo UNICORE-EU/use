@@ -66,7 +66,7 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <secutils.version>2.0.3</secutils.version>
+    <secutils.version>2.0.4</secutils.version>
     <cxf.version>3.3.1</cxf.version>
     <jetty.version>9.4.31.v20200723</jetty.version>
     <httpclient.version>4.5.3</httpclient.version>
