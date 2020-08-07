@@ -73,7 +73,7 @@
     <seclib.version>4.5.10</seclib.version>
     <slf4j.version>1.7.13</slf4j.version>
     <metrics.version>3.2.6</metrics.version>
-    <jwt.version>6.3</jwt.version>
+    <jwt.version>7.9</jwt.version>
   </properties>
 
   <modules>
