@@ -68,7 +68,7 @@
     <compiler.fork>false</compiler.fork>
     <secutils.version>2.0.3</secutils.version>
     <cxf.version>3.3.1</cxf.version>
-    <jetty.version>9.4.28.v20200408</jetty.version>
+    <jetty.version>9.4.31.v20200723</jetty.version>
     <httpclient.version>4.5.3</httpclient.version>
     <seclib.version>4.5.10</seclib.version>
     <slf4j.version>1.7.13</slf4j.version>
