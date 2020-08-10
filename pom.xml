@@ -67,6 +67,7 @@
   <properties>
     <compiler.fork>false</compiler.fork>
     <secutils.version>2.0.4</secutils.version>
+    <saaj.version>1.5.1</saaj.version>
     <cxf.version>3.3.1</cxf.version>
     <jetty.version>9.4.31.v20200723</jetty.version>
     <httpclient.version>4.5.3</httpclient.version>
@@ -176,9 +177,24 @@
 
     <!-- CXF -->
     <dependency>
+      <groupId>com.sun.xml.messaging.saaj</groupId>
+      <artifactId>saaj-impl</artifactId>
+      <version>${saaj.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-rt-frontend-jaxrs</artifactId>
       <version>${cxf.version}</version>
+      <exclusions>
+	<exclusion>
+	  <groupId>org.glassfish.jaxb</groupId>
+	  <artifactId>jaxb-xjc</artifactId>
+	</exclusion>
+	<exclusion>
+	  <groupId>org.jboss.spec.javax.rmi</groupId>
+	  <artifactId>jboss-rmi-api_1.0_spec</artifactId>
+	</exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.cxf</groupId>
