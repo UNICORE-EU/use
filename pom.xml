@@ -66,12 +66,13 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
+    <persistence.version>0.104</persistence.version>
     <secutils.version>2.0.4</secutils.version>
+    <seclib.version>4.5.10</seclib.version>
     <saaj.version>1.5.1</saaj.version>
     <cxf.version>3.3.1</cxf.version>
     <jetty.version>9.4.31.v20200723</jetty.version>
     <httpclient.version>4.5.3</httpclient.version>
-    <seclib.version>4.5.10</seclib.version>
     <slf4j.version>1.7.13</slf4j.version>
     <metrics.version>3.2.6</metrics.version>
     <jwt.version>7.9</jwt.version>
@@ -109,7 +110,7 @@
     <dependency>
       <groupId>de.fzj.unicore</groupId>
       <artifactId>persistence</artifactId>
-      <version>0.103</version>
+      <version>${persistence.version}</version>
     </dependency>
 
     <dependency>
