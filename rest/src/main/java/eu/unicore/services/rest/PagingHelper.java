@@ -21,12 +21,16 @@ public class PagingHelper {
 	
 	/**
 	 * @param linkBase - base URL used for the next, prev and self links
-	 * @param childURLBase - base URL for the links to child resources. These will get the child ID appended
+	 * @param childURLBase - base URL for the links to child resources. These will get the child ID appended. Can be empty ("")
 	 * @param childResourceName - the JSON tag to use in the JSON properties for the list of children
 	 */
 	public PagingHelper(String linkBase, String childURLBase, String childResourceName){
 		this.linkBase = linkBase;
-		this.childURLBase = childURLBase.endsWith("/") ? childURLBase : childURLBase+"/";
+		if(childURLBase.length()>0) {
+			this.childURLBase = childURLBase.endsWith("/") ? childURLBase : childURLBase+"/";
+		}else {
+			this.childURLBase = childURLBase;
+		}
 		this.childResourceName = childResourceName;
 	}
 	
