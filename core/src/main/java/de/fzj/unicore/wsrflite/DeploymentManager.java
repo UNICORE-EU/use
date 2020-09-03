@@ -58,7 +58,7 @@ public class DeploymentManager {
 		return kernel;
 	}
 
-	public boolean deployFeature(Feature ft, boolean runInittasks){
+	public boolean deployFeature(Feature ft){
 		Boolean enable = Boolean.FALSE;
 		try{
 			String ftName = ft.getName();
@@ -82,10 +82,9 @@ public class DeploymentManager {
 						logger.info("Service <"+dd.getName()+"> is disabled, skipping.");
 					}
 				}
-				if(runInittasks){
-					for(Runnable r: ft.getInitTasks()){
-						r.run();
-					}
+				for(Runnable r: ft.getInitTasks()){
+					logger.info("Running <"+r.getClass().getName()+">");
+					r.run();
 				}
 				logger.info("Feature <"+ftName+"> successfully deployed.");
 			}

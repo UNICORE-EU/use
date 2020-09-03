@@ -134,7 +134,7 @@ public class USEContainer {
 				name = args[1];
 			USEContainer uas=new USEContainer(args[0], name);
 			uas.startSynchronous();
-		}catch(Exception ex){
+		}catch(Throwable ex){
 			ex.printStackTrace();
 			System.err.println("ERROR during server startup, server NOT started.");
 			System.exit(1);

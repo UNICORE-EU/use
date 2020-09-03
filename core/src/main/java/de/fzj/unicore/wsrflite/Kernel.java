@@ -643,10 +643,10 @@ public class Kernel {
 			h.run();
 		}
 	
-		//run user defined init tasks after basic setup is complete
+		//run remaining init tasks after basic setup is complete
 		if(startupTasks!=null){
 			for (Runnable r : startupTasks) {
-				logger.info("Running startup task <"+r+">");
+				logger.info("Running startup task <"+r.getClass().getName()+">");
 				r.run();
 			}
 		}

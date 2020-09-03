@@ -118,8 +118,7 @@ public class ServiceConfigReader implements IServiceConfigurator {
 	}
 
 	protected void deployFeature(Feature ft){
-		boolean enabled = kernel.getDeploymentManager().deployFeature(ft, false);
-		if(enabled)initTasks.addAll(ft.getInitTasks());
+		kernel.getDeploymentManager().deployFeature(ft);
 	}
 	
 	protected void deployService(DeploymentDescriptor dd){
