@@ -28,7 +28,7 @@ public class TestWSRegistry extends JettyTestCase {
 
 	@Before
 	public void addServices() throws Exception{
-		kernel.getDeploymentManager().deployFeature(new RegistryFeature(kernel), false);
+		kernel.getDeploymentManager().deployFeature(new RegistryFeature(kernel));
 	}
 
 	@Test
