@@ -60,8 +60,9 @@
   </contributors>
 
   <scm>
-    <connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/wsrflite/trunk</connection>
-    <developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/wsrflite/trunk</developerConnection>
+    <url>https://github.com/UNICORE-EU/use</url>
+    <connection>scm:git:git://github.com/UNICORE-EU/use.git</connection>
+    <developerConnection>scm:git:git://github.com/UNICORE-EU/use.git</developerConnection>
   </scm>
 
   <properties>

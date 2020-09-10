@@ -347,7 +347,7 @@ public class BaseClient {
 
 	public JSONObject asJSON(HttpResponse response) throws IOException, JSONException {
 		try{
-			String reply = IOUtils.toString(response.getEntity().getContent());
+			String reply = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 			return new JSONObject(reply);
 		}
 		finally{
@@ -411,7 +411,8 @@ public class BaseClient {
 
 	public void close(HttpResponse response) {
 		if(response instanceof CloseableHttpResponse){
-			IOUtils.closeQuietly((CloseableHttpResponse)response);
+			try{ ((CloseableHttpResponse)response).close(); }
+			catch(IOException e) {}
 		}
 	}
 

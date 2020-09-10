@@ -32,11 +32,11 @@ public class UserPreferences {
 		prefs.put("uid", uid);
 	}
 
-	public String getPgid() {
+	public String getGroup() {
 		return prefs.get("pgid");
 	}
 
-	public void setPgid(String pgid) {
+	public void setGroup(String pgid) {
 		prefs.put("pgid", pgid);
 	}
 
@@ -50,5 +50,13 @@ public class UserPreferences {
 
 	public void clear(){
 		prefs.clear();
+	}
+	
+	public void put(String name, String value) {
+		prefs.put(name, value);
+	}
+	
+	public String get(String name) {
+		return prefs.get(name);
 	}
 }
