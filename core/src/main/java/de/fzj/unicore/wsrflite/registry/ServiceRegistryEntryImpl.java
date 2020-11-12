@@ -1,6 +1,6 @@
 package de.fzj.unicore.wsrflite.registry;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.InitParameters;
 import de.fzj.unicore.wsrflite.impl.ResourceImpl;

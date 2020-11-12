@@ -8,11 +8,10 @@
 
 package eu.unicore.uas.security.vo.basic;
 
-import org.apache.log4j.Logger;
-
 import eu.unicore.uas.security.vo.UnicoreAttributeMappingDef;
 import eu.unicore.uas.security.vo.VOCommonUtils;
 import eu.unicore.uas.security.vo.conf.PropertiesBasedConfiguration;
+import eu.unicore.util.Log;
 import junit.framework.TestCase;
 
 
@@ -35,7 +34,7 @@ public class TestConfigurationMapping extends TestCase
 			cfg = new PropertiesBasedConfiguration(
 					"src/test/resources/mappingsTest.properties");
 			UnicoreAttributeMappingDef[] filledMappings = VOCommonUtils.fillMappings(
-					cfg.getSourceProperties(), mappings, Logger.getLogger(this.getClass()));
+					cfg.getSourceProperties(), mappings, Log.getLogger("unicore",this.getClass()));
 			assertTrue(filledMappings.length == 7);
 		} catch (Exception e)
 		{
@@ -58,7 +57,7 @@ public class TestConfigurationMapping extends TestCase
 			cfg = new PropertiesBasedConfiguration(
 					"src/test/resources/mappingsTest.properties");
 			UnicoreAttributeMappingDef initializedMappings[] = VOCommonUtils.fillMappings(
-					cfg.getSourceProperties(), mappings, Logger.getLogger(this.getClass()));
+					cfg.getSourceProperties(), mappings, Log.getLogger("unicore",this.getClass()));
 
 			for (UnicoreAttributeMappingDef map: initializedMappings)
 			{

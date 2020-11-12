@@ -11,7 +11,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;

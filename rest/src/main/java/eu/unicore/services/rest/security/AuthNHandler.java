@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.PhaseInterceptorChain;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import de.fzj.unicore.wsrflite.Kernel;

@@ -93,7 +93,7 @@ public class WSResourceHomeImpl extends DefaultHome {
 	
 	@Override
 	protected Resource doCreateInstance()throws Exception{
-		Object o = Class.forName("eu.unicore.services.ws.MockResource").newInstance();
+		Object o = Class.forName("eu.unicore.services.ws.MockResource").getConstructor().newInstance();
 		return (Resource)o; 
 	}
 

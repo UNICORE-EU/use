@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.cxf.message.Message;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.Kernel;
 import de.fzj.unicore.wsrflite.security.ContainerSecurityProperties;

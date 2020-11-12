@@ -35,7 +35,7 @@ package de.fzj.unicore.wsrflite.impl;
 
 import java.util.Calendar;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.wsrflite.Home;
@@ -52,7 +52,7 @@ import eu.unicore.util.Log;
  */
 public class ExpiryChecker implements InstanceChecker {
 
-	private static final Logger logger=Log.getLogger(Log.WSRFLITE,ExpiryChecker.class);
+	private static final Logger logger=Log.getLogger(Log.UNICORE,ExpiryChecker.class);
 
 	public boolean check(Home home, String id)throws ResourceUnknownException, PersistenceException {
 		Calendar c=home.getTerminationTime(id);

@@ -39,7 +39,7 @@ import eu.unicore.services.rest.jwt.JWTDelegation;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.HttpUtils;
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class TestRestSecurity {
 
@@ -79,7 +79,7 @@ public class TestRestSecurity {
 		int status=response.getStatusLine().getStatusCode();
 		assertEquals(200, status);
 		assertEquals(invoked+1, MockResource.invocationCounter.get());
-		JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent()));
+		JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
 		System.out.println("Service reply: "+reply.toString(2));
 		assertTrue(checkSessionInfo(response));
 		String sessionID = response.getFirstHeader(SecuritySessionUtils.SESSION_ID_HEADER).getValue();
@@ -124,7 +124,7 @@ public class TestRestSecurity {
 		HttpResponse response=client.execute(get);
 		int status=response.getStatusLine().getStatusCode();
 		assertEquals(200, status);
-		JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent()));
+		JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
 		System.out.println("Service reply: "+reply.toString(2));
 		Assert.assertEquals(dn, reply.getString("dn"));
 		Assert.assertEquals(issuer, reply.getString("td_consignor"));

@@ -37,7 +37,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.persist.PersistenceProperties;
 import de.fzj.unicore.persist.impl.LockSupport;
@@ -109,7 +109,7 @@ public class PersistenceManager {
 		Store p=persistMap.get(serviceName);
 		if (p==null){
 			try {
-				p=(Store)persistClass.newInstance();	
+				p=(Store)persistClass.getConstructor().newInstance();	
 				p.init(kernel,serviceName);
 				persistMap.put(serviceName,p);
 			} catch (Exception e) {

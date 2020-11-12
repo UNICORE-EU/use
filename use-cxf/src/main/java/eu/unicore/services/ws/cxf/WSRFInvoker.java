@@ -37,7 +37,8 @@ import java.lang.reflect.Method;
 
 import org.apache.cxf.message.Exchange;
 import org.apache.cxf.service.invoker.AbstractInvoker;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import com.codahale.metrics.Meter;
 
@@ -56,7 +57,7 @@ import eu.unicore.util.Log;
  */
 public class WSRFInvoker extends AbstractInvoker {
 	
-	private static final Logger logger=Log.getLogger(Log.WSRFLITE,WSRFInvoker.class);
+	private static final Logger logger=Log.getLogger(Log.UNICORE,WSRFInvoker.class);
 
 	/**
 	 * property key for storing the service instance object in the message context 
@@ -132,7 +133,7 @@ public class WSRFInvoker extends AbstractInvoker {
 		}
 		SecurityManager.clearLocalCall();
 		boolean locked=Boolean.TRUE.equals(ctx.get(LOCKEDKEY));
-		Log.cleanLogContext();
+		ThreadContext.clearAll();
 		Resource serviceInstance=(Resource)ctx.get(KEY);
 		AuthZAttributeStore.clear();
 		if(serviceInstance!=null){

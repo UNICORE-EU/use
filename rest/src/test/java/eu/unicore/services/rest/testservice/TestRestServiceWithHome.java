@@ -1,10 +1,10 @@
 package eu.unicore.services.rest.testservice;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -97,7 +97,7 @@ public class TestRestServiceWithHome {
 			HttpResponse response=client.post(null);
 			int status=client.getLastHttpStatus();
 			assertEquals(200, status);
-			String reply=IOUtils.toString(response.getEntity().getContent());
+			String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 			System.out.println("Service reply: "+reply);
 		}
 		CounterModel m = (CounterModel) k.getHome("counter").get("my_counter").getModel();
@@ -109,7 +109,7 @@ public class TestRestServiceWithHome {
 		HttpResponse response=client.get(ContentType.WILDCARD);
 		int status=client.getLastHttpStatus();
 		assertEquals(200, status);
-		String reply=IOUtils.toString(response.getEntity().getContent());
+		String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 		System.out.println("Service reply: "+reply);
 
 		// set value
@@ -196,7 +196,7 @@ public class TestRestServiceWithHome {
 		response=client.put(setP);
 		int status=client.getLastHttpStatus();
 		assertEquals(200, status);
-		String reply=IOUtils.toString(response.getEntity().getContent());
+		String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 		System.out.println("Service reply: "+reply);
 		JSONObject replyJ = new JSONObject(reply);
 		assertEquals("OK",replyJ.getString("acl"));
@@ -214,7 +214,7 @@ public class TestRestServiceWithHome {
 		response=client.put(setP);
 		status=client.getLastHttpStatus();
 		assertEquals(200, status);
-		reply=IOUtils.toString(response.getEntity().getContent());
+		reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 		replyJ = new JSONObject(reply);
 		assertTrue(replyJ.getString("acl").contains("Error setting property"));
 		client.delete();
@@ -304,7 +304,7 @@ public class TestRestServiceWithHome {
 		@Consumes(MediaType.APPLICATION_JSON)
 		public String setProperty(@PathParam("uniqueID") String name, @PathParam("property") String property, 
 				InputStream contentStream) throws Exception {
-			String content = IOUtils.toString(contentStream);
+			String content = IOUtils.toString(contentStream, "UTF-8");
 			getModel().setCounter(Integer.parseInt(content));
 			if(!"value".equals(property)){
 				throw new WebApplicationException(new IllegalArgumentException("No such property:"+property),404);

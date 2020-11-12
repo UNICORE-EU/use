@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.cxf.message.Message;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import eu.unicore.security.HTTPAuthNTokens;
 import eu.unicore.security.SecurityTokens;

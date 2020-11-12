@@ -7,7 +7,7 @@ package eu.unicore.uas.security.vo;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.Kernel;
 import de.fzj.unicore.wsrflite.security.IAttributeSource;

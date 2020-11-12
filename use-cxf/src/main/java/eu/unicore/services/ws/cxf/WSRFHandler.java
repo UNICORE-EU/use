@@ -47,7 +47,7 @@ import org.apache.cxf.ws.addressing.AddressingProperties;
 import org.apache.cxf.ws.addressing.ContextUtils;
 import org.apache.cxf.ws.addressing.ReferenceParametersType;
 import org.apache.cxf.ws.addressing.soap.MAPCodec;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.Home;
 import de.fzj.unicore.wsrflite.Kernel;
@@ -70,7 +70,7 @@ import eu.unicore.util.Log;
  */
 public class WSRFHandler extends AbstractPhaseInterceptor<Message> {
 
-	private static final Logger logger=Log.getLogger(Log.WSRFLITE,WSRFHandler.class);
+	private static final Logger logger=Log.getLogger(Log.UNICORE,WSRFHandler.class);
 	
 	private final Kernel kernel;
 	

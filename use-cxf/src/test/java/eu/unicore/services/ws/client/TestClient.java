@@ -156,7 +156,7 @@ public class TestClient extends AbstractClientTest {
 		HttpResponse response=cl.execute(get);
 		int status=response.getStatusLine().getStatusCode();
 		assertEquals(200,status);
-		String res=IOUtils.toString(response.getEntity().getContent());
+		String res=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 		assertTrue(res.contains("Available SOAP services"));
 		assertTrue(res.contains(url));
 	}
@@ -171,7 +171,7 @@ public class TestClient extends AbstractClientTest {
 		HttpResponse response=cl.execute(get);
 		int status=response.getStatusLine().getStatusCode();
 		assertEquals(200,status);
-		String wsdl=IOUtils.toString(response.getEntity().getContent());
+		String wsdl=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 		assertTrue(wsdl.contains(url));
 	}
 

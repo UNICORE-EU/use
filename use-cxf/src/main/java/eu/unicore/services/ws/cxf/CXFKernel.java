@@ -51,9 +51,7 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.service.Service;
 import org.apache.cxf.ws.addressing.MAPAggregator;
 import org.apache.cxf.ws.addressing.soap.MAPCodec;
-import org.apache.cxf.wsdl.service.factory.ReflectionServiceFactoryBean;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.Home;
 import de.fzj.unicore.wsrflite.Kernel;
@@ -85,7 +83,7 @@ import eu.unicore.util.Log;
  */
 public class CXFKernel {
 
-	private static final Logger logger=Log.getLogger(Log.WSRFLITE, CXFKernel.class);
+	private static final Logger logger=Log.getLogger(Log.UNICORE, CXFKernel.class);
 
 	private final Map<String,Server> services=Collections.synchronizedMap(new HashMap<String,Server>());
 
@@ -107,9 +105,6 @@ public class CXFKernel {
 	
 	private CXFKernel(Kernel kernel){
 		this.kernel=kernel;
-		// I know I'm evil but the error messages from this class just clutter up the logs and make
-		// the admins nervous
-		Logger.getLogger(ReflectionServiceFactoryBean.class).setLevel(Level.FATAL);
 	}
 
 	/**

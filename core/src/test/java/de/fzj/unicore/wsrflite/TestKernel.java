@@ -1,14 +1,9 @@
 package de.fzj.unicore.wsrflite;
 
-import java.io.File;
-import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.security.IContainerSecurityConfiguration;
 import de.fzj.unicore.wsrflite.security.TestConfigUtil;
@@ -20,7 +15,6 @@ import de.fzj.unicore.wsrflite.testservice.MockHome;
 import de.fzj.unicore.wsrflite.utils.deployment.DemoFeature;
 import de.fzj.unicore.wsrflite.utils.deployment.DemoFeature2;
 import de.fzj.unicore.wsrflite.utils.deployment.DemoFeature3;
-import eu.unicore.bugsreporter.annotation.RegressionTest;
 import junit.framework.TestCase;
 
 public class TestKernel extends TestCase {
@@ -95,29 +89,6 @@ public class TestKernel extends TestCase {
 		}
 	}
 
-	@RegressionTest(url="https://sourceforge.net/tracker/?func=detail&aid=3474470&group_id=102081&atid=633902", id=3474470)
-	public void testLog4jReconfigure()throws MalformedURLException{
-		String relName="src/test/resources/test_log4j.properties";
-		File f=new File(relName);
-		//test with file:// URL
-		String name="file://"+f.getAbsolutePath();
-		assertFalse(Logger.getLogger("ddtest123").isDebugEnabled());
-		Kernel.reConfigureLog4j(name);
-		assertTrue(Logger.getLogger("test123").isDebugEnabled());
-		
-		//test with relative filename
-		Logger.getLogger("test123").setLevel(Level.INFO);
-		assertFalse(Logger.getLogger("test123").isDebugEnabled());
-		Kernel.reConfigureLog4j(relName);
-		assertTrue(Logger.getLogger("test123").isDebugEnabled());
-		
-		//test with absolute path
-		Logger.getLogger("test123").setLevel(Level.INFO);
-		assertFalse(Logger.getLogger("test123").isDebugEnabled());
-		Kernel.reConfigureLog4j(f.getAbsolutePath());
-		assertTrue(Logger.getLogger("test123").isDebugEnabled());
-	}
-	
 	public void testLoadClass()throws Exception{
 		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
 		k.load(MockClass1.class);

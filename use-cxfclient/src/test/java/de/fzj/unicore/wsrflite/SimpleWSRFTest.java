@@ -5,8 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import javax.xml.namespace.QName;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlObject;
 import org.junit.Test;
 import org.oasisOpen.docs.wsrf.rp2.DeleteResourcePropertiesDocument;
@@ -56,7 +54,6 @@ public class SimpleWSRFTest extends AbstractTestBase{
 		EndpointReferenceType epr = WSUtilities.makeServiceEPR(url);
 
 		MockSecurityConfig sec = new MockSecurityConfig(true, true);
-		Logger.getLogger("unicore").setLevel(Level.INFO);
 		SimpleService client = new WSRFClientFactory(sec).createProxy(SimpleService.class, url, epr);
 		for(int i=0;i<50;i++){
 			System.out.print(".");

@@ -6,13 +6,13 @@
   <packaging>pom</packaging>
   <description>UNICORE service container</description>
   <inceptionYear>2010</inceptionYear>
-  <version>4.0.5</version>
+  <version>4.1.0</version>
   <name>UNICORE Services Environment</name>
  
   <parent>
     <groupId>eu.unicore</groupId>
     <artifactId>unicore-parent</artifactId>
-    <version>1.22</version>  
+    <version>1.23</version>  
   </parent>
 
   <developers>
@@ -67,14 +67,13 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>0.104</persistence.version>
-    <secutils.version>2.0.4</secutils.version>
-    <seclib.version>4.5.10</seclib.version>
+    <persistence.version>0.200</persistence.version>
+    <secutils.version>3.1.0</secutils.version>
+    <seclib.version>5.1.0</seclib.version>
     <saaj.version>1.5.1</saaj.version>
-    <cxf.version>3.3.1</cxf.version>
+    <cxf.version>3.3.8</cxf.version>
     <jetty.version>9.4.31.v20200723</jetty.version>
     <httpclient.version>4.5.3</httpclient.version>
-    <slf4j.version>1.7.13</slf4j.version>
     <metrics.version>3.2.6</metrics.version>
     <jwt.version>7.9</jwt.version>
   </properties>
@@ -101,12 +100,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.16</version>
-    </dependency>
-
     <!-- other UNICORE components -->
     <dependency>
       <groupId>de.fzj.unicore</groupId>
@@ -124,6 +117,12 @@
       <groupId>eu.unicore.security</groupId>
       <artifactId>securityLibrary</artifactId>
       <version>${seclib.version}</version>
+            <exclusions>
+        <exclusion>
+          <groupId>org.apache.xmlbeans</groupId>
+         <artifactId>xmlbeans</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>eu.unicore.security</groupId>
@@ -146,11 +145,11 @@
     <dependency>
       <groupId>de.fzj.unicore.xuudb</groupId>
       <artifactId>xuudb-common</artifactId>
-      <version>2.5.1</version>
+      <version>2.6.0</version>
       <exclusions>
         <exclusion>
-	  <groupId>org.apache.xmlbeans</groupId>
-	  <artifactId>xmlbeans</artifactId>
+          <groupId>org.apache.xmlbeans</groupId>
+         <artifactId>xmlbeans</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -217,16 +216,6 @@
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-rt-features-clustering</artifactId>
       <version>${cxf.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

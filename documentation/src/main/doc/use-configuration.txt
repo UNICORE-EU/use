@@ -64,15 +64,13 @@ In this example the value of the "name" property will be "value1 value2".
 
 ==== XML
 
-Various XML dialects are being used, so please refer to the example files distributed with
-UNICORE for more information on the syntax. In general XML is a bit unfriendly to edit, and
-it is rather easy to introduce typos. 
+Some config files, such as the file attribute source and he access
+control policy files (which usually are not edited) are written in an
+XML dialect.
 
-[NOTE]
-============
-It is advisable to run a tool such as 'xmllint' after editing XML files to check for
-typos
-============
+It is advisable to run a tool such as 'xmllint' after editing XML
+files to check for typos
+
 
 Integration of UNICORE/X into a UNICORE infrastructure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

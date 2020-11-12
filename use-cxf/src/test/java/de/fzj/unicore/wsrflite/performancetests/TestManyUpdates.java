@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,7 +42,6 @@ public class TestManyUpdates extends JettyTestCase {
 
 	@Test
 	public void refreshEntries() throws Exception {
-		Logger.getLogger("unicore.services.registry").setLevel(Level.WARN);
 		int N = 10;
 		LocalRegistryClient registry = kernel.getAttribute(RegistryHandler.class).getRegistryClient();;
 		List<String> items = new ArrayList<>();

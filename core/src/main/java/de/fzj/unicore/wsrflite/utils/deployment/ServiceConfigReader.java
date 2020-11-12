@@ -11,7 +11,7 @@ import java.util.ServiceLoader;
 
 import javax.xml.stream.XMLStreamException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.ContainerProperties;
 import de.fzj.unicore.wsrflite.DeploymentDescriptor;
@@ -30,7 +30,7 @@ import eu.unicore.util.configuration.ConfigurationException;
  */
 public class ServiceConfigReader implements IServiceConfigurator {
 
-	private static final Logger logger=Log.getLogger(Log.WSRFLITE,ServiceConfigReader.class);
+	private static final Logger logger=Log.getLogger(Log.UNICORE,ServiceConfigReader.class);
 	
 	private Properties properties;
 	

@@ -7,10 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.persist.Persist;
 import eu.unicore.util.ConcurrentAccess;
+import eu.unicore.util.Log;
 
 /**
  * Holds settings that govern the behaviour of the persistence system. 
@@ -23,7 +24,7 @@ import eu.unicore.util.ConcurrentAccess;
  */
 public class PersistenceSettings {
 	
-	protected final static Logger logger=Logger.getLogger(PersistenceSettings.class);
+	protected final static Logger logger = Log.getLogger(Log.UNICORE, PersistenceSettings.class);
 	
 	private boolean loadOnce;
 	

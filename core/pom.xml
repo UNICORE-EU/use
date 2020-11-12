@@ -4,7 +4,7 @@
   <parent>
     <groupId>eu.unicore.services</groupId>
     <artifactId>use</artifactId>
-    <version>4.0.5</version>
+    <version>4.1.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>UNICORE Services Environment Core</name>
@@ -58,8 +58,8 @@
       <artifactId>persistence</artifactId>
     </dependency>
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
+      <groupId>org.apache.xmlbeans</groupId>
+      <artifactId>xmlbeans-jdk8</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>

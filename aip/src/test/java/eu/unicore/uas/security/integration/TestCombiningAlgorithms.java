@@ -21,7 +21,6 @@ import de.fzj.unicore.wsrflite.security.ContainerSecurityProperties;
 import de.fzj.unicore.wsrflite.xmlbeans.client.BaseWSRFClient;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
-import eu.unicore.security.wsutil.client.LogOutMessageHandler;
 import eu.unicore.uas.security.ForwardService;
 import eu.unicore.uas.security.file.FileAttributeSource;
 import eu.unicore.uas.security.ldap.LDAPAttributeSource;
@@ -78,7 +77,6 @@ public class TestCombiningAlgorithms extends TestCase
 		sec.getETDSettings().setIssuerCertificateChain(sec.getCredential().getCertificateChain());
 		sec.getHttpClientProperties().setProperty(HttpClientProperties.SO_TIMEOUT, "600000");
 		sec.getHttpClientProperties().setProperty(HttpClientProperties.CONNECT_TIMEOUT, "5000");
-		sec.setOutHandlerClassNames(new String[] {LogOutMessageHandler.class.getName()});
 		return sec;
 	}
 	

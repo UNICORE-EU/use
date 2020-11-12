@@ -1,15 +1,16 @@
 package eu.unicore.services.rest;
 
 import javax.ws.rs.core.Application;
+import javax.xml.namespace.QName;
 
 import org.apache.cxf.endpoint.Server;
+import org.apache.cxf.ext.logging.LoggingFeature;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxrs.utils.ResourceUtils;
 
 import de.fzj.unicore.wsrflite.Home;
 import de.fzj.unicore.wsrflite.Kernel;
 import de.fzj.unicore.wsrflite.Service;
-import eu.unicore.security.wsutil.client.LogInMessageHandler;
 import eu.unicore.services.rest.impl.PostInvokeHandler;
 import eu.unicore.services.rest.impl.USERestInvoker;
 import eu.unicore.services.rest.security.AuthNHandler;
@@ -131,12 +132,11 @@ public class RestService implements Service {
 		bean.setBus(new RestServiceFactory().getServlet().getBus());
 		bean.setAddress("/"+name);
 		bean.setProvider(new AuthNHandler(kernel, kernel.getOrCreateSecuritySessionStore()));
-		bean.getInInterceptors().add(new LogInMessageHandler());
-		
+		bean.getFeatures().add(new LoggingFeature());
 		bean.getInFaultInterceptors().add(new PostInvokeHandler());
 		bean.getOutFaultInterceptors().add(new PostInvokeHandler());
 		bean.getOutInterceptors().add(new PostInvokeHandler());
-		
+		bean.setServiceName(new QName("", "test"));
 		bean.setInvoker(new USERestInvoker(kernel));
 		return bean.create();
 	}

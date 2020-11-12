@@ -4,7 +4,7 @@ package de.fzj.unicore.wsrflite;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.exceptions.ServiceDeploymentException;
 import eu.unicore.util.Log;
@@ -16,7 +16,7 @@ import eu.unicore.util.configuration.ConfigurationException;
  */
 public class DeploymentManager {
 
-	private static final Logger logger = Log.getLogger(Log.WSRFLITE,DeploymentManager.class);
+	private static final Logger logger = Log.getLogger(Log.UNICORE,DeploymentManager.class);
 
 	private final Kernel kernel;
 

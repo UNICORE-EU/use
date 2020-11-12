@@ -7,7 +7,7 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.unigrids.services.atomic.types.PermitDocument;
 import org.unigrids.services.atomic.types.ShareDocument;
 

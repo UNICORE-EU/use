@@ -1,6 +1,6 @@
 package de.fzj.unicore.wsrflite.events;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.Home;
 import de.fzj.unicore.wsrflite.Resource;
@@ -14,7 +14,7 @@ import eu.unicore.util.Log;
  */
 public abstract class AsynchActionWithCallback<T extends Resource> implements Runnable{
 
-	protected final static Logger log=Log.getLogger(Log.WSRFLITE, AsynchActionWithCallback.class);
+	protected final static Logger log=Log.getLogger(Log.UNICORE, AsynchActionWithCallback.class);
 	
 	private final Runnable task;
 	private final Home home;

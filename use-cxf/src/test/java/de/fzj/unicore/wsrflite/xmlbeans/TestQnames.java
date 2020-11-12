@@ -4,12 +4,11 @@ import static org.junit.Assert.assertEquals;
 
 import javax.xml.namespace.QName;
 
-import junit.framework.Assert;
-
 import org.apache.xmlbeans.SchemaType;
 import org.apache.xmlbeans.XmlBeans;
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlObject;
+import org.junit.Assert;
 import org.junit.Test;
 import org.oasisOpen.docs.wsrf.rl2.CurrentTimeDocument;
 import org.oasisOpen.docs.wsrf.rl2.TerminationTimeDocument;

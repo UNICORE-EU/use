@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.naming.ConfigurationException;
 import javax.xml.bind.JAXBException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.herasaf.xacml.core.SyntaxException;
 import org.xml.sax.SAXException;
 

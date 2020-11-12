@@ -39,7 +39,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.Home;
 import de.fzj.unicore.wsrflite.exceptions.ResourceUnknownException;
@@ -52,7 +52,7 @@ import eu.unicore.util.Log;
  */
 public class InstanceChecking implements Runnable {
 	
-	private static final Logger logger=Log.getLogger(Log.WSRFLITE,InstanceChecking.class);
+	private static final Logger logger=Log.getLogger(Log.UNICORE,InstanceChecking.class);
 
 	private final Home home;
 	

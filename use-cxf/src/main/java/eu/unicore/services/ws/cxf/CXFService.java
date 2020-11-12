@@ -1,6 +1,6 @@
 package eu.unicore.services.ws.cxf;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.DeploymentDescriptor;
 import de.fzj.unicore.wsrflite.Home;

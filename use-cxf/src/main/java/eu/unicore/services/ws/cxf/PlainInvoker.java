@@ -66,7 +66,7 @@ public class PlainInvoker extends AbstractInvoker {
 			if(serviceObject==null){
 				Service s=context.getService();
 				Class<?>clazz=(Class<?>)s.get(SERVICE_IMPL_CLASS);
-				serviceObject=clazz.newInstance();
+				serviceObject=clazz.getConstructor().newInstance();
 				if(serviceObject instanceof KernelInjectable){
 					((KernelInjectable)serviceObject).setKernel(kernel);
 				}	

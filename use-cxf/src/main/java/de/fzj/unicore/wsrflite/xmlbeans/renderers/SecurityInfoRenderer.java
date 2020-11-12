@@ -4,7 +4,7 @@ import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.unigrids.services.atomic.types.AcceptedCAsType;
 import org.unigrids.services.atomic.types.SecurityDocument;

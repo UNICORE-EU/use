@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import eu.unicore.util.Log;
 
@@ -17,7 +17,7 @@ import eu.unicore.util.Log;
  */
 public class AdminActionLoader {
 
-	private static final Logger logger = Log.getLogger(Log.WSRFLITE, AdminActionLoader.class);
+	private static final Logger logger = Log.getLogger(Log.UNICORE, AdminActionLoader.class);
 
 	private AdminActionLoader(){}
 	

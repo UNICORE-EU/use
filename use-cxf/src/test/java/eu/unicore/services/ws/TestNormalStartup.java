@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
@@ -25,7 +26,6 @@ import de.fzj.unicore.wsrflite.xmlbeans.registry.RegistryHandler;
 import de.fzj.unicore.wsrflite.xmlbeans.sg.Registry;
 import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.util.httpclient.IClientConfiguration;
-import junit.framework.Assert;
 
 public class TestNormalStartup {
 

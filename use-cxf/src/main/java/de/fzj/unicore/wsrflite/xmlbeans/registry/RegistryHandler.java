@@ -41,7 +41,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.oasisOpen.docs.wsrf.sg2.EntryType;
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
@@ -299,7 +299,7 @@ public class RegistryHandler implements ExternalSystemConnector {
 	
 	private PublicKey parsePEM(String pem) throws Exception {
 		X509Certificate cert = CertificateUtils.loadCertificate(
-				IOUtils.toInputStream(pem), Encoding.PEM);
+				IOUtils.toInputStream(pem, "UTF-8"), Encoding.PEM);
 		return cert.getPublicKey();
 	}
 	

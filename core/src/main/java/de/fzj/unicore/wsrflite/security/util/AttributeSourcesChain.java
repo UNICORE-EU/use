@@ -35,7 +35,7 @@ package de.fzj.unicore.wsrflite.security.util;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.apache.log4j.NDC;
 
 import de.fzj.unicore.wsrflite.security.ContainerSecurityProperties;

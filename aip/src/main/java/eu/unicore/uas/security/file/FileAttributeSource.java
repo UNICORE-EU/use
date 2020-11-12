@@ -17,7 +17,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.security.IAttributeSource;
 import eu.emi.security.authn.x509.impl.X500NameUtils;

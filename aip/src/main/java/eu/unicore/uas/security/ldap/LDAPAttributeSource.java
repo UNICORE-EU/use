@@ -18,7 +18,7 @@ import javax.naming.directory.SearchResult;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.Kernel;
 import de.fzj.unicore.wsrflite.security.IAttributeSource;

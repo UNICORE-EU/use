@@ -11,8 +11,6 @@ package eu.unicore.uas.security.vo.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.samly2.attrprofile.UVOSAttributeProfile.ScopedStringValue;
@@ -21,7 +19,7 @@ import eu.unicore.uas.security.vo.UnicoreAttributesHandler;
 import eu.unicore.uas.security.vo.UnicoreIncarnationAttributes;
 import eu.unicore.uas.security.vo.VOCommonUtils;
 import eu.unicore.uas.security.vo.conf.PropertiesBasedConfiguration;
-
+import eu.unicore.util.Log;
 import junit.framework.TestCase;
 
 
@@ -175,7 +173,7 @@ public class UnicoreAttributesHandlerTest extends TestCase
 					"src/test/resources/mappingsTest.properties");
 			
 			UnicoreAttributeMappingDef[] filledMappings = VOCommonUtils.fillMappings(cfg.getSourceProperties(),
-					mappings, Logger.getLogger(this.getClass()));
+					mappings, Log.getLogger("unicore",this.getClass()));
 			UnicoreAttributesHandler h = new UnicoreAttributesHandler(cfg, filledMappings, !pullMode);
 			return h.extractUnicoreAttributes(attrs, selectedVo, true);
 		} catch (Exception e)

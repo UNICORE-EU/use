@@ -2,7 +2,7 @@ package eu.unicore.uas.pdp.request.creator;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.herasaf.xacml.core.context.impl.ActionType;
 import org.herasaf.xacml.core.context.impl.AttributeType;
 import org.herasaf.xacml.core.context.impl.AttributeValueType;

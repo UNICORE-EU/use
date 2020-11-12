@@ -13,7 +13,7 @@ import eu.unicore.services.rest.security.FilebasedAuthenticator;
 import eu.unicore.services.rest.security.FilebasedAuthenticator.AttributesHolder;
 import eu.unicore.services.rest.security.IAuthenticator;
 import eu.unicore.services.rest.security.RESTSecurityProperties;
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class TestConfig {
 

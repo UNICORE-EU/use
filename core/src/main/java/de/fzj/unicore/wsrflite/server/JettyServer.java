@@ -38,7 +38,7 @@ import java.util.HashMap;
 
 import javax.servlet.Servlet;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -62,7 +62,7 @@ import eu.unicore.util.jetty.JettyServerBase;
  * @author schuller
  */
 public class JettyServer extends JettyServerBase {
-	private static final Logger logger = Log.getLogger(Log.WSRFLITE, JettyServer.class);
+	private static final Logger logger = Log.getLogger(Log.UNICORE, JettyServer.class);
 
 	private final Kernel kernel;
 	private final WebAppContext presetWebappCtx;

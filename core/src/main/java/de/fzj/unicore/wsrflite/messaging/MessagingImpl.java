@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.persist.Persist;
 import de.fzj.unicore.persist.PersistenceException;
@@ -54,7 +54,7 @@ import eu.unicore.util.Log;
  */
 public class MessagingImpl implements IMessaging{
 	
-	private static final Logger logger=Log.getLogger(Log.WSRFLITE,MessagingImpl.class);
+	private static final Logger logger=Log.getLogger(Log.UNICORE,MessagingImpl.class);
 
 	private final Persist<MessageBean> store;
 

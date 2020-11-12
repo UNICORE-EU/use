@@ -15,7 +15,7 @@ public class RestServiceFactory implements ServiceFactory {
 		try{
 			RestService service=new RestService(dd.getName(),dd.getKernel());
 			Class<?>applicationClass = dd.getImplementation();
-			Application application=(Application)applicationClass.newInstance();
+			Application application=(Application)applicationClass.getConstructor().newInstance();
 			service.setApplication(application);
 			return service;
 		}catch(Exception ex){

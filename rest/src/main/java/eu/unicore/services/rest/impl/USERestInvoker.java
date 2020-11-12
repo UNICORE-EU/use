@@ -12,7 +12,7 @@ import org.apache.cxf.jaxrs.JAXRSInvoker;
 import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.jaxrs.model.OperationResourceInfo;
 import org.apache.cxf.message.Exchange;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.codahale.metrics.Meter;
 

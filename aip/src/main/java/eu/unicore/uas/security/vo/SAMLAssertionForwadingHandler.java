@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.cxf.binding.soap.SoapMessage;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.security.util.AuthZAttributeStore;
 import eu.unicore.samly2.assertion.Assertion;

@@ -10,7 +10,6 @@ package de.fzj.unicore.wsrflite;
 import java.io.ByteArrayInputStream;
 import java.util.Properties;
 
-import de.fzj.unicore.wsrflite.Kernel;
 import de.fzj.unicore.wsrflite.security.CertificateInfoMetric;
 import eu.unicore.bugsreporter.annotation.RegressionTest;
 import eu.unicore.util.Log;

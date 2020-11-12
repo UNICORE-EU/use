@@ -11,7 +11,7 @@ import java.util.Properties;
 import java.util.ServiceLoader;
 
 import org.apache.cxf.message.Message;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.ISubSystem;
 import de.fzj.unicore.wsrflite.Kernel;

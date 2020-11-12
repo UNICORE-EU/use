@@ -2,10 +2,9 @@ package eu.unicore.services.rest.jwt;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 
 import org.apache.cxf.message.Message;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import de.fzj.unicore.wsrflite.Kernel;
@@ -30,6 +29,9 @@ public class JWTAuthenticator implements IAuthenticator, KernelInjectable {
 	
 	private final static Collection<String> s = Collections.singletonList("Bearer");
 	
+	// TODO future extension where end users authenticate with JWT tokens
+	// signed with their private key, with UNICORE reading the pub key
+	// from the system (TSI / uftpd)
 	private String dnTemplate = "CN=%s, OU=sshkey-local-users";
 
 	private JWTHelper jwt;
@@ -76,7 +78,8 @@ public class JWTAuthenticator implements IAuthenticator, KernelInjectable {
 		}
 		jwt.verifyJWTToken(bearerToken);
 		JSONObject json = new JSONObject(payload);
-		String exp = new Date(1000*Long.valueOf(json.getString("exp"))).toString();
+		String exp = json.optString("exp", null);
+		if(exp==null)throw new AuthenticationException("JWT Token does not specify a lifetime ('exp' attribute).");
 		String subject = json.getString("sub");
 		String issuer = json.getString("iss");
 		if(!subject.equals(issuer)){

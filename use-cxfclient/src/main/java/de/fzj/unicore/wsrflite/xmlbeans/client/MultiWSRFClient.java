@@ -36,7 +36,7 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.xmlbeans.client.BaseWSRFClient;
 import eu.unicore.util.Log;

@@ -70,7 +70,7 @@ public class TestRestService {
 		int status=response.getStatusLine().getStatusCode();
 		assertEquals(200, status);
 		assertEquals(invoked+1, MockResource.invocationCounter.get());
-		String reply=IOUtils.toString(response.getEntity().getContent());
+		String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 		System.out.println("Service reply: "+reply);
 	}
 
@@ -98,14 +98,14 @@ public class TestRestService {
 		HttpResponse response=client.execute(get);
 		int status=response.getStatusLine().getStatusCode();
 		assertEquals(200, status);
-		String reply=IOUtils.toString(response.getEntity().getContent());
+		String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 		System.out.println("Service 'foo' reply: "+reply);
 
 		get=new HttpGet(url+"/rest/test2/bar");
 		response=client.execute(get);
 		status=response.getStatusLine().getStatusCode();
 		assertEquals(200, status);
-		reply=IOUtils.toString(response.getEntity().getContent());
+		reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 		System.out.println("Service 'bar' reply: "+reply);
 
 	}

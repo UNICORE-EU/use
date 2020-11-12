@@ -40,7 +40,7 @@ import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.Home;
 import de.fzj.unicore.wsrflite.InitParameters;
@@ -71,7 +71,7 @@ import eu.unicore.util.Log;
  */
 public abstract class SecuredResourceImpl implements Resource {
 
-	private static final Logger logger=Log.getLogger(Log.WSRFLITE, SecuredResourceImpl.class);
+	private static final Logger logger=Log.getLogger(Log.UNICORE, SecuredResourceImpl.class);
 	
 	public static enum AccessLevel {
 		NORMAL, OWNER;

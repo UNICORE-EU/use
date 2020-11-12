@@ -18,7 +18,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.cxf.jaxrs.impl.ResponseBuilderImpl;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import de.fzj.unicore.wsrflite.ExternalSystemConnector;

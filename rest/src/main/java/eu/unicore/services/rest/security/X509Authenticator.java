@@ -15,7 +15,7 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.transport.http.AbstractHTTPDestination;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicHeaderValueParser;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.Kernel;
 import de.fzj.unicore.wsrflite.KernelInjectable;

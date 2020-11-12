@@ -8,12 +8,12 @@ Controlling memory usage
 
 You can set a limit on the number of service instances (e.g. jobs) per user.
 This allows you to make sure your server stays nicely up and running even if 
-flooded by jobs. To enable, edit +CONF/wsrflite.xml+ and
+flooded by jobs. To enable, edit +CONF/container.properties+ and
 add properties, e.g.
 
 ---------------
-  <property name="container.wsrf.maxInstancesPerUser.JobManagement" value="200"/>
-  <property name="container.wsrf.maxInstancesPerUser.ClientFileTransfer" value="20"/>
+container.wsrf.maxInstancesPerUser.JobManagement=200
+container.wsrf.maxInstancesPerUser.ClientFileTransfer=20
 --------------
 
 The last part of the property name is the service name.
@@ -25,11 +25,11 @@ trying to submit a new job).
 Logging
 ~~~~~~~
 
-UNICORE uses the Log4j logging framework. By default, it is configured
-using a config file +CONF/logging.properties+. To change this default,
-edit the start script (+BIN/start.sh+) or, on Windows, the
-+CONF/wrapper.conf+. The config file is specified with a Java property
-+log4j.configuration+.
+UNICORE uses the Log4j logging framework (version 2). By default, it
+is configured using a config file +CONF/logging.properties+. To change
+this default, edit the start script (+BIN/start.sh+) or, on Windows,
+the +CONF/wrapper.conf+. The config file is specified with a Java
+property +log4j.configurationFile+.
 
 
 [NOTE]
@@ -39,33 +39,6 @@ The new configuration will take effect a few seconds after the file has been mod
 ===========
 
 By default, log files are written to the the +LOGS+ directory. 
-
-The following example config file configures logging so that log files are 
-rotated daily.
-
--------------------
-# Set root logger level to INFO and its only appender to A1.
-log4j.rootLogger=INFO, A1
-
-# A1 is set to be a rolling file appender with default params
-log4j.appender.A1=org.apache.log4j.DailyRollingFileAppender
-log4j.appender.A1.File=logs/uas.log
-
-#configure daily rollover: once per day the uas.log will be copied 
-#to a file named e.g. uas.log.2008-12-24
-log4j.appender.A1.DatePattern='.'yyyy-MM-dd
-
-# A1 uses the PatternLayout
-log4j.appender.A1.layout=org.apache.log4j.PatternLayout
-log4j.appender.A1.layout.ConversionPattern=%d [%t] %-5p %c{1} %x - %m%n
--------------------
-
-[NOTE]
-===========
-In Log4j, the log rotation frequency is controlled by the DatePattern. Check 
-http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/DailyRollingFileAppender.html
-for the details.
-===========
 
 Within the logging pattern, you can use special variables to output information.
 In addition to the variables defined by Log4j (such as '%d'), UNICORE defines several variables
@@ -82,24 +55,16 @@ related to the client and the current job.
 A sample logging pattern might be
 
 -------------------
-log4j.appender.A1.layout.ConversionPattern=%d [%X{clientName}] [%X{jobID}] [%t] %-5p %c{1} %x - %m%n
+ "%d [%X{clientName}] [%X{jobID}] [%t] %-5p %c{1} %x - %m%n"
 -------------------
 
-
-For more info on controlling the logging we refer to the log4j documentation:
-  
-  - http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html[PatternLayout]
-  
-  - http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/RollingFileAppender.html[RollingFileAppender]
-  
-  - http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/DailyRollingFileAppender.html[DailyRollingFileAppender]
-  
- 
+   
 Log4j supports a very wide range of logging options, such as date based or size based file rollover,
 logging different things to different files and much more. For full information on Log4j we refer to
-the publicly available documentation, for example the 
-http://logging.apache.org/log4j/1.2/manual.html[Log4j manual].
- 
+the publicly available documentation
+
+- https://logging.apache.org/log4j/2.x/manual/configuration.html
+
 
 ==== Logger categories, names and levels
 
@@ -121,8 +86,8 @@ log4j.logger.unicore.security=DEBUG
 If you are just interested in XUUDB related output, you can set
 
 ------
-log4j.logger.unicore.security=INFO
-log4j.logger.unicore.security.XUUDBAuthoriser=DEBUG
+logger.xuudb.name=unicore.security.XUUDBAuthoriser
+logger.xuudb.level=DEBUG
 ------
 
 so the XUUDBAuthoriser will log on DEBUG level, while the other security components
@@ -157,17 +122,11 @@ Often it is desirable to keep track of the usage of your UNICORE site. The UNICO
 server has a special logger category called +unicore.services.jobexecution.USAGE+ which
 logs information about finished jobs at INFO level. If you wish to enable this,
 set 
-------
-log4j.logger.unicore.services.jobexecution.USAGE=INFO
-------
 
-[NOTE]
-===========
-If you are setting up a production environment and need a sophisticated accounting solution (featuring database 
-with a real resources consumption, WWW interface and possibility to produce reports or aggregated data)
-then consider deploying UNICORE RUS Accounting. Further instructions can be found in xref:xnjs-accounting[here]. 
-===========
-
+------
+logger.usage.name=unicore.services.jobexecution.USAGE
+logger.usage.level=INFO
+------
 
 It might be convenient to send usage output to a different file than normal log output.
 This is easily achieved with log4j:
@@ -175,27 +134,28 @@ This is easily achieved with log4j:
 ------
 # send usage logger output to a separate file
 
-# use separate appender 'U1' for usage info
-log4j.logger.unicore.services.jobexecution.USAGE=INFO,U1
+logger.usage.name=unicore.services.jobexecution.USAGE
+logger.usage.level=INFO
+logger.usage.appenderRef.usage.ref=USAGE_FILE
 
-# U1 is set to be a rolling file appender with default params
-log4j.appender.U1=org.apache.log4j.DailyRollingFileAppender
-log4j.appender.U1.File=logs/usage.log
-# U1 uses the PatternLayout                                                                           
-log4j.appender.U1.layout=org.apache.log4j.PatternLayout
-log4j.appender.U1.layout.ConversionPattern=%d [%t] %-5p %c{1} %x - %m%n
+appender.FILE2.name = USAGE_FILE
+appender.FILE2.type = RollingFile
+appender.FILE2.fileName = logs/usage.log
+appender.FILE2.filePattern = logs/usage-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz
+appender.FILE2.layout.type = PatternLayout
+appender.FILE2.layout.pattern =%d - %m%n
+appender.FILE2.policies.type = Policies
+appender.FILE2.policies.time.type = TimeBasedTriggeringPolicy
+appender.FILE2.policies.time.interval = 1
+appender.FILE2.strategy.type = DefaultRolloverStrategy
 ------
 
 For each finished job, the usage logger will log a line with the following information (if available)
 ----
-[result] [executable] [actionUUID] [clientDN] [BSSJobId] [clientXlogin] [jobName] [machineName] [VOs]
+[result] [executable] [actionUUID] [clientDN] [BSSJobId] [clientXlogin] [jobName] [machineName] 
 ----
 
 An example output line is:
-
-----
-2011-08-16 10:00:39,513 [XNJS-1-JobRunner-1] INFO  USAGE  - [SUCCESSFUL] [ /bin/date] [ e9deab79-af1f-4704-a6bd-427b3ab20969] [CN=Bernd Schuller, OU=VSGC, OU=Forschungszentrum Juelich GmbH, O=GridGermany, C=DE] [82942] [schuller] [Date job submitted using UCC] [zam025c02.zam.kfa-juelich.de] []
-----
 
 
 Administration and monitoring
@@ -247,34 +207,20 @@ this selection is done by adding "-Z role:admin" at the end of each command.
 
 ===== Examples
 
-The main UCC commands that are useful are the _list-jobs_, _list-sites_ and _wsrf_ commands. 
-Using _list-jobs_ you can search for jobs with given properties, whereas the _wsrf_ command 
-allows to look at any resource, or even destroy resources.
+The main UCC commands that are useful are the _list-jobs_,
+_list-sites_ and _rest_ commands.  Using _list-jobs_ you can search
+for jobs with given properties, whereas the _rest__ command allows to
+look at any resource, or even destroy resources.
 
-To list all jobs on the server belonging to a specific user, do 
-  
-------
-ucc list-jobs -f Log contains <username>
-------
-
-where _username_ is some unique part of the user's DN, or the xlogin. Similarly, you can
-filter based on other properties of the job.
-
-The _wsrf_ command can be used to destroy resources, extend their lifetime 
-and look at their properties. Please see "ucc wsrf -h" for details.
-
-Try
-
-----------
-ucc wsrf getproperties https://myhost:7777/services/TargetSystemFactory?res=default_target_system_factory
-----------    
-
+UCC also includes support for the Admin Service in UNICORE/X, please
+refer to the UCC documentation for details.
 
 ==== Java Management Extensions (JMX)
 
-Using the Java Management Extensions, you can monitor any Java virtual machine using (for example) a 
-program called "jconsole" that is part of the Sun/Oracle Java SDK. 
-It allows to check memory and thread usage, as well as access to application specific management
-components ("MBeans").
+Using the Java Management Extensions, you can monitor any Java virtual
+machine using (for example) a program called "jconsole" that is part
+of the Java SDK.  It allows to check memory and thread usage, as well
+as access to application specific management components ("MBeans").
 
-For details on how to enable JMX access, we refer to the general Java documentation.
+For details on how to enable JMX access, we refer to the general Java
+documentation.

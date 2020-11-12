@@ -52,7 +52,7 @@ import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import com.codahale.metrics.JmxReporter;
@@ -103,7 +103,7 @@ public class Kernel {
 	public static final String VERSION = Kernel.class.getPackage().getImplementationVersion() != null ?
 			Kernel.class.getPackage().getImplementationVersion() : "DEVELOPMENT";
 
-	private static final Logger logger = Log.getLogger(Log.WSRFLITE, Kernel.class);
+	private static final Logger logger = Log.getLogger(Log.UNICORE, Kernel.class);
 
 	private IMessaging msg;
 

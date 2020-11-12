@@ -12,8 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.impl.OpensslNameUtils;
 import eu.unicore.util.Log;
@@ -47,9 +46,8 @@ public class GridMapFileParser
 		
 		Map<String,List<String>> result = new HashMap<>();
 	
-		BufferedReader br = null;
-		try {
-			br = new BufferedReader(new InputStreamReader(new DataInputStream(new FileInputStream(gridMapFile))));
+		try(BufferedReader br = new BufferedReader(new InputStreamReader(new DataInputStream(new FileInputStream(gridMapFile)))))
+				{
 			String line;
 			
 			while ((line = br.readLine()) != null)   {
@@ -98,10 +96,6 @@ public class GridMapFileParser
 
 		} catch (Exception e){
 			logger.warn("Problem while parsing grid-mapfile "+gridMapFile.getAbsolutePath()+": "+e.getMessage(),e);
-		}
-		finally
-		{
-			IOUtils.closeQuietly(br);
 		}
 		return result;
 	}

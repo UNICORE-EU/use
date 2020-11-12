@@ -35,7 +35,7 @@ package de.fzj.unicore.wsrflite.impl;
 
 import java.util.Calendar;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.ContainerProperties;
 import de.fzj.unicore.wsrflite.ExtendedResourceStatus;
@@ -64,7 +64,7 @@ import eu.unicore.util.Log;
  */
 public abstract class ResourceImpl extends SecuredResourceImpl implements ExtendedResourceStatus {
 
-	private static final Logger logger=Log.getLogger(Log.WSRFLITE, ResourceImpl.class);
+	private static final Logger logger=Log.getLogger(Log.UNICORE, ResourceImpl.class);
 
 	protected Home home;
 

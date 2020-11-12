@@ -6,7 +6,7 @@ package de.fzj.unicore.wsrflite.xmlbeans.registry;
 
 import java.util.concurrent.locks.Lock;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.impl.LockSupport;

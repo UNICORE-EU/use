@@ -38,7 +38,7 @@ public class SSHUtils {
 	}
 	
 	public static PublicKey readPublicKey(File file) throws IOException, GeneralSecurityException {
-		String pubkey = FileUtils.readFileToString(file);
+		String pubkey = FileUtils.readFileToString(file, "UTF-8");
 		return readPubkey(pubkey);
 	}
 	

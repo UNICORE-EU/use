@@ -7,9 +7,9 @@
  */
 package eu.unicore.uas.pdp;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.junit.Before;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.junit.Test;
 
 import de.fzj.unicore.wsrflite.security.pdp.ActionDescriptor;
@@ -19,8 +19,6 @@ import de.fzj.unicore.wsrflite.security.pdp.UnicoreXPDP;
 import de.fzj.unicore.wsrflite.security.util.ResourceDescriptor;
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
-
-import static org.junit.Assert.*;
 
 
 public abstract class AbstractPerformanceTester implements Runnable
@@ -32,13 +30,6 @@ public abstract class AbstractPerformanceTester implements Runnable
 	protected String[] actions;
 	protected Decision[] decisions;
 	protected int iterationsPerThread;
-	
-	@Before
-	public void setupLog()
-	{
-		Logger log = Logger.getRootLogger();
-		log.setLevel(Level.ERROR);
-	}
 	
 	public void run()
 	{

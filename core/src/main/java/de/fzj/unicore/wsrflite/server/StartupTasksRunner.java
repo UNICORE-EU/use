@@ -7,7 +7,7 @@ package de.fzj.unicore.wsrflite.server;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.wsrflite.Kernel;
 import de.fzj.unicore.wsrflite.KernelInjectable;
@@ -18,7 +18,7 @@ import eu.unicore.util.Log;
  * @author K. Benedyczak
  */
 public class StartupTasksRunner {
-	private static final Logger logger = Log.getLogger(Log.WSRFLITE, StartupTasksRunner.class);
+	private static final Logger logger = Log.getLogger(Log.UNICORE, StartupTasksRunner.class);
 	
 	
 	
