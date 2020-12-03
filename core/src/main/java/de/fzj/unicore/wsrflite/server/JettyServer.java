@@ -40,12 +40,10 @@ import javax.servlet.Servlet;
 
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.Decorator;
-import org.eclipse.jetty.webapp.WebAppContext;
 
 import de.fzj.unicore.wsrflite.ContainerProperties;
 import de.fzj.unicore.wsrflite.Kernel;
@@ -65,30 +63,17 @@ public class JettyServer extends JettyServerBase {
 	private static final Logger logger = Log.getLogger(Log.UNICORE, JettyServer.class);
 
 	private final Kernel kernel;
-	private final WebAppContext presetWebappCtx;
 	
 	protected static final HashMap<String, Integer> defaults = new HashMap<String, Integer>();
 
 	/**
 	 * create a jetty server using settings from the supplied Kernel 
-	 * @param kernel -  the Kernel
+	 * @param kernel
+	 * @param jettyCfg
 	 * @throws Exception
 	 */
-	public JettyServer(Kernel kernel, HttpServerProperties jettyCfg) 
-			throws Exception {
-		this(kernel, null, jettyCfg);
-	}
-
-	/**
-	 * create a jetty server using settings from the supplied Kernel 
-	 * @param kernel -  the Kernel
-	 * @param webappCtx - a web app context to serve
-	 * @throws Exception
-	 */
-	public JettyServer(Kernel kernel, WebAppContext webappCtx, HttpServerProperties jettyCfg) throws Exception {
+	public JettyServer(Kernel kernel, HttpServerProperties jettyCfg) throws Exception {
 		super(makeUrl(kernel), kernel.getContainerSecurityConfiguration(), jettyCfg);
-		
-		this.presetWebappCtx = webappCtx;
 		this.kernel = kernel;
 		initServer();
 	}
@@ -127,18 +112,6 @@ public class JettyServer extends JettyServerBase {
 			kernel.getContainerProperties().setProperty(ContainerProperties.WSRF_BASEURL, 
 					baseUrl.toExternalForm());
 		}
-	}
-
-
-	/**
-	 * Adds default handler after the provided Webapp context and returns them as HandlerCollection
-	 */
-	private Handler configureWithExistingWebAppCtx() {
-		DefaultHandler defaultHandler = new DefaultHandler();
-		HandlerCollection handlers = new HandlerCollection();
-		handlers.setHandlers(new Handler[] { presetWebappCtx, defaultHandler });
-		presetWebappCtx.getObjectFactory().addDecorator(new ServletDecorator(kernel));
-		return handlers;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -193,9 +166,6 @@ public class JettyServer extends JettyServerBase {
 
 	@Override
 	protected Handler createRootHandler() throws ConfigurationException {
-		if (presetWebappCtx != null)
-			return configureWithExistingWebAppCtx();
-		
 		ServletContextHandler root = new ServletContextHandler(getServer(), "/", ServletContextHandler.SESSIONS);
 		root.getObjectFactory().addDecorator(new ServletDecorator(kernel));
 		try {
@@ -213,8 +183,6 @@ public class JettyServer extends JettyServerBase {
 	 */
 	public ServletContextHandler getRootServletContext() 
 	{
-		if (presetWebappCtx != null)
-			return presetWebappCtx;
 		return (ServletContextHandler)super.getRootHandler();
 	}
 

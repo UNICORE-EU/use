@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.log4j.MDC;
+import org.apache.logging.log4j.ThreadContext;
 
 import de.fzj.unicore.wsrflite.Resource;
 import de.fzj.unicore.wsrflite.impl.SecuredResourceImpl;
@@ -394,7 +394,7 @@ public final class SecurityManager {
 			tokens.setConsignorTrusted(true);
 		}
 		//now we know the client name we can put it into the log context
-		MDC.put("clientName", client.getDistinguishedName());
+		ThreadContext.put("clientName", client.getDistinguishedName());
 		return client;
 	}
 

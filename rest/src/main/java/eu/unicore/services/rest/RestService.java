@@ -8,6 +8,7 @@ import org.apache.cxf.ext.logging.LoggingFeature;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxrs.utils.ResourceUtils;
 
+import de.fzj.unicore.wsrflite.ContainerProperties;
 import de.fzj.unicore.wsrflite.Home;
 import de.fzj.unicore.wsrflite.Kernel;
 import de.fzj.unicore.wsrflite.Service;
@@ -79,7 +80,6 @@ public class RestService implements Service {
 		if(kernel.getAttribute(RESTSecurityProperties.class)==null){
 			RESTSecurityProperties sp = new RESTSecurityProperties(kernel, kernel.getContainerProperties().getRawProperties());
 			kernel.setAttribute(RESTSecurityProperties.class, sp);
-			
 		}
 	}
 	
@@ -92,7 +92,6 @@ public class RestService implements Service {
 
 	public void stopAndCleanup() throws Exception{
 		stop();
-
 	}
 	
 	public ClassLoader getClassLoader(){
@@ -132,7 +131,11 @@ public class RestService implements Service {
 		bean.setBus(new RestServiceFactory().getServlet().getBus());
 		bean.setAddress("/"+name);
 		bean.setProvider(new AuthNHandler(kernel, kernel.getOrCreateSecuritySessionStore()));
-		bean.getFeatures().add(new LoggingFeature());
+		ContainerProperties sp = kernel.getContainerProperties();
+		boolean enableLogging = sp.getBooleanValue(ContainerProperties.LOGGING_KEY+name);
+		if(enableLogging) {
+			bean.getFeatures().add(new LoggingFeature());
+		}
 		bean.getInFaultInterceptors().add(new PostInvokeHandler());
 		bean.getOutFaultInterceptors().add(new PostInvokeHandler());
 		bean.getOutInterceptors().add(new PostInvokeHandler());

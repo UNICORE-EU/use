@@ -40,6 +40,8 @@ public class RESTSecurityProperties extends PropertiesHelper {
 
 	public static final String PROP_FORBID_NO_CREDS = PROP_AUTHN_PREFIX + ".failOnMissingAuthCredentials";
 
+	public static final String PROP_MSG_LOGGING = "enableMessageLogging";
+
 	
 	@DocumentationReferenceMeta
 	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
@@ -53,6 +55,8 @@ public class RESTSecurityProperties extends PropertiesHelper {
 				setDescription("Properties with this prefix are used to configure authentication. See separate documentation for details."));
 		META.put("jwt", new PropertyMD().setCanHaveSubkeys().
 				setDescription("Prefix used to configure JWT support. See separate docs."));
+		META.put(PROP_MSG_LOGGING, new PropertyMD("false").setBoolean().
+				setDescription("Enable the Apache CXF logging feature on services."));
 	}
 	
 	private IAuthenticator auth;

@@ -52,6 +52,7 @@ public class TestRestService {
 	@Test
 	public void testInvokeRestService()throws Exception {
 		String sName="test";
+		kernel.getContainerProperties().setProperty("messageLogging.test", "true");
 		DeploymentDescriptorImpl dd = new DeploymentDescriptorImpl();
 		dd.setKernel(kernel);
 		dd.setType(RestService.TYPE);
@@ -72,6 +73,7 @@ public class TestRestService {
 		assertEquals(invoked+1, MockResource.invocationCounter.get());
 		String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 		System.out.println("Service reply: "+reply);
+		kernel.getContainerProperties().setProperty("messageLogging.test", "false");
 	}
 
 	@Test

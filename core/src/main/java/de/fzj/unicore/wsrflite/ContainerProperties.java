@@ -163,6 +163,8 @@ public class ContainerProperties extends PropertiesHelper {
 	 */
 	public static final String FEATURE_KEY = "feature.";
 
+	public static final String LOGGING_KEY = "messageLogging.";
+
 
 	@DocumentationReferenceMeta
 	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
@@ -238,6 +240,9 @@ public class ContainerProperties extends PropertiesHelper {
 		
 		META.put("feature.", new PropertyMD().setCanHaveSubkeys().
 				setDescription("Properties with this prefix are used to configure the deployed features. See separate documentation for details."));
+
+		META.put(LOGGING_KEY, new PropertyMD("false").setBoolean().setCanHaveSubkeys().
+				setDescription("Append service name and set to 'true' to enable message logging for that service."));
 	}
 
 	protected ThreadingServices threadingServices;
