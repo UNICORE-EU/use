@@ -93,13 +93,15 @@ public class Registries extends ServicesBase {
 			// non wsrf link
 			map.put("href",endpoint);	
 		}
-		String interfaceName = value.get(RegistryClient.INTERFACE_NAME);
+		value.remove(RegistryClient.ENDPOINT);
+		String interfaceName = value.remove(RegistryClient.INTERFACE_NAME);
 		if(interfaceName!=null)map.put("type",interfaceName);
-		String dn = value.get(RegistryClient.SERVER_IDENTITY);
+		String dn = value.remove(RegistryClient.SERVER_IDENTITY);
 		if(dn!=null)map.put(RegistryClient.SERVER_IDENTITY,dn);
-		String pubkey = value.get(RegistryClient.SERVER_PUBKEY);
+		String pubkey = value.remove(RegistryClient.SERVER_PUBKEY);
 		if(pubkey!=null)map.put(RegistryClient.SERVER_PUBKEY,pubkey);
-		
+		// copy the rest
+		map.putAll(value);
 		return map;
 	}
 	
