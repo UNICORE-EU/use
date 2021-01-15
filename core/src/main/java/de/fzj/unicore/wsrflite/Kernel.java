@@ -36,10 +36,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -50,14 +46,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ServiceLoader;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
-import com.codahale.metrics.jmx.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Reporter;
 
 import de.fzj.unicore.persist.PersistenceFactory;
 import de.fzj.unicore.persist.PersistenceProperties;
@@ -81,7 +73,6 @@ import de.fzj.unicore.wsrflite.server.JettyServer;
 import de.fzj.unicore.wsrflite.server.StartupTask;
 import de.fzj.unicore.wsrflite.server.StartupTasksRunner;
 import de.fzj.unicore.wsrflite.utils.CapabilitiesLoader;
-import de.fzj.unicore.wsrflite.utils.FileWatcher;
 import de.fzj.unicore.wsrflite.utils.deployment.IServiceConfigurator;
 import de.fzj.unicore.wsrflite.utils.deployment.NullServiceConfigurator;
 import de.fzj.unicore.wsrflite.utils.deployment.PropertyChecker;
@@ -114,8 +105,6 @@ public class Kernel {
 	private PersistenceManager persistenceManager;
 
 	private final MetricRegistry metricRegistry = new MetricRegistry();
-	
-	private Reporter metricReporter;
 	
 	private final Map<String, Home> homes = Collections
 			.synchronizedMap(new HashMap<String, Home>());
@@ -468,10 +457,6 @@ public class Kernel {
 		return metricRegistry;
 	}
 
-	public Reporter getMetricReporter() {
-		return metricReporter;
-	}
-
 	public final GatewayHandler getGatewayHandler(){
 		return gwHandler;
 	}
@@ -556,7 +541,6 @@ public class Kernel {
 	 * @throws Exception 
 	 */
 	private void initializeBuddies() throws Exception {
-		metricReporter = configureMetricReporter();
 		msg = new MessagingImpl(getPersistenceProperties());
 		persistenceManager=new PersistenceManager(this);
 		deploymentManager=new DeploymentManager(this);
@@ -581,12 +565,6 @@ public class Kernel {
 		capabilities=CapabilitiesLoader.load(this);
 	}
 
-	private Reporter configureMetricReporter(){
-		JmxReporter jr = JmxReporter.forRegistry(metricRegistry).inDomain("UNICORE").build();
-		jr.start();
-		return jr;
-	}
-	
 	/**
 	 * The main initialization logic.
 	 * Prepare for the start: loads configuration, setup cooperating objects but does not start
@@ -651,9 +629,7 @@ public class Kernel {
 			}
 		}
 
-		startLogConfigWatcher();
 		addShutDownHook();
-		
 	}
 
 	/**
@@ -738,50 +714,6 @@ public class Kernel {
 		gwHandler.waitForGateway();
 		// if appropriate, dynamically register with gateway
 		gwHandler.enableGatewayRegistration();
-	}
-
-	/**
-	 * sets up a watchdog that checks for changes to the log4j configuration file,
-	 * and re-configures log4j if that file has changed
-	 */
-	private void startLogConfigWatcher(){
-		final String logConfig=System.getProperty("log4j.configuration");
-		if(logConfig==null){
-			logger.debug("No logger configuration found.");
-			return;
-		}
-		try{
-			Runnable r=new Runnable(){
-				public void run(){
-					try{
-						reConfigureLog4j(logConfig);
-					}catch(MalformedURLException me){
-						throw new RuntimeException(me);
-					}
-				}
-			};
-			File logProperties=logConfig.startsWith("file:")?new File(new URI(logConfig)):new File(logConfig);
-			FileWatcher fw=new FileWatcher(logProperties,r);
-			containerConfiguration.getThreadingServices().getScheduledExecutorService()
-			.scheduleWithFixedDelay(fw, 5, 5, TimeUnit.SECONDS);
-		}catch(FileNotFoundException fex){
-			logger.warn("Log configuration file <"+logConfig+"> not found.");
-		}
-		catch(URISyntaxException use){
-			logger.warn("Location of log configuration is not an URI: <"+logConfig+">");
-		}
-	}
-
-	/**
-	 * re-configure log4j from the named properties file
-	 */
-	public static void reConfigureLog4j(String logConfig)throws MalformedURLException{
-		logger.info("LOG CONFIG MODIFIED, re-configuring.");
-		if(logConfig.startsWith("file:")){
-			PropertyConfigurator.configure(new URL(logConfig));	
-		}else{
-			PropertyConfigurator.configure(logConfig);
-		}
 	}
 
 	/**
