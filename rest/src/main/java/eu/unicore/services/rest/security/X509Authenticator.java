@@ -57,15 +57,18 @@ public class X509Authenticator implements IAuthenticator, KernelInjectable  {
 	
 	public void setKernel(Kernel kernel){
 		this.kernel = kernel;
+		try {
+			haveGateway = kernel.getContainerSecurityConfiguration().isGatewayAuthnEnabled();
+		}catch(Exception e) {}
 	}
 	
 	@Override
 	public boolean authenticate(Message message, SecurityTokens tokens) {
-		if(!haveGateway){
-			return extractFromTLS(message, tokens);
+		if(haveGateway){
+			return extractFromGWHeader(message, tokens);
 		}
 		else{
-			return extractFromGWHeader(message, tokens);
+			return extractFromTLS(message, tokens);
 		}
 	}
 

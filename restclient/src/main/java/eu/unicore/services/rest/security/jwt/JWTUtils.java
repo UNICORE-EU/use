@@ -6,6 +6,7 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,7 @@ import org.json.JSONObject;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.JWSSignerOption;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
@@ -22,6 +24,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.crypto.opts.AllowWeakRSAKey;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -41,12 +44,20 @@ public class JWTUtils {
 
 	public static JSONObject getPayload(String token) throws Exception {
 		JWT jwt = JWTParser.parse(token);
-		return new JSONObject(jwt.getJWTClaimsSet().toJSONObject().toString());
+		JSONObject j = new JSONObject();
+		for(Map.Entry<String, Object>e: jwt.getJWTClaimsSet().toJSONObject().entrySet()) {
+			j.put(e.getKey(), e.getValue());
+		}
+		return j;
 	}
 
 	public static JSONObject getHeaders(String token) throws Exception {
 		JWT jwt = JWTParser.parse(token);
-		return new JSONObject(jwt.getHeader().toJSONObject().toJSONString());
+		JSONObject j = new JSONObject();
+		for(Map.Entry<String, Object>e: jwt.getHeader().toJSONObject().entrySet()) {
+			j.put(e.getKey(), e.getValue());
+		}
+		return j;
 	}
 
 	final static Map<String,String>etd = new HashMap<>();
@@ -95,7 +106,10 @@ public class JWTUtils {
 
 	public static JWSSigner getSigner(PrivateKey pk) throws Exception {
 		if(pk instanceof RSAPrivateKey){
-			return new RSASSASigner(pk, true);
+			return new RSASSASigner(pk
+					// TODO remove once our demo-ca keys are 2048
+					, Collections.singleton((JWSSignerOption) AllowWeakRSAKey.getInstance())
+			);
 		}
 		if(pk instanceof ECPrivateKey){
 			return new ECDSASigner((ECPrivateKey)pk);
