@@ -457,11 +457,12 @@ public class LDAPAttributeSource implements IAttributeSource {
 		try
 		{
 			ctx = SSLContextCreator.createSSLContext(credential, validator, "TLS", 
-					"LDAP Client", logger);
+					"LDAP Client", logger, 
+					kernel.getClientConfiguration().getServerHostnameCheckingMode());
 		} catch (Exception e)
 		{
-			logger.debug("Problem with TLS setup" + e.toString(), e);
-			throw new NamingException("Problem setting up TLS infrastructure: " + e.toString());
+			Log.logException("Problem setting up TLS", e, logger);
+			throw new NamingException(Log.createFaultMessage("Problem setting up TLS", e));
 		}
 		return ctx.getSocketFactory();
 	}
