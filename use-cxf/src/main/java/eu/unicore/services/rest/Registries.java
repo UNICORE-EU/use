@@ -11,9 +11,11 @@ import java.util.regex.Pattern;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -58,6 +60,10 @@ public class Registries extends ServicesBase {
 			ServiceRegistryImpl sg = (ServiceRegistryImpl)resource;
 			Map<String,String>content = BaseClient.asMap(j);
 			String endpoint = j.getString(RegistryClient.ENDPOINT);
+			if(endpoint==null) {
+				throw new WebApplicationException("Registry entry must specify an 'Endpoint'",
+						HttpStatus.SC_BAD_REQUEST);
+			}
 			String entryID = sg.addEntry(endpoint, content, null);
 			String location = "/"+entryID;
 			return Response.created(new URI(location)).build();

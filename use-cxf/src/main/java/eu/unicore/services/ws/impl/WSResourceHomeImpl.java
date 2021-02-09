@@ -41,7 +41,6 @@ import javax.xml.namespace.QName;
 import de.fzj.unicore.wsrflite.Kernel;
 import de.fzj.unicore.wsrflite.Resource;
 import de.fzj.unicore.wsrflite.impl.DefaultHome;
-import eu.unicore.security.wsutil.XmlBinding;
 
 /**
  * 
@@ -64,7 +63,6 @@ import eu.unicore.security.wsutil.XmlBinding;
  * 
  * @author schuller
  */
-@XmlBinding(name="xmlbeans")
 public class WSResourceHomeImpl extends DefaultHome {
 
 	private List<QName>acceptedRefParams=Arrays.asList(new QName[]{

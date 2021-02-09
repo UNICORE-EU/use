@@ -30,6 +30,8 @@ public class CXFService implements Service {
 	public CXFService(DeploymentDescriptor serviceConfiguration){
 		this.name=serviceConfiguration.getName();
 		this.kernel=serviceConfiguration.getKernel();
+		this.frontend = serviceConfiguration.getFrontend()!=null?
+				serviceConfiguration.getFrontend().getName() : null;
 		this.serviceConfiguration=serviceConfiguration;
 	}
 

@@ -72,7 +72,6 @@ import eu.unicore.security.wsutil.SecuritySessionCreateInHandler;
 import eu.unicore.security.wsutil.SecuritySessionStore;
 import eu.unicore.security.wsutil.SessionIDServerOutHandler;
 import eu.unicore.security.wsutil.client.CheckUnderstoodHeadersHandler;
-import eu.unicore.security.wsutil.client.WSClientFactory;
 import eu.unicore.security.wsutil.cxf.XmlBeansDataBinding;
 import eu.unicore.services.ws.WSFrontEnd;
 import eu.unicore.services.ws.security.AccessControlHandler;
@@ -146,7 +145,7 @@ public class CXFKernel {
 		}
 
 		if(useFactory.getDataBinding()==null){
-			useFactory.setDataBinding(WSClientFactory.getBinding(spec));
+			useFactory.setDataBinding(new XmlBeansDataBinding());
 		}
 		useFactory.setServiceClass(spec);
 		
