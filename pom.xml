@@ -67,7 +67,7 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>0.200</persistence.version>
+    <persistence.version>0.202</persistence.version>
     <secutils.version>3.1.2</secutils.version>
     <seclib.version>5.2.0</seclib.version>
     <saaj.version>1.5.1</saaj.version>
