@@ -35,8 +35,8 @@ package eu.unicore.services.ws.testutils;
 
 
 import static de.fzj.unicore.wsrflite.ContainerProperties.PREFIX;
-import static de.fzj.unicore.wsrflite.ContainerProperties.WSRF_HOST;
-import static de.fzj.unicore.wsrflite.ContainerProperties.WSRF_PORT;
+import static de.fzj.unicore.wsrflite.ContainerProperties.SERVER_HOST;
+import static de.fzj.unicore.wsrflite.ContainerProperties.SERVER_PORT;
 
 import java.io.File;
 import java.util.Properties;
@@ -64,8 +64,8 @@ public abstract class JettyTestCase {
 		Properties properties = getServerSideSecurityProperties();
 		FileUtils.deleteDirectory(new File("target","data"));
 		properties.setProperty("persistence.directory", "target/data");
-		properties.setProperty(PREFIX+WSRF_HOST, "localhost");
-		properties.setProperty(PREFIX+WSRF_PORT, ""+getPort());
+		properties.setProperty(PREFIX+SERVER_HOST, "localhost");
+		properties.setProperty(PREFIX+SERVER_PORT, ""+getPort());
 		init(properties);
 		started = true;
 	}

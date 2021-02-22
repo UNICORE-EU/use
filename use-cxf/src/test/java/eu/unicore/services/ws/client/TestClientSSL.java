@@ -34,8 +34,8 @@
 package eu.unicore.services.ws.client;
 
 import static de.fzj.unicore.wsrflite.ContainerProperties.PREFIX;
-import static de.fzj.unicore.wsrflite.ContainerProperties.WSRF_HOST;
-import static de.fzj.unicore.wsrflite.ContainerProperties.WSRF_PORT;
+import static de.fzj.unicore.wsrflite.ContainerProperties.SERVER_HOST;
+import static de.fzj.unicore.wsrflite.ContainerProperties.SERVER_PORT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -114,8 +114,8 @@ public class TestClientSSL extends TestClient{
 		properties.load(new ByteArrayInputStream(serverprops.getBytes()));
 		FileUtils.deleteDirectory(new File("target","data"));
 		properties.setProperty("persistence.directory", "target/data");
-		properties.setProperty(PREFIX+WSRF_HOST, "localhost");
-		properties.setProperty(PREFIX+WSRF_PORT, ""+getPort());
+		properties.setProperty(PREFIX+SERVER_HOST, "localhost");
+		properties.setProperty(PREFIX+SERVER_PORT, ""+getPort());
 		return properties;
 	}
 
