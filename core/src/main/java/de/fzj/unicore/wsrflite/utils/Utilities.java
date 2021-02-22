@@ -102,8 +102,8 @@ public class Utilities {
 	 * @return a URL of the form scheme://host:port where 'scheme' is http or https
 	 */
 	public static String getPhysicalServerAddress(ContainerProperties cfg, boolean isSSLEnabled){
-		String host=cfg.getValue(ContainerProperties.WSRF_HOST);
-		String port=cfg.getValue(ContainerProperties.WSRF_PORT);
+		String host=cfg.getValue(ContainerProperties.SERVER_HOST);
+		String port=cfg.getValue(ContainerProperties.SERVER_PORT);
 		String proto="http";
 		if (isSSLEnabled) 
 			proto="https";

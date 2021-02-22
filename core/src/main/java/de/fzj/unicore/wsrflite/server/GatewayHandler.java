@@ -74,7 +74,7 @@ public class GatewayHandler implements ExternalSystemConnector{
 		Integer timeout = secConfiguration.getGatewayWaitTime();
 		timeout *= 1000;
 		long start = System.currentTimeMillis();
-		String gwUrl = containerConfiguration.getValue(ContainerProperties.WSRF_BASEURL);
+		String gwUrl = containerConfiguration.getValue(ContainerProperties.EXTERNAL_URL);
 		do{
 			try {
 				X509Certificate[] cert = ConnectionUtil.getPeerCertificate(clientConfiguration, gwUrl, 
@@ -123,9 +123,9 @@ public class GatewayHandler implements ExternalSystemConnector{
 	private void checkConnection(){
 		if (lastChecked+2000>System.currentTimeMillis())
 			return;
-		String url = containerConfiguration.getValue(ContainerProperties.WSRF_BASEURL);
-		String myHost = containerConfiguration.getValue(ContainerProperties.WSRF_HOST) + ":"
-				+containerConfiguration.getValue(ContainerProperties.WSRF_PORT);
+		String url = containerConfiguration.getValue(ContainerProperties.EXTERNAL_URL);
+		String myHost = containerConfiguration.getValue(ContainerProperties.SERVER_HOST) + ":"
+				+containerConfiguration.getValue(ContainerProperties.SERVER_PORT);
 		boolean secure = clientConfiguration.isSslEnabled();
 		if(url.contains(myHost)){
 			status=Status.NOT_APPLICABLE;
@@ -217,7 +217,7 @@ public class GatewayHandler implements ExternalSystemConnector{
 		public GatewayRegistration(ContainerProperties containerConfiguration, int updateInterval)
 				throws Exception{
 			this.containerConfiguration=containerConfiguration;
-			gwAddress = extractGWAddress(containerConfiguration.getValue(ContainerProperties.WSRF_BASEURL))
+			gwAddress = extractGWAddress(containerConfiguration.getValue(ContainerProperties.EXTERNAL_URL))
 					+"/VSITE_REGISTRATION_REQUEST";
 			client = HttpUtils.createClient(gwAddress, clientConfiguration);
 			threadingSrv.getScheduledExecutorService().scheduleWithFixedDelay(

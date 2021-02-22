@@ -18,7 +18,7 @@ public class TestServer extends TestCase{
 	public void testSingleService()throws Exception{
 		Properties props = TestConfigUtil.getInsecureProperties();
 		props.setProperty(ContainerProperties.PREFIX + 
-				ContainerProperties.WSRF_HOST, "localhost");
+				ContainerProperties.SERVER_HOST, "localhost");
 		Kernel k=new Kernel(props);
 		
 		JettyServer server=new JettyServer(k, new ContainerHttpServerProperties(props));

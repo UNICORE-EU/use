@@ -21,8 +21,8 @@ public class TestUtilities {
 		String base=gw+"/SITE";
 		k=new ContainerProperties(properties, false);
 		k.setProperty(ContainerProperties.WSRF_BASEURL, base);
-		k.setProperty(ContainerProperties.WSRF_HOST, "my");
-		k.setProperty(ContainerProperties.WSRF_PORT, "5678");
+		k.setProperty(ContainerProperties.SERVER_HOST, "my");
+		k.setProperty(ContainerProperties.SERVER_PORT, "5678");
 	}
 	
 	@Test

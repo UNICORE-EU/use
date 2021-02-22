@@ -80,8 +80,8 @@ public class JettyServer extends JettyServerBase {
 
 	private static URL makeUrl(Kernel kernel) throws MalformedURLException {
 		int port = 0;
-		String host = kernel.getContainerProperties().getValue(ContainerProperties.WSRF_HOST);
-		String pString = kernel.getContainerProperties().getValue(ContainerProperties.WSRF_PORT);
+		String host = kernel.getContainerProperties().getValue(ContainerProperties.SERVER_HOST);
+		String pString = kernel.getContainerProperties().getValue(ContainerProperties.SERVER_PORT);
 		if (pString != null) port = Integer.parseInt(pString);
 		
 		if (kernel.getContainerSecurityConfiguration().isSslEnabled())
@@ -92,7 +92,7 @@ public class JettyServer extends JettyServerBase {
 
 	/**
 	 * After start, if a choice of listen port was left to the server,
-	 * let's update listen port property. Also if baseUrl was not set explicitly, 
+	 * let's update listen port property. Also if externalUrl was not set explicitly, 
 	 * let's update its port as it has (by default) the same port as the listen port.  
 	 */
 	@Override
@@ -100,16 +100,16 @@ public class JettyServer extends JettyServerBase {
 		super.start();
 		
 		URL url = getUrls()[0];
-		if ("0".equals(kernel.getContainerProperties().getValue(ContainerProperties.WSRF_PORT)))
-			kernel.getContainerProperties().setProperty(ContainerProperties.WSRF_PORT, 
+		if ("0".equals(kernel.getContainerProperties().getValue(ContainerProperties.SERVER_PORT)))
+			kernel.getContainerProperties().setProperty(ContainerProperties.SERVER_PORT, 
 				String.valueOf(url.getPort()));
 		
-		String baseUrlS = kernel.getContainerProperties().getValue(ContainerProperties.WSRF_BASEURL);
+		String baseUrlS = kernel.getContainerProperties().getValue(ContainerProperties.EXTERNAL_URL);
 		URL baseUrl = new URL(baseUrlS);
 		if (baseUrl.getPort() == 0 && baseUrl.getHost().equals(url.getHost())) {
 			baseUrl = new URL(baseUrl.getProtocol(), baseUrl.getHost(), 
 					url.getPort(), baseUrl.getFile());
-			kernel.getContainerProperties().setProperty(ContainerProperties.WSRF_BASEURL, 
+			kernel.getContainerProperties().setProperty(ContainerProperties.EXTERNAL_URL, 
 					baseUrl.toExternalForm());
 		}
 	}
