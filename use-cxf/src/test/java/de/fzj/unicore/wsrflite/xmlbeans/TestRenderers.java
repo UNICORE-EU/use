@@ -28,7 +28,7 @@ public class TestRenderers {
 	@Test
 	public void testAddressListSingle()throws Exception{
 		Properties p = TestConfigUtil.getInsecureProperties();
-		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.WSRF_BASEURL, "http://foo");
+		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.EXTERNAL_URL, "http://foo");
 		Kernel kernel=new Kernel(p);
 		MockWSResourceImpl r=new MockWSResourceImpl();
 		r.setKernel(kernel);
@@ -47,14 +47,14 @@ public class TestRenderers {
 		assertEquals(1, x.length);
 		EndpointReferenceDocument epr=(EndpointReferenceDocument)x[0];
 		String url=epr.getEndpointReference().getAddress().getStringValue();
-		assertTrue(url.equals("http://foo/testService?res=test123"));
+		assertTrue(url.equals("http://foo/services/testService?res=test123"));
 	}
 	
 	@Test
 	public void testAddressListMany()throws Exception{
 		String s="testService";
 		Properties p = TestConfigUtil.getInsecureProperties();
-		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.WSRF_BASEURL, "http://foo");
+		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.EXTERNAL_URL, "http://foo");
 		Kernel kernel=new Kernel(p);
 		MockWSResourceImpl r=new MockWSResourceImpl();
 		r.setKernel(kernel);
@@ -74,22 +74,22 @@ public class TestRenderers {
 		assertEquals(N, x.length);
 		EndpointReferenceDocument epr=(EndpointReferenceDocument)x[0];
 		String url=epr.getEndpointReference().getAddress().getStringValue();
-		assertTrue(url.equals("http://foo/testService?res=test0"));
+		assertTrue(url.equals("http://foo/services/testService?res=test0"));
 		
 		//test getting a subset
 		List<XmlObject>x2=rp.render(10,10);
 		assertEquals(10, x2.size());
 		epr=(EndpointReferenceDocument)x2.get(0);
 		url=epr.getEndpointReference().getAddress().getStringValue();
-		assertTrue(url.equals("http://foo/testService?res=test10"));
+		assertTrue(url.equals("http://foo/services/testService?res=test10"));
 		
 	}
 	
 	@Test
 	public void testFieldRenderer()throws Exception{
 		Properties p = TestConfigUtil.getInsecureProperties();
-		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.WSRF_BASEURL, "http://foo");
-		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.WSRF_BASEURL, "http://foo");
+		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.EXTERNAL_URL, "http://foo");
+		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.EXTERNAL_URL, "http://foo");
 		p.setProperty("persistence.directory","target/data");
 		Kernel kernel=new Kernel(p);
 		MockWSResourceImpl r=new MockWSResourceImpl();
@@ -125,8 +125,8 @@ public class TestRenderers {
 	@Test
 	public void testModify()throws Exception{
 		Properties p = TestConfigUtil.getInsecureProperties();
-		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.WSRF_BASEURL, "http://foo");
-		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.WSRF_BASEURL, "http://foo");
+		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.EXTERNAL_URL, "http://foo");
+		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.EXTERNAL_URL, "http://foo");
 		p.setProperty("persistence.directory","target/data");
 		Kernel kernel=new Kernel(p);
 		MockWSResourceImpl r=new MockWSResourceImpl();

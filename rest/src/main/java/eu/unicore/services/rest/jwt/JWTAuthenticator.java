@@ -32,6 +32,7 @@ public class JWTAuthenticator implements IAuthenticator, KernelInjectable {
 	// TODO future extension where end users authenticate with JWT tokens
 	// signed with their private key, with UNICORE reading the pub key
 	// from the system (TSI / uftpd)
+	@SuppressWarnings("unused")
 	private String dnTemplate = "CN=%s, OU=sshkey-local-users";
 
 	private JWTHelper jwt;

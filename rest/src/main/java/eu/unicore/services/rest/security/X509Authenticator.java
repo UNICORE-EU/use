@@ -39,9 +39,6 @@ public class X509Authenticator implements IAuthenticator, KernelInjectable  {
 	private static final Logger logger =  Log.getLogger(Log.SECURITY,X509Authenticator.class);
 	
 	private Kernel kernel;
-
-	// validate Gateway signature on the Consignor header
-	private boolean validate = true;
 	
 	private boolean haveGateway = true;
 	
@@ -49,10 +46,6 @@ public class X509Authenticator implements IAuthenticator, KernelInjectable  {
 	public final Collection<String>getAuthSchemes(){
 		// nothing here for the WWW-Authenticate header
 		return Collections.emptySet();
-	}
-
-	public void setValidate(boolean validate) {
-		this.validate = validate;
 	}
 	
 	public void setKernel(Kernel kernel){
@@ -101,7 +94,7 @@ public class X509Authenticator implements IAuthenticator, KernelInjectable  {
 		}
 		if(dn==null||dsig==null)return false;
 		
-		if(validate && !isValid(dn,dsig)) {
+		if(!isValid(dn,dsig)) {
 			return true;
 		}
 		tokens.setUserName(dn);

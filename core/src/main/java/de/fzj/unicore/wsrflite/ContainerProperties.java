@@ -52,6 +52,7 @@ public class ContainerProperties extends PropertiesHelper {
 	 * This should NOT end with a slash "/". This is the address that is 
 	 * published in registries, etc.
 	 */
+	@Deprecated
 	public static final String WSRF_BASEURL = "baseurl";
 
 
@@ -178,9 +179,9 @@ public class ContainerProperties extends PropertiesHelper {
 		META.put(WSRF_SERVLETPATH, new PropertyMD("/services").
 				setDescription("Servlet context path. In most cases shouldn't be changed."));
 		META.put(WSRF_BASEURL, new PropertyMD().
-				setDescription("Server URL as visible from the outside, usually the gateway's address, including '/services'"));
+				setDescription("(deprecated, use 'container.externalurl') Server URL as visible from the outside, usually the gateway's address, including '<sitename>/services'"));
 		META.put(EXTERNAL_URL, new PropertyMD().
-				setDescription("Server URL as visible from the outside, usually the gateway's address."));
+				setDescription("Server URL as visible from the outside, usually the gateway's address, including '<sitename>'"));
 
 		META.put(SERVER_HOST, new PropertyMD("localhost").
 				setDescription("Server interface to listen on."));
@@ -200,7 +201,7 @@ public class ContainerProperties extends PropertiesHelper {
 				setDescription("The timeout in millis for removing idle threads."));
 
 		META.put(WSRF_PERSIST_CLASSNAME, new PropertyMD(Persistence.class.getName()).
-				setDescription("Implementation used to maintain the persistence of WS-resources state."));
+				setDescription("Implementation used to maintain the persistence of resources state."));
 
 		META.put(EXPIRYCHECK_INITIAL, new PropertyMD("120").setCanHaveSubkeys().
 				setDescription("The initial delay for resource expiry checking (seconds). Additionally it can be used as a per-service setting, after appending a dot and service name to the property key."));

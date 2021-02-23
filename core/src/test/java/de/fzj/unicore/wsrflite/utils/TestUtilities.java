@@ -20,7 +20,7 @@ public class TestUtilities {
 		Properties properties = new Properties();
 		String base=gw+"/SITE";
 		k=new ContainerProperties(properties, false);
-		k.setProperty(ContainerProperties.WSRF_BASEURL, base);
+		k.setProperty(ContainerProperties.EXTERNAL_URL, base);
 		k.setProperty(ContainerProperties.SERVER_HOST, "my");
 		k.setProperty(ContainerProperties.SERVER_PORT, "5678");
 	}

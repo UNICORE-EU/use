@@ -21,7 +21,7 @@ public class TestAddressRenderer {
 	@Test
 	public void test1()throws Exception{
 		Properties p = TestConfigUtil.getInsecureProperties();
-		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.WSRF_BASEURL, "http://foo");
+		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.EXTERNAL_URL, "http://foo");
 		Kernel kernel=new Kernel(p);
 		Resource r=new MockWSResourceImpl();
 		r.setKernel(kernel);
@@ -30,7 +30,7 @@ public class TestAddressRenderer {
 		AddressRenderer rp=new FixedAddressRenderer(r,docName,s,false);
 		EndpointReferenceDocument x=(EndpointReferenceDocument)rp.render()[0];
 		String address=x.getEndpointReference().getAddress().getStringValue();
-		assertEquals("http://foo/testService?res=123",address);
+		assertEquals("http://foo/services/testService?res=123",address);
 		
 	}
 }

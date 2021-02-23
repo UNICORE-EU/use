@@ -117,7 +117,7 @@ public class Utilities {
 	 * @throws Exception
 	 */
 	public static String getGatewayAddress(ContainerProperties cfg)throws Exception{
-		URL u=new URL(cfg.getValue(ContainerProperties.WSRF_BASEURL));
+		URL u=new URL(cfg.getValue(ContainerProperties.EXTERNAL_URL));
 		return u.toString().split(u.getPath())[0];
 	}
 	
