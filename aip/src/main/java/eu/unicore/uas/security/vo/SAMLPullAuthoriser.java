@@ -20,8 +20,11 @@ import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.uas.security.vo.conf.IPullConfiguration;
+import eu.unicore.uas.security.vo.conf.PropertiesBasedConfiguration;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
+import eu.unicore.util.httpclient.DefaultClientConfiguration;
+import eu.unicore.util.httpclient.IClientConfiguration;
 
 /**
  * Pull UNICORE/X attributes via SAML
@@ -47,7 +50,16 @@ public class SAMLPullAuthoriser extends SAMLAttributeSourceBase
 
 		try
 		{
-			fetcher = new VOAttributeFetcher(conf, kernel.getClientConfiguration());
+			IClientConfiguration cc = kernel.getClientConfiguration().clone();
+			if(cc instanceof DefaultClientConfiguration &&
+				conf.getValue(PropertiesBasedConfiguration.CFG_VO_SERVICE_USERNAME)!=null){
+					DefaultClientConfiguration dcc = (DefaultClientConfiguration)cc;
+					dcc.setHttpAuthn(true);
+					dcc.setHttpUser(conf.getValue(PropertiesBasedConfiguration.CFG_VO_SERVICE_USERNAME));
+					dcc.setHttpPassword(conf.getValue(PropertiesBasedConfiguration.CFG_VO_SERVICE_PASSWORD));
+					log.debug("Authenticating to Unity with username/password.");
+			}
+			fetcher = new VOAttributeFetcher(conf, cc);
 		} catch (Exception e)
 		{
 			isEnabled = false;

@@ -57,6 +57,8 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 	public static final String CFG_PULL_GENERIC_ENABLE = "pull.enableGenericAttributes";
 	public static final String CFG_SERVER_URI = "localServerURI";
 	public static final String CFG_VO_SERVICE_URL = "pull.voServerURL";
+	public static final String CFG_VO_SERVICE_USERNAME = "pull.voServerAuthN.username";
+	public static final String CFG_VO_SERVICE_PASSWORD = "pull.voServerAuthN.password";
 	public static final String CFG_VO_PULL_CACHE = "pull.cacheTtl";
 	public static final String CFG_VO_VERIFY_SIGNATURES = "pull.verifySignatures";
 	public static final String CFG_PUSH_ENABLE = "push.enable";
@@ -84,7 +86,10 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 				setDescription("Full address (URL) of SAML VO service. Note that this server's CA cert must be present in the main truststore of the server to create the connection."));
 		DEFAULTS.put(CFG_VO_VERIFY_SIGNATURES, new PropertyMD("true").setCategory(pullCat).
 				setDescription("Additional security for the pulled assertions (except transport level which is always on) can be achieved by verification of signatures of the received assertions. The key which is used for verification must be present in the VO truststore."));
-
+		DEFAULTS.put(CFG_VO_SERVICE_USERNAME, new PropertyMD().setCategory(pullCat).
+				setDescription("If certificate-based authentication to the VO server is disabled, you might be able to use username/password. This sets the username."));
+		DEFAULTS.put(CFG_VO_SERVICE_PASSWORD, new PropertyMD().setCategory(pullCat).
+				setDescription("If certificate-based authentication to the VO server is disabled, you might be able to use username/password. This sets the password."));
 		DEFAULTS.put(CFG_PUSH_ENABLE, new PropertyMD("false").setCategory(pushCat).
 				setDescription("Defines if push mode should be enabled."));
 		
@@ -93,7 +98,7 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 						"Server will honour only attributes with exactly this scope or global (i.e. without scope set)." +
 						"This will work only with legacy UVOS service, for Unity configure proper scope at server side."));
 		DEFAULTS.put(CFG_VO_SERVICE_URI, new PropertyMD().setCategory(mainCat).
-				setDescription("Identification URI of the VO service providing attribtues for this source. Only attributes issued by this issuer will be honoured."));
+				setDescription("Identification URI of the VO service providing attributes for this source. Only attributes issued by this issuer will be honoured."));
 		DEFAULTS.put(TruststoreProperties.DEFAULT_PREFIX, new PropertyMD().setCanHaveSubkeys().setCategory(mainCat).
 				setDescription("Properties starting with this prefix are used to configure validation of VO assertion issuers certificates. Trust anchors should contain only the trusted VO servers certificates. All options are the same as those for other UNICORE truststores."));
 		DEFAULTS.put(CFG_INCARNATION_ATTR_PFX, new PropertyMD().setCanHaveSubkeys().setCategory(mainCat).
