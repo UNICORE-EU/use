@@ -25,14 +25,17 @@ The required steps are:
     to make it a member of any particular VO (or group). However it must have the *read* permission to 
     all groups where its users will be placed. In Unity, this corresponds to the "Priviledged Inspector" role
     (check Unity documentation for details).
- 4. Create a VO (possibly with subgroups). Add users to the group. 
+ 4. Check that UNICORE/X can properly authenticate to Unity on the SAML endpoint that is used to query attributes.
+    Generally this will be via the UNICORE/X certificate, if that is not possible, you'll need to setup an additional
+    username identity for the entity created in Step 3, and setup password authentication.
+ 5. Create a VO (possibly with subgroups). Add users to the group.
     Here we will assume this group is +/Math-VO/UUDB/SiteA+. 
     Next assign them _in the scope of the group_ attribute
 	+urn:unicore:attrType:xlogin+ with the value of Unix UID for the user, and attribute 
 	+urn:unicore:attrType:role+ with the value of the user's role (usually its just +user+).
 	Note that if you want to assign the same Xlogin/role to multiple users then you can
 	define Unity _group attributes_ and set them for the whole +/Math-VO/UUDB/SiteA+ group.
- 5. Enable VO attribute source ("SAML PULL") in the UNICORE server. Here we will configure it as the primary 
+ 6. Enable VO attribute source ("SAML PULL") in the UNICORE server. Here we will configure it as the primary
     source and leave XUUDB to provide local mappings (which can override data fetched from Unity). 
     You should have the following entries:
 +
@@ -44,7 +47,7 @@ container.security.attributes.combiningPolicy=MERGE_LAST_OVERRIDES
 container.security.attributes.SAML-PULL.class=eu.unicore.uas.security.vo.SAMLPullAuthoriser
 ----------
 
- 6. Configure VO attribute source (typically in the +vo.config+) file as follows:
+ 7. Configure VO attribute source (typically in the +vo.config+) file as follows:
 +
 ------------------
 vo.group=/Math-VO/UUDB/SiteA
@@ -82,7 +85,7 @@ vo.unicoreAttribute.queue.default=urn:unicore:attrType:defaultQueue
 vo.unicoreAttribute.virtualOrganisations=urn:SAML:voprofile:group
 ------------------
 
-7. In the VO truststore directory (/opt/unicore/certs/unity/ in this case) put
+8. In the VO truststore directory (/opt/unicore/certs/unity/ in this case) put
 the Unity certificate (NOT the CA certificate) as a PEM file, with pem extension.
 
 
