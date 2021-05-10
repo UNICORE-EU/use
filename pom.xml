@@ -72,7 +72,7 @@
     <seclib.version>5.2.0</seclib.version>
     <saaj.version>1.5.1</saaj.version>
     <cxf.version>3.3.9</cxf.version>
-    <jetty.version>9.4.38.v20210224</jetty.version>
+    <jetty.version>11.0.2</jetty.version>
     <httpclient.version>4.5.3</httpclient.version>
     <metrics.version>4.1.14</metrics.version>
     <jwt.version>9.4.2</jwt.version>
