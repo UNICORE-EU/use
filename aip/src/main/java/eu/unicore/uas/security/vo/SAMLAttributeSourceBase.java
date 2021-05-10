@@ -35,7 +35,6 @@ public abstract class SAMLAttributeSourceBase implements IAttributeSource
 	{
 		this.name = name;
 		isEnabled = false;
-
 		try
 		{
 			conf = new PropertiesBasedConfiguration(configFile);
@@ -44,8 +43,6 @@ public abstract class SAMLAttributeSourceBase implements IAttributeSource
 			throw new ConfigurationException("Can't read configuration of the VO subsystem: " +
 					e.getMessage());
 		}
-		if(!conf.isPullEnabled()) return;
-		
 		isEnabled = true;
 	}
 	

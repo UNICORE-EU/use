@@ -120,26 +120,13 @@ public class VOCommonUtils
 				addMapping(result, rawList[i]).setDefSamlName(val);
 				continue;
 			}
-			if (elems[1].equals("disabled"))
+			if (elems[1].equals("disabled") || elems[1].equals("pullDisabled"))
 			{
 				log.info("Attribute " + elems[0] + " won't be used in incarnation.");
 				UnicoreAttributeMappingDef mapping = addMapping(result, rawList[i]);
 				mapping.setDisabledInPull(true);
-				mapping.setDisabledInPush(true);
 				continue;
 			}
-			if (elems[1].equals("pullDisabled"))
-			{
-				log.info("Pulled attribute " + elems[0] + " won't be used in incarnation.");
-				addMapping(result, rawList[i]).setDisabledInPull(true);
-				continue;
-			}
-			if (elems[1].equals("pushDisabled"))
-			{
-				log.info("Pushed attribute " + elems[0] + " won't be used in incarnation.");
-				addMapping(result, rawList[i]).setDisabledInPush(true);
-				continue;
-			}			
 		}
 		
 		return result.values().toArray(new UnicoreAttributeMappingDef[result.size()]);
@@ -189,9 +176,7 @@ public class VOCommonUtils
 		}
 		sb.append(")");
 		if (mapping.isDisabledInPull())
-			sb.append(" [disabled when pulling]");
-		if (mapping.isDisabledInPush())
-			sb.append(" [disabled for pushed]");
+			sb.append(" [disabled]");
 		return sb.toString();
 	}
 }

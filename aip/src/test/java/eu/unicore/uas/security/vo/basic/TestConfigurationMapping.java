@@ -8,15 +8,20 @@
 
 package eu.unicore.uas.security.vo.basic;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import org.junit.Test;
+
 import eu.unicore.uas.security.vo.UnicoreAttributeMappingDef;
 import eu.unicore.uas.security.vo.VOCommonUtils;
 import eu.unicore.uas.security.vo.conf.PropertiesBasedConfiguration;
 import eu.unicore.util.Log;
-import junit.framework.TestCase;
 
-
-public class TestConfigurationMapping extends TestCase
+public class TestConfigurationMapping
 {
+	@Test
 	public void testParse()
 	{
 		PropertiesBasedConfiguration cfg;
@@ -43,7 +48,7 @@ public class TestConfigurationMapping extends TestCase
 		}
 	}
 
-	
+	@Test
 	public void testDisable()
 	{
 		PropertiesBasedConfiguration cfg;
@@ -64,15 +69,12 @@ public class TestConfigurationMapping extends TestCase
 				if (map.getUnicoreName().equals("disAttr"))
 				{
 					assertTrue(map.isDisabledInPull());
-					assertTrue(map.isDisabledInPush());					
 				} else if (map.getUnicoreName().equals("disAttr2"))
 				{
 					assertTrue(map.isDisabledInPull());
-					assertFalse(map.isDisabledInPush());
 				} else if (map.getUnicoreName().equals("disAttr3"))
 				{
 					assertFalse(map.isDisabledInPull());
-					assertTrue(map.isDisabledInPush());
 				} 
 			}
 		} catch (Exception e)

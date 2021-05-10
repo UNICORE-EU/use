@@ -16,8 +16,4 @@ public class ServiceRegistryEntryModel extends BaseModel {
 		this.endpoint = endpoint;
 	}
 
-	@Override
-	public String getFrontend(String serviceType) {
-		return "de.fzj.unicore.wsrflite.registry.ws.SGEFrontend";
-	}
 }

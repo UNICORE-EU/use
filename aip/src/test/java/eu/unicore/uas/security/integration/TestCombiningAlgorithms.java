@@ -99,8 +99,8 @@ public class TestCombiningAlgorithms extends TestCase
 			String userDN = sec.getCredential().getCertificate().getSubjectX500Principal().getName();
 			assertTrue(userDN.contains("Demo User"));
 			
-			String url=kernel.getContainerProperties().getValue(ContainerProperties.WSRF_BASEURL);
-			url += "/" + ForwardService.TEST_SERVICE + "?res=default";
+			String url=kernel.getContainerProperties().getValue(ContainerProperties.EXTERNAL_URL);
+			url += "/services/" + ForwardService.TEST_SERVICE + "?res=default";
 			EndpointReferenceType epr = EndpointReferenceType.Factory.newInstance();
 			epr.addNewAddress().setStringValue(url);
 

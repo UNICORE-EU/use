@@ -23,7 +23,6 @@ public class UnicoreAttributeMappingDef
 	private boolean multiVal;
 	private boolean nonZeroVal;
 	private boolean disabledInPull = false;
-	private boolean disabledInPush = false;
 	
 	public UnicoreAttributeMappingDef(String unicoreName, 
 			boolean multiVal, boolean nonZeroVal)
@@ -83,13 +82,5 @@ public class UnicoreAttributeMappingDef
 	public void setDisabledInPull(boolean disabledInPull)
 	{
 		this.disabledInPull = disabledInPull;
-	}
-	public boolean isDisabledInPush()
-	{
-		return disabledInPush;
-	}
-	public void setDisabledInPush(boolean disabledInPush)
-	{
-		this.disabledInPush = disabledInPush;
 	}
 }

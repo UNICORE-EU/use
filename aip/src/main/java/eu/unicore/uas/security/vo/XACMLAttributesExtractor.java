@@ -31,7 +31,7 @@ public class XACMLAttributesExtractor
 	
 	public static List<XACMLAttribute> getSubjectAttributes(List<ParsedAttribute> authzAttribs, String scope)
 	{
-		logger.debug("getSubjectAttributes called");
+		logger.trace("getSubjectAttributes called");
 		if (authzAttribs == null)
 			return null;
 
@@ -60,8 +60,7 @@ public class XACMLAttributesExtractor
 		String s = scopedValue.getScope();
 		if (s == null || scope == null || s.equals(scope.toString()))
 			return true;
-		logger.debug("Ignoring attribute " + a.getName() + " as it has unwanted" +
-				" scope: " + s);
+		logger.debug("Ignoring attribute {} as it has unwanted scope: {}", a.getName(), s);
 		return false;
 	}
 	
@@ -74,28 +73,24 @@ public class XACMLAttributesExtractor
 	{
 		if (voAttr.getObjectValues().isEmpty())
 		{
-			logger.debug("Got SAML attribute without " +
-					"any value, not using as a generic XACML attribute, it's name is: " 
-					+ voAttr.getName());
+			logger.debug("Got SAML attribute without any value, not using as a generic XACML attribute, its name is: {}",
+					voAttr.getName());
 			return;
 		}
 		if (voAttr.getDataType().isAssignableFrom(String.class))
 		{
 			for (String value: voAttr.getStringValues())
 			{
-				logger.debug("Adding XACML string attribute " + 
-						voAttr.getName() + " with value " + 
-						value);
-				toFill.add(new XACMLAttribute(
-					voAttr.getName(), value, XACMLAttribute.Type.STRING));
+				logger.debug("Adding XACML string attribute {} with value {}",
+						voAttr.getName(), value);
+				toFill.add(new XACMLAttribute(voAttr.getName(), value, XACMLAttribute.Type.STRING));
 			}
 		}
 		
 		if (!voAttr.getDataType().isAssignableFrom(ScopedStringValue.class))
 		{
-			logger.debug("Got SAML attribute with " +
-					"unknown type of object value, not using as a generic XACML attribute, it's name is: " 
-					+ voAttr.getName() + " and value class " + voAttr.getDataType());
+			logger.debug("Got SAML attribute with unknown type of object value, not using as a generic XACML attribute, it's name is: {} and value class {}",
+					voAttr.getName(), voAttr.getDataType());
 			return;
 		}
 		
@@ -103,28 +98,22 @@ public class XACMLAttributesExtractor
 		String xacmlDT = scopedValue.getXacmlType();
 		if (xacmlDT == null)
 		{
-			logger.debug("Got SAML attribute without " +
-				"XACML DT set - ignoring, it's name is: " 
-				+ voAttr.getName());
+			logger.debug("Got SAML attribute without XACML DT set - ignoring, it's name is: {}", voAttr.getName());
 			return;
 		}
 		if (xacmlDT.equals(SAMLConstants.XACMLDT_STRING))
 		{
 			for (String value: voAttr.getStringValues())
 			{
-				logger.debug("Adding XACML string attribute " + 
-						voAttr.getName() + " with value " + 
-						value);
-				toFill.add(new XACMLAttribute(
-					voAttr.getName(), value, XACMLAttribute.Type.STRING));
+				logger.debug("Adding XACML string attribute {} with value {}", 
+						voAttr.getName(), value);
+				toFill.add(new XACMLAttribute(voAttr.getName(), value, XACMLAttribute.Type.STRING));
 			}
 		} else if (xacmlDT.equals("http://www.w3.org/2001/XMLSchema#anyURI"))
 		{
 			for (String value: voAttr.getStringValues())
 			{
-				logger.debug("Adding XACML anyURI attribute " + 
-						voAttr.getName() + " with value " + 
-						value);
+				logger.debug("Adding XACML anyURI attribute {} with value {}", voAttr.getName(), value);
 				toFill.add(new XACMLAttribute(
 					voAttr.getName(), value, XACMLAttribute.Type.ANYURI));
 			}
@@ -135,17 +124,15 @@ public class XACMLAttributesExtractor
 				String val = value;
 				if (scopedValue.getScope() != null && !scopedValue.getScope().equals("/"))
 					val = val + "@" + scopedValue.getScope();
-				logger.debug("Adding XACML scoped string attribute " + 
-						voAttr.getName() + " with value " + 
-						val + " as a normal string attribute");
+				logger.debug("Adding XACML scoped string attribute {} with value {} as a normal string attribute",
+						voAttr.getName(), val);
 				toFill.add(new XACMLAttribute(
 					voAttr.getName(), val, XACMLAttribute.Type.STRING));
 			}
 		} else
 		{
-			logger.warn("Got SAML attribute with unsupported XACML DataType:" +
-					" " + xacmlDT + ". Attribute name is: " 
-					+ voAttr.getName());
+			logger.warn("Got SAML attribute with unsupported XACML DataType: {}. Attribute name is: {}",
+					xacmlDT, voAttr.getName());
 			return;
 		}
 	}

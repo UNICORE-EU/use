@@ -30,7 +30,6 @@ import eu.unicore.samly2.elements.NameID;
 import eu.unicore.samly2.exceptions.SAMLServerException;
 import eu.unicore.samly2.exceptions.SAMLValidationException;
 import eu.unicore.security.SecurityTokens;
-import eu.unicore.security.wsutil.client.SAMLAttributePushOutHandler;
 import eu.unicore.security.wsutil.samlclient.SAMLAttributeQueryClient;
 import eu.unicore.uas.security.vo.conf.IPullConfiguration;
 import eu.unicore.util.Log;
@@ -53,39 +52,33 @@ public class VOAttributeFetcher
 	
 	private static final Logger log = Log.getLogger(IPullConfiguration.LOG_PFX, VOAttributeFetcher.class);
 	
-	private boolean isEnabled;
-	
-	private IPullConfiguration pullConfiguration;
-	private IClientConfiguration clientConfiguration;
-	private boolean disableIfPushed;
-	private int cacheTtl;
+	private final IPullConfiguration pullConfiguration;
+	private final IClientConfiguration clientConfiguration;
+	private final int cacheTtl;
 
-	private Cache<String, List<ParsedAttribute>> cache;
+	private final Cache<String, List<ParsedAttribute>> cache;
 	
 	public static final int MAX_ELEMS = 128;
 
 	public VOAttributeFetcher(IPullConfiguration cc, IClientConfiguration secProv) throws Exception
 	{
-		pullConfiguration = cc;
+		this.pullConfiguration = cc;
 		this.clientConfiguration = secProv;
-		isEnabled = pullConfiguration.isPullEnabled();
-		if (!isEnabled)
-			return;
-		cacheTtl = pullConfiguration.getChacheTtl();
-		disableIfPushed = pullConfiguration.disableIfAttributesWerePushed();
-		initCache();
+		this.cacheTtl = pullConfiguration.getCacheTtl();
+		this.cache = initCache();
 	}
 	
-	private void initCache()
+	private Cache<String, List<ParsedAttribute>> initCache()
 	{
 		if (cacheTtl > 0)
 		{
-			cache = CacheBuilder.newBuilder()
+			return CacheBuilder.newBuilder()
 					.maximumSize(MAX_ELEMS)
 					.expireAfterAccess(cacheTtl, TimeUnit.SECONDS)
 					.expireAfterWrite(cacheTtl, TimeUnit.SECONDS)
 					.build();
 		}
+		else return null;
 	}
 	
 	/**
@@ -99,25 +92,10 @@ public class VOAttributeFetcher
 	 */
 	public void authorise(SecurityTokens tokens) throws IOException
 	{
-		if (!isEnabled)
-			throw new IOException("The pull SAML authoriser is disabled");
-		Map<String, Object> context = tokens.getContext();
-		if (disableIfPushed)
-		{	 
-			List<?> pushedAssertions = (List<?>) context.get(
-				SAMLAttributePushOutHandler.PUSHED_ASSERTIONS);
- 			if (pushedAssertions != null && pushedAssertions.size() > 0)
-			{
-				log.debug("Skipping fetching of attributes as client pushed some.");
-				throw new IOException("The pull SAML authoriser is skipped as pushed assertions are available");
-			}
-		}
-		
-		if (tokens.getEffectiveUserName() == null)
-			throw new IllegalStateException("Can't authorize unknown user!");
 		String dn = tokens.getEffectiveUserName();
+		if (dn == null)
+			throw new IllegalStateException("Can't authorize unknown user!");
 		NameID subject = new NameID(dn, SAMLConstants.NFORMAT_DN);
-		
 		try
 		{
 			getAttributes(subject, tokens);
@@ -178,8 +156,8 @@ public class VOAttributeFetcher
 		{
 			if (SAMLConstants.SubStatus.STATUS2_UNKNOWN_PRINCIPIAL.equals(e.getSamlSubErrorId()))
 			{
-				log.debug("The user " + X500NameUtils.getReadableForm(subject.getXBean().getStringValue()) 
-						+ " is not recognized by the VO server");
+				log.debug("The user {} is not recognized by the VO server",
+						X500NameUtils.getReadableForm(subject.getXBean().getStringValue()));
 			} else if (SAMLConstants.SubStatus.STATUS2_AUTHN_FAILED.equals(e.getSamlSubErrorId()))
 			{
 				log.error("Can't authenticate to the VO " +

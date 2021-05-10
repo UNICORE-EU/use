@@ -8,8 +8,14 @@
 
 package eu.unicore.uas.security.vo.basic;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import org.junit.Test;
 
 import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
@@ -20,11 +26,12 @@ import eu.unicore.uas.security.vo.UnicoreIncarnationAttributes;
 import eu.unicore.uas.security.vo.VOCommonUtils;
 import eu.unicore.uas.security.vo.conf.PropertiesBasedConfiguration;
 import eu.unicore.util.Log;
-import junit.framework.TestCase;
 
 
-public class UnicoreAttributesHandlerTest extends TestCase
+public class UnicoreAttributesHandlerTest 
 {
+
+	@Test
 	public void testEmpty()
 	{
 		UnicoreAttributeMappingDef[] mappings = new UnicoreAttributeMappingDef[] {			
@@ -40,6 +47,7 @@ public class UnicoreAttributesHandlerTest extends TestCase
 	/**
 	 * Tests default and valid values. defAttr2 is disabled in configuration.
 	 */
+	@Test
 	public void testDefaultAndDisabled()
 	{
 		UnicoreAttributeMappingDef[] mappings = new UnicoreAttributeMappingDef[] {			
@@ -71,6 +79,7 @@ public class UnicoreAttributesHandlerTest extends TestCase
 	/**
 	 * Tests if attribute in wrong scope won't be added
 	 */
+	@Test
 	public void testScope()
 	{
 		UnicoreAttributeMappingDef[] mappings = new UnicoreAttributeMappingDef[] {			
@@ -84,6 +93,7 @@ public class UnicoreAttributesHandlerTest extends TestCase
 		assertTrue(result.getValidAttributes().size() == 0);
 	}
 
+	@Test
 	public void testRegular()
 	{
 		UnicoreAttributeMappingDef[] mappings = new UnicoreAttributeMappingDef[] {			
@@ -101,6 +111,7 @@ public class UnicoreAttributesHandlerTest extends TestCase
 				result.getValidAttributes().get("normalAttr")[0].equals("val1"));
 	}
 
+	@Test
 	public void testMultiplicity()
 	{
 		UnicoreAttributeMappingDef[] mappings = new UnicoreAttributeMappingDef[] {			
@@ -130,6 +141,7 @@ public class UnicoreAttributesHandlerTest extends TestCase
 				result.getValidAttributes().get("defAttr").length == 2);
 	}
 
+	@Test
 	public void testSelectedVo()
 	{
 		UnicoreAttributeMappingDef[] mappings = new UnicoreAttributeMappingDef[] {			
@@ -147,7 +159,7 @@ public class UnicoreAttributesHandlerTest extends TestCase
 		assertEquals(1, result.getDefaultVoAttributes().size());
 		assertEquals("val1", result.getDefaultVoAttributes().get("normalAttr")[0]);
 	}
-	
+
 	public static ParsedAttribute createScopedAttr(String name, String scope, String... vals)
 	{
 		ParsedAttribute ret = new ParsedAttribute(name);

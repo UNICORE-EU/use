@@ -7,18 +7,21 @@ package eu.unicore.uas.security.vo.basic;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Test;
+
 import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.samly2.attrprofile.UVOSAttributeProfile;
 import eu.unicore.samly2.attrprofile.UVOSAttributeProfile.ScopedStringValue;
 import eu.unicore.uas.security.vo.VOCommonUtils;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 /**
  * @author K. Benedyczak
  */
-public class TestVoUtils extends TestCase
+public class TestVoUtils 
 {
+	@Test
 	public void testPreferredVoSelection()
 	{
 		String res = VOCommonUtils.handlePreferredVo(new String[] {"/uudb/subvo"}, "/uudb", null);
@@ -43,6 +46,7 @@ public class TestVoUtils extends TestCase
 		assertNull(res);
 	}
 	
+	@Test
 	public void testSplitByScope()
 	{
 		List<ParsedAttribute> attrs = new ArrayList<ParsedAttribute>();

@@ -2,75 +2,65 @@
 Configuration
 ~~~~~~~~~~~~~
 
-This sections describes the default configuration file format which is used to configure VO
-attribute source. This section provides a detailed and comrehensive information on all configuration 
-options. In the most cases defaults are fine - you can consult the HOWTO (below) for a short 'quick start' information.
+This sections describes the default configuration file format which is
+used to configure the VO attribute source. This section provides a
+detailed and comrehensive information on all configuration options. In
+the most cases defaults are fine - you can consult the HOWTO (below)
+for a short 'quick start' information.
 
-Some of the configuration options require value of a VO/GROUP type. 
+Some of the configuration options require a value of a VO/GROUP type. 
 Whenever it is needed it should be written in the following way:
 
 ---------
 /VO[/group1[/subgroup2[...]]]
 ---------
 
-where elements in square brackets are optional. E.g. +/Math/users+ denotes a group 'users' 
-of a VO called 'Math'.
+where elements in square brackets are optional. E.g. +/Math/users+
+denotes a group 'users' of a VO called 'Math'.
 
 
-In case of Unicore/X and other USE servers the configuration is provided in a separate file, by default
-the +vo.config+ from the configuration directory of the server (you can change location and name of 
-this file, see below). It holds generic VO configuration which is not dependent to the actual server used - the most
-of settings is configured there. This file options are described xref:use_vo-configfile[below].
+In case of UNICORE/X and other USE servers the configuration is
+provided in a separate file, by default the +vo.config+ from the
+configuration directory of the server (you can change location and
+name of this file, see below). It holds generic VO configuration which
+is not dependent to the actual server used - the most of settings is
+configured there. This file options are described
+xref:use_vo-configfile[below].
 
-To enable the VO subsystem certain settings are also required in the main server's configuration
-file. You have to define an appropriate Attribute Source. There are two VO-related Attribute Sources:
-one for each mode. You can add them both, only one or even use them multiple times. The latter
-situation occurs when you want to support multiple VOs (from one or multiple VO servers) - then 
-you have to define one attribute source per VO (or VO group). 
+To enable the VO subsystem certain settings are also required in the
+main server's configuration file. You have to define an appropriate
+Attribute Source. You can use only one or even use multiple
+instances. The latter situation occurs when you want to support
+multiple VOs (from one or multiple VO servers) - then you have to
+define one attribute source per VO (or VO group).
 
-Example with both PUSH and PULL VO attribute sources and also with local XUUDB. 
-Local data from XUUDB (if exists) will override attributes received from VOs (in any mode):
+Example with a VO attribute sources and also with local XUUDB.  Local
+data from XUUDB (if it exists) will override attributes received from
+VOs:
 
 ----------
-container.security.attributes.order=SAML-PUSH SAML-PULL XUUDB
+container.security.attributes.order=SAML-PULL XUUDB
 # ... here comes xuudb configuration
-
-container.security.attributes.SAML-PUSH.class=eu.unicore.uas.security.vo.SAMLPushAuthoriser
-container.security.attributes.SAML-PUSH.configurationFile=conf/vo.config
 
 container.security.attributes.SAML-PULL.class=eu.unicore.uas.security.vo.SAMLPullAuthoriser
 container.security.attributes.SAML-PULL.configurationFile=conf/vo.config
 ----------
 
-The +ZZZ.configurationFile+ configuration option is not necessary if you 
-want to use the +conf/vo.config+ file for both attribute sources (as +conf/vo.config+
-is a default configuration file). However this option is very important when you want to use 
-more then one SAML-PULL attribute source, as it allows you to use different configuration
-files for them. 
-
-When using both PUSH and PULL mode together you can disable PULL mode dynamically for those
-requests that contain pushed assertions only. See +vo.pull.disableIfAttributesWerePushed+ 
-configuration option.
-
 Before proceeding to fill the VO configuration it is suggested to prepare the VO truststore, 
 which should contain *ONLY* the certificates of the trusted VO servers. Note that
 this file must not contain any CA certificates, only the trusted VO servers' certificates!
-This file is necessary for the PUSH mode, and optionally can be used for the PULL 
-mode to increase security.
+This file is optional, but will increase security.
 
 Logging configuration is done by means of standard UNICORE logging configuration file. See
 <<use_vo_logging>> section for possible settings related to 
 the VO subsystem.
 
-Note that in Unicore/X there is a simple program which allows you to test VO Push setup.
-The application is called without arguments and is called +testVOPull+.
-
 [[use_vo-configfile]]
 Main VO configuration file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The main configuration file (usually +vo.config+) can be used to configure both 
-PULL and PUSH modes. The following sections provide complete reference of available options.
+The following sections provide complete reference of available options
+for the main configuration file (usually +vo.config+).
 
 include::use-ref-voProperties.txt[]
 
@@ -83,15 +73,13 @@ The following table shows options, which are used to define mappings of SAML att
 |vo.unicoreAttribute.NAME 				|URI			    |Value must be a SAML attribute name which will be used as a UNICORE internal incarnation attribute NAME.
 |vo.unicoreAttribute.NAME.default 		|URI				|Value must be a SAML attribute name which will be used as a default for UNICORE internal incarnation attribute NAME.
 |vo.unicoreAttribute.NAME.disabled 		|ANY, IGNORED		|When this attribute is present regardless of its value the NAME attribute won't be mapped.
-|vo.unicoreAttribute.NAME.pullDisabled	|ANY, IGNORED		|When this attribute is present regardless of its value the pulled NAME attributes won't be mapped.
-|vo.unicoreAttribute.NAME.pushDisabled	|ANY, IGNORED		|When this attribute is present regardless of its value the pushed NAME attributes won't be mapped.
 |===========================================================
 
 Example mapping for Unity attributes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Note that your distribution should contain a sensible default for Unity attribute mappings, which does not need
-to be modified.
+Note that your distribution should contain a sensible default for
+Unity attribute mappings, which does not need to be modified.
 
 ---------
 # standard settings for the xlogin mapping, however let's ignore pushed xlogins
@@ -125,15 +113,15 @@ vo.unicoreAttribute.virtualOrganisations=urn:SAML:voprofile:group
 Logging configuration
 ^^^^^^^^^^^^^^^^^^^^^
 
-All components use log4j logging mechanism. All events are logged with +unicore.security.vo+
-prefix. Further logging category is either +pull+, +push+ or +common+. Finally 
-reporting class name is appended. 
+All components use the usual log4j/2 logging mechanism. All events are
+logged with +unicore.security.vo+ prefix. The reporting class name is
+appended.
 
-Example snippet of log4j configuration for logging all events for VO subsystem but only 'INFO' 
-and higher events for PUSH mode can be specified as follows:
+As an example, a configuration for logging all events for the VO
+subsystem can be specified as follows:
 
 ---------
-log4j.logger.unicore.security.vo=TRACE
-log4j.logger.unicore.security.vo.push=INFO
+logger.vo.name=unicore.security.vo
+logger.vo.level=trace
 ---------
 

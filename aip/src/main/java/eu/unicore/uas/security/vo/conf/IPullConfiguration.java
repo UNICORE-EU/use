@@ -25,10 +25,7 @@ public interface IPullConfiguration extends IBaseVOConfiguration
 	 * For log4j logging
 	 */
 	public static final String LOG_PFX = IBaseVOConfiguration._LOG_PFX + ".pull";
-	/**
-	 * @return Whether the pull mode is enabled at all.
-	 */
-	public boolean isPullEnabled();
+
 	/**
 	 * @return Whether to pass normal (not role or xlogin) attributes.
 	 */
@@ -37,7 +34,7 @@ public interface IPullConfiguration extends IBaseVOConfiguration
 	 * @return How long should the attributes be cached, in seconds. Negative
 	 * value disables the cache.
 	 */
-	public int getChacheTtl();
+	public int getCacheTtl();
 
 	/**
 	 * @return The VO server's URL for queries

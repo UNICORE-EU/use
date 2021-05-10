@@ -29,7 +29,6 @@ import eu.unicore.util.configuration.DocumentationReferenceMeta;
 import eu.unicore.util.configuration.DocumentationReferencePrefix;
 import eu.unicore.util.configuration.FilePropertiesHelper;
 import eu.unicore.util.configuration.PropertyMD;
-import eu.unicore.util.configuration.PropertyMD.DocumentationCategory;
 
 
 /**
@@ -50,10 +49,7 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 
 	public static final String CFG_INCARNATION_ATTR_PFX = "unicoreAttribute."; 
 
-	public static final String CFG_VO_SERVICE_SCOPE = "group";
 	public static final String CFG_VO_SERVICE_URI = "voServerURI";
-	public static final String CFG_DISABLE_PULL_WHEN_PUSHED = "pull.disableIfAttributesWerePushed";
-	public static final String CFG_PULL_ENABLE = "pull.enable";
 	public static final String CFG_PULL_GENERIC_ENABLE = "pull.enableGenericAttributes";
 	public static final String CFG_SERVER_URI = "localServerURI";
 	public static final String CFG_VO_SERVICE_URL = "pull.voServerURL";
@@ -61,48 +57,48 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 	public static final String CFG_VO_SERVICE_PASSWORD = "pull.voServerAuthN.password";
 	public static final String CFG_VO_PULL_CACHE = "pull.cacheTtl";
 	public static final String CFG_VO_VERIFY_SIGNATURES = "pull.verifySignatures";
-	public static final String CFG_PUSH_ENABLE = "push.enable";
-
+		
 	@DocumentationReferenceMeta
 	public final static Map<String, PropertyMD> DEFAULTS = new HashMap<String, PropertyMD>();
 	static 
 	{
-		DocumentationCategory pullCat = new DocumentationCategory("Pull mode");
-		DocumentationCategory pushCat = new DocumentationCategory("Push mode");
-		DocumentationCategory mainCat = new DocumentationCategory("General");
-		
-		DEFAULTS.put(CFG_DISABLE_PULL_WHEN_PUSHED, new PropertyMD("true").setCategory(pullCat).
-				setDescription("Whether pull mode should be skipped if user sent (or pushed) some attributes with the request. Note that to make this feature work PUSH mode must be enabled AND PULL authorization must be invoked AFTER PUSH authorization."));
-		DEFAULTS.put(CFG_PULL_ENABLE, new PropertyMD("false").setCategory(pullCat).
-				setDescription("Defines if pull mode should be enabled."));
-		DEFAULTS.put(CFG_PULL_GENERIC_ENABLE, new PropertyMD("true").setCategory(pullCat).
+		DEFAULTS.put(CFG_PULL_GENERIC_ENABLE, new PropertyMD("true").
 				setDescription("If turned on, then not only the recognized UNICORE attributes are processed, but also all others, which can be used for authorization."));
-		DEFAULTS.put(CFG_SERVER_URI, new PropertyMD().setCategory(pullCat).
+		DEFAULTS.put(CFG_SERVER_URI, new PropertyMD().
 				setDescription("Can contain this, local server SAML identifier, to be used in SAML requests in PULL mode." +
 						" If unset then DN identity is used for queries, created from the local server's credential."));
-		DEFAULTS.put(CFG_VO_PULL_CACHE, new PropertyMD("600").setCategory(pullCat).
+		DEFAULTS.put(CFG_VO_PULL_CACHE, new PropertyMD("600").
 				setDescription("Controls pulled attributes cache. Set to negative integer to disable the caching or to positive number - lifetime in seconds of cached entries."));
-		DEFAULTS.put(CFG_VO_SERVICE_URL, new PropertyMD("localhost").setCategory(pullCat).
+		DEFAULTS.put(CFG_VO_SERVICE_URL, new PropertyMD("localhost").
 				setDescription("Full address (URL) of SAML VO service. Note that this server's CA cert must be present in the main truststore of the server to create the connection."));
-		DEFAULTS.put(CFG_VO_VERIFY_SIGNATURES, new PropertyMD("true").setCategory(pullCat).
+		DEFAULTS.put(CFG_VO_VERIFY_SIGNATURES, new PropertyMD("true").
 				setDescription("Additional security for the pulled assertions (except transport level which is always on) can be achieved by verification of signatures of the received assertions. The key which is used for verification must be present in the VO truststore."));
-		DEFAULTS.put(CFG_VO_SERVICE_USERNAME, new PropertyMD().setCategory(pullCat).
+		DEFAULTS.put(CFG_VO_SERVICE_USERNAME, new PropertyMD().
 				setDescription("If certificate-based authentication to the VO server is disabled, you might be able to use username/password. This sets the username."));
-		DEFAULTS.put(CFG_VO_SERVICE_PASSWORD, new PropertyMD().setCategory(pullCat).
+		DEFAULTS.put(CFG_VO_SERVICE_PASSWORD, new PropertyMD().
 				setDescription("If certificate-based authentication to the VO server is disabled, you might be able to use username/password. This sets the password."));
-		DEFAULTS.put(CFG_PUSH_ENABLE, new PropertyMD("false").setCategory(pushCat).
-				setDescription("Defines if push mode should be enabled."));
-		
-		DEFAULTS.put(CFG_VO_SERVICE_SCOPE, new PropertyMD().setCategory(mainCat).
-				setDescription("VO or group which is accepted by this attribute source. " +
-						"Server will honour only attributes with exactly this scope or global (i.e. without scope set)." +
-						"This will work only with legacy UVOS service, for Unity configure proper scope at server side."));
-		DEFAULTS.put(CFG_VO_SERVICE_URI, new PropertyMD().setCategory(mainCat).
+		DEFAULTS.put(CFG_VO_SERVICE_URI, new PropertyMD().
 				setDescription("Identification URI of the VO service providing attributes for this source. Only attributes issued by this issuer will be honoured."));
-		DEFAULTS.put(TruststoreProperties.DEFAULT_PREFIX, new PropertyMD().setCanHaveSubkeys().setCategory(mainCat).
+		DEFAULTS.put(TruststoreProperties.DEFAULT_PREFIX, new PropertyMD().setCanHaveSubkeys().
 				setDescription("Properties starting with this prefix are used to configure validation of VO assertion issuers certificates. Trust anchors should contain only the trusted VO servers certificates. All options are the same as those for other UNICORE truststores."));
-		DEFAULTS.put(CFG_INCARNATION_ATTR_PFX, new PropertyMD().setCanHaveSubkeys().setCategory(mainCat).
+		DEFAULTS.put(CFG_INCARNATION_ATTR_PFX, new PropertyMD().setCanHaveSubkeys().
 				setDescription("Properties starting with this prefix are used to configure mappings of SAML attributes to UNICORE internal ones."));
+
+	}
+
+	// DEPRECATED - remove at some point
+	public static final String CFG_PULL_ENABLE = "pull.enable";
+	public static final String CFG_PUSH_ENABLE = "push.enable";
+	public static final String CFG_VO_SERVICE_SCOPE = "group";	
+	public static final String CFG_DISABLE_PULL_WHEN_PUSHED = "pull.disableIfAttributesWerePushed";
+	static {
+		DEFAULTS.put(CFG_DISABLE_PULL_WHEN_PUSHED, new PropertyMD("true").
+				setDescription("DEPRECATED"));
+		DEFAULTS.put(CFG_PULL_ENABLE, new PropertyMD("true").
+				setDescription("DEPRECATED"));
+		DEFAULTS.put(CFG_PUSH_ENABLE, new PropertyMD("false").
+				setDescription("DEPRECATED"));
+		DEFAULTS.put(CFG_VO_SERVICE_SCOPE, new PropertyMD().setDescription("DEPRECATED"));
 	}
 
 	private SamlTrustChecker trustChecker;
@@ -120,21 +116,15 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 				Collections.singleton(new LoggingStoreUpdateListener()), 
 				PREFIX+TruststoreProperties.DEFAULT_PREFIX);
 		trustChecker = new TruststoreBasedSamlTrustChecker(trustProperties.getValidator());
-		if (isPullEnabled() && getVOServiceURI() == null)
+		if (getVOServiceURI() == null)
 			throw new ConfigurationException("For the VO subsystem, the " + 
 					getKeyDescription(CFG_VO_SERVICE_URI) + " property must be defined.");
 
-		if (!isPullEnabled())
-			log.info("VO PULL authorization is disabled.");
-		else
-			initPull();
+		initPull();
 	}
 
 	private void initPull()
 	{
-		if (getVOServiceURL() == null)
-			throw new ConfigurationException("The " + getKeyDescription(CFG_VO_SERVICE_URL) + 
-					" is required if the pull mode is enabled.");
 		try
 		{
 			new URI(getVOServiceURL());
@@ -160,7 +150,7 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 	}
 	
 	@Override
-	public int getChacheTtl()
+	public int getCacheTtl()
 	{
 		return getIntValue(CFG_VO_PULL_CACHE);
 	}
@@ -171,12 +161,6 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 		return getValue(CFG_VO_SERVICE_URL);
 	}
 
-	@Override
-	public boolean isPullEnabled()
-	{
-		return getBooleanValue(CFG_PULL_ENABLE);
-	}
-	
 	@Override
 	public String getVOServiceURI()
 	{

@@ -28,9 +28,4 @@ public class BaseModel extends SecuredResourceModel {
 		this.resourceStatus = resourceStatus;
 	}
 
-	@Override
-	public String getFrontend(String serviceType) {
-		return "self";
-	}
-	
 }

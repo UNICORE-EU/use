@@ -64,9 +64,7 @@ public class UnicoreAttributesHandler
 		{
 			if (mapping.getSamlName() == null && mapping.getDefSamlName() == null)
 				continue;
-			if (pushMode && mapping.isDisabledInPush())
-				continue;
-			if (!pushMode && mapping.isDisabledInPull())
+			if (mapping.isDisabledInPull())
 				continue;
 			if (mapping.getSamlName() != null)
 				this.mappings.put(mapping.getSamlName(), mapping);
