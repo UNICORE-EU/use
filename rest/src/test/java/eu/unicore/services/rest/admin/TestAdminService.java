@@ -7,8 +7,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.Properties;
 
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.fzj.unicore.wsrflite.Kernel;
@@ -17,10 +17,10 @@ import eu.unicore.services.rest.client.BaseClient;
 
 public class TestAdminService {
 
-	private Kernel kernel;
+	private static Kernel kernel;
 	
-	@Before
-	public void startServer()throws Exception{
+	@BeforeClass
+	public static void startServer()throws Exception{
 		Properties p = TestConfigUtil.getInsecureProperties();
 		p.setProperty("container.host", "localhost");
 		p.setProperty("container.port", "55333");
@@ -30,8 +30,8 @@ public class TestAdminService {
 		kernel.getDeploymentManager().deployFeature(new AdminFeature(kernel));
 	}
 
-	@After
-	public void stopServer()throws Exception{
+	@AfterClass
+	public static void stopServer()throws Exception{
 		kernel.shutdown();
 	}
 
@@ -40,7 +40,7 @@ public class TestAdminService {
 	public void testGetAllMetrics() throws Exception {
 		BaseClient client = getClient();
 		JSONObject o = client.getJSON().getJSONObject("metrics");
-		System.out.println(o.toString(2));
+		System.out.println("*** metrics ***\n"+o.toString(2));
 	}
 	
 	@Test
