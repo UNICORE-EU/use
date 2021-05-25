@@ -1,4 +1,4 @@
-package eu.unicore.services.rest;
+package eu.unicore.services.rest.admin;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,6 +28,8 @@ import de.fzj.unicore.wsrflite.admin.AdminActionResult;
 import de.fzj.unicore.wsrflite.security.util.AuthZAttributeStore;
 import de.fzj.unicore.wsrflite.utils.MetricUtils;
 import eu.unicore.security.Client;
+import eu.unicore.services.rest.Link;
+import eu.unicore.services.rest.RESTUtils;
 import eu.unicore.services.rest.impl.BaseRESTController;
 import eu.unicore.util.Log;
 

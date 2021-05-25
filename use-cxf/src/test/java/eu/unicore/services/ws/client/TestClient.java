@@ -149,7 +149,7 @@ public class TestClient extends AbstractClientTest {
 
 	@Test
 	public void testGetServicesPage()throws Exception{
-		url=kernel.getContainerProperties().getValue(ContainerProperties.WSRF_BASEURL);
+		url=kernel.getContainerProperties().getValue(ContainerProperties.EXTERNAL_URL)+"/services";
 		System.out.println("Getting "+url);
 		HttpClient cl=HttpUtils.createClient(url, kernel.getClientConfiguration());
 		HttpGet get=new HttpGet(url);
@@ -163,8 +163,7 @@ public class TestClient extends AbstractClientTest {
 
 	@Test
 	public void testGetWSDL()throws Exception{
-		url=kernel.getContainerProperties().getValue(ContainerProperties.WSRF_BASEURL)
-				+"/serviceFactory";
+		url=kernel.getContainerProperties().getValue(ContainerProperties.EXTERNAL_URL)+"/services/serviceFactory";
 		System.out.println("Getting WSDL for "+url);
 		HttpClient cl=HttpUtils.createClient(url, kernel.getClientConfiguration());
 		HttpGet get=new HttpGet(url+"?wsdl");

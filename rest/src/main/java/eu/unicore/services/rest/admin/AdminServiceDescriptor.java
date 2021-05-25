@@ -1,7 +1,8 @@
-package eu.unicore.services.rest;
+package eu.unicore.services.rest.admin;
 
 import de.fzj.unicore.wsrflite.Kernel;
 import de.fzj.unicore.wsrflite.utils.deployment.DeploymentDescriptorImpl;
+import eu.unicore.services.rest.RestService;
 
 public class AdminServiceDescriptor extends DeploymentDescriptorImpl {
 

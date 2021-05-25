@@ -19,8 +19,6 @@ import de.fzj.unicore.wsrflite.InitParameters;
 import de.fzj.unicore.wsrflite.Kernel;
 import de.fzj.unicore.wsrflite.registry.LocalRegistryClient;
 import de.fzj.unicore.wsrflite.registry.ServiceRegistryImpl;
-import de.fzj.unicore.wsrflite.xmlbeans.AdminService;
-import de.fzj.unicore.wsrflite.xmlbeans.client.AdminServiceClient;
 import de.fzj.unicore.wsrflite.xmlbeans.client.RegistryClient;
 import de.fzj.unicore.wsrflite.xmlbeans.registry.RegistryHandler;
 import de.fzj.unicore.wsrflite.xmlbeans.sg.Registry;
@@ -43,13 +41,7 @@ public class TestNormalStartup {
 	public static void shutdown()throws Exception{
 		if(kernel!=null)kernel.shutdown();
 	}
-	
-	@Test
-	public void testAdminService()throws Exception{
-		AdminServiceClient c=getAdminServiceClient();
-		c.getCurrentTime();
-	}
-	
+
 	@Test
 	public void testLocalRegistry()throws Exception{
 		createInstance();
@@ -89,16 +81,7 @@ public class TestNormalStartup {
 		content.put(ServiceRegistryImpl.INTERFACE_NAMESPACE,"http://foo");
 		lrc.addEntry(endpoint, content, null);
 	}
-	
-	private AdminServiceClient getAdminServiceClient() throws Exception {
-		EndpointReferenceType epr = EndpointReferenceType.Factory.newInstance();
-		String uri = getBaseURL()+"/"+AdminService.SERVICE_NAME+"?res="+AdminService.SINGLETON_ID;
-		epr.addNewAddress().setStringValue(uri);
-		AdminServiceClient c= new AdminServiceClient(epr, getClientConfiguration());
-		c.setUpdateInterval(-1);
-		return c;
-	}
-	
+
 	private String getBaseURL(){
 		return kernel.getContainerProperties().getBaseUrl();
 	}

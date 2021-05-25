@@ -1,4 +1,4 @@
-package de.fzj.unicore.wsrflite.admin.service;
+package eu.unicore.services.rest.admin;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

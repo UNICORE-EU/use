@@ -1,4 +1,4 @@
-package eu.unicore.services.rest;
+package eu.unicore.services.rest.admin;
 
 import java.util.HashSet;
 import java.util.Set;

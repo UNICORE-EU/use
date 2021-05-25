@@ -1,4 +1,4 @@
-package de.fzj.unicore.wsrflite.admin.service;
+package eu.unicore.services.rest.admin;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import de.fzj.unicore.wsrflite.Kernel;
 import de.fzj.unicore.wsrflite.utils.deployment.FeatureImpl;
 
 /**
- * Admin service (SOAP and REST)
+ * Admin service
  * 
  * @author schuller
  */
@@ -29,9 +29,8 @@ public class AdminFeature extends FeatureImpl {
 
 	public List<DeploymentDescriptor> getServices(){
 		List<DeploymentDescriptor> services = new ArrayList<>();
-		
-		services.add(new AdminServiceDescriptor(kernel));		
-		services.add(new eu.unicore.services.rest.AdminServiceDescriptor(kernel));		
+				
+		services.add(new eu.unicore.services.rest.admin.AdminServiceDescriptor(kernel));		
 		
 		return services;
 	}
