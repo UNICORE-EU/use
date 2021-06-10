@@ -282,12 +282,10 @@ public class RegistryHandler implements ExternalSystemConnector {
 					try{
 						Map<String,String>entry = SGFrontend.parse(e.getMemberServiceEPR());
 						String pem = entry.get(RegistryClient.SERVER_PUBKEY);
-						String serverDN = entry.get(RegistryClient.SERVER_IDENTITY);
 						if(pem!=null){
+							String serverDN = entry.get(RegistryClient.SERVER_IDENTITY);
 							keyCache.update(serverDN, parsePEM(pem));
-							if(logger.isDebugEnabled()){
-								logger.debug("Read public key for <"+serverDN+">");
-							}
+							logger.debug("Read public key for <{}>", serverDN);
 						}
 					}catch(Exception ex){}
 				}

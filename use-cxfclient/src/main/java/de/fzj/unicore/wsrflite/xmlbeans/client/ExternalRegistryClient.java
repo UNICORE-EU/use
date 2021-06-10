@@ -56,13 +56,14 @@ public class ExternalRegistryClient extends MultiWSRFClient<RegistryClient> impl
 		long selected=responseTT.getTimeInMillis();
 		boolean haveExternalTT=false;
 		for(RegistryClient reg: clients){
+			String address = reg.getEPR().getAddress().getStringValue();
 			try{
-				if(logger.isDebugEnabled())logger.debug("Calling external registry: "+reg.getEPR().getAddress().getStringValue());
+				logger.debug("Calling external registry: {}", address);
 				Calendar c=reg.getCurrentTime();
 				long timeDifference = current - c.getTimeInMillis();
 				AddResponseDocument res=reg.addRegistryEntry(in);
 				Calendar extTT=res.getAddResponse().getTerminationTime();
-				if(logger.isDebugEnabled())logger.debug("External registry requests lifetime: "+extTT.getTime());
+				logger.debug("External registry {} requests lifetime: {}", address, extTT.getTime());
 				//select the "earliest" termination time reported back from the external registries
 				//and subtract 60 "grace seconds"
 				long tt = extTT.getTimeInMillis()+timeDifference-readd_offset;
@@ -71,9 +72,7 @@ public class ExternalRegistryClient extends MultiWSRFClient<RegistryClient> impl
 					haveExternalTT=true;
 				}
 			}catch(Exception e){
-				if(logger.isDebugEnabled()) {
-					logger.debug(Log.createFaultMessage("Can't talk to registry "+reg.getEPR().getAddress().getStringValue(),e));
-				}
+				logger.debug(Log.createFaultMessage("Can't talk to registry "+address ,e));
 			}
 		}
 		responseTT.setTimeInMillis(selected);
