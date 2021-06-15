@@ -271,6 +271,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 
 	public ContainerSecurityProperties(Properties source, IAuthnAndTrustConfiguration authAndTrust) 
 			throws ConfigurationException {
+		backwardsCompat(source);
 		properties = new PropertiesHelper(PREFIX, source, META, propsLogger);
 		setSslEnabled(properties.getBooleanValue(PROP_SSL_ENABLED));
 		setAccessControlEnabled(properties.getBooleanValue(PROP_CHECKACCESS));
@@ -366,6 +367,18 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		setAip(createAttributeSource(source));
 		setDap(createDynamicAttributeSource(source));
 		setPdp(createPDP(properties));
+	}
+	
+	// backwards compatibility fixes
+	protected void backwardsCompat(Properties properties) throws ConfigurationException {
+		String old = "de.fzj.unicore.wsrflite";
+		for(String key: properties.stringPropertyNames()){
+			String val = properties.getProperty(key);
+			if(!val.startsWith(old))continue;
+			String newValue = "eu.unicore.services"+val.substring(old.length());
+			properties.put(key, newValue);
+			logger.warn("Old property value <{}> is DEPRECATED, superseded by <{}>", val, newValue);
+		}
 	}
 
 	public void updateProperties(Properties newProperties) {
@@ -478,5 +491,5 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	public List<String>getAdditionalSAMLIds(){
 		return properties.getListOfValues(PROP_ADDITIONAL_ACCEPTED_SAML_IDS);
 	}
-	
+
 }
