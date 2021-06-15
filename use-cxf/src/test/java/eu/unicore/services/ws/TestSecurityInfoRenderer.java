@@ -19,26 +19,25 @@ import org.unigrids.services.atomic.types.PermitDocument;
 import org.unigrids.services.atomic.types.SecurityDocument;
 import org.w3.x2005.x08.addressing.EndpointReferenceDocument;
 
-import de.fzj.unicore.wsrflite.Home;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.Resource;
-import de.fzj.unicore.wsrflite.impl.SecuredResourceImpl;
-import de.fzj.unicore.wsrflite.security.ContainerSecurityProperties;
-import de.fzj.unicore.wsrflite.security.IAttributeSource;
-import de.fzj.unicore.wsrflite.xmlbeans.WSUtilities;
-import de.fzj.unicore.wsrflite.xmlbeans.sg.Registry;
-import de.fzj.unicore.wsrflite.xmlbeans.sg.ServiceGroupEntry;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
+import eu.unicore.services.Home;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.Resource;
+import eu.unicore.services.impl.SecuredResourceImpl;
 import eu.unicore.services.registry.LocalRegistryEntryHomeImpl;
 import eu.unicore.services.registry.LocalRegistryHomeImpl;
 import eu.unicore.services.registry.RegistryCreator;
 import eu.unicore.services.registry.RegistryHandler;
+import eu.unicore.services.security.ContainerSecurityProperties;
+import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.ws.client.TestClientSSL;
 import eu.unicore.services.ws.cxf.CXFServiceFactory;
 import eu.unicore.services.ws.renderers.AddressRenderer;
 import eu.unicore.services.ws.renderers.FixedAddressRenderer;
 import eu.unicore.services.ws.renderers.SecurityInfoRenderer;
+import eu.unicore.services.ws.sg.Registry;
+import eu.unicore.services.ws.sg.ServiceGroupEntry;
 import eu.unicore.services.ws.testutils.AbstractClientTest;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.httpclient.ClientProperties;
@@ -55,7 +54,7 @@ public class TestSecurityInfoRenderer extends AbstractClientTest {
 	public void addServices() throws Exception{
 		super.addServices();
 		if(kernel.getService("Registry")!=null)return;
-		CXFServiceFactory.createAndDeployService(kernel,"Registry",Registry.class,
+		CXFServiceFactory.createAndDeployService(kernel,"Registry", Registry.class,
 				LocalRegistryHomeImpl.class,null);
 		CXFServiceFactory.createAndDeployService(kernel,"ServiceGroupEntry",ServiceGroupEntry.class,
 				LocalRegistryEntryHomeImpl.class,null);

@@ -2,12 +2,12 @@
  * Copyright (c) 2012 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE.txt file for licensing information.
  */
-package eu.unicore.services.pdp;
+package eu.unicore.services.security.pdp;
 
 import eu.unicore.security.Client;
 import eu.unicore.services.ContainerProperties;
-import eu.unicore.services.pdp.PDPResult.Decision;
 import eu.unicore.services.security.IContainerSecurityConfiguration;
+import eu.unicore.services.security.pdp.PDPResult.Decision;
 import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.util.httpclient.IClientConfiguration;
 

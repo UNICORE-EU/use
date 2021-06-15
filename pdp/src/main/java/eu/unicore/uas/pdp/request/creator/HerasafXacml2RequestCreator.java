@@ -14,7 +14,7 @@ import org.herasaf.xacml.core.converter.DataTypeJAXBTypeAdapter;
 
 import eu.unicore.security.Client;
 import eu.unicore.security.XACMLAttribute;
-import eu.unicore.services.pdp.ActionDescriptor;
+import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.uas.pdp.request.creator.XACMLAttributeMeta.XACMLAttributeCategory;
 import eu.unicore.uas.pdp.request.profile.XACMLProfile;

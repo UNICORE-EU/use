@@ -35,12 +35,12 @@ package eu.unicore.services.ws.exampleservice;
 
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
-import de.fzj.unicore.wsrflite.InitParameters;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.KernelInjectable;
-import de.fzj.unicore.wsrflite.xmlbeans.AddTestResourceDocument;
-import de.fzj.unicore.wsrflite.xmlbeans.AddTestResourceResponseDocument;
-import de.fzj.unicore.wsrflite.xmlbeans.BaseFault;
+import eu.unicore.services.InitParameters;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.KernelInjectable;
+import eu.unicore.services.ws.AddTestResourceDocument;
+import eu.unicore.services.ws.AddTestResourceResponseDocument;
+import eu.unicore.services.ws.BaseFault;
 import eu.unicore.services.ws.utils.WSServerUtilities;
 
 /**

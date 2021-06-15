@@ -9,10 +9,10 @@ import javax.xml.namespace.QName;
 import org.junit.Test;
 import org.w3.x2005.x08.addressing.EndpointReferenceDocument;
 
-import de.fzj.unicore.wsrflite.ContainerProperties;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.Resource;
-import de.fzj.unicore.wsrflite.security.TestConfigUtil;
+import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.Resource;
+import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.ws.renderers.AddressRenderer;
 import eu.unicore.services.ws.renderers.FixedAddressRenderer;
 

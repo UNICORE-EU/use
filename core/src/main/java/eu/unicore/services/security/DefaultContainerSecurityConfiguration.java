@@ -8,7 +8,7 @@ import java.security.cert.X509Certificate;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
-import eu.unicore.services.pdp.UnicoreXPDP;
+import eu.unicore.services.security.pdp.UnicoreXPDP;
 
 /**
  * Simple implementation of {@link IContainerSecurityConfiguration} as java bean.

@@ -45,6 +45,7 @@ import com.codahale.metrics.Meter;
 import eu.unicore.security.wsutil.CXFUtils;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Resource;
+import eu.unicore.services.security.SecurityManager;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.services.ws.WSFrontEnd;
 import eu.unicore.util.Log;

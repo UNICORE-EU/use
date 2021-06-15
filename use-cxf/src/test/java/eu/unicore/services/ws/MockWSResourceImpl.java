@@ -14,8 +14,7 @@ import org.apache.xmlbeans.XmlObject;
 import org.oasisOpen.docs.wsrf.rl2.CurrentTimeDocument;
 import org.oasisOpen.docs.wsrf.sg2.ServiceGroupRPDocument;
 
-import de.fzj.unicore.wsrflite.InitParameters;
-import de.fzj.unicore.wsrflite.xmlbeans.WSUtilities;
+import eu.unicore.services.InitParameters;
 import eu.unicore.services.ws.impl.WSResourceImpl;
 import eu.unicore.services.ws.renderers.FieldRenderer;
 import eu.unicore.services.ws.renderers.ModifiableBase;

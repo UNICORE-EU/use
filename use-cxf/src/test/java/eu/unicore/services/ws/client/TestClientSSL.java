@@ -33,9 +33,9 @@
 
 package eu.unicore.services.ws.client;
 
-import static de.fzj.unicore.wsrflite.ContainerProperties.PREFIX;
-import static de.fzj.unicore.wsrflite.ContainerProperties.SERVER_HOST;
-import static de.fzj.unicore.wsrflite.ContainerProperties.SERVER_PORT;
+import static eu.unicore.services.ContainerProperties.PREFIX;
+import static eu.unicore.services.ContainerProperties.SERVER_HOST;
+import static eu.unicore.services.ContainerProperties.SERVER_PORT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -52,12 +52,12 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
-import de.fzj.unicore.wsrflite.security.ContainerSecurityProperties;
-import de.fzj.unicore.wsrflite.xmlbeans.AddTestResourceDocument;
-import de.fzj.unicore.wsrflite.xmlbeans.WSUtilities;
 import eu.unicore.security.canl.CredentialProperties;
 import eu.unicore.security.canl.TruststoreProperties;
 import eu.unicore.security.wsutil.client.SessionIDInHandler;
+import eu.unicore.services.security.ContainerSecurityProperties;
+import eu.unicore.services.ws.AddTestResourceDocument;
+import eu.unicore.services.ws.WSUtilities;
 import eu.unicore.services.ws.exampleservice.MockPDP;
 import eu.unicore.util.httpclient.ClientProperties;
 import eu.unicore.util.httpclient.IClientConfiguration;

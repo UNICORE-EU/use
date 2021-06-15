@@ -53,7 +53,7 @@ import eu.unicore.services.InitParameters;
 import eu.unicore.services.Model;
 import eu.unicore.services.Resource;
 import eu.unicore.services.exceptions.ResourceUnknownException;
-import eu.unicore.services.pdp.ActionDescriptor;
+import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.util.Log;
 

@@ -57,11 +57,9 @@ import org.oasisOpen.docs.wsrf.rp2.QueryExpressionType;
 import org.oasisOpen.docs.wsrf.rp2.QueryResourcePropertiesDocument;
 import org.w3.x2005.x08.addressing.EndpointReferenceDocument;
 
-import de.fzj.unicore.wsrflite.InitParameters;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.TestConfigUtil;
-import de.fzj.unicore.wsrflite.xmlbeans.ResourceLifetime;
-import de.fzj.unicore.wsrflite.xmlbeans.WSUtilities;
+import eu.unicore.services.InitParameters;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.ws.impl.WSRFRepresentation;
 import eu.unicore.services.ws.impl.WSResourceHomeImpl;
 import eu.unicore.services.ws.impl.WSResourceImpl;

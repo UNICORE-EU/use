@@ -18,11 +18,11 @@ import org.oasisOpen.docs.wsrf.rl2.TerminationTimeDocument;
 import org.oasisOpen.docs.wsrf.rp2.GetResourcePropertyDocument;
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
-import de.fzj.unicore.wsrflite.ContainerProperties;
-import de.fzj.unicore.wsrflite.Home;
-import de.fzj.unicore.wsrflite.InitParameters;
-import de.fzj.unicore.wsrflite.persistence.Persistence;
-import de.fzj.unicore.wsrflite.xmlbeans.client.BaseWSRFClient;
+import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.Home;
+import eu.unicore.services.InitParameters;
+import eu.unicore.services.persistence.Persistence;
+import eu.unicore.services.ws.client.BaseWSRFClient;
 import eu.unicore.services.ws.cxf.CXFServiceFactory;
 import eu.unicore.services.ws.impl.WSResourceHomeImpl;
 import eu.unicore.services.ws.testutils.JettyTestCase;

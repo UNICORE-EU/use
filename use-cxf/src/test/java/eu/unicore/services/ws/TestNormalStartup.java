@@ -14,15 +14,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
-import de.fzj.unicore.wsrflite.Home;
-import de.fzj.unicore.wsrflite.InitParameters;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.registry.LocalRegistryClient;
-import de.fzj.unicore.wsrflite.registry.ServiceRegistryImpl;
-import de.fzj.unicore.wsrflite.xmlbeans.client.RegistryClient;
-import de.fzj.unicore.wsrflite.xmlbeans.sg.Registry;
+import eu.unicore.services.Home;
+import eu.unicore.services.InitParameters;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.registry.LocalRegistryClient;
 import eu.unicore.services.registry.RegistryHandler;
+import eu.unicore.services.registry.ServiceRegistryImpl;
 import eu.unicore.services.rest.client.BaseClient;
+import eu.unicore.services.ws.client.RegistryClient;
+import eu.unicore.services.ws.sg.Registry;
 import eu.unicore.util.httpclient.IClientConfiguration;
 
 public class TestNormalStartup {

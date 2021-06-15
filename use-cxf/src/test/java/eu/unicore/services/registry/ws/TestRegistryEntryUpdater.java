@@ -16,25 +16,24 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
-import de.fzj.unicore.wsrflite.ContainerProperties;
-import de.fzj.unicore.wsrflite.Home;
-import de.fzj.unicore.wsrflite.InitParameters;
-import de.fzj.unicore.wsrflite.impl.DefaultHome;
-import de.fzj.unicore.wsrflite.registry.LocalRegistryClient;
-import de.fzj.unicore.wsrflite.xmlbeans.WSUtilities;
-import de.fzj.unicore.wsrflite.xmlbeans.client.BaseWSRFClient;
-import de.fzj.unicore.wsrflite.xmlbeans.client.RegistryClient;
-import de.fzj.unicore.wsrflite.xmlbeans.sg.Registry;
-import de.fzj.unicore.wsrflite.xmlbeans.sg.ServiceGroupEntry;
+import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.Home;
+import eu.unicore.services.InitParameters;
+import eu.unicore.services.impl.DefaultHome;
+import eu.unicore.services.registry.LocalRegistryClient;
 import eu.unicore.services.registry.LocalRegistryEntryHomeImpl;
 import eu.unicore.services.registry.LocalRegistryHomeImpl;
 import eu.unicore.services.registry.RegistryCreator;
 import eu.unicore.services.registry.RegistryEntryUpdater;
 import eu.unicore.services.registry.RegistryHandler;
-import eu.unicore.services.registry.ws.SGFrontend;
 import eu.unicore.services.ws.WSServerResource;
+import eu.unicore.services.ws.WSUtilities;
+import eu.unicore.services.ws.client.BaseWSRFClient;
+import eu.unicore.services.ws.client.RegistryClient;
 import eu.unicore.services.ws.cxf.CXFServiceFactory;
 import eu.unicore.services.ws.impl.WSResourceHomeImpl;
+import eu.unicore.services.ws.sg.Registry;
+import eu.unicore.services.ws.sg.ServiceGroupEntry;
 import eu.unicore.services.ws.testutils.JettyTestCase;
 
 public class TestRegistryEntryUpdater extends JettyTestCase {

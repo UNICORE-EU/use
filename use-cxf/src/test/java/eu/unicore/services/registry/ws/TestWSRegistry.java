@@ -16,14 +16,12 @@ import org.oasisOpen.docs.wsrf.sg2.AddResponseDocument;
 import org.oasisOpen.docs.wsrf.sg2.EntryType;
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
-import de.fzj.unicore.wsrflite.InitParameters;
-import de.fzj.unicore.wsrflite.InitParameters.TerminationMode;
-import de.fzj.unicore.wsrflite.registry.ServiceRegistryImpl;
-import de.fzj.unicore.wsrflite.xmlbeans.WSUtilities;
-import de.fzj.unicore.wsrflite.xmlbeans.client.BaseWSRFClient;
-import de.fzj.unicore.wsrflite.xmlbeans.client.RegistryClient;
-import eu.unicore.services.registry.ws.RegistryFeature;
-import eu.unicore.services.registry.ws.SGFrontend;
+import eu.unicore.services.InitParameters;
+import eu.unicore.services.InitParameters.TerminationMode;
+import eu.unicore.services.registry.ServiceRegistryImpl;
+import eu.unicore.services.ws.WSUtilities;
+import eu.unicore.services.ws.client.BaseWSRFClient;
+import eu.unicore.services.ws.client.RegistryClient;
 import eu.unicore.services.ws.testutils.JettyTestCase;
 
 public class TestWSRegistry extends JettyTestCase {

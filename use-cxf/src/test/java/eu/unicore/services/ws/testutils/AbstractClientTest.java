@@ -12,12 +12,12 @@ import org.apache.xmlbeans.XmlCursor;
 import org.junit.Before;
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
-import de.fzj.unicore.wsrflite.xfire.WSRFClientFactory;
-import de.fzj.unicore.wsrflite.xmlbeans.AddTestResourceDocument;
-import de.fzj.unicore.wsrflite.xmlbeans.AddTestResourceResponseDocument;
-import de.fzj.unicore.wsrflite.xmlbeans.WSResource;
-import de.fzj.unicore.wsrflite.xmlbeans.WSUtilities;
-import de.fzj.unicore.wsrflite.xmlbeans.client.BaseWSRFClient;
+import eu.unicore.services.ws.AddTestResourceDocument;
+import eu.unicore.services.ws.AddTestResourceResponseDocument;
+import eu.unicore.services.ws.WSRFClientFactory;
+import eu.unicore.services.ws.WSResource;
+import eu.unicore.services.ws.WSUtilities;
+import eu.unicore.services.ws.client.BaseWSRFClient;
 import eu.unicore.services.ws.cxf.CXFServiceFactory;
 import eu.unicore.services.ws.exampleservice.ExampleFactoryImpl;
 import eu.unicore.services.ws.exampleservice.IExampleFactory;

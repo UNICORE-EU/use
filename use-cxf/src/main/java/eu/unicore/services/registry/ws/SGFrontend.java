@@ -21,6 +21,7 @@ import org.w3.x2005.x08.addressing.EndpointReferenceType;
 import eu.unicore.services.registry.ServiceRegistryImpl;
 import eu.unicore.services.ws.BaseFault;
 import eu.unicore.services.ws.WSUtilities;
+import eu.unicore.services.ws.client.RegistryClient;
 import eu.unicore.services.ws.exceptions.ResourceNotDestroyedFault;
 import eu.unicore.services.ws.exceptions.ResourceUnavailableFault;
 import eu.unicore.services.ws.exceptions.ResourceUnknownFault;

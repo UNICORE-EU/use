@@ -7,7 +7,7 @@ import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
 import eu.unicore.security.XACMLAttribute;
-import eu.unicore.services.pdp.ActionDescriptor;
+import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.SecurityManager;
 import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.uas.pdp.request.creator.XACMLAttributeMeta;

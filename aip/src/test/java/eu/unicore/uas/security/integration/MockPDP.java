@@ -9,9 +9,9 @@ package eu.unicore.uas.security.integration;
 
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.security.IContainerSecurityConfiguration;
-import eu.unicore.services.pdp.ActionDescriptor;
-import eu.unicore.services.pdp.PDPResult;
-import eu.unicore.services.pdp.UnicoreXPDP;
+import eu.unicore.services.security.pdp.ActionDescriptor;
+import eu.unicore.services.security.pdp.PDPResult;
+import eu.unicore.services.security.pdp.UnicoreXPDP;
 import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.security.Client;
 import eu.unicore.util.httpclient.IClientConfiguration;

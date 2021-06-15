@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.services.Home;
+import eu.unicore.services.Kernel;
 import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.services.registry.RegistryCreator;
 import eu.unicore.services.registry.RegistryHandler;

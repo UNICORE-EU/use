@@ -5,18 +5,18 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.fzj.unicore.wsrflite.InitParameters;
-import de.fzj.unicore.wsrflite.InitParameters.TerminationMode;
-import de.fzj.unicore.wsrflite.utils.deployment.DeploymentDescriptorImpl;
-import de.fzj.unicore.wsrflite.xmlbeans.client.RegistryClient;
-import de.fzj.unicore.wsrflite.xmlbeans.sg.Registry;
-import de.fzj.unicore.wsrflite.xmlbeans.sg.ServiceGroupEntry;
+import eu.unicore.services.InitParameters;
+import eu.unicore.services.InitParameters.TerminationMode;
 import eu.unicore.services.registry.ws.SGEFrontend;
 import eu.unicore.services.registry.ws.SGFrontend;
 import eu.unicore.services.registry.ws.ServiceRegistryEntryHomeImpl;
 import eu.unicore.services.registry.ws.ServiceRegistryHomeImpl;
 import eu.unicore.services.rest.client.BaseClient;
+import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
+import eu.unicore.services.ws.client.RegistryClient;
 import eu.unicore.services.ws.cxf.CXFServiceFactory;
+import eu.unicore.services.ws.sg.Registry;
+import eu.unicore.services.ws.sg.ServiceGroupEntry;
 import eu.unicore.services.ws.testutils.JettyTestCase;
 
 public class TestRegistry extends JettyTestCase {

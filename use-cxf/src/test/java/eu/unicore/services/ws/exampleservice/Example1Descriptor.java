@@ -1,6 +1,6 @@
 package eu.unicore.services.ws.exampleservice;
 
-import de.fzj.unicore.wsrflite.utils.deployment.DeploymentDescriptorImpl;
+import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
 import eu.unicore.services.ws.WSServerResource;
 import eu.unicore.services.ws.cxf.CXFService;
 import eu.unicore.services.ws.impl.WSResourceHomeImpl;

@@ -2,7 +2,7 @@
  * Copyright (c) 2012 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE.txt file for licensing information.
  */
-package eu.unicore.services.pdp;
+package eu.unicore.services.security.pdp;
 
 import eu.unicore.security.OperationType;
 

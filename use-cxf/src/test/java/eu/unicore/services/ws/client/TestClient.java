@@ -54,10 +54,10 @@ import org.oasisOpen.docs.wsrf.rl2.CurrentTimeDocument;
 import org.oasisOpen.docs.wsrf.rl2.TerminationTimeDocument;
 import org.oasisOpen.docs.wsrf.rp2.QueryResourcePropertiesResponseDocument;
 
-import de.fzj.unicore.wsrflite.ContainerProperties;
-import de.fzj.unicore.wsrflite.xmlbeans.ResourceLifetime;
-import de.fzj.unicore.wsrflite.xmlbeans.WSUtilities;
+import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.ws.ResourceLifetime;
 import eu.unicore.services.ws.WSServerResource;
+import eu.unicore.services.ws.WSUtilities;
 import eu.unicore.services.ws.testutils.AbstractClientTest;
 import eu.unicore.util.httpclient.HttpUtils;
 

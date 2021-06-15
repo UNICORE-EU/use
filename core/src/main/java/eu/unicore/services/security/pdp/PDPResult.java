@@ -5,7 +5,7 @@
  * Created on 25-10-2010
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
-package eu.unicore.services.pdp;
+package eu.unicore.services.security.pdp;
 
 /**
  * Wraps a decision which was produced by PDP. UNCLEAR status means DENY,

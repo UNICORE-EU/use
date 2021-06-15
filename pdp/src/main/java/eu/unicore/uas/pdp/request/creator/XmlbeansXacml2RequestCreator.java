@@ -8,7 +8,7 @@ import org.apache.xmlbeans.XmlObject;
 import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.elements.NameID;
 import eu.unicore.security.Client;
-import eu.unicore.services.pdp.ActionDescriptor;
+import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.uas.pdp.request.creator.XACMLAttributeMeta.XACMLAttributeCategory;
 import eu.unicore.uas.pdp.request.profile.XACMLProfile;

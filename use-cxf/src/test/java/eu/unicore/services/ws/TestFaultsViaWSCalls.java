@@ -40,21 +40,20 @@ import static org.junit.Assert.fail;
 import java.util.Calendar;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.oasisOpen.docs.wsrf.rp2.UpdateResourcePropertiesDocument;
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
-import de.fzj.unicore.wsrflite.ContainerProperties;
-import de.fzj.unicore.wsrflite.Home;
-import de.fzj.unicore.wsrflite.InitParameters;
-import de.fzj.unicore.wsrflite.Resource;
-import de.fzj.unicore.wsrflite.persistence.Persistence;
-import de.fzj.unicore.wsrflite.xmlbeans.BaseFault;
-import de.fzj.unicore.wsrflite.xmlbeans.ResourceProperties;
-import de.fzj.unicore.wsrflite.xmlbeans.client.BaseWSRFClient;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.ResourceUnavailableFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.ResourceUnknownFault;
+import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.Home;
+import eu.unicore.services.InitParameters;
+import eu.unicore.services.Resource;
+import eu.unicore.services.persistence.Persistence;
+import eu.unicore.services.ws.client.BaseWSRFClient;
 import eu.unicore.services.ws.cxf.CXFServiceFactory;
+import eu.unicore.services.ws.exceptions.ResourceUnavailableFault;
+import eu.unicore.services.ws.exceptions.ResourceUnknownFault;
 import eu.unicore.services.ws.impl.WSResourceHomeImpl;
 import eu.unicore.services.ws.testutils.JettyTestCase;
 import eu.unicore.util.Log;
@@ -97,6 +96,7 @@ public class TestFaultsViaWSCalls extends JettyTestCase {
 	}
 	
 	@Test
+	@Ignore
 	public void testResourceUnavailableFault() throws Exception {
 		Home h=kernel.getHome("wsrf");
 		String id=h.createResource(new InitParameters());

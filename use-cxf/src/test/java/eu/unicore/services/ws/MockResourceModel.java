@@ -7,7 +7,7 @@ import java.util.Set;
 import org.apache.xmlbeans.XmlObject;
 import org.oasisOpen.docs.wsrf.rl2.CurrentTimeDocument;
 
-import de.fzj.unicore.wsrflite.impl.BaseModel;
+import eu.unicore.services.impl.BaseModel;
 
 public class MockResourceModel extends BaseModel {
 

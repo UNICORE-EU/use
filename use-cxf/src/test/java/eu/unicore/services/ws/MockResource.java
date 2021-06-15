@@ -7,17 +7,16 @@ import org.oasisOpen.docs.wsrf.rl2.SetTerminationTimeResponseDocument;
 import org.oasisOpen.docs.wsrf.rp2.GetResourcePropertyDocument;
 import org.oasisOpen.docs.wsrf.rp2.GetResourcePropertyResponseDocument;
 
-import de.fzj.unicore.wsrflite.InitParameters;
-import de.fzj.unicore.wsrflite.impl.BaseModel;
-import de.fzj.unicore.wsrflite.security.ACLEntry;
-import de.fzj.unicore.wsrflite.security.ACLEntry.MatchType;
-import de.fzj.unicore.wsrflite.xmlbeans.BaseFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.InvalidResourcePropertyQNameFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.ResourceUnavailableFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.ResourceUnknownFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.TerminationTimeChangeRejectedFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.UnableToSetTerminationTimeFault;
 import eu.unicore.security.OperationType;
+import eu.unicore.services.InitParameters;
+import eu.unicore.services.impl.BaseModel;
+import eu.unicore.services.security.ACLEntry;
+import eu.unicore.services.security.ACLEntry.MatchType;
+import eu.unicore.services.ws.exceptions.InvalidResourcePropertyQNameFault;
+import eu.unicore.services.ws.exceptions.ResourceUnavailableFault;
+import eu.unicore.services.ws.exceptions.ResourceUnknownFault;
+import eu.unicore.services.ws.exceptions.TerminationTimeChangeRejectedFault;
+import eu.unicore.services.ws.exceptions.UnableToSetTerminationTimeFault;
 import eu.unicore.services.ws.impl.WSResourceImpl;
 import eu.unicore.util.ConcurrentAccess;
 

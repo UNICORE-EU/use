@@ -14,8 +14,7 @@ import org.oasisOpen.docs.wsrf.rl2.CurrentTimeDocument;
 import org.oasisOpen.docs.wsrf.rl2.TerminationTimeDocument;
 import org.oasisOpen.docs.wsrf.rp2.GetResourcePropertyDocument;
 
-import de.fzj.unicore.wsrflite.WSRFConstants;
-import de.fzj.unicore.wsrflite.xmlbeans.ResourceLifetime;
+import eu.unicore.services.WSRFConstants;
 
 public class TestQnames {
 

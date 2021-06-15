@@ -5,7 +5,7 @@
  * Created on 25-10-2010
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
-package eu.unicore.services.pdp;
+package eu.unicore.services.security.pdp;
 
 import eu.unicore.security.Client;
 import eu.unicore.services.ContainerProperties;

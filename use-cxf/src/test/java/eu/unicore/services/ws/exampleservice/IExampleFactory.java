@@ -42,9 +42,9 @@ import javax.jws.soap.SOAPBinding.ParameterStyle;
 import javax.jws.soap.SOAPBinding.Style;
 import javax.jws.soap.SOAPBinding.Use;
 
-import de.fzj.unicore.wsrflite.xmlbeans.AddTestResourceDocument;
-import de.fzj.unicore.wsrflite.xmlbeans.AddTestResourceResponseDocument;
-import de.fzj.unicore.wsrflite.xmlbeans.BaseFault;
+import eu.unicore.services.ws.AddTestResourceDocument;
+import eu.unicore.services.ws.AddTestResourceResponseDocument;
+import eu.unicore.services.ws.BaseFault;
 
 /**
  *  Example WSRF factory interface for testing

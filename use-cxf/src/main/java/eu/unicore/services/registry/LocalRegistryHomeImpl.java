@@ -33,6 +33,7 @@
 
 package eu.unicore.services.registry;
 
+import eu.unicore.services.Resource;
 import eu.unicore.services.ws.impl.WSResourceHomeImpl;
 
 public class LocalRegistryHomeImpl extends WSResourceHomeImpl {

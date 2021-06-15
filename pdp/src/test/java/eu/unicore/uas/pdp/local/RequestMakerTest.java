@@ -25,7 +25,7 @@ import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.XACMLAttribute;
-import eu.unicore.services.pdp.ActionDescriptor;
+import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.uas.pdp.MockAuthZContext;
 import eu.unicore.uas.pdp.request.creator.HerasafXacml2RequestCreator;

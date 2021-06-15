@@ -11,8 +11,8 @@ import org.oasisOpen.docs.wsrf.rl2.SetTerminationTimeResponseDocument;
 import org.oasisOpen.docs.wsrf.rp2.GetResourcePropertyDocument;
 import org.oasisOpen.docs.wsrf.rp2.GetResourcePropertyResponseDocument;
 
-import de.fzj.unicore.wsrflite.xmlbeans.BaseFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.ResourceUnavailableFault;
+import eu.unicore.services.ws.BaseFault;
+import eu.unicore.services.ws.exceptions.ResourceUnavailableFault;
 
 public class ExampleService implements IExampleService {
 	

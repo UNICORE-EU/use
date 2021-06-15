@@ -1,6 +1,6 @@
 package eu.unicore.services.ws;
 
-import de.fzj.unicore.wsrflite.Kernel;
+import eu.unicore.services.Kernel;
 import eu.unicore.services.ws.impl.WSResourceHomeImpl;
 
 

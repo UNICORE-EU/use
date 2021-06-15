@@ -12,8 +12,10 @@ import org.oasisOpen.docs.wsrf.sg2.EntryDocument;
 import org.oasisOpen.docs.wsrf.sg2.EntryType;
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
+import eu.unicore.services.Resource;
 import eu.unicore.services.registry.ServiceRegistryModel;
 import eu.unicore.services.ws.WSUtilities;
+import eu.unicore.services.ws.client.RegistryClient;
 import eu.unicore.services.ws.renderers.ValueRenderer;
 
 /**

@@ -37,7 +37,7 @@ import java.security.cert.X509Certificate;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
-import eu.unicore.services.pdp.UnicoreXPDP;
+import eu.unicore.services.security.pdp.UnicoreXPDP;
 
 /**
  * Interface extends {@link IAuthnAndTrustConfiguration} with container security 
