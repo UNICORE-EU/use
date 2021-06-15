@@ -42,11 +42,10 @@ import org.apache.logging.log4j.ThreadContext;
 
 import com.codahale.metrics.Meter;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.Resource;
-import de.fzj.unicore.wsrflite.security.SecurityManager;
-import de.fzj.unicore.wsrflite.security.util.AuthZAttributeStore;
 import eu.unicore.security.wsutil.CXFUtils;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.Resource;
+import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.services.ws.WSFrontEnd;
 import eu.unicore.util.Log;
 

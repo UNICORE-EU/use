@@ -2,15 +2,15 @@ package eu.unicore.services.ws.impl;
 
 import java.util.concurrent.TimeoutException;
 
-import de.fzj.unicore.wsrflite.exceptions.ResourceUnavailableException;
-import de.fzj.unicore.wsrflite.exceptions.ResourceUnknownException;
-import de.fzj.unicore.wsrflite.exceptions.TerminationTimeChangeRejectedException;
-import de.fzj.unicore.wsrflite.exceptions.UnableToSetTerminationTimeException;
-import de.fzj.unicore.wsrflite.xmlbeans.BaseFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.ResourceUnavailableFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.ResourceUnknownFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.TerminationTimeChangeRejectedFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.UnableToSetTerminationTimeFault;
+import eu.unicore.services.exceptions.ResourceUnavailableException;
+import eu.unicore.services.exceptions.ResourceUnknownException;
+import eu.unicore.services.exceptions.TerminationTimeChangeRejectedException;
+import eu.unicore.services.exceptions.UnableToSetTerminationTimeException;
+import eu.unicore.services.ws.BaseFault;
+import eu.unicore.services.ws.exceptions.ResourceUnavailableFault;
+import eu.unicore.services.ws.exceptions.ResourceUnknownFault;
+import eu.unicore.services.ws.exceptions.TerminationTimeChangeRejectedFault;
+import eu.unicore.services.ws.exceptions.UnableToSetTerminationTimeFault;
 import eu.unicore.util.Log;
 
 /**

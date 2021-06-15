@@ -2,11 +2,11 @@ package eu.unicore.services.ws.cxf;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.DeploymentDescriptor;
-import de.fzj.unicore.wsrflite.Home;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.Service;
-import de.fzj.unicore.wsrflite.impl.DefaultHome;
+import eu.unicore.services.DeploymentDescriptor;
+import eu.unicore.services.Home;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.Service;
+import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.util.Log;
 
 public class CXFService implements Service {

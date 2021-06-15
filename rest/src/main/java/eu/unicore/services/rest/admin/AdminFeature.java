@@ -3,9 +3,9 @@ package eu.unicore.services.rest.admin;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.fzj.unicore.wsrflite.DeploymentDescriptor;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.utils.deployment.FeatureImpl;
+import eu.unicore.services.DeploymentDescriptor;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.utils.deployment.FeatureImpl;
 
 /**
  * Admin service
@@ -29,9 +29,7 @@ public class AdminFeature extends FeatureImpl {
 
 	public List<DeploymentDescriptor> getServices(){
 		List<DeploymentDescriptor> services = new ArrayList<>();
-				
-		services.add(new eu.unicore.services.rest.admin.AdminServiceDescriptor(kernel));		
-		
+		services.add(new AdminServiceDescriptor(kernel));		
 		return services;
 	}
 	

@@ -37,10 +37,10 @@ import javax.xml.namespace.QName;
 
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
-import de.fzj.unicore.wsrflite.ContainerProperties;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.IContainerSecurityConfiguration;
-import de.fzj.unicore.wsrflite.xmlbeans.WSUtilities;
+import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.IContainerSecurityConfiguration;
+import eu.unicore.services.ws.WSUtilities;
 
 /**
  * Server side tools and utilities, mainly for working with endpoint references, soap headers, and WSRF

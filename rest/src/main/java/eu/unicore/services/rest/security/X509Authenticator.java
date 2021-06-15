@@ -17,10 +17,10 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicHeaderValueParser;
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.KernelInjectable;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.CXFUtils;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.KernelInjectable;
 import eu.unicore.util.Log;
 
 /**

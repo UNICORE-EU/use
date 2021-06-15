@@ -2,18 +2,18 @@ package eu.unicore.services.rest;
 
 import java.util.Properties;
 
+import org.junit.Assert;
 import org.junit.Test;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.TestConfigUtil;
 import eu.unicore.security.HTTPAuthNTokens;
 import eu.unicore.security.SecurityTokens;
+import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.security.AuthenticatorChain;
 import eu.unicore.services.rest.security.FilebasedAuthenticator;
 import eu.unicore.services.rest.security.FilebasedAuthenticator.AttributesHolder;
 import eu.unicore.services.rest.security.IAuthenticator;
 import eu.unicore.services.rest.security.RESTSecurityProperties;
-import org.junit.Assert;
+import eu.unicore.services.security.TestConfigUtil;
 
 public class TestConfig {
 

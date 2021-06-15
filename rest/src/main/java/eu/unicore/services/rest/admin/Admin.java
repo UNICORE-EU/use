@@ -21,16 +21,16 @@ import org.apache.cxf.jaxrs.impl.ResponseBuilderImpl;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import de.fzj.unicore.wsrflite.ExternalSystemConnector;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.admin.AdminAction;
-import de.fzj.unicore.wsrflite.admin.AdminActionResult;
-import de.fzj.unicore.wsrflite.security.util.AuthZAttributeStore;
-import de.fzj.unicore.wsrflite.utils.MetricUtils;
 import eu.unicore.security.Client;
+import eu.unicore.services.ExternalSystemConnector;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.admin.AdminAction;
+import eu.unicore.services.admin.AdminActionResult;
 import eu.unicore.services.rest.Link;
 import eu.unicore.services.rest.RESTUtils;
 import eu.unicore.services.rest.impl.BaseRESTController;
+import eu.unicore.services.security.util.AuthZAttributeStore;
+import eu.unicore.services.utils.MetricUtils;
 import eu.unicore.util.Log;
 
 /**

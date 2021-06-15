@@ -7,6 +7,9 @@
  */
 package eu.unicore.uas.pdp.local;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -17,10 +20,8 @@ import org.herasaf.xacml.core.policy.Evaluatable;
 import org.herasaf.xacml.core.simplePDP.SimplePDPFactory;
 import org.junit.Test;
 
-import de.fzj.unicore.wsrflite.ContainerProperties;
-import de.fzj.unicore.wsrflite.ThreadingServices;
-
-import static org.junit.Assert.*;
+import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.ThreadingServices;
 
 public class PolicyStoreTest
 {

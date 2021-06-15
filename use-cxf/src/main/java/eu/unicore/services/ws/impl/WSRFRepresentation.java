@@ -14,11 +14,11 @@ import org.apache.xmlbeans.XmlBeans;
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlObject;
 
-import de.fzj.unicore.wsrflite.xmlbeans.WSUtilities;
-import de.fzj.unicore.wsrflite.xmlbeans.XmlRenderer;
-import de.fzj.unicore.wsrflite.xmlbeans.XmlRenderer.Internal;
 import eu.unicore.security.wsutil.client.ConditionalGetUtil;
 import eu.unicore.services.ws.WSFrontEnd;
+import eu.unicore.services.ws.WSUtilities;
+import eu.unicore.services.ws.XmlRenderer;
+import eu.unicore.services.ws.XmlRenderer.Internal;
 import eu.unicore.util.Log;
 
 /**

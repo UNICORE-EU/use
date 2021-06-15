@@ -33,8 +33,7 @@
 
 package eu.unicore.services.ws;
 
-import de.fzj.unicore.wsrflite.Resource;
-import de.fzj.unicore.wsrflite.xmlbeans.WSResource;
+import eu.unicore.services.Resource;
 
 /**
  * a WS Resource, with server side data included.

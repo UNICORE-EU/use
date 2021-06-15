@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.fzj.unicore.wsrflite.ExternalSystemConnector;
-import de.fzj.unicore.wsrflite.security.util.AuthZAttributeStore;
 import eu.unicore.security.Client;
 import eu.unicore.security.Queue;
 import eu.unicore.security.Role;
 import eu.unicore.security.Xlogin;
+import eu.unicore.services.ExternalSystemConnector;
+import eu.unicore.services.security.util.AuthZAttributeStore;
 
 /**
  * base class for resources providing general information about client&server

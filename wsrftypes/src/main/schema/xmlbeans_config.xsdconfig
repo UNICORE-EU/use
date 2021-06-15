@@ -9,7 +9,7 @@
     <!-- wsrflite types -->
     
     <xb:namespace uri="http://www.fz-juelich.de/unicore/wsrflite">
-        <xb:package>de.fzj.unicore.wsrflite.xmlbeans</xb:package>
+        <xb:package>eu.unicore.services.ws</xb:package>
     </xb:namespace>
     
     <xb:namespace uri="http://unigrids.org/2006/04/types">

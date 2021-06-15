@@ -8,9 +8,9 @@ import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 
-import de.fzj.unicore.wsrflite.ContainerProperties;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
+import eu.unicore.services.ContainerProperties;
 import eu.unicore.uas.pdp.argus.ArgusPAP;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 

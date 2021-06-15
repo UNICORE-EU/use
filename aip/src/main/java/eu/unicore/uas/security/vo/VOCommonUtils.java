@@ -16,7 +16,7 @@ import java.util.Properties;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.security.IAttributeSource;
+import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.uas.security.vo.conf.PropertiesBasedConfiguration;
 
 /**

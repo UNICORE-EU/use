@@ -17,20 +17,20 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.fzj.unicore.wsrflite.ContainerProperties;
-import de.fzj.unicore.wsrflite.Home;
-import de.fzj.unicore.wsrflite.InitParameters;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.Resource;
-import de.fzj.unicore.wsrflite.impl.DefaultHome;
-import de.fzj.unicore.wsrflite.persistence.Persistence;
-import de.fzj.unicore.wsrflite.security.TestConfigUtil;
-import de.fzj.unicore.wsrflite.utils.deployment.DeploymentDescriptorImpl;
+import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.Home;
+import eu.unicore.services.InitParameters;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.Resource;
+import eu.unicore.services.impl.DefaultHome;
+import eu.unicore.services.persistence.Persistence;
 import eu.unicore.services.rest.RestService;
 import eu.unicore.services.rest.USEResource;
 import eu.unicore.services.rest.USERestApplication;
 import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.services.rest.impl.ServicesBase;
+import eu.unicore.services.security.TestConfigUtil;
+import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
 
 public class TestServicesBase {
 

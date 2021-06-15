@@ -3,10 +3,6 @@ package eu.unicore.uas.security.xuudb;
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 
-import junit.framework.TestCase;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.IAttributeSource;
-import de.fzj.unicore.wsrflite.security.TestConfigUtil;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
@@ -18,6 +14,10 @@ import eu.emi.security.authn.x509.proxy.ProxyUtils;
 import eu.unicore.bugsreporter.annotation.FunctionalTest;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.IAttributeSource;
+import eu.unicore.services.security.TestConfigUtil;
+import junit.framework.TestCase;
 
 public class TestXUUDBAuthoriser extends TestCase{
 

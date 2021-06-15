@@ -5,11 +5,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 
-import de.fzj.unicore.wsrflite.Home;
-import de.fzj.unicore.wsrflite.Resource;
-import de.fzj.unicore.wsrflite.security.util.AuthZAttributeStore;
 import eu.unicore.security.wsutil.SecuritySession;
 import eu.unicore.security.wsutil.SecuritySessionUtils;
+import eu.unicore.services.Home;
+import eu.unicore.services.Resource;
+import eu.unicore.services.security.util.AuthZAttributeStore;
 
 public class PostInvokeHandler extends AbstractPhaseInterceptor<Message> {
 

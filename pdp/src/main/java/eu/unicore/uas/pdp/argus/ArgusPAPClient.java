@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import eu.unicore.services.ws.WSRFClientFactory;
+import eu.unicore.util.httpclient.IClientConfiguration;
 import xmlbeans.oasis.xacml.x2.x0.saml.assertion.XACMLPolicyQueryDocument;
 import xmlbeans.org.oasis.saml2.protocol.ResponseDocument;
-import de.fzj.unicore.wsrflite.xfire.WSRFClientFactory;
-import eu.unicore.util.httpclient.IClientConfiguration;
 
 public class ArgusPAPClient{
 	private SAMLXACMLProvisioningInterface samlProxy;

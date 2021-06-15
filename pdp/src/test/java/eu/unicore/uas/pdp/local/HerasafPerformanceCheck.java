@@ -11,7 +11,7 @@ import java.util.Properties;
 
 import org.junit.Before;
 
-import de.fzj.unicore.wsrflite.ContainerProperties;
+import eu.unicore.services.ContainerProperties;
 import eu.unicore.uas.pdp.AbstractPerformanceTester;
 
 public class HerasafPerformanceCheck extends AbstractPerformanceTester

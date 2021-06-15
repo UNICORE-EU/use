@@ -1,16 +1,16 @@
 package eu.unicore.uas.security.gridmapfile;
 
-import static org.junit.Assert.*;
+import static eu.unicore.services.security.ContainerSecurityProperties.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Properties;
 
 import org.junit.Test;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import static de.fzj.unicore.wsrflite.security.ContainerSecurityProperties.*;
-import de.fzj.unicore.wsrflite.security.IAttributeSource;
-import de.fzj.unicore.wsrflite.security.TestConfigUtil;
-import de.fzj.unicore.wsrflite.security.util.AttributeSourcesChain;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.IAttributeSource;
+import eu.unicore.services.security.TestConfigUtil;
+import eu.unicore.services.security.util.AttributeSourcesChain;
 import eu.unicore.util.configuration.ConfigurationException;
 
 public class TestGridmapFileAuthoriser {

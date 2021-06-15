@@ -5,9 +5,7 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
-import de.fzj.unicore.wsrflite.Kernel;
-
-import eu.unicore.services.rest.USERestApplication;
+import eu.unicore.services.Kernel;
 
 /**
  * REST application for local/shared Registry

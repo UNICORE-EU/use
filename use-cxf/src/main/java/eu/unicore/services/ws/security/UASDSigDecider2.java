@@ -10,9 +10,9 @@ package eu.unicore.services.ws.security;
 
 import org.apache.cxf.message.Message;
 
-import de.fzj.unicore.wsrflite.security.DSignCheck;
 import eu.unicore.security.wsutil.CXFUtils;
 import eu.unicore.security.wsutil.DSigDecider;
+import eu.unicore.services.security.DSignCheck;
 
 /**
  * This class decides whether incoming message should have its digital signature checked or not. 

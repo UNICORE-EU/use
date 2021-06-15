@@ -9,12 +9,12 @@ import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.IAttributeSource;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.samly2.attrprofile.UVOSAttributeProfile;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.XACMLAttribute;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.uas.security.vo.conf.PropertiesBasedConfiguration;
 import eu.unicore.util.configuration.ConfigurationException;
 

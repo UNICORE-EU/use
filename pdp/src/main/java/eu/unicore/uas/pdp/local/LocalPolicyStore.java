@@ -31,8 +31,8 @@ import org.herasaf.xacml.core.simplePDP.SimplePDPFactory;
 import org.herasaf.xacml.core.utils.JAXBMarshallerConfiguration;
 import org.xml.sax.SAXException;
 
-import de.fzj.unicore.wsrflite.ThreadingServices;
-import de.fzj.unicore.wsrflite.utils.FileWatcher;
+import eu.unicore.services.ThreadingServices;
+import eu.unicore.services.utils.FileWatcher;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.FilePropertiesHelper;

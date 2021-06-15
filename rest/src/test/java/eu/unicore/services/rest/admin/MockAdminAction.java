@@ -2,9 +2,9 @@ package eu.unicore.services.rest.admin;
 
 import java.util.Map;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.admin.AdminAction;
-import de.fzj.unicore.wsrflite.admin.AdminActionResult;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.admin.AdminAction;
+import eu.unicore.services.admin.AdminActionResult;
 
 public class MockAdminAction implements AdminAction {
 

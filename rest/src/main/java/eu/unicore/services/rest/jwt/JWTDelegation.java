@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.apache.http.HttpMessage;
 
-import de.fzj.unicore.wsrflite.security.IContainerSecurityConfiguration;
 import eu.unicore.services.rest.client.IAuthCallback;
+import eu.unicore.services.security.IContainerSecurityConfiguration;
 
 /**
  * Adds JWT delegation token to outgoing call. It will be signed with the server private key 

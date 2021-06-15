@@ -11,11 +11,11 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
-import de.fzj.unicore.wsrflite.security.SecurityManager;
-import de.fzj.unicore.wsrflite.security.pdp.ActionDescriptor;
-import de.fzj.unicore.wsrflite.security.util.ResourceDescriptor;
 import eu.unicore.security.Client;
 import eu.unicore.security.XACMLAttribute;
+import eu.unicore.services.pdp.ActionDescriptor;
+import eu.unicore.services.security.SecurityManager;
+import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.uas.pdp.request.creator.XACMLAttributeMeta;
 import eu.unicore.uas.pdp.request.creator.XACMLAttributeMeta.XACMLAttributeCategory;
 

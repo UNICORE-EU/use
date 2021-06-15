@@ -16,8 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.TestConfigUtil;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.TestConfigUtil;
 
 import eu.unicore.bugsreporter.annotation.FunctionalTest;
 import eu.unicore.security.SecurityTokens;

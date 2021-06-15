@@ -23,23 +23,23 @@ import org.apache.http.client.methods.HttpGet;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.util.AuthZAttributeStore;
-import de.fzj.unicore.wsrflite.server.JettyServer;
-import de.fzj.unicore.wsrflite.utils.deployment.DeploymentDescriptorImpl;
 import eu.unicore.security.wsutil.SecuritySessionUtils;
+import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.RestService;
 import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.services.rest.client.IAuthCallback;
 import eu.unicore.services.rest.client.UsernamePassword;
 import eu.unicore.services.rest.jwt.JWTDelegation;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
+import eu.unicore.services.security.util.AuthZAttributeStore;
+import eu.unicore.services.server.JettyServer;
+import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.HttpUtils;
-import org.junit.Assert;
 
 public class TestRestSecurity {
 
@@ -148,12 +148,12 @@ public class TestRestSecurity {
 			JSONObject reply = bc.getJSON();
 			if(i==1){
 				System.out.println("Service reply: "+reply.toString(2));
-				sessionId = bc.getSessionIDProvider().getSessionID(resource, auth.getSessionKey());
+				sessionId = bc.getSessionIDProvider().getSessionID(resource, bc.getSessionKey());
 				assertNotNull(sessionId);
 			}
 			else{
 				assertEquals(sessionId, bc.getSessionIDProvider().getSessionID(resource, 
-						 auth.getSessionKey()));
+						bc.getSessionKey()));
 			}
 			Assert.assertEquals(dn, reply.getString("dn"));
 			Assert.assertEquals(issuer, reply.getString("td_consignor"));

@@ -11,9 +11,9 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.TestConfigUtil;
+import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.client.BaseClient;
+import eu.unicore.services.security.TestConfigUtil;
 
 public class TestAdminService {
 

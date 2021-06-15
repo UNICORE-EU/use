@@ -20,14 +20,14 @@ import javax.net.ssl.SSLContext;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.IAttributeSource;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.canl.SSLContextCreator;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.uas.security.vo.UnicoreAttributesHandler;
 import eu.unicore.uas.security.xuudb.CredentialCache;
 import eu.unicore.util.Log;

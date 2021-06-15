@@ -2,10 +2,10 @@ package eu.unicore.services.rest;
 
 import javax.ws.rs.core.Application;
 
-import de.fzj.unicore.wsrflite.DeploymentDescriptor;
-import de.fzj.unicore.wsrflite.Service;
-import de.fzj.unicore.wsrflite.ServiceFactory;
-import de.fzj.unicore.wsrflite.exceptions.ServiceDeploymentException;
+import eu.unicore.services.DeploymentDescriptor;
+import eu.unicore.services.Service;
+import eu.unicore.services.ServiceFactory;
+import eu.unicore.services.exceptions.ServiceDeploymentException;
 
 public class RestServiceFactory implements ServiceFactory {
 	

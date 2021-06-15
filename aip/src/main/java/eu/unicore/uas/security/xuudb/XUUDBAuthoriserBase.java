@@ -7,12 +7,12 @@ import java.util.concurrent.Callable;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.ExternalSystemConnector;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.ThreadingServices;
-import de.fzj.unicore.wsrflite.security.IAttributeSourceBase;
-import de.fzj.unicore.wsrflite.utils.CircuitBreaker;
-import de.fzj.unicore.wsrflite.utils.TimeoutRunner;
+import eu.unicore.services.ExternalSystemConnector;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.ThreadingServices;
+import eu.unicore.services.security.IAttributeSourceBase;
+import eu.unicore.services.utils.CircuitBreaker;
+import eu.unicore.services.utils.TimeoutRunner;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.ConnectionUtil;
 

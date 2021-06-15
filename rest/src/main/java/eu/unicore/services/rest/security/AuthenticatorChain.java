@@ -13,11 +13,11 @@ import java.util.ServiceLoader;
 import org.apache.cxf.message.Message;
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.ISubSystem;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.KernelInjectable;
-import de.fzj.unicore.wsrflite.utils.Utilities;
 import eu.unicore.security.SecurityTokens;
+import eu.unicore.services.ISubSystem;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.KernelInjectable;
+import eu.unicore.services.utils.Utilities;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.PropertyGroupHelper;
@@ -26,7 +26,7 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 	
 	private static final Logger logger=Log.getLogger(Log.SECURITY, AuthenticatorChain.class);
 
-	private final List<IAuthenticator>chain = new ArrayList<IAuthenticator>();
+	private final List<IAuthenticator>chain = new ArrayList<>();
 	
 	private final Kernel kernel;
 	
@@ -38,7 +38,7 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 	
 	public void init(Kernel k){}
 	
-	private final static Collection<String> s = new HashSet<String>();
+	private final static Collection<String> s = new HashSet<>();
 	
 	@Override
 	public final Collection<String>getAuthSchemes(){
@@ -112,7 +112,7 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 	
 	// lookup and register service factories from classpath
 	private void registerConfigDefaults() {
-		ServiceLoader<AuthenticatorDefaults> sl=ServiceLoader.load(AuthenticatorDefaults.class);
+		ServiceLoader<AuthenticatorDefaults> sl = ServiceLoader.load(AuthenticatorDefaults.class);
 		for (AuthenticatorDefaults defs: sl) {
 			defaults.add(defs);
 		}

@@ -2,12 +2,12 @@ package eu.unicore.services.rest.jwt;
 
 import java.security.PublicKey;
 
-import de.fzj.unicore.wsrflite.security.IContainerSecurityConfiguration;
-import de.fzj.unicore.wsrflite.security.util.PubkeyCache;
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.services.rest.security.jwt.JWTUtils;
+import eu.unicore.services.security.IContainerSecurityConfiguration;
+import eu.unicore.services.security.util.PubkeyCache;
 
 public class JWTHelper {
 	

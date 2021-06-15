@@ -38,9 +38,10 @@ import java.util.List;
 
 import javax.xml.namespace.QName;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.Resource;
-import de.fzj.unicore.wsrflite.impl.DefaultHome;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.Resource;
+import eu.unicore.services.WSRFConstants;
+import eu.unicore.services.impl.DefaultHome;
 
 /**
  * 
@@ -67,7 +68,7 @@ public class WSResourceHomeImpl extends DefaultHome {
 
 	private List<QName>acceptedRefParams=Arrays.asList(new QName[]{
 			new QName("http://unicore.sourceforge.net","resId"),
-			de.fzj.unicore.wsrflite.WSRFConstants.U6_RESOURCE_ID,
+			WSRFConstants.U6_RESOURCE_ID,
 			//old GPE clients still use this
 			new QName("http://com.fujitsu.arcon.addressing","ResourceDisambiguator"),
 	});

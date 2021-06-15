@@ -82,31 +82,31 @@ import org.oasisOpen.docs.wsrf.rp2.UpdateType;
 import org.unigrids.services.atomic.types.SecurityDocument;
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.Resource;
-import de.fzj.unicore.wsrflite.exceptions.InvalidModificationException;
-import de.fzj.unicore.wsrflite.exceptions.TerminationTimeChangeRejectedException;
-import de.fzj.unicore.wsrflite.exceptions.UnableToSetTerminationTimeException;
-import de.fzj.unicore.wsrflite.impl.ResourceImpl;
-import de.fzj.unicore.wsrflite.impl.SecuredResourceImpl;
-import de.fzj.unicore.wsrflite.xmlbeans.BaseFault;
-import de.fzj.unicore.wsrflite.xmlbeans.Modifiable;
-import de.fzj.unicore.wsrflite.xmlbeans.WSResource;
-import de.fzj.unicore.wsrflite.xmlbeans.WSUtilities;
-import de.fzj.unicore.wsrflite.xmlbeans.XmlRenderer;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.InvalidResourcePropertyQNameFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.ResourceNotDestroyedFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.ResourceUnavailableFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.ResourceUnknownFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.TerminationTimeChangeRejectedFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.UnableToSetTerminationTimeFault;
-import de.fzj.unicore.wsrflite.xmlbeans.renderers.ACLRenderer;
-import de.fzj.unicore.wsrflite.xmlbeans.renderers.CurrentTimeRenderer;
-import de.fzj.unicore.wsrflite.xmlbeans.renderers.SecurityInfoRenderer;
-import de.fzj.unicore.wsrflite.xmlbeans.renderers.TerminationTimeRenderer;
 import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.wsutil.client.ConditionalGetUtil;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.Resource;
+import eu.unicore.services.exceptions.InvalidModificationException;
+import eu.unicore.services.exceptions.TerminationTimeChangeRejectedException;
+import eu.unicore.services.exceptions.UnableToSetTerminationTimeException;
+import eu.unicore.services.impl.ResourceImpl;
+import eu.unicore.services.impl.SecuredResourceImpl;
+import eu.unicore.services.ws.BaseFault;
+import eu.unicore.services.ws.Modifiable;
 import eu.unicore.services.ws.WSFrontEnd;
+import eu.unicore.services.ws.WSResource;
+import eu.unicore.services.ws.WSUtilities;
+import eu.unicore.services.ws.XmlRenderer;
+import eu.unicore.services.ws.exceptions.InvalidResourcePropertyQNameFault;
+import eu.unicore.services.ws.exceptions.ResourceNotDestroyedFault;
+import eu.unicore.services.ws.exceptions.ResourceUnavailableFault;
+import eu.unicore.services.ws.exceptions.ResourceUnknownFault;
+import eu.unicore.services.ws.exceptions.TerminationTimeChangeRejectedFault;
+import eu.unicore.services.ws.exceptions.UnableToSetTerminationTimeFault;
+import eu.unicore.services.ws.renderers.ACLRenderer;
+import eu.unicore.services.ws.renderers.CurrentTimeRenderer;
+import eu.unicore.services.ws.renderers.SecurityInfoRenderer;
+import eu.unicore.services.ws.renderers.TerminationTimeRenderer;
 import eu.unicore.services.ws.utils.WSServerUtilities;
 import eu.unicore.util.ConcurrentAccess;
 import eu.unicore.util.Log;
@@ -129,7 +129,7 @@ public class WSRFFrontend implements WSFrontEnd, WSResource {
 	
 	public static final QName RPSecurityInfoProperty=SecurityDocument.type.getDocumentElementName();
 
-	protected final Map<QName,XmlRenderer> renderers = new HashMap<QName, XmlRenderer>();
+	protected final Map<QName,XmlRenderer> renderers = new HashMap<>();
 	
 	protected final Resource resource;
 

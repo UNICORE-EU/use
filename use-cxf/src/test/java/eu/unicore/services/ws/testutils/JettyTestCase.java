@@ -34,9 +34,9 @@
 package eu.unicore.services.ws.testutils;
 
 
-import static de.fzj.unicore.wsrflite.ContainerProperties.PREFIX;
-import static de.fzj.unicore.wsrflite.ContainerProperties.SERVER_HOST;
-import static de.fzj.unicore.wsrflite.ContainerProperties.SERVER_PORT;
+import static eu.unicore.services.ContainerProperties.PREFIX;
+import static eu.unicore.services.ContainerProperties.SERVER_HOST;
+import static eu.unicore.services.ContainerProperties.SERVER_PORT;
 
 import java.io.File;
 import java.util.Properties;
@@ -45,9 +45,9 @@ import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.TestConfigUtil;
-import de.fzj.unicore.wsrflite.server.JettyServer;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.TestConfigUtil;
+import eu.unicore.services.server.JettyServer;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import eu.unicore.util.httpclient.IClientConfiguration;
 import eu.unicore.util.httpclient.ServerHostnameCheckingMode;

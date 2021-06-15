@@ -5,6 +5,13 @@ import java.util.ArrayList;
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlObject;
 
+import eu.unicore.samly2.SAMLConstants;
+import eu.unicore.samly2.elements.NameID;
+import eu.unicore.security.Client;
+import eu.unicore.services.pdp.ActionDescriptor;
+import eu.unicore.services.security.util.ResourceDescriptor;
+import eu.unicore.uas.pdp.request.creator.XACMLAttributeMeta.XACMLAttributeCategory;
+import eu.unicore.uas.pdp.request.profile.XACMLProfile;
 import xmlbeans.oasis.xacml.x2.x0.context.ActionType;
 import xmlbeans.oasis.xacml.x2.x0.context.AttributeType;
 import xmlbeans.oasis.xacml.x2.x0.context.AttributeValueType;
@@ -14,13 +21,6 @@ import xmlbeans.oasis.xacml.x2.x0.context.ResourceType;
 import xmlbeans.oasis.xacml.x2.x0.context.SubjectType;
 import xmlbeans.oasis.xacml.x2.x0.saml.assertion.XACMLAuthzDecisionQueryDocument;
 import xmlbeans.oasis.xacml.x2.x0.saml.assertion.XACMLAuthzDecisionQueryType;
-import de.fzj.unicore.wsrflite.security.pdp.ActionDescriptor;
-import de.fzj.unicore.wsrflite.security.util.ResourceDescriptor;
-import eu.unicore.samly2.SAMLConstants;
-import eu.unicore.samly2.elements.NameID;
-import eu.unicore.security.Client;
-import eu.unicore.uas.pdp.request.creator.XACMLAttributeMeta.XACMLAttributeCategory;
-import eu.unicore.uas.pdp.request.profile.XACMLProfile;
 
 public class XmlbeansXacml2RequestCreator extends RequestCreatorBase {
 

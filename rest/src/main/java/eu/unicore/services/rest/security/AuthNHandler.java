@@ -16,11 +16,6 @@ import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.IAttributeSource;
-import de.fzj.unicore.wsrflite.security.IContainerSecurityConfiguration;
-import de.fzj.unicore.wsrflite.security.util.AuthZAttributeStore;
-import de.fzj.unicore.wsrflite.security.util.PubkeyCache;
 import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
@@ -28,10 +23,15 @@ import eu.unicore.security.wsutil.CXFUtils;
 import eu.unicore.security.wsutil.SecuritySession;
 import eu.unicore.security.wsutil.SecuritySessionStore;
 import eu.unicore.security.wsutil.SecuritySessionUtils;
+import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.impl.PostInvokeHandler;
 import eu.unicore.services.rest.jwt.JWTHelper;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.jwt.JWTUtils;
+import eu.unicore.services.security.IAttributeSource;
+import eu.unicore.services.security.IContainerSecurityConfiguration;
+import eu.unicore.services.security.util.AuthZAttributeStore;
+import eu.unicore.services.security.util.PubkeyCache;
 import eu.unicore.util.Log;
 
 /**

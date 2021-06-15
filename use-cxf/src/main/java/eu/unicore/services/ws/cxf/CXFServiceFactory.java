@@ -1,10 +1,10 @@
 package eu.unicore.services.ws.cxf;
 
-import de.fzj.unicore.wsrflite.DeploymentDescriptor;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.ServiceFactory;
-import de.fzj.unicore.wsrflite.exceptions.ServiceDeploymentException;
-import de.fzj.unicore.wsrflite.utils.deployment.DeploymentDescriptorImpl;
+import eu.unicore.services.DeploymentDescriptor;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.ServiceFactory;
+import eu.unicore.services.exceptions.ServiceDeploymentException;
+import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
 import eu.unicore.services.ws.WSFrontEnd;
 
 public class CXFServiceFactory implements ServiceFactory {

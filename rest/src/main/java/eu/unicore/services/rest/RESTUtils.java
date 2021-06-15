@@ -9,7 +9,7 @@ import java.util.Stack;
 
 import org.json.JSONObject;
 
-import de.fzj.unicore.wsrflite.Kernel;
+import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.client.BaseClient;
 
 public class RESTUtils {

@@ -13,10 +13,10 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.IAttributeSource;
 import eu.unicore.security.XACMLAttribute;
 import eu.unicore.security.XACMLAttribute.Type;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.util.configuration.ConfigurationException;
 
 /**

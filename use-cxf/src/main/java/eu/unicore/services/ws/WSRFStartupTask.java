@@ -8,13 +8,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.Home;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.impl.DefaultHome;
-import de.fzj.unicore.wsrflite.server.AbstractStartupTask;
-import de.fzj.unicore.wsrflite.xmlbeans.registry.RegistryCreator;
-import de.fzj.unicore.wsrflite.xmlbeans.registry.RegistryHandler;
-import de.fzj.unicore.wsrflite.xmlbeans.sg.ServiceGroupEntry;
+import eu.unicore.services.Home;
+import eu.unicore.services.impl.DefaultHome;
+import eu.unicore.services.registry.RegistryCreator;
+import eu.unicore.services.registry.RegistryHandler;
+import eu.unicore.services.server.AbstractStartupTask;
+import eu.unicore.services.ws.sg.ServiceGroupEntry;
 import eu.unicore.util.Log;
 
 

@@ -1,6 +1,6 @@
 package eu.unicore.services.rest.testservice;
 
-import de.fzj.unicore.wsrflite.impl.BaseModel;
+import eu.unicore.services.impl.BaseModel;
 
 public class CounterModel extends BaseModel {
 

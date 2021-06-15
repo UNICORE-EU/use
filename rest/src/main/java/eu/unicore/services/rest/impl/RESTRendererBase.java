@@ -15,11 +15,11 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.KernelInjectable;
-import de.fzj.unicore.wsrflite.utils.Utilities;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.KernelInjectable;
 import eu.unicore.services.rest.Link;
 import eu.unicore.services.rest.RESTUtils.HtmlBuilder;
+import eu.unicore.services.utils.Utilities;
 import eu.unicore.util.Log;
 
 /**

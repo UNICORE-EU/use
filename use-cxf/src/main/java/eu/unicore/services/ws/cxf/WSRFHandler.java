@@ -49,17 +49,17 @@ import org.apache.cxf.ws.addressing.ReferenceParametersType;
 import org.apache.cxf.ws.addressing.soap.MAPCodec;
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.Home;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.Resource;
-import de.fzj.unicore.wsrflite.Service;
-import de.fzj.unicore.wsrflite.admin.ResourceAvailability;
-import de.fzj.unicore.wsrflite.exceptions.ResourceUnavailableException;
-import de.fzj.unicore.wsrflite.exceptions.ResourceUnknownException;
-import de.fzj.unicore.wsrflite.messaging.MessagingException;
-import de.fzj.unicore.wsrflite.persistence.PersistenceSettings;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.ResourceUnknownFault;
 import eu.unicore.security.wsutil.CXFUtils;
+import eu.unicore.services.Home;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.Resource;
+import eu.unicore.services.Service;
+import eu.unicore.services.admin.ResourceAvailability;
+import eu.unicore.services.exceptions.ResourceUnavailableException;
+import eu.unicore.services.exceptions.ResourceUnknownException;
+import eu.unicore.services.messaging.MessagingException;
+import eu.unicore.services.persistence.PersistenceSettings;
+import eu.unicore.services.ws.exceptions.ResourceUnknownFault;
 import eu.unicore.services.ws.impl.XmlBeansFaultConverter;
 import eu.unicore.util.Log;
 

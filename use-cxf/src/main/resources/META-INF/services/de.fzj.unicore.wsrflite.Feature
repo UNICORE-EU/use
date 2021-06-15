@@ -1,1 +1,1 @@
-de.fzj.unicore.wsrflite.registry.ws.RegistryFeature
+eu.unicore.services.registry.ws.RegistryFeature

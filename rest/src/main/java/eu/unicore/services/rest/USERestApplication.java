@@ -1,6 +1,6 @@
 package eu.unicore.services.rest;
 
-import de.fzj.unicore.wsrflite.Kernel;
+import eu.unicore.services.Kernel;
 
 /**
  * helper interface used to initialize a REST application

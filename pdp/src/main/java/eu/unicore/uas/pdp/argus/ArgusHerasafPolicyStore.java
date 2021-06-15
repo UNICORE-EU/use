@@ -8,8 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.herasaf.xacml.core.SyntaxException;
 import org.xml.sax.SAXException;
 
-import de.fzj.unicore.wsrflite.ThreadingServices;
-
+import eu.unicore.services.ThreadingServices;
 import eu.unicore.uas.pdp.local.LocalPolicyStore;
 import eu.unicore.uas.pdp.local.PolicyListener;
 import eu.unicore.util.Log;

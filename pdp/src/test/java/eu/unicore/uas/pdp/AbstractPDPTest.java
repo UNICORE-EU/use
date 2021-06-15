@@ -12,14 +12,14 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import de.fzj.unicore.wsrflite.security.pdp.ActionDescriptor;
-import de.fzj.unicore.wsrflite.security.pdp.PDPResult;
-import de.fzj.unicore.wsrflite.security.pdp.PDPResult.Decision;
-import de.fzj.unicore.wsrflite.security.pdp.UnicoreXPDP;
-import de.fzj.unicore.wsrflite.security.util.ResourceDescriptor;
 import eu.unicore.bugsreporter.annotation.RegressionTest;
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
+import eu.unicore.services.pdp.ActionDescriptor;
+import eu.unicore.services.pdp.PDPResult;
+import eu.unicore.services.pdp.PDPResult.Decision;
+import eu.unicore.services.pdp.UnicoreXPDP;
+import eu.unicore.services.security.util.ResourceDescriptor;
 
 
 public abstract class AbstractPDPTest

@@ -7,14 +7,14 @@ import org.apache.cxf.message.Message;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.KernelInjectable;
-import de.fzj.unicore.wsrflite.security.util.PubkeyCache;
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.CXFUtils;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.KernelInjectable;
 import eu.unicore.services.rest.security.IAuthenticator;
 import eu.unicore.services.rest.security.jwt.JWTUtils;
+import eu.unicore.services.security.util.PubkeyCache;
 import eu.unicore.util.Log;
 
 /**

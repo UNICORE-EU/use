@@ -18,14 +18,14 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.ThreadingServices;
-import de.fzj.unicore.wsrflite.security.IAttributeSource;
-import de.fzj.unicore.wsrflite.utils.FileWatcher;
 import eu.emi.security.authn.x509.impl.OpensslNameUtils;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.XACMLAttribute;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.ThreadingServices;
+import eu.unicore.services.security.IAttributeSource;
+import eu.unicore.services.utils.FileWatcher;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 

@@ -355,6 +355,18 @@ public class BaseClient {
 		}
 	}
 	
+	public String getSessionKey() {
+		String key = authCallback!=null? authCallback.getSessionKey() : null;
+		String prefsKey = userPreferences!=null? userPreferences.getEncoded() : null;
+		if(key!=null && prefsKey!=null && prefsKey.length()>0) {
+			key = key + prefsKey;
+		}
+		else {
+			key = prefsKey;
+		}
+		return key;
+	}
+	
 	protected HttpResponse execute(HttpRequestBase method) throws Exception {
 		HttpResponse response = null;
 		boolean execWithAuth = !useSessions;
@@ -362,8 +374,7 @@ public class BaseClient {
 		
 		if(useSessions){
 			method.removeHeaders(SecuritySessionUtils.SESSION_ID_HEADER);
-			sessionKey = authCallback!=null? authCallback.getSessionKey() : null;
-			
+			sessionKey = getSessionKey();
 			String sessionId = sessionIDProvider.getSessionID(url, sessionKey);
 			if(sessionId!=null){
 				method.setHeader(SecuritySessionUtils.SESSION_ID_HEADER, sessionId);

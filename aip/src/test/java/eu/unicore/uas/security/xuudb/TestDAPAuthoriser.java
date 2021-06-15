@@ -3,16 +3,16 @@ package eu.unicore.uas.security.xuudb;
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 
-import junit.framework.TestCase;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.IAttributeSource;
-import de.fzj.unicore.wsrflite.security.TestConfigUtil;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.Xlogin;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.IAttributeSource;
+import eu.unicore.services.security.TestConfigUtil;
+import junit.framework.TestCase;
 
 public class TestDAPAuthoriser extends TestCase {
 	XUUDBDynamicAttributeSource xuudb;

@@ -20,13 +20,13 @@ import org.herasaf.xacml.core.context.impl.RequestType;
 import org.herasaf.xacml.core.simplePDP.SimplePDPFactory;
 import org.junit.Test;
 
-import de.fzj.unicore.wsrflite.security.pdp.ActionDescriptor;
-import de.fzj.unicore.wsrflite.security.util.ResourceDescriptor;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.XACMLAttribute;
+import eu.unicore.services.pdp.ActionDescriptor;
+import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.uas.pdp.MockAuthZContext;
 import eu.unicore.uas.pdp.request.creator.HerasafXacml2RequestCreator;
 import eu.unicore.uas.pdp.request.profile.UnicoreInternalProfile;

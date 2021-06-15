@@ -20,10 +20,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.fzj.unicore.persist.PersistenceException;
-import de.fzj.unicore.wsrflite.registry.ServiceRegistryImpl;
-import de.fzj.unicore.wsrflite.xmlbeans.client.RegistryClient;
+import eu.unicore.services.registry.ServiceRegistryImpl;
 import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.services.rest.impl.ServicesBase;
+import eu.unicore.services.ws.client.RegistryClient;
 
 /**
  * @author schuller

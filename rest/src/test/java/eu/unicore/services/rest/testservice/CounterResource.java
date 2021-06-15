@@ -1,11 +1,11 @@
 package eu.unicore.services.rest.testservice;
 
-import de.fzj.unicore.wsrflite.InitParameters;
-import de.fzj.unicore.wsrflite.impl.ResourceImpl;
-import de.fzj.unicore.wsrflite.messaging.PullPoint;
-import de.fzj.unicore.wsrflite.security.ACLEntry;
-import de.fzj.unicore.wsrflite.security.ACLEntry.MatchType;
 import eu.unicore.security.OperationType;
+import eu.unicore.services.InitParameters;
+import eu.unicore.services.impl.ResourceImpl;
+import eu.unicore.services.messaging.PullPoint;
+import eu.unicore.services.security.ACLEntry;
+import eu.unicore.services.security.ACLEntry.MatchType;
 
 public class CounterResource extends ResourceImpl {
 

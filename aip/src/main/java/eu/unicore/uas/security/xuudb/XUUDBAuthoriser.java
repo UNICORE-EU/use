@@ -16,14 +16,14 @@ import de.fzJuelich.unicore.xuudb.CheckDNDocument;
 import de.fzJuelich.unicore.xuudb.CheckDNResponseDocument;
 import de.fzJuelich.unicore.xuudb.CheckDataType;
 import de.fzJuelich.unicore.xuudb.LoginDataType;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.IAttributeSource;
-import de.fzj.unicore.wsrflite.utils.CircuitBreaker;
 import de.fzj.unicore.xuudb.X509Utils;
 import de.fzj.unicore.xuudb.interfaces.IPublic;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.wsutil.client.WSClientFactory;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.IAttributeSource;
+import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.IClientConfiguration;
 

@@ -8,10 +8,10 @@ import org.apache.cxf.ext.logging.LoggingFeature;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxrs.utils.ResourceUtils;
 
-import de.fzj.unicore.wsrflite.ContainerProperties;
-import de.fzj.unicore.wsrflite.Home;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.Service;
+import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.Home;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.Service;
 import eu.unicore.services.rest.impl.PostInvokeHandler;
 import eu.unicore.services.rest.impl.USERestInvoker;
 import eu.unicore.services.rest.security.AuthNHandler;

@@ -37,8 +37,8 @@ import org.apache.cxf.message.Exchange;
 import org.apache.cxf.service.Service;
 import org.apache.cxf.service.invoker.AbstractInvoker;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.KernelInjectable;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.KernelInjectable;
 
 /**
  * an CXF Invoker for plain (non-WSRF) web services

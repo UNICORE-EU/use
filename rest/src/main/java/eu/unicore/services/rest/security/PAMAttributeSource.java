@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.IAttributeSource;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.util.configuration.ConfigurationException;
 
 public class PAMAttributeSource implements IAttributeSource {

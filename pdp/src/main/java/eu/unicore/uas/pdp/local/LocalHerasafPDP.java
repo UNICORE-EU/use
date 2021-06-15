@@ -30,13 +30,13 @@ import org.herasaf.xacml.core.simplePDP.OrderedMapBasedSimplePolicyRepository;
 import org.herasaf.xacml.core.simplePDP.SimplePDPConfiguration;
 import org.herasaf.xacml.core.simplePDP.SimplePDPFactory;
 
-import de.fzj.unicore.wsrflite.ContainerProperties;
-import de.fzj.unicore.wsrflite.security.IContainerSecurityConfiguration;
-import de.fzj.unicore.wsrflite.security.pdp.ActionDescriptor;
-import de.fzj.unicore.wsrflite.security.pdp.PDPResult;
-import de.fzj.unicore.wsrflite.security.pdp.UnicoreXPDP;
-import de.fzj.unicore.wsrflite.security.util.ResourceDescriptor;
 import eu.unicore.security.Client;
+import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.pdp.ActionDescriptor;
+import eu.unicore.services.pdp.PDPResult;
+import eu.unicore.services.pdp.UnicoreXPDP;
+import eu.unicore.services.security.IContainerSecurityConfiguration;
+import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.uas.pdp.argus.ArgusPAP;
 import eu.unicore.uas.pdp.request.creator.HerasafXacml2RequestCreator;
 import eu.unicore.uas.pdp.request.profile.UnicoreInternalProfile;
@@ -73,7 +73,7 @@ public class LocalHerasafPDP implements UnicoreXPDP, PolicyListener
 			throw new ConfigurationException("For " + LocalHerasafPDP.class.getName() + 
 					" PDP a configuration file must be defined.");
 
-		String baseUrl = baseSettings.getValue(ContainerProperties.WSRF_BASEURL);
+		String baseUrl = baseSettings.getContainerURL();
 		requestMaker=new HerasafXacml2RequestCreator(new UnicoreInternalProfile(baseUrl));
 		new LocalPolicyStore(this, configuration, baseSettings.getThreadingServices());
 	}

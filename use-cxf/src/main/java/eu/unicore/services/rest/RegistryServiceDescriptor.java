@@ -1,7 +1,7 @@
 package eu.unicore.services.rest;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.utils.deployment.DeploymentDescriptorImpl;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
 
 public class RegistryServiceDescriptor extends DeploymentDescriptorImpl {
 

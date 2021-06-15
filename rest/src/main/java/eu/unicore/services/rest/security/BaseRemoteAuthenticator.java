@@ -9,10 +9,10 @@ import org.apache.logging.log4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.KernelInjectable;
-import de.fzj.unicore.wsrflite.utils.CircuitBreaker;
 import eu.unicore.security.SecurityTokens;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.KernelInjectable;
+import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 

@@ -33,7 +33,7 @@
 
 package eu.unicore.services.ws;
 
-import de.fzj.unicore.wsrflite.Home;
+import eu.unicore.services.Home;
 
 
 /**

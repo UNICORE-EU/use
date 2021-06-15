@@ -20,8 +20,8 @@ import de.fzj.unicore.wsrflite.Kernel;
 import de.fzj.unicore.wsrflite.registry.LocalRegistryClient;
 import de.fzj.unicore.wsrflite.registry.ServiceRegistryImpl;
 import de.fzj.unicore.wsrflite.xmlbeans.client.RegistryClient;
-import de.fzj.unicore.wsrflite.xmlbeans.registry.RegistryHandler;
 import de.fzj.unicore.wsrflite.xmlbeans.sg.Registry;
+import eu.unicore.services.registry.RegistryHandler;
 import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.util.httpclient.IClientConfiguration;
 

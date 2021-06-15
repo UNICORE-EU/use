@@ -7,11 +7,11 @@ import java.util.Map;
 
 import org.apache.cxf.message.Message;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.util.AttributeHandlingCallback;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.CXFUtils;
 import eu.unicore.security.wsutil.client.OAuthBearerTokenOutInterceptor;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.util.AttributeHandlingCallback;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 
 /**

@@ -11,6 +11,12 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.Logger;
 import org.apache.xmlbeans.XmlOptions;
 
+import eu.unicore.services.ThreadingServices;
+import eu.unicore.util.Log;
+import eu.unicore.util.configuration.ConfigurationException;
+import eu.unicore.util.configuration.FilePropertiesHelper;
+import eu.unicore.util.configuration.PropertyMD;
+import eu.unicore.util.httpclient.IClientConfiguration;
 import xmlbeans.oasis.xacml.x2.x0.policy.PolicySetDocument;
 import xmlbeans.oasis.xacml.x2.x0.policy.PolicySetType;
 import xmlbeans.oasis.xacml.x2.x0.saml.assertion.XACMLPolicyQueryDocument;
@@ -19,12 +25,6 @@ import xmlbeans.org.oasis.saml2.assertion.AssertionType;
 import xmlbeans.org.oasis.saml2.assertion.StatementAbstractType;
 import xmlbeans.org.oasis.saml2.protocol.ResponseDocument;
 import xmlbeans.org.oasis.saml2.protocol.ResponseType;
-import de.fzj.unicore.wsrflite.ThreadingServices;
-import eu.unicore.util.Log;
-import eu.unicore.util.configuration.ConfigurationException;
-import eu.unicore.util.configuration.FilePropertiesHelper;
-import eu.unicore.util.configuration.PropertyMD;
-import eu.unicore.util.httpclient.IClientConfiguration;
 
 public class ArgusPAPChecker {
 	private static final Logger log = Log.getLogger(Log.SECURITY, ArgusPAPChecker.class);

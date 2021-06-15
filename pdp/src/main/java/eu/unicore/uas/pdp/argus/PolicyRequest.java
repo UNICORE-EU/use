@@ -7,12 +7,12 @@ import java.util.Calendar;
 import org.apache.xmlbeans.XmlException;
 import org.w3c.dom.Document;
 
-import xmlbeans.oasis.xacml.x2.x0.policy.IdReferenceType;
-import xmlbeans.oasis.xacml.x2.x0.saml.assertion.XACMLPolicyQueryDocument;
-import xmlbeans.oasis.xacml.x2.x0.saml.assertion.XACMLPolicyQueryType;
 import eu.unicore.samly2.elements.NameID;
 import eu.unicore.samly2.proto.AbstractRequest;
 import eu.unicore.security.dsig.DSigException;
+import xmlbeans.oasis.xacml.x2.x0.policy.IdReferenceType;
+import xmlbeans.oasis.xacml.x2.x0.saml.assertion.XACMLPolicyQueryDocument;
+import xmlbeans.oasis.xacml.x2.x0.saml.assertion.XACMLPolicyQueryType;
 
 public class PolicyRequest extends AbstractRequest<XACMLPolicyQueryDocument, XACMLPolicyQueryType> {
 	

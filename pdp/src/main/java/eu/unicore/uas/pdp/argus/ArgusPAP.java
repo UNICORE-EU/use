@@ -9,12 +9,12 @@ import org.apache.logging.log4j.Logger;
 import org.herasaf.xacml.core.SyntaxException;
 import org.xml.sax.SAXException;
 
-import de.fzj.unicore.wsrflite.ContainerProperties;
-import de.fzj.unicore.wsrflite.security.IContainerSecurityConfiguration;
-import de.fzj.unicore.wsrflite.security.pdp.ActionDescriptor;
-import de.fzj.unicore.wsrflite.security.pdp.PDPResult;
-import de.fzj.unicore.wsrflite.security.util.ResourceDescriptor;
 import eu.unicore.security.Client;
+import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.pdp.ActionDescriptor;
+import eu.unicore.services.pdp.PDPResult;
+import eu.unicore.services.security.IContainerSecurityConfiguration;
+import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.uas.pdp.local.LocalHerasafPDP;
 import eu.unicore.uas.pdp.request.creator.HerasafXacml2RequestCreator;
 import eu.unicore.uas.pdp.request.profile.EMI1Profile;
@@ -34,7 +34,7 @@ public class ArgusPAP extends LocalHerasafPDP {
 		if (configuration == null)
 			throw new ConfigurationException("For " + ArgusPAP.class.getName() + 
 					" PDP a configuration file must be defined.");
-		String baseUrl = baseSettings.getValue(ContainerProperties.WSRF_BASEURL);
+		String baseUrl = baseSettings.getContainerURL();
 		super.initialize(new HerasafXacml2RequestCreator(new EMI1Profile(baseUrl)));
 		Object notificationObject = new Object();
 		new ArgusHerasafPolicyStore(this, configuration, 

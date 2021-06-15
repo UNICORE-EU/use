@@ -15,10 +15,10 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.Kernel;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
+import eu.unicore.services.Kernel;
 import eu.unicore.uas.security.vo.conf.IPullConfiguration;
 import eu.unicore.uas.security.vo.conf.PropertiesBasedConfiguration;
 import eu.unicore.util.Log;

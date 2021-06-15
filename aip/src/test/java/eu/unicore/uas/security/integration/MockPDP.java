@@ -7,12 +7,12 @@
  */
 package eu.unicore.uas.security.integration;
 
-import de.fzj.unicore.wsrflite.ContainerProperties;
-import de.fzj.unicore.wsrflite.security.IContainerSecurityConfiguration;
-import de.fzj.unicore.wsrflite.security.pdp.ActionDescriptor;
-import de.fzj.unicore.wsrflite.security.pdp.PDPResult;
-import de.fzj.unicore.wsrflite.security.pdp.UnicoreXPDP;
-import de.fzj.unicore.wsrflite.security.util.ResourceDescriptor;
+import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.security.IContainerSecurityConfiguration;
+import eu.unicore.services.pdp.ActionDescriptor;
+import eu.unicore.services.pdp.PDPResult;
+import eu.unicore.services.pdp.UnicoreXPDP;
+import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.security.Client;
 import eu.unicore.util.httpclient.IClientConfiguration;
 

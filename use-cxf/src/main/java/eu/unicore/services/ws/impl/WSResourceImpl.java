@@ -66,17 +66,17 @@ import org.oasisOpen.docs.wsrf.rp2.UpdateResourcePropertiesResponseDocument;
 import org.unigrids.services.atomic.types.SecurityDocument;
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
-import de.fzj.unicore.wsrflite.impl.ResourceImpl;
-import de.fzj.unicore.wsrflite.xmlbeans.BaseFault;
-import de.fzj.unicore.wsrflite.xmlbeans.XmlRenderer;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.InvalidResourcePropertyQNameFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.ResourceNotDestroyedFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.ResourceUnavailableFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.ResourceUnknownFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.TerminationTimeChangeRejectedFault;
-import de.fzj.unicore.wsrflite.xmlbeans.exceptions.UnableToSetTerminationTimeFault;
+import eu.unicore.services.impl.ResourceImpl;
+import eu.unicore.services.ws.BaseFault;
 import eu.unicore.services.ws.WSFrontEnd;
 import eu.unicore.services.ws.WSServerResource;
+import eu.unicore.services.ws.XmlRenderer;
+import eu.unicore.services.ws.exceptions.InvalidResourcePropertyQNameFault;
+import eu.unicore.services.ws.exceptions.ResourceNotDestroyedFault;
+import eu.unicore.services.ws.exceptions.ResourceUnavailableFault;
+import eu.unicore.services.ws.exceptions.ResourceUnknownFault;
+import eu.unicore.services.ws.exceptions.TerminationTimeChangeRejectedFault;
+import eu.unicore.services.ws.exceptions.UnableToSetTerminationTimeFault;
 import eu.unicore.util.ConcurrentAccess;
 import eu.unicore.util.Log;
 

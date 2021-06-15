@@ -13,11 +13,11 @@ import java.util.Map;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.security.util.AuthZAttributeStore;
 import eu.unicore.samly2.assertion.Assertion;
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.client.SAMLAttributePushOutHandler;
+import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.IClientConfiguration;
 

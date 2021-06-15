@@ -12,12 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.log4j.NDC;
+import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.security.util.AttributeHandlingCallback;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.security.SecurityTokens;
+import eu.unicore.services.security.util.AttributeHandlingCallback;
 import eu.unicore.uas.security.vo.conf.IBaseVOConfiguration;
 import eu.unicore.util.Log;
 

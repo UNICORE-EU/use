@@ -18,13 +18,13 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.wsrflite.security.IAttributeSource;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.XACMLAttribute;
+import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 

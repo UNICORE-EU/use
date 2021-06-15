@@ -7,14 +7,14 @@ import org.junit.Test;
 
 import de.fzj.unicore.wsrflite.InitParameters;
 import de.fzj.unicore.wsrflite.InitParameters.TerminationMode;
-import de.fzj.unicore.wsrflite.registry.ws.SGEFrontend;
-import de.fzj.unicore.wsrflite.registry.ws.SGFrontend;
-import de.fzj.unicore.wsrflite.registry.ws.ServiceRegistryEntryHomeImpl;
-import de.fzj.unicore.wsrflite.registry.ws.ServiceRegistryHomeImpl;
 import de.fzj.unicore.wsrflite.utils.deployment.DeploymentDescriptorImpl;
 import de.fzj.unicore.wsrflite.xmlbeans.client.RegistryClient;
 import de.fzj.unicore.wsrflite.xmlbeans.sg.Registry;
 import de.fzj.unicore.wsrflite.xmlbeans.sg.ServiceGroupEntry;
+import eu.unicore.services.registry.ws.SGEFrontend;
+import eu.unicore.services.registry.ws.SGFrontend;
+import eu.unicore.services.registry.ws.ServiceRegistryEntryHomeImpl;
+import eu.unicore.services.registry.ws.ServiceRegistryHomeImpl;
 import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.services.ws.cxf.CXFServiceFactory;
 import eu.unicore.services.ws.testutils.JettyTestCase;

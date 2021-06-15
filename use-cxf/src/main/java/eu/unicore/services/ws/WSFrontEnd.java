@@ -6,8 +6,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.xmlbeans.XmlObject;
 
-import de.fzj.unicore.wsrflite.Resource;
-import de.fzj.unicore.wsrflite.xmlbeans.XmlRenderer;
+import eu.unicore.services.Resource;
 
 /**
  * WSFrontEnd implementations handle web service invocations on a {@link Resource}.

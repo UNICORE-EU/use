@@ -14,11 +14,11 @@ import java.security.cert.X509Certificate;
 import org.apache.xmlbeans.XmlException;
 import org.w3c.dom.Document;
 
-import xmlbeans.oasis.xacml.x2.x0.saml.assertion.XACMLAuthzDecisionQueryDocument;
-import xmlbeans.oasis.xacml.x2.x0.saml.assertion.XACMLAuthzDecisionQueryType;
 import eu.unicore.samly2.elements.NameID;
 import eu.unicore.samly2.proto.AbstractRequest;
 import eu.unicore.security.dsig.DSigException;
+import xmlbeans.oasis.xacml.x2.x0.saml.assertion.XACMLAuthzDecisionQueryDocument;
+import xmlbeans.oasis.xacml.x2.x0.saml.assertion.XACMLAuthzDecisionQueryType;
 
 /**
  * SAML XACML Authz Decision Query representation.

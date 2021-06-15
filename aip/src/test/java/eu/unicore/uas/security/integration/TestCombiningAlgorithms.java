@@ -4,30 +4,27 @@
  */
 package eu.unicore.uas.security.integration;
 
-import static de.fzj.unicore.wsrflite.security.ContainerSecurityProperties.PREFIX;
-import static de.fzj.unicore.wsrflite.security.ContainerSecurityProperties.PROP_AIP_COMBINING_POLICY;
-import static de.fzj.unicore.wsrflite.security.ContainerSecurityProperties.PROP_AIP_ORDER;
-import static de.fzj.unicore.wsrflite.security.ContainerSecurityProperties.PROP_AIP_PREFIX;
+import static eu.unicore.services.security.ContainerSecurityProperties.PREFIX;
+import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_COMBINING_POLICY;
+import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_ORDER;
+import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_PREFIX;
 
 import java.util.Properties;
 
-import junit.framework.TestCase;
-
-import org.w3.x2005.x08.addressing.EndpointReferenceType;
-
-import de.fzj.unicore.wsrflite.ContainerProperties;
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.ContainerSecurityProperties;
-import de.fzj.unicore.wsrflite.xmlbeans.client.BaseWSRFClient;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
-import eu.unicore.uas.security.ForwardService;
+import eu.unicore.security.SecurityTokens;
+import eu.unicore.security.SubjectAttributesHolder;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.ContainerSecurityProperties;
+import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.uas.security.file.FileAttributeSource;
 import eu.unicore.uas.security.ldap.LDAPAttributeSource;
 import eu.unicore.uas.security.vo.SAMLPullAuthoriser;
 import eu.unicore.uas.security.xuudb.XUUDBAuthoriser;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import eu.unicore.util.httpclient.HttpClientProperties;
+import junit.framework.TestCase;
 
 public class TestCombiningAlgorithms extends TestCase
 {
@@ -36,7 +33,7 @@ public class TestCombiningAlgorithms extends TestCase
 	protected Properties getProperties()
 	{
 		Properties ret = new Properties();
-		ret.setProperty(PREFIX+ContainerSecurityProperties.PROP_CHECKACCESS_PDP, MockPDP.class.getName());
+		ret.setProperty(PREFIX+ContainerSecurityProperties.PROP_CHECKACCESS_PDP, "eu.unicore.uas.security.integration.MockPDP");
 		
 		ret.setProperty(PREFIX+PROP_AIP_ORDER, "LDAP VO-PULL XUUDB FILE");
 		//ret.setProperty(PREFIX+PROP_AIP_ORDER, "FILE");
@@ -85,33 +82,27 @@ public class TestCombiningAlgorithms extends TestCase
 	 * LDAP UVOS-Pull XUUDB File
 	 * where 3 first have inaccessible server configured.
 	 */
-	public void testFirstAccessible()
-	{
-		System.out.println("Starting USE...");
+	public void testFirstAccessible() throws Exception {
 		try
 		{
 			kernel= new Kernel("src/test/resources/use.properties", getProperties());
 			kernel.startSynchronous();
-			ForwardService.createInstance(kernel);
-			Thread.sleep(3000);
 			DefaultClientConfiguration sec = getClientCfg();
 			
 			String userDN = sec.getCredential().getCertificate().getSubjectX500Principal().getName();
 			assertTrue(userDN.contains("Demo User"));
-			
-			String url=kernel.getContainerProperties().getValue(ContainerProperties.EXTERNAL_URL);
-			url += "/services/" + ForwardService.TEST_SERVICE + "?res=default";
-			EndpointReferenceType epr = EndpointReferenceType.Factory.newInstance();
-			epr.addNewAddress().setStringValue(url);
-
-			System.out.println("\nPERFORMING AN ACTUAL REQUEST ...\n");
-			
-			BaseWSRFClient client = new BaseWSRFClient(url, epr, sec);
-			client.getResourcePropertyDocument();
-
-			BaseWSRFClient client2 = new BaseWSRFClient(url, epr, sec);
-			client2.getResourcePropertyDocument();
 		
+			IAttributeSource aip = kernel.getContainerSecurityConfiguration().getAip();
+			System.out.println(aip.getStatusDescription());
+			SecurityTokens st = new SecurityTokens();
+			st.setUserName(userDN);
+			st.setConsignorTrusted(true);
+			SubjectAttributesHolder sah = aip.getAttributes(st, new SubjectAttributesHolder());
+			 
+			String [] rl = sah.getIncarnationAttributes().get("role");
+			assertTrue(rl!=null);
+			assertEquals("user", rl[0]);
+							
 			kernel.shutdown();
 		} catch(Exception e)
 		{

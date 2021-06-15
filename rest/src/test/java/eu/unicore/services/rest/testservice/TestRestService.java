@@ -23,11 +23,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.fzj.unicore.wsrflite.Kernel;
-import de.fzj.unicore.wsrflite.security.TestConfigUtil;
-import de.fzj.unicore.wsrflite.server.JettyServer;
-import de.fzj.unicore.wsrflite.utils.deployment.DeploymentDescriptorImpl;
+import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.RestService;
+import eu.unicore.services.security.TestConfigUtil;
+import eu.unicore.services.server.JettyServer;
+import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
 import eu.unicore.util.httpclient.HttpUtils;
 
 public class TestRestService {
