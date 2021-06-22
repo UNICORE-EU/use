@@ -34,24 +34,19 @@ public class LocalRegistryImpl extends RegistryImpl {
 	 */
 	@Override
 	protected Calendar pushToExternalRegistries(String endpoint, Map<String,String>content, Calendar requestedTT) {
-		RegistryHandler rh=kernel.getAttribute(RegistryHandler.class);
-		if(rh!=null && rh.usesExternalRegistry()){
-			try {
+		try {
+			RegistryHandler rh = kernel.getAttribute(RegistryHandler.class);
+			if(rh!=null && rh.usesExternalRegistry()){
 				ExternalRegistryClient externalRegistryClient = rh.getExternalRegistryClient();
 				requestedTT = externalRegistryClient.addRegistryEntry(endpoint, content);
-				if(logger.isDebugEnabled()){
-					logger.debug("Will try to re-add entry for "
-							+ endpoint 
-							+ " at: "+requestedTT.getTime().toString());
-				}
-			} catch (Exception e) {
-				Log.logException("Could not connect to external Registry!",e,logger);
+				logger.debug("Will try to re-add entry for <{}> at: ", endpoint, requestedTT.getTime());
 			}
+		} catch (Exception e) {
+			Log.logException("Could not connect to external Registry!",e,logger);
 		}
 		return requestedTT;
 	}
-	
-	
+
 	@Override
 	public Calendar getDefaultEntryLifetime() {
 		Calendar tt = Calendar.getInstance();

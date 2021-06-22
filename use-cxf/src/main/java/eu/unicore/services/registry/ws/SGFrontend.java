@@ -18,7 +18,7 @@ import org.oasisOpen.docs.wsrf.sg2.AddResponseDocument;
 import org.oasisOpen.docs.wsrf.sg2.ServiceGroupRPDocument;
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
-import eu.unicore.services.registry.ServiceRegistryImpl;
+import eu.unicore.services.registry.RegistryImpl;
 import eu.unicore.services.ws.BaseFault;
 import eu.unicore.services.ws.WSUtilities;
 import eu.unicore.services.ws.client.RegistryClient;
@@ -34,9 +34,9 @@ public class SGFrontend extends WSRFFrontend implements ServiceGroupRegistration
 
 	public static final String sre_uuid = "__sge_uuid";
 
-	ServiceRegistryImpl resource;
+	RegistryImpl resource;
 
-	public SGFrontend(ServiceRegistryImpl r) {
+	public SGFrontend(RegistryImpl r) {
 		super(r, ServiceGroupRPDocument.type.getDocumentElementName(), null);
 		this.resource = r;
 		addRenderer(new SGEntryRenderer(resource));
@@ -49,8 +49,8 @@ public class SGFrontend extends WSRFFrontend implements ServiceGroupRegistration
 			String endpoint = memberEPR.getAddress().getStringValue();
 			Calendar requestedTT =  makeCalendar(in.getAdd().getInitialTerminationTime());
 			Map<String,String>content = parse(memberEPR);
-			String entryID = resource.addEntry(endpoint, content, requestedTT);
 			Calendar tt = requestedTT!=null? requestedTT : resource.getDefaultEntryLifetime();
+			String entryID = resource.addEntry(endpoint, content, tt);
 			AddResponseDocument res = AddResponseDocument.Factory.newInstance();
 			res.addNewAddResponse().setTerminationTime(tt);
 			String url = kernel.getContainerProperties().getBaseUrl()+ServiceGroupEntry.SERVICENAME+"?res="+entryID;

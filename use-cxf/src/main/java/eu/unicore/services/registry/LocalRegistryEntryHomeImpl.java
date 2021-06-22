@@ -4,10 +4,10 @@ import java.util.Collection;
 
 import de.fzj.unicore.persist.PersistenceException;
 import eu.unicore.services.Resource;
-import eu.unicore.services.ws.impl.WSResourceHomeImpl;
+import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.util.Log;
 
-public class LocalRegistryEntryHomeImpl extends WSResourceHomeImpl {
+public class LocalRegistryEntryHomeImpl extends DefaultHome {
 
 	/**
 	 * setup the expiry check
@@ -24,7 +24,7 @@ public class LocalRegistryEntryHomeImpl extends WSResourceHomeImpl {
 		
 	@Override
 	protected Resource doCreateInstance() {
-		return new ServiceRegistryEntryImpl();
+		return new RegistryEntryImpl();
 	}
 
 	@Override

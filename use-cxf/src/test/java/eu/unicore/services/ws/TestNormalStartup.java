@@ -19,7 +19,7 @@ import eu.unicore.services.InitParameters;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.registry.LocalRegistryClient;
 import eu.unicore.services.registry.RegistryHandler;
-import eu.unicore.services.registry.ServiceRegistryImpl;
+import eu.unicore.services.registry.RegistryImpl;
 import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.services.ws.client.RegistryClient;
 import eu.unicore.services.ws.sg.Registry;
@@ -77,8 +77,8 @@ public class TestNormalStartup {
 		String endpoint = kernel.getContainerProperties().getBaseUrl()+"/example?res="+uid;
 		LocalRegistryClient lrc = kernel.getAttribute(RegistryHandler.class).getRegistryClient();
 		Map<String,String>content = new HashMap<>();
-		content.put(ServiceRegistryImpl.INTERFACE_NAME,"example");
-		content.put(ServiceRegistryImpl.INTERFACE_NAMESPACE,"http://foo");
+		content.put(RegistryImpl.INTERFACE_NAME,"example");
+		content.put(RegistryImpl.INTERFACE_NAMESPACE,"http://foo");
 		lrc.addEntry(endpoint, content, null);
 	}
 

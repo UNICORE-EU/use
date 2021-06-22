@@ -7,6 +7,7 @@ import eu.unicore.services.DeploymentDescriptor;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.registry.LocalRegistryEntryHomeImpl;
 import eu.unicore.services.registry.LocalRegistryHomeImpl;
+import eu.unicore.services.registry.RegistryEntryHomeImpl;
 import eu.unicore.services.registry.RegistryHomeImpl;
 import eu.unicore.services.rest.RegistryServiceDescriptor;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
@@ -16,10 +17,8 @@ import eu.unicore.services.ws.sg.ServiceGroupEntry;
 import eu.unicore.services.ws.sg.ServiceGroupRegistration;
 
 /**
- * Registry SOAP web service
- * 
- * Handles both local (default) and shared registry
- * 
+ * Feature definition for both the local (default) and shared registry
+ *
  * @author schuller
  */
 public class RegistryFeature extends FeatureImpl {
@@ -35,6 +34,10 @@ public class RegistryFeature extends FeatureImpl {
 	
 	public RegistryFeature() {
 		this.name = "Registry";
+	}
+	
+	public boolean isSharedRegistry() {
+		return isSharedRegistry;
 	}
 	
 	public void setKernel(Kernel kernel) {
@@ -134,7 +137,7 @@ public class RegistryFeature extends FeatureImpl {
 			super();
 			this.name = "ServiceGroupEntry";
 			this.type = CXFService.TYPE;
-			this.implementationClass = ServiceRegistryEntryHomeImpl.class;
+			this.implementationClass = RegistryEntryHomeImpl.class;
 			this.interfaceClass = ServiceGroupEntry.class;
 			this.frontendClass = SGEFrontend.class;
 		}

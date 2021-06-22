@@ -34,9 +34,9 @@
 package eu.unicore.services.registry;
 
 import eu.unicore.services.Resource;
-import eu.unicore.services.ws.impl.WSResourceHomeImpl;
+import eu.unicore.services.impl.DefaultHome;
 
-public class LocalRegistryHomeImpl extends WSResourceHomeImpl {
+public class LocalRegistryHomeImpl extends DefaultHome {
 
 	@Override
 	protected Resource doCreateInstance() {

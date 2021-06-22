@@ -29,16 +29,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ********************************************************************************/
- 
 
-package eu.unicore.services.registry;
 
-/**
- * shared registry to be used by multiple servers for registering services
- * 
- * @author schuller
- * @author demuth
- */
-public class RegistryImpl extends ServiceRegistryImpl {
+package eu.unicore.services.ws.impl;
+
+import eu.unicore.services.Kernel;
+import eu.unicore.services.Resource;
+import eu.unicore.services.impl.DefaultHome;
+
+public class WSResourceHomeImpl extends DefaultHome {
+
+	public WSResourceHomeImpl(){
+		super();
+	}
+
+	public WSResourceHomeImpl(Kernel kernel){
+		super();
+		setKernel(kernel);
+	}
+	
+	@Override
+	protected Resource doCreateInstance()throws Exception{
+		Object o = Class.forName("eu.unicore.services.ws.MockResource").getConstructor().newInstance();
+		return (Resource)o; 
+	}
 
 }

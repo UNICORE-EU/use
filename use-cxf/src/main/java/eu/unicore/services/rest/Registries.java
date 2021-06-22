@@ -20,7 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.fzj.unicore.persist.PersistenceException;
-import eu.unicore.services.registry.ServiceRegistryImpl;
+import eu.unicore.services.registry.RegistryImpl;
 import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.services.rest.impl.ServicesBase;
 import eu.unicore.services.ws.client.RegistryClient;
@@ -57,7 +57,7 @@ public class Registries extends ServicesBase {
 	public Response addEntry(String json) throws Exception {
 		try{
 			JSONObject j = new JSONObject(json);
-			ServiceRegistryImpl sg = (ServiceRegistryImpl)resource;
+			RegistryImpl sg = (RegistryImpl)resource;
 			Map<String,String>content = BaseClient.asMap(j);
 			String endpoint = j.getString(RegistryClient.ENDPOINT);
 			if(endpoint==null) {
@@ -78,7 +78,7 @@ public class Registries extends ServicesBase {
 	@Override
 	protected Map<String,Object>getProperties() throws Exception {
 		Map<String,Object> status = super.getProperties();
-		ServiceRegistryImpl sg = (ServiceRegistryImpl)resource;
+		RegistryImpl sg = (RegistryImpl)resource;
 		List<Object>entries = new ArrayList<>();
 		for(Map.Entry<String,Map<String,String>> e: sg.getModel().getContents().entrySet()){
 			Map<String,Object> restEntry = renderEntry(e.getKey(),e.getValue());

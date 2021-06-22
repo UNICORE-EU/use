@@ -109,17 +109,15 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 		validator.setLaxInResponseToChecking(true);
 		validator.addConsumerSamlNameAlias(endpointURI);
 
-		if(logger.isDebugEnabled()){
-			logger.debug("Validating AuthN assertions. endpointURI="+endpointURI+" consumerName="+consumerName);
-		}
-
+		logger.debug("Validating AuthN assertions. endpointURI={} consumerName={}", endpointURI, consumerName);
+		
 		for(AssertionParser ap : authn.getAuthNAssertions()){
 			try{
-				if(logger.isDebugEnabled())logger.debug("Validating "+ap.getXMLBeanDoc());
+				logger.debug("Validating {}", ap.getXMLBeanDoc());
 				validator.validate(ap.getXMLBeanDoc());
 			} catch(Exception e1) {
 				logger.warn("SAML authentication assertion is " +
-						"not trusted: " + e1.getMessage());
+						"not trusted: {}", e1.getMessage());
 				throw new AuthenticationException("SAML authentication assertion is " +
 						"not trusted: " + e1.getMessage());
 			}

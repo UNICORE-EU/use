@@ -6,7 +6,7 @@ import java.util.Map;
 
 import eu.unicore.services.impl.BaseModel;
 
-public class ServiceRegistryModel extends BaseModel {
+public class RegistryModel extends BaseModel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -37,12 +37,7 @@ public class ServiceRegistryModel extends BaseModel {
 	public Map<String,Map<String,String>>getContents(){
 		return Collections.unmodifiableMap(contents);
 	}
-	
-	@Override
-	public String getFrontend(String serviceType) {
-		return "de.fzj.unicore.wsrflite.registry.ws.SGFrontend";
-	}
-	
+
 	@Override
 	public boolean removeChild(String uid){
 		String endpoint = null;

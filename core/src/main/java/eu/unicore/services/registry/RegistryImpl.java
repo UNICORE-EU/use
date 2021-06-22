@@ -19,9 +19,9 @@ import eu.unicore.util.Log;
  * 
  * @author schuller
  */
-public class ServiceRegistryImpl extends ResourceImpl {
+public class RegistryImpl extends ResourceImpl {
 	
-	private static final Logger logger = Log.getLogger(Log.SERVICES+".registry", ServiceRegistryImpl.class);
+	private static final Logger logger = Log.getLogger(Log.SERVICES+".registry", RegistryImpl.class);
 	
 	/**
 	 * create a new entry (or update an existing one) and return the entry ID
@@ -36,7 +36,7 @@ public class ServiceRegistryImpl extends ResourceImpl {
 			try {
 				createNew = false;
 				refresh(endpoint);
-				if(logger.isDebugEnabled())logger.debug("Refreshed registry entry for: <"+endpoint+">");
+				logger.debug("Refreshed registry entry for <{}>", endpoint);
 			} catch (ResourceUnknownException e) {
 				// sgEntry has been destroyed in between, so remove it from Entry RP
 				getModel().removeEntry(endpoint);
@@ -47,7 +47,7 @@ public class ServiceRegistryImpl extends ResourceImpl {
 			}
 		}
 		if(createNew){
-			logger.info("Creating new registry entry for service: <"+endpoint+">");
+			logger.info("Creating new registry entry for <{}>",endpoint);
 			tt = pushToExternalRegistries(endpoint, content, tt);
 			entryID = createSREntry(tt, endpoint);
 		}
@@ -56,11 +56,11 @@ public class ServiceRegistryImpl extends ResourceImpl {
 	}
 	
 	protected String createSREntry(Calendar tt, String endpoint) throws ResourceNotCreatedException {
-		ServiceRegistryEntryInitParameters sgInit = new ServiceRegistryEntryInitParameters(tt);
+		RegistryEntryInitParameters sgInit = new RegistryEntryInitParameters(tt);
 		sgInit.parentUUID = this.getUniqueID();
 		sgInit.parentServiceName = this.getServiceName();
 		sgInit.endpoint = endpoint;
-		Home sreHome=getKernel().getHome(ServiceRegistryEntryImpl.SERVICENAME);
+		Home sreHome=getKernel().getHome(RegistryEntryImpl.SERVICENAME);
 		return sreHome.createResource(sgInit);
 	}
 	
@@ -74,14 +74,14 @@ public class ServiceRegistryImpl extends ResourceImpl {
 	}
 	
 	@Override
-	public ServiceRegistryModel getModel(){
-		return (ServiceRegistryModel)model;
+	public RegistryModel getModel(){
+		return (RegistryModel)model;
 	}
 	
 	@Override
 	public void initialise(InitParameters initParams) throws Exception {
 		if(model==null){
-			setModel(new ServiceRegistryModel());
+			setModel(new RegistryModel());
 		}
 		super.initialise(initParams);
 	}
@@ -91,7 +91,7 @@ public class ServiceRegistryImpl extends ResourceImpl {
 		try{
 			while(p.hasNext()){
 				String id=(String)p.next().getBody();
-				logger.debug("Removing entry with id="+id);
+				logger.debug("Removing entry with id={}", id);
 				getModel().removeChild(id);
 			}
 		}
@@ -109,23 +109,22 @@ public class ServiceRegistryImpl extends ResourceImpl {
 	}
 	
 	public void refresh(String endpoint)throws Exception{
-		if(logger.isDebugEnabled())logger.debug("Updating information for <"+endpoint+">");
-		Home sreHome=getKernel().getHome(ServiceRegistryEntryImpl.SERVICENAME);
+		logger.debug("Updating information for <{}>", endpoint);
+		Home sreHome=getKernel().getHome(RegistryEntryImpl.SERVICENAME);
 		String entryUID = getModel().getEntryID(endpoint);
 		Map<String,String> content = getModel().getContent(endpoint);
-		ServiceRegistryEntryImpl wsr=(ServiceRegistryEntryImpl)sreHome.getForUpdate(entryUID);
-		Calendar tt = pushToExternalRegistries(endpoint, content, null);
-		if(tt==null)tt=getDefaultEntryLifetime();
+		RegistryEntryImpl wsr=(RegistryEntryImpl)sreHome.getForUpdate(entryUID);
 		try{
-			wsr.setTerminationTime(tt);
-			ServiceRegistryEntryModel model = wsr.getModel();
+			RegistryEntryModel model = wsr.getModel();
 			model.setEndpoint(endpoint);
+			Calendar tt = pushToExternalRegistries(endpoint, content, null);
+			if(tt==null)tt=getDefaultEntryLifetime();
+			wsr.setTerminationTime(tt);
 		}
 		finally{
 			getKernel().getPersistenceManager().persist(wsr);
 		}
 	}
-	
 
 	// constants for storing info in the content map
 	public static final String ENDPOINT = "Endpoint";

@@ -39,11 +39,11 @@ public class TestRegistry {
 		String uid = update(endpoint, content); 
 		assertNotNull(uid);
 
-		RegistryEntryHome entryHome = (RegistryEntryHome)kernel.getHome(ServiceRegistryEntryImpl.SERVICENAME);
-		ServiceRegistryEntryImpl entry = (ServiceRegistryEntryImpl)entryHome.get(uid);
+		RegistryEntryHome entryHome = (RegistryEntryHome)kernel.getHome(RegistryEntryImpl.SERVICENAME);
+		RegistryEntryImpl entry = (RegistryEntryImpl)entryHome.get(uid);
 		assertEquals(endpoint, entry.getModel().getEndpoint());
 		
-		ServiceRegistryImpl registry = (ServiceRegistryImpl)home.get("default_registry");
+		RegistryImpl registry = (RegistryImpl)home.get("default_registry");
 		Map<String, String> content2 = registry.getModel().getContent(endpoint);
 		assertEquals("bar", content2.get("foo"));
 		System.out.println("Entry for <"+entry.getModel().getEndpoint()+"> : "+content2);
@@ -52,9 +52,9 @@ public class TestRegistry {
 		content.put("foo", "spam");
 		String uid2 = update(endpoint, content);
 		assertEquals(uid, uid2);
-		entry = (ServiceRegistryEntryImpl)entryHome.get(uid);
+		entry = (RegistryEntryImpl)entryHome.get(uid);
 		assertEquals(endpoint, entry.getModel().getEndpoint());
-		registry = (ServiceRegistryImpl)home.get("default_registry");
+		registry = (RegistryImpl)home.get("default_registry");
 		content2 = registry.getModel().getContent(endpoint);
 		assertEquals("spam", content2.get("foo"));
 		System.out.println("Entry for <"+entry.getModel().getEndpoint()+"> : "+content2);
@@ -63,7 +63,7 @@ public class TestRegistry {
 
 	private String update(String endpoint, Map<String,String>content) throws Exception {
 		RegistryHome home = (RegistryHome)kernel.getHome("Registry");
-		ServiceRegistryImpl registry = (ServiceRegistryImpl)home.getForUpdate("default_registry");
+		RegistryImpl registry = (RegistryImpl)home.getForUpdate("default_registry");
 		registry.addEntry(endpoint, content, null);
 		home.persist(registry);
 		return registry.getModel().getEntryID(endpoint);
@@ -79,8 +79,8 @@ public class TestRegistry {
 
 	public class RegistryHome extends DefaultHome {
 
-		protected ServiceRegistryImpl doCreateInstance(){
-			return new ServiceRegistryImpl();
+		protected RegistryImpl doCreateInstance(){
+			return new RegistryImpl();
 		}
 
 	}
@@ -132,8 +132,8 @@ public class TestRegistry {
 
 	public class RegistryEntryHome extends DefaultHome {
 
-		protected ServiceRegistryEntryImpl doCreateInstance(){
-			return new ServiceRegistryEntryImpl();
+		protected RegistryEntryImpl doCreateInstance(){
+			return new RegistryEntryImpl();
 		}
 
 	}

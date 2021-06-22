@@ -18,7 +18,7 @@ import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
 import eu.unicore.services.InitParameters;
 import eu.unicore.services.InitParameters.TerminationMode;
-import eu.unicore.services.registry.ServiceRegistryImpl;
+import eu.unicore.services.registry.RegistryImpl;
 import eu.unicore.services.ws.WSUtilities;
 import eu.unicore.services.ws.client.BaseWSRFClient;
 import eu.unicore.services.ws.client.RegistryClient;
@@ -85,7 +85,7 @@ public class TestWSRegistry extends JettyTestCase {
 	}
 	
 	protected void addContent(Map<String,String>content) throws Exception {
-		ServiceRegistryImpl reg = (ServiceRegistryImpl)kernel.getHome("Registry").getForUpdate("default_registry");
+		RegistryImpl reg = (RegistryImpl)kernel.getHome("Registry").getForUpdate("default_registry");
 		reg.addEntry("http://foo", content, null);
 		kernel.getHome("Registry").persist(reg);
 	}

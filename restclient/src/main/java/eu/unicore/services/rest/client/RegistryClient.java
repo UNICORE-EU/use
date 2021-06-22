@@ -43,7 +43,7 @@ public class RegistryClient extends BaseClient {
 		for(int i=0; i<entries.length(); i++){
 			try{
 				JSONObject o = entries.getJSONObject(i);
-				String type = o.optString("type", o.optString("InterfaceName", null));
+				String type = o.optString("type", o.optString(INTERFACE_NAME, null));
 				if(serviceType!=null && serviceType.equalsIgnoreCase(type)){
 					result.add(o);
 				}
@@ -51,5 +51,12 @@ public class RegistryClient extends BaseClient {
 		}
 		return result;
 	}
-	
+
+	// constants for storing standard info in the content map
+	public static final String ENDPOINT = "Endpoint";
+	public static final String INTERFACE_NAME = "InterfaceName";
+	public static final String INTERFACE_NAMESPACE = "InterfaceNamespace";
+	public static final String SERVER_IDENTITY = "ServerIdentity";
+	public static final String SERVER_PUBKEY = "ServerPublicKey";
+
 }

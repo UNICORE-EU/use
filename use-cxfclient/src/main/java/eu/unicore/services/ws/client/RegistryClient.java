@@ -225,9 +225,7 @@ public class RegistryClient extends BaseWSRFClient implements IRegistryQuery{
 				c.getCurrentTime();
 				return true;	
 			}catch(Exception e){
-				if(logger.isTraceEnabled()){
-					logger.trace("",e);
-				}
+				logger.trace("",e);
 				return false;
 			}
 		}

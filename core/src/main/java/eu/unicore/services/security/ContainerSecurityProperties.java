@@ -154,11 +154,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	 * property for defining the combining policy if multiple DAPs are used
 	 */
 	public static final String PROP_DAP_COMBINING_POLICY = PROP_DAP_PREFIX + ".combiningPolicy";
-	
-	public static final String PROP_SEPARATE_ETD_TRUSTSTORE = "separateDelegationTruststore";
 
-	public static final String PROP_ETD_TRUSTSTORE_PFX = "delegationTruststore.";
-	
 	public static final String PROP_TRUSTED_ASSERTION_ISSUERS_PFX = "trustedAssertionIssuers.";
 	
 	public static final String PROP_ADDITIONAL_ACCEPTED_SAML_IDS = "additionalServiceIdentifier";
@@ -233,12 +229,6 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		META.put(PROP_DAP_COMBINING_POLICY, new PropertyMD(MergeLastOverrides.NAME).
 				setDescription("What algorithm should be used for combining the attributes from " +
 						"multiple dynamic attribute sources (if more then one is defined)."));
-		META.put(PROP_SEPARATE_ETD_TRUSTSTORE, new PropertyMD("false").
-				setDescription("Significant for XSEDE integration: when turned on, allows for using a " +
-						"separate truststore for delegation checking then the one used for SSL connections checking."));
-		META.put(PROP_ETD_TRUSTSTORE_PFX, new PropertyMD().setCanHaveSubkeys().
-				setDescription("When " + PROP_SEPARATE_ETD_TRUSTSTORE + " is true allows to configure " +
-						"the trust delegation truststore (using normal truststore properties with this prefix)."));
 		META.put(PROP_TRUSTED_ASSERTION_ISSUERS_PFX, new PropertyMD().setCanHaveSubkeys().
 				setDescription("Allows for configuring a truststore " +
 						"(using normal truststore properties with this prefix) with certificates of trusted services (not CAs!) which are permitted to issue trust delegations and authenticate with SAML. Typically this truststore should contain certificates of all Unity instanes installed."));
@@ -289,15 +279,9 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		}
 		setValidator(authAndTrust.getValidator());
 		setCredential(authAndTrust.getCredential());
-		
-		if (properties.getBooleanValue(PROP_SEPARATE_ETD_TRUSTSTORE)) {
-			TruststoreProperties etdTrustProperties = new TruststoreProperties(source, 
-					Collections.singleton(new LoggingStoreUpdateListener()), 
-					PREFIX+PROP_ETD_TRUSTSTORE_PFX);
-			setETDValidator(etdTrustProperties.getValidator());
-		} else
-			setETDValidator(getValidator());
-		
+
+		setETDValidator(getValidator());
+
 		try
 		{
 			TruststoreProperties assertionTrustProperties = new TruststoreProperties(source, 
@@ -310,8 +294,8 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 				logger.info("  -) " + X500NameUtils.getReadableForm(c.getSubjectX500Principal()));
 		} catch (ConfigurationException e)
 		{
-			logger.info("Trusted SAML assertion issuers truststore is not defined, " +
-					"UNICORE 7 certificate-less access won't be possible.");
+			logger.info("Trusted SAML assertion issuers truststore is not defined! " +
+					"Unity-based authentication will not work.");
 			setTrustedAssertionIssuers(new BinaryCertChainValidator(false));
 		}
 		

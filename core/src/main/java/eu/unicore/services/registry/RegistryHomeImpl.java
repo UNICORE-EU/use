@@ -1,8 +1,8 @@
 package eu.unicore.services.registry;
 
-import eu.unicore.services.ws.impl.WSResourceHomeImpl;
+import eu.unicore.services.impl.DefaultHome;
 
-public class RegistryHomeImpl extends WSResourceHomeImpl {
+public class RegistryHomeImpl extends DefaultHome {
 
 	@Override
 	protected RegistryImpl doCreateInstance() {

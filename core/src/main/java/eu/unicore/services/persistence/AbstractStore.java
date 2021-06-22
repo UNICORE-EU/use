@@ -33,6 +33,7 @@
 
 package eu.unicore.services.persistence;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -133,15 +134,7 @@ public abstract class AbstractStore implements Store {
 		try {
 			bean = _read(uniqueID);
 			if(bean!=null){							
-				Class<?> clazz=Class.forName(bean.className);
-				inst=(Resource)clazz.getConstructor().newInstance();
-				inst.setKernel(kernel);
-				inst.setHome(kernel.getHome(serviceName));
-				inst.setModel(bean.getState());
-				if(settings.isLoadOnce()){
-					instances.put(uniqueID,inst);
-				}
-				bean=null;
+				inst = createResource(bean);
 			}
 		}
 		catch (PersistenceException pe){ throw pe; }
@@ -150,8 +143,45 @@ public abstract class AbstractStore implements Store {
 		}
 		return inst;
 	}
-
-
+	
+	// TODO remove for U9
+	private final static Map<String,String> _classname_updates = new HashMap<>();
+	static {
+		_classname_updates.put("de.fzj.unicore.wsrflite.xmlbeans.registry.LocalRegistryImpl", 
+				"eu.unicore.services.registry.LocalRegistryImpl");
+		_classname_updates.put("de.fzj.unicore.wsrflite.xmlbeans.registry.RegistryImpl", 
+				"eu.unicore.services.registry.RegistryImpl");
+		_classname_updates.put("de.fzj.unicore.wsrflite.registry.ServiceRegistryEntryImpl", 
+				"eu.unicore.services.registry.RegistryEntryImpl");
+	}
+	
+	protected Resource createResource(ResourceBean bean) throws Exception {
+		Resource inst = null;
+		Class<?> clazz = null;
+		try{
+			clazz = Class.forName(bean.className);
+		}catch(ClassNotFoundException cne) {
+			try{
+				String newName = _classname_updates.get(bean.className);
+				if(newName==null) {
+					newName = bean.className.replace("de.fzj.unicore.wsrflite.registry", "eu.unicore.services.registry");
+				}
+				clazz = Class.forName(newName);
+			}catch(ClassNotFoundException cne1) {
+				throw cne;
+			}
+		}
+		
+		inst=(Resource)clazz.getConstructor().newInstance();
+		inst.setKernel(kernel);
+		inst.setHome(kernel.getHome(serviceName));
+		inst.setModel(bean.getState());
+		if(settings.isLoadOnce()){
+			instances.put(bean.uniqueID,inst);
+		}
+		return inst;
+	}
+	
 	protected abstract ResourceBean _read(String uniqueID) throws PersistenceException;
 
 
@@ -167,14 +197,7 @@ public abstract class AbstractStore implements Store {
 		try {
 			bean = _getForUpdate(uniqueID, time, timeUnit);
 			if(bean!=null){							
-				inst=(Resource)(Class.forName(bean.className).getConstructor().newInstance());
-				inst.setKernel(kernel);
-				inst.setHome(kernel.getHome(serviceName));
-				inst.setModel(bean.getState());
-				if(settings.isLoadOnce()){
-					instances.put(uniqueID,inst);
-				}
-				bean=null;
+				inst=createResource(bean);
 			}
 		}
 		catch (TimeoutException te){ throw te; }

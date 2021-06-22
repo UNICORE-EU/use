@@ -2,7 +2,7 @@ package eu.unicore.services.registry;
 
 import eu.unicore.services.impl.BaseModel;
 
-public class ServiceRegistryEntryModel extends BaseModel {
+public class RegistryEntryModel extends BaseModel {
 
 	private static final long serialVersionUID = 1L;
 

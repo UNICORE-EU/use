@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
@@ -84,6 +86,15 @@ public class ModelWrapper implements Serializable {
 	
 	private static final ModelAdapter adapter=new ModelAdapter();
 	
+	// TODO remove for U9
+	private final static Map<String,String> _classname_updates = new HashMap<>();
+	static {
+		_classname_updates.put("de.fzj.unicore.wsrflite.registry.ServiceRegistryModel", 
+				"eu.unicore.services.registry.RegistryModel");
+		_classname_updates.put("de.fzj.unicore.wsrflite.registry.ServiceRegistryEntryModel", 
+				"eu.unicore.services.registry.RegistryEntryModel");
+	}
+
 	public static class ModelAdapter implements JsonDeserializer<ModelWrapper>{
 
 		@Override
@@ -91,13 +102,23 @@ public class ModelWrapper implements Serializable {
 				JsonDeserializationContext context)
 						throws JsonParseException {
 			String className = json.getAsJsonObject().get("className").getAsString();
+			Class<?>modelClass = null;
 			try{
-				Class<?>modelClass = Class.forName(className);
-				Model model =  context.deserialize(json.getAsJsonObject().get("model"),modelClass);
-				return new ModelWrapper(model);
-			}catch(ClassNotFoundException cne){
-				throw new JsonParseException("Unknown model class", cne);
+				modelClass = Class.forName(className);
+			}catch(ClassNotFoundException cne) {
+				try{
+					// TODO remove in U9
+					String newName = _classname_updates.get(className);
+					if(newName==null) {
+						newName = className.replace("de.fzj.unicore.wsrflite", "eu.unicore.services");
+					}
+					modelClass = Class.forName(newName);
+				}catch(ClassNotFoundException cne1){
+					throw new JsonParseException("Unknown model class "+className, cne);
+				}
 			}
+			Model model =  context.deserialize(json.getAsJsonObject().get("model"),modelClass);
+			return new ModelWrapper(model);
 		}
 
 	}

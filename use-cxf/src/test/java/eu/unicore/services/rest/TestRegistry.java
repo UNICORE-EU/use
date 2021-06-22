@@ -7,10 +7,10 @@ import org.junit.Test;
 
 import eu.unicore.services.InitParameters;
 import eu.unicore.services.InitParameters.TerminationMode;
+import eu.unicore.services.registry.RegistryEntryHomeImpl;
+import eu.unicore.services.registry.RegistryHomeImpl;
 import eu.unicore.services.registry.ws.SGEFrontend;
 import eu.unicore.services.registry.ws.SGFrontend;
-import eu.unicore.services.registry.ws.ServiceRegistryEntryHomeImpl;
-import eu.unicore.services.registry.ws.ServiceRegistryHomeImpl;
 import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
 import eu.unicore.services.ws.client.RegistryClient;
@@ -24,10 +24,10 @@ public class TestRegistry extends JettyTestCase {
 	@Before
 	public void addServices() throws Exception{
 		CXFServiceFactory.createAndDeployService(kernel, "ServiceGroupEntry", 
-				ServiceGroupEntry.class, ServiceRegistryEntryHomeImpl.class, 
+				ServiceGroupEntry.class, RegistryEntryHomeImpl.class, 
 				SGEFrontend.class.getName());
 		CXFServiceFactory.createAndDeployService(kernel, "Registry", 
-				Registry.class, ServiceRegistryHomeImpl.class,
+				Registry.class, RegistryHomeImpl.class,
 				SGFrontend.class.getName());
 		DeploymentDescriptorImpl info = new DeploymentDescriptorImpl();
 		info.setName("registries");
