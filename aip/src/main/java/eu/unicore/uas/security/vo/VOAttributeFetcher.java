@@ -139,7 +139,7 @@ public class VOAttributeFetcher
 				List<ParsedAttribute> cachedAttrs = cache.getIfPresent(comparableSubjectDN);
 				if (cachedAttrs != null)
 				{
-					if (log.isDebugEnabled())log.debug("Returning cached attributes for " + subject);
+					log.debug("Returning cached attributes for {}", subject);
 					attrs = new ArrayList<ParsedAttribute>(cachedAttrs.size());
 					attrs.addAll(cachedAttrs);
 				} else
@@ -154,7 +154,7 @@ public class VOAttributeFetcher
 			}
 		} catch (SAMLServerException e)
 		{
-			if (SAMLConstants.SubStatus.STATUS2_UNKNOWN_PRINCIPIAL.equals(e.getSamlSubErrorId()))
+			if (SAMLConstants.SubStatus.STATUS2_UNKNOWN_PRINCIPAL.equals(e.getSamlSubErrorId()))
 			{
 				log.debug("The user {} is not recognized by the VO server",
 						X500NameUtils.getReadableForm(subject.getXBean().getStringValue()));
@@ -194,8 +194,8 @@ public class VOAttributeFetcher
 			throw new IllegalStateException("Malformed URL while we checked it??", e);
 		}
 		
-		log.debug("Performing SAML query for attributes of " + X500NameUtils.getReadableForm(
-				subject.getXBean().getStringValue()));
+		log.debug("Performing SAML query for attributes of {}",
+				() -> X500NameUtils.getReadableForm(subject.getXBean().getStringValue()));
 		String samlId = pullConfiguration.getServerURI();
 		NameID myID;
 		if (samlId != null)

@@ -19,8 +19,8 @@
     <developer>
       <name>Bernd Schuller</name>
       <email>bschuller at users.sourceforge.net</email>
-      <organization>Forschungszentrum Juelich</organization>
-      <organizationUrl>http://www.fz-juelich.de</organizationUrl>
+      <organization>Forschungszentrum Juelich GmbH</organization>
+      <organizationUrl>https://www.fz-juelich.de/jsc</organizationUrl>
     </developer>
     <developer>
       <name>Krzysztof Benedyczak</name>
@@ -67,15 +67,15 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>0.202</persistence.version>
-    <secutils.version>3.1.2</secutils.version>
-    <seclib.version>5.2.0</seclib.version>
+    <persistence.version>0.203</persistence.version>
+    <secutils.version>3.2.1</secutils.version>
+    <seclib.version>5.3.1</seclib.version>
     <saaj.version>1.5.1</saaj.version>
-    <cxf.version>3.3.9</cxf.version>
+    <cxf.version>3.4.4</cxf.version>
     <jetty.version>9.4.41.v20210516</jetty.version>
     <httpclient.version>4.5.13</httpclient.version>
     <metrics.version>4.1.14</metrics.version>
-    <jwt.version>9.4.2</jwt.version>
+    <jwt.version>9.10</jwt.version>
   </properties>
 
   <modules>
