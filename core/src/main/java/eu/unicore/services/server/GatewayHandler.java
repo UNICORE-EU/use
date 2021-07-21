@@ -79,12 +79,11 @@ public class GatewayHandler implements ExternalSystemConnector{
 			try {
 				X509Certificate[] cert = ConnectionUtil.getPeerCertificate(clientConfiguration, gwUrl, 
 						(int)(timeout-(System.currentTimeMillis()-start)), logger);
-				logger.info("Successfully connected to gateway at " + gwUrl);
+				logger.info("Successfully connected to gateway at {}", gwUrl);
 				if (secConfiguration.isGatewaySignatureCheckingEnabled() && 
 						secConfiguration.getGatewayCertificate() == null) {
 					secConfiguration.setGatewayCertificate(cert[0]);
-					logger.info("Gateway's DN was autodetected and will be used " +
-							"for signature checking: " + 
+					logger.info("Gateway's DN was autodetected and will be used for signature checking: {}",
 							X500NameUtils.getReadableForm(secConfiguration.
 									getGatewayCertificate().getSubjectX500Principal()));
 				}
@@ -158,9 +157,8 @@ public class GatewayHandler implements ExternalSystemConnector{
 			return;
 		}
 		Integer update=secConfiguration.getGatewayRegistrationUpdateInterval();
-		logger.info("Enabling dynamic registration at the Gateway at " +
-				""+Utilities.getGatewayAddress(containerConfiguration)+
-				" updated every "+update+" seconds.");
+		logger.info("Enabling dynamic registration at the Gateway at {} updated every {} seconds",
+				Utilities.getGatewayAddress(containerConfiguration), update);
 		new GatewayRegistration(containerConfiguration, update);
 		return;
 	}
@@ -238,12 +236,12 @@ public class GatewayHandler implements ExternalSystemConnector{
 		        post.setEntity(new UrlEncodedFormEntity(nvps, "UTF-8"));
 				HttpResponse response = client.execute(post);
 				if(response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED){
-					logger.warn("Could not register with gateway at "+gwAddress+", will try again!");
+					logger.warn("Could not register with gateway at {}, will try again!",gwAddress);
 				}
 				//read response in any case
 				InputStream is=response.getEntity().getContent();
 				while(is.read()!=-1);
-				logger.debug("(Re-)registered with gateway at "+gwAddress+".");
+				logger.debug("(Re-)registered with gateway at {}", gwAddress);
 			}catch(Exception e){
 				Log.logException("Could not contact gateway at "+gwAddress,e,logger);
 			}

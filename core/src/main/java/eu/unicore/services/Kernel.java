@@ -319,7 +319,7 @@ public class Kernel {
 	 * @param value - the value
 	 */
 	public <T> void setAttribute(Class<T>key, T value){
-		if(logger.isDebugEnabled())logger.debug("Storing attribute: "+key.getName());
+		logger.debug("Storing attribute: {}", key.getName());
 		attributes.put(key, value);
 		if(value instanceof ExternalSystemConnector){
 			externalSystemConnectors.add((ExternalSystemConnector)value);
@@ -398,7 +398,7 @@ public class Kernel {
 	 * @return configuration for the client calls made by the container
 	 */
 	public USEClientProperties getClientConfiguration() {
-		return clientConfiguration;
+		return (USEClientProperties)clientConfiguration.clone();
 	}
 
 	public ContainerProperties getContainerProperties() {
@@ -527,7 +527,7 @@ public class Kernel {
 		try {
 			String pdpConfig = containerSecurityConfiguration.getPdpConfigurationFile();
 			if (pdpConfig != null)
-				logger.info("Using PDP configuration file <"+pdpConfig+">");
+				logger.info("Using PDP configuration file <{}>", pdpConfig);
 			containerSecurityConfiguration.getPdp().initialize(pdpConfig, containerConfiguration, 
 					containerSecurityConfiguration, clientConfiguration);
 		} catch (Exception e) {
@@ -543,7 +543,6 @@ public class Kernel {
 		msg = new MessagingImpl(getPersistenceProperties());
 		persistenceManager=new PersistenceManager(this);
 		deploymentManager=new DeploymentManager(this);
-		//TODO do we need to support Jetty with a non-null WebAppCtx (CIS uses it I think)
 		jetty = new JettyServer(this, jettyConfiguration);
 		securityManager = new SecurityManager(getContainerSecurityConfiguration());
 		metricRegistry.register("use.security.ServerIdentity",new CertificateInfoMetric(securityManager));
@@ -611,11 +610,9 @@ public class Kernel {
 		
 		state = State.running;
 	
-		//run new style StartupTasks
 		ServiceLoader<StartupTask> sl = ServiceLoader.load(StartupTask.class);
 		new StartupTasksRunner().runStartupTasks(this, sl);
 
-		//run "home" startup tasks
 		for(Home h: homes.values()){
 			h.run();
 		}
@@ -623,7 +620,7 @@ public class Kernel {
 		//run remaining init tasks after basic setup is complete
 		if(startupTasks!=null){
 			for (Runnable r : startupTasks) {
-				logger.info("Running startup task <"+r.getClass().getName()+">");
+				logger.info("Running startup task <{}>", r.getClass().getName());
 				r.run();
 			}
 		}
@@ -632,7 +629,7 @@ public class Kernel {
 	}
 
 	/**
-	 * starts the UNICORE/X server asynchronously, i.e. this method returns
+	 * starts the container asynchronously, i.e. this method returns
 	 * immediately
 	 * 
 	 * @see #startSynchronous()
@@ -650,12 +647,12 @@ public class Kernel {
 				}
 			}
 		});
-		t.setName("UNICORE/X-Startup");
+		t.setName("UNICORE-Startup");
 		t.start();
 	}
 
 	/**
-	 * starts UNICORE/X synchronously: starts the server and 
+	 * starts the container synchronously: starts the server and 
 	 * return only after server is started.
 	 * 
 	 * @throws Exception
@@ -664,8 +661,7 @@ public class Kernel {
 		long start = System.currentTimeMillis();
 		printHeader();				
 		start();
-		logger.info("Startup time: " + (System.currentTimeMillis() - start)
-				+ " ms.");
+		logger.info("Startup time: {} ms.", System.currentTimeMillis() - start);
 		logger.info("***** Server started. *****");
 		System.out.println("***** Server started. *****");
 		System.out.println("Send TERM signal to shutdown gracefully.");
@@ -681,13 +677,12 @@ public class Kernel {
 		ServiceLoader<ServiceFactory> sl=ServiceLoader.load(ServiceFactory.class);
 		for (ServiceFactory factory: sl) {
 			serviceFactories.put(factory.getType(), factory);
-			logger.info("Registered '" + factory.getClass().getName() + "'"
-					+ " for service type '" + factory.getType() + "'");
+			logger.info("Registered '{}' for service type '{}'", factory.getClass().getName(), factory.getType());
 		}
 	}
 
 	private void addShutDownHook() {
-		Runtime.getRuntime().addShutdownHook(new Thread("UNICORE/X-Shutdown") {
+		Runtime.getRuntime().addShutdownHook(new Thread("UNICORE-Shutdown") {
 			public void run() {
 				try {
 					shutdown();

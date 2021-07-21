@@ -38,7 +38,7 @@ public class AttributeSourceConfigurator {
 		if (clazz==null)
 			throw new IllegalArgumentException("Inconsistent attribute sources chain definition: " +
 					"expected <"+dotName+"class> property with attribute source implementation.");
-		logger.debug("Creating attribute source " + name + " served by class <"+clazz+">");
+		logger.debug("Creating attribute source {} served by class <{}>", name, clazz);
 		IAttributeSource auth;
 		try {
 			auth = (IAttributeSource)(Class.forName(clazz).getConstructor().newInstance());
@@ -57,7 +57,7 @@ public class AttributeSourceConfigurator {
 		if (clazz==null)
 			throw new IllegalArgumentException("Inconsistent dynamic attribute sources chain definition: " +
 					"expected <"+dotName+"class> property with dynamic attribute source implementation.");
-		logger.debug("Creating dynamic attribute source " + name + " served by class <"+clazz+">");
+		logger.debug("Creating dynamic attribute source {} served by class <{}>", name, clazz);
 		IDynamicAttributeSource auth;
 		try {
 			auth = (IDynamicAttributeSource)(Class.forName(clazz).getConstructor().newInstance());

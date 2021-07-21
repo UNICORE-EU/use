@@ -72,7 +72,7 @@ public class ExternalRegistryClient extends MultiWSRFClient<RegistryClient> impl
 					haveExternalTT=true;
 				}
 			}catch(Exception e){
-				logger.debug(Log.createFaultMessage("Can't talk to registry "+address ,e));
+				logger.warn(Log.createFaultMessage("Error adding registry entry at <"+address+">" ,e));
 			}
 		}
 		responseTT.setTimeInMillis(selected);

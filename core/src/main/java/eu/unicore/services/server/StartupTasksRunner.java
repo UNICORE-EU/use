@@ -37,11 +37,10 @@ public class StartupTasksRunner {
 		while (todo.size() > 0) {
 			for (StartupTask candidate: todo.values()) {
 				if (isEligibleToRun(candidate, done, todo)) {
-					logger.info("Running startup task <"+candidate.getName()+">");
+					logger.info("Running startup task <{}>", candidate.getName());
 					if (candidate instanceof KernelInjectable) {
 						((KernelInjectable)candidate).setKernel(kernel);
 					}
-						
 					candidate.run();
 					todo.remove(candidate.getName());
 					done.put(candidate.getName(), candidate);

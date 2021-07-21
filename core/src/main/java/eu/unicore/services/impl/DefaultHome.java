@@ -137,7 +137,7 @@ public abstract class DefaultHome implements Home {
 			serviceInstances=kernel.getPersistenceManager().getPersist(serviceName);
 		}
 		Collection<String> uniqueIDs=serviceInstances.getUniqueIDs();
-		logger.info("["+serviceName+"] Have "+uniqueIDs.size()+" instances from permanent storage.");
+		logger.info("[{}] Have {} instances from permanent storage.", serviceName, uniqueIDs.size());
 		boolean logIt = true;
 		Iterator<String>iter = uniqueIDs.iterator();
 		while(iter.hasNext()){
@@ -155,7 +155,7 @@ public abstract class DefaultHome implements Home {
 		initNotification();
 		locking_timeout = kernel.getContainerProperties().
 				getSubkeyIntValue(ContainerProperties.INSTANCE_LOCKING_TIMEOUT, serviceName);
-		logger.info("["+serviceName+"] Initialisation done.");
+		logger.info("[{}] Initialisation done.", serviceName);
 	}
 
 	/**
@@ -171,7 +171,7 @@ public abstract class DefaultHome implements Home {
 		}
 		try{
 			if(ClassNotFoundException.class.isAssignableFrom(cause.getClass())){
-				if(logIt)logger.info("Deleting stored data due to incompatible class change (server update?) for <"+serviceName+">");
+				if(logIt)logger.info("Deleting stored data due to incompatible class change (server update?) for <{}>", serviceName);
 				serviceInstances.remove(id);
 			}
 		}catch(Exception ex){}
@@ -198,9 +198,7 @@ public abstract class DefaultHome implements Home {
 					X509Credential kernelIdentity = getKernel().getContainerSecurityConfiguration().getCredential();
 					if (kernelIdentity != null) {
 						owner = kernelIdentity.getSubjectName();
-						if(logger.isDebugEnabled()){
-							logger.debug("Setting server as owner of "+getServiceName()+"<"+id+">");
-						}
+						logger.debug("Setting server as owner of {}/{}", serviceName, id);
 					}
 					else {
 						owner = Client.ANONYMOUS_CLIENT_DN;
@@ -225,7 +223,7 @@ public abstract class DefaultHome implements Home {
 				ContainerProperties.EXPIRYCHECK_INITIAL, serviceName);
 		int period = kernel.getContainerProperties().getSubkeyIntValue(
 				ContainerProperties.EXPIRYCHECK_PERIOD, serviceName);
-		logger.debug("["+serviceName+"] Expiry thread scheduled at a period of "+period+" secs.");
+		logger.debug("[{}] Expiry thread scheduled at a period of {} secs.", serviceName, period);
 		ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
 		ts.getScheduledExecutorService().scheduleWithFixedDelay(instanceChecking,
 				initial,period,TimeUnit.SECONDS);
@@ -255,7 +253,7 @@ public abstract class DefaultHome implements Home {
 	 * called when the container shuts down
 	 */
 	public void passivateHome(){
-		logger.info("["+serviceName+"] Shutting down.");
+		logger.info("[{}] Shutting down.", serviceName);
 		isShuttingDown=true;
 		if (serviceInstances != null)
 			serviceInstances.shutdown();

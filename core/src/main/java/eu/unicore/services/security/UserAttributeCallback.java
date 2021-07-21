@@ -34,7 +34,7 @@ public class UserAttributeCallback implements eu.unicore.security.UserAttributeH
 	 */
 	public void processUserDefinedAttribute(String name, String nameFormat, XmlObject[]values, SecurityTokens mainToken){
 		if (!nameFormat.equals(ETDClientSettings.SAML_ATTRIBUTE_REQUEST_NAMEFORMAT))
-			logger.debug("Ignoring request for unknown attribute of type <"+nameFormat+">");
+			logger.debug("Ignoring request for unknown attribute of type <{}>", nameFormat);
 		
 		Map<String, String[]> preferences = mainToken.getUserPreferences();
 		if (genericAttributeHandle(IAttributeSource.ATTRIBUTE_XLOGIN, 
@@ -56,7 +56,7 @@ public class UserAttributeCallback implements eu.unicore.security.UserAttributeH
 				preferences, name, values, false)) 
 			return;
 		
-		logger.debug("Ignoring request for unknown attribute named <"+name+">");
+		logger.debug("Ignoring request for unknown attribute named <{}>", name);
 	}
 	
 	private boolean genericAttributeHandle(String processedName, Map<String, String[]> preferences, 
@@ -74,8 +74,7 @@ public class UserAttributeCallback implements eu.unicore.security.UserAttributeH
 		}
 		preferences.put(processedName, values);
 		if(logger.isDebugEnabled()){
-			logger.debug("Got request for '" + processedName + 
-					"' with value <"+Arrays.toString(values)+">");
+			logger.debug("Got request for '{}' with value <{}>", processedName , Arrays.toString(values));
 		}
 		return true;
 	}

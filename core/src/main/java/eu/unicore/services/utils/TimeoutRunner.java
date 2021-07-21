@@ -46,7 +46,7 @@ public class TimeoutRunner<V> implements Callable<V> {
 	}
 	
 	public V call() throws RejectedExecutionException, InterruptedException, ExecutionException {
-		if(logger.isDebugEnabled())logger.debug("Starting task with timeout of "+timeout+ " "+unit);
+		logger.debug("Starting task with timeout of {} {}", timeout, unit);
 		try{
 			Future<V> res=service.getExecutorService().submit(task);
 			result=res.get(timeout, unit);

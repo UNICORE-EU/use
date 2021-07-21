@@ -80,12 +80,11 @@ public class PersistenceManager {
 					clazz = clazz.replace("de.fzj.unicore.wsrflite", "eu.unicore.services");
 				}
 				persistClass=Class.forName(clazz);
-				logger.info("Using '"+persistClass.getName()+"' for permanent storage.");
+				logger.info("Using '{}' for permanent storage.", persistClass.getName());
 			}
 			catch(Exception e){
-				String message=Log.createFaultMessage("Error configuring persistence! Please check the configuration " +
-				"and the latest documentation.",e);
-				throw new ConfigurationException(message, e);
+				throw new ConfigurationException(Log.createFaultMessage(
+						"Error configuring persistence! Please check the configuration and the latest documentation.", e), e);
 			}			
 		}	
 	}
@@ -151,7 +150,7 @@ public class PersistenceManager {
 	public synchronized LockSupport getLockSupport(){
 		if(lockSupport==null){
 			String config=kernel.getPersistenceProperties().getValue(PersistenceProperties.DB_CLUSTER_CONFIG);
-			lockSupport=new LockSupport(config,"__wsrflite_internal__");
+			lockSupport=new LockSupport(config,"__use_internal__");
 		}
 		return lockSupport;
 	}	

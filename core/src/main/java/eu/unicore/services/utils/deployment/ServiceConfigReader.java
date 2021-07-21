@@ -59,7 +59,7 @@ public class ServiceConfigReader implements IServiceConfigurator {
 		properties=new Properties();
 		try(FileInputStream fis=new FileInputStream(configFile)){
 			properties.load(fis);
-			logger.info("Loaded properties from file <"+configFile+">");
+			logger.info("Loaded properties from file <{}>", configFile);
 		}
 		return properties;
 	}
@@ -105,7 +105,7 @@ public class ServiceConfigReader implements IServiceConfigurator {
 						c=c.trim();
 						if (c.length()==0)
 							continue;
-						logger.info("Found startup task <"+c+">");
+						logger.info("Found startup task <{}>", c);
 						Class<?>clazz = Class.forName(c);
 						Object o=kernel.load(clazz);
 						initTasks.add((Runnable)o);
@@ -132,7 +132,7 @@ public class ServiceConfigReader implements IServiceConfigurator {
 			}
 			else{
 				deploy = false;
-				logger.info("Disabling service <"+dd.getName()+">");
+				logger.info("Disabling service <{}>", dd.getName());
 				//check if service already is deployed and undeploy it
 				Service s=kernel.getService(dd.getName());
 				if(s!=null){

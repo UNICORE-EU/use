@@ -39,7 +39,7 @@ public class CapabilitiesLoader {
 					((KernelInjectable)c).setKernel(kernel);
 				}
 				result.put(c.getName(), c);
-				logger.debug("Loaded capability "+c.getName());
+				logger.debug("Loaded capability {}", c.getName());
 			}
 		}
 		return Collections.unmodifiableMap(result);

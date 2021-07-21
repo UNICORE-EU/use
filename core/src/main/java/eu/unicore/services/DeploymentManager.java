@@ -28,7 +28,7 @@ public class DeploymentManager {
 
 	public synchronized void deployService(Service service)throws ServiceDeploymentException{
 		if(kernel.getService(service.getName())!=null){
-			logger.info("Service <"+service.getName()+"> already deployed, skipping.");
+			logger.info("Service <{}> already deployed, skipping.", service.getName());
 			return;
 		}
 		kernel.addService(service);
@@ -37,7 +37,7 @@ public class DeploymentManager {
 			if(service.getHome()!=null){
 				kernel.putHome(service.getHome());
 			}
-			logger.info("Service <"+service.getName()+"> successfully deployed.");
+			logger.info("Service <{}> successfully deployed.", service.getName());
 		}catch(Throwable ex){
 			throw new ServiceDeploymentException("Can't deploy service <"+service.getName()+">",ex);
 		}
@@ -79,17 +79,17 @@ public class DeploymentManager {
 						deployService(dd);
 					}
 					else {
-						logger.info("Service <"+dd.getName()+"> is disabled, skipping.");
+						logger.info("Service <{}> is disabled, skipping.", dd.getName());
 					}
 				}
 				for(Runnable r: ft.getInitTasks()){
-					logger.info("Running <"+r.getClass().getName()+">");
+					logger.info("Running <{}>", r.getClass().getName());
 					r.run();
 				}
-				logger.info("Feature <"+ftName+"> successfully deployed.");
+				logger.info("Feature <{}> successfully deployed.", ftName);
 			}
 			else{
-				logger.info("Feature <"+ftName+"> is disabled, skipping.");
+				logger.info("Feature <{}> successfully deployed.", ftName);
 			}
 		}catch(Exception ex){
 			String msg = Log.createFaultMessage("Cannot deploy feature <"+ft.getName()+">", ex);

@@ -57,18 +57,15 @@ public class ExpiryChecker implements InstanceChecker {
 	public boolean check(Home home, String id)throws ResourceUnknownException, PersistenceException {
 		Calendar c=home.getTerminationTime(id);
 		if(c==null)return false;
-		if(logger.isDebugEnabled()){
-			logger.debug("Checking <"+home.getServiceName()+">"+id+" TT = "+c.getTime());
-		}
-		boolean comp=c.compareTo(Calendar.getInstance())<=0;
-		return comp;
+		logger.debug("Checking {}/{} TT={}", home.getServiceName(), id, c.getTime());
+		return c.compareTo(Calendar.getInstance())<=0;
 	}
 
 	public boolean process(Home home, String id) {
 		String serviceName = home.getServiceName();
 		Resource i;
 		try{
-			logger.debug("Destroying "+serviceName+"<"+id+">");
+			logger.debug("Destroying {}/{}", serviceName, id);
 			i=home.getForUpdate(id);
 			try{
 				i.destroy();
@@ -92,6 +89,5 @@ public class ExpiryChecker implements InstanceChecker {
 		}
 		return false;
 	}
-
 
 }

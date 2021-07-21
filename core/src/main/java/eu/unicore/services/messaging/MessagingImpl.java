@@ -84,7 +84,7 @@ public class MessagingImpl implements IMessaging{
 	public void registerProvider(IMessagingProvider provider, String id) {
 		if(provider!=null && id!=null){
 			if(providers.put(id,provider)==null){
-				logger.info("Registered new provider <"+provider.getClass().getName()+"> as <"+id+">");
+				logger.info("Registered new provider <{}> as <{}>", provider.getClass().getName(), id);
 			}
 		}else {
 			logger.warn("Null provider or id, continuing.");

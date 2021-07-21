@@ -153,7 +153,7 @@ public abstract class SecuredResourceImpl implements Resource {
 		if(logger.isDebugEnabled()){
 			String ownerDN=model.getOwnerDN();
 			if (ownerDN!=null) {
-				logger.debug("Owner: "+X500NameUtils.getReadableForm(ownerDN));
+				logger.debug("Owner: {}", X500NameUtils.getReadableForm(ownerDN));
 			} else {
 				logger.debug("Owner could not be assigned.");
 			}
@@ -166,9 +166,7 @@ public abstract class SecuredResourceImpl implements Resource {
 		X509Credential kernelIdentity = getKernel().getContainerSecurityConfiguration().getCredential();
 		if (kernelIdentity != null) {
 			owner = kernelIdentity.getSubjectName();
-			if(logger.isDebugEnabled()){
-				logger.debug("Setting server as owner of "+getServiceName()+"<"+getUniqueID()+">");
-			}
+			logger.debug("Setting server as owner of {}/{}", getServiceName(), getUniqueID());
 		}
 		setOwner(owner);
 	}
@@ -256,8 +254,8 @@ public abstract class SecuredResourceImpl implements Resource {
 			final Collection<String>ids = toRemove.get(serviceName);
 			final Client client = getClient();
 			Runnable r = new AsyncChildDelete(client, h, ids);
-			logger.info("Deleting instances of <"+serviceName+
-					"> for <"+getClient().getDistinguishedName()+"> : "+ids);
+			logger.info("Deleting instances of <{}> for <{}> : {}", 
+					serviceName, getClient().getDistinguishedName(), ids);
 			getKernel().getContainerProperties().getThreadingServices().getExecutorService().execute(r);
 		}
 		return getModel().removeChildren(children);

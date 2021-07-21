@@ -145,11 +145,10 @@ public abstract class ResourceImpl extends SecuredResourceImpl implements Extend
 			setTerminationTime(tt);
 		}	
 		setResourceStatus(initParams.resourceState);
-		
-		if(logger.isDebugEnabled()){
-			logger.debug("Initialised <"+getServiceName()+">"+uniqueID+ (tt!=null ? ", TT = "+tt.getTime(): ""));
+		if(logger.isDebugEnabled()) {
+			String _tt = tt!=null? tt.getTime().toString() : "never";
+			logger.debug("Initialised {}/{} TT={}", getServiceName(), uniqueID, _tt);
 		}
-
 	}
 
 	/**

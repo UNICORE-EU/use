@@ -347,12 +347,11 @@ public final class SecurityManager {
 		
 		assembleClientAttributes(client, tokens);
 		if(logger.isDebugEnabled()){
-			logger.debug("Client info (after static AIPs):\n" + client.toString());
+			logger.debug("Client info (after static AIPs):\n{}", client.toString());
 			try{
 				SecurityTokens st=client.getSecurityTokens();
 				if (st!=null)
-					logger.debug("TD Chain length=" + 
-							st.getTrustDelegationTokens().size());
+					logger.debug("TD Chain length={}", st.getTrustDelegationTokens().size());
 			}catch(Exception e){
 				logger.debug("No TD.");
 			}
@@ -387,8 +386,8 @@ public final class SecurityManager {
 		if (isTrustedAgent(client)) {
 			if(logger.isDebugEnabled()) {
 				String consignor = tokens.getConsignorName(); 
-				logger.debug("Accept trusted-agent " + X500NameUtils.getReadableForm(consignor) 
-						+ " to work on selected user's behalf " + 
+				logger.debug("Accept trusted-agent {} to work for selected user {}",
+						X500NameUtils.getReadableForm(consignor),
 						X500NameUtils.getReadableForm(tokens.getUserName()));
 			}
 			tokens.setConsignorTrusted(true);
@@ -420,7 +419,7 @@ public final class SecurityManager {
 		}
 		if (res.getDecision().equals(PDPResult.Decision.DENY) && logger.isDebugEnabled()) {
 			if (res.getMessage() != null && res.getMessage().length() > 0)
-				logger.debug("The UNICORE/X PDP denied the request: " + res.getMessage());
+				logger.debug("The UNICORE/X PDP denied the request: {}", res.getMessage());
 			else
 				logger.debug("The UNICORE/X PDP denied the request");
 		}
@@ -537,10 +536,7 @@ public final class SecurityManager {
 			} catch (Exception e) {
 				throw new SecurityException("Exception when getting dynamic attributes for the client.", e);
 			}
-		
-			if(logger.isDebugEnabled()){
-				logger.debug("Client's dynamic attributes:\n" + dynamicSubAttributes);
-			}
+			logger.debug("Client's dynamic attributes: {}", dynamicSubAttributes);
 			MergeLastOverrides combiner = new MergeLastOverrides();
 			combiner.combineAttributes(staticSubAttributes, dynamicSubAttributes);
 		}
@@ -553,9 +549,7 @@ public final class SecurityManager {
 		handleXlogin(client, preferences, validAttributes, defaultAttributes);
 		handleQueue(client, preferences, validAttributes, defaultAttributes);
 		
-		if(logger.isDebugEnabled()){
-			logger.debug("Client info (final):\n" + client.toString());
-		}
+		logger.debug("Client info (final):\n{}", ()-> client.toString());
 	}
 	
 	/**
@@ -570,9 +564,7 @@ public final class SecurityManager {
 		if(acl==null)return false;
 		for(ACLEntry e: acl){
 			if(e.allowed(opType, client)){
-				if(logger.isDebugEnabled()){
-					logger.debug("Access granted by ACL entry "+e);
-				}
+				logger.debug("Access granted by ACL entry {}", e);
 				return true;
 			}
 		}
@@ -643,15 +635,11 @@ public final class SecurityManager {
 
 		String dn = serverCert.getSubjectX500Principal().getName();
 		if(logger.isTraceEnabled()){
-			logger.trace("Check server=<"+X500NameUtils.getReadableForm(
-					serverCert.getSubjectX500Principal())+"> "+
-					" vs client=<"+X500NameUtils.getReadableForm(
-							c.getDistinguishedName())+">");
+			logger.trace("Check server=<{}> vs client=<{}>",
+					X500NameUtils.getReadableForm(serverCert.getSubjectX500Principal()),
+					X500NameUtils.getReadableForm(c.getDistinguishedName()));
 		}
-		if (X500NameUtils.equal(dn, c.getDistinguishedName())){
-			return true;
-		}
-		return false;
+		return X500NameUtils.equal(dn, c.getDistinguishedName());
 	}
 
 	/**

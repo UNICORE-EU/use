@@ -63,20 +63,19 @@ public class DynamicAttributeSourcesChain extends BaseAttributeSourcesChain<IDyn
 	@Override
 	public SubjectAttributesHolder getAttributes(Client client, SubjectAttributesHolder initial)
 			throws IOException, AuthorisationException {
-		if (!started)
-			throw new IllegalStateException("This object must be started prior to be used.");
+		assert started : "This object must be started before use.";
 		SubjectAttributesHolder resultMap = new SubjectAttributesHolder(initial.getPreferredVos());
 		for (IDynamicAttributeSource a: chain){
 			NDC.push(a.getName());
 			try{
 				SubjectAttributesHolder current = a.getAttributes(client, resultMap);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Dynamic attribute source " + a.getName() + 
-							" returned the following attributes:\n" + current);
+					logger.debug("Dynamic attribute source {} returned the following attributes:\n{}",
+							a.getName(), current);
 				}
 				if (!combiner.combineAttributes(resultMap, current)) {
-					logger.debug("Dynamic attributes combiner decided to stop processing of attribute " +
-							"sources at " + a.getName() + ".");
+					logger.debug("Dynamic attributes combiner decided to stop processing attribute sources at {}",
+							a.getName());
 					break;
 				}
 			}

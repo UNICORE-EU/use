@@ -55,7 +55,7 @@ public class PersistenceSettings {
 	 */
 	public static PersistenceSettings get(Class<?> spec){
 		if(spec==null)return null;
-		logger.debug("Generating persistence settings for class "+spec.getName());
+		logger.debug("Generating persistence settings for class {}", spec.getName());
 		PersistenceSettings persistenceSettings=new PersistenceSettings();
 		boolean loadOnce=false;
 		Persistent p=(Persistent)spec.getAnnotation(Persistent.class);
@@ -64,9 +64,7 @@ public class PersistenceSettings {
 		}
 		persistenceSettings.loadOnce=loadOnce;
 		persistenceSettings.concurrentMethods=findConcurrentMethods(spec);
-		if(logger.isTraceEnabled()){
-			logger.trace("Persistence settings for "+spec.getName()+"\n"+persistenceSettings.toString());
-		}
+		logger.trace("Persistence settings for {}", ()-> persistenceSettings.toString());
 		return persistenceSettings;
 	}
 	
@@ -95,13 +93,11 @@ public class PersistenceSettings {
 	}
 	
 	public String toString(){
-		
 		StringBuilder sb=new StringBuilder();
 		sb.append(super.toString());
 		sb.append(" isLoadOnce="+isLoadOnce());
 		sb.append(" concurrent methods="+concurrentMethods.toString());
 		return sb.toString();
-		
 	}
 	
 	public static List<String> findConcurrentMethods(Class<?> spec){
@@ -122,7 +118,7 @@ public class PersistenceSettings {
 				}
 			}
 		}catch(Exception e){
-			logger.fatal("Could not create list of concurrent methods",e);
+			logger.error("Could not create list of concurrent methods", e);
 		}
 		return concurrentMethods;
 	}

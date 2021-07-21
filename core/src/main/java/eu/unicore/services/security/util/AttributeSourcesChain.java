@@ -88,12 +88,10 @@ public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeS
 			try{
 				SubjectAttributesHolder current = a.getAttributes(tokens, resultMap);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Attribute source " + a.getName() + 
-							" returned the following attributes:\n" + current);
+					logger.debug("Attribute source {} returned the following attributes:\n{}", a.getName(), current);
 				}
 				if (!combiner.combineAttributes(resultMap, current)) {
-					logger.debug("Attributes combiner decided to stop processing of attribute " +
-							"sources at " + a.getName() + ".");
+					logger.debug("Attributes combiner decided to stop processing attribute sources at {}", a.getName());
 					break;
 				}
 			}

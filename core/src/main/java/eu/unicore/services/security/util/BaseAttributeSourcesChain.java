@@ -120,8 +120,7 @@ public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> 
 	
 	@Override
 	public String getStatusDescription() {
-		if (!started)
-			throw new IllegalStateException("This object must be started prior to be used.");
+		assert started : "This object must be started before use.";
 		StringBuilder sb=new StringBuilder();
 		String newline = System.getProperty("line.separator");
 		if(chain.size()==0){
@@ -139,14 +138,12 @@ public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> 
 	}
 	
 	public List<T> getChain(){
-		if (!started)
-			throw new IllegalStateException("This object must be started prior to be used.");
+		assert started : "This object must be started before use.";
 		return Collections.unmodifiableList(chain);
 	}
 	
 	public CombiningPolicy getCombiningPolicy(){
-		if (!started)
-			throw new IllegalStateException("This object must be started prior to be used.");
+		assert started : "This object must be started before use.";
 		return combiner;
 	}
 	
@@ -192,8 +189,7 @@ public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> 
 				combiner=(CombiningPolicy)c;
 			}
 			catch(Exception ex){
-				throw new ConfigurationException("Can't create combining policy <"+
-						combinerName+">");
+				throw new ConfigurationException("Can't create combining policy <"+combinerName+">");
 			}
 		}
 	}
