@@ -85,16 +85,6 @@ touch conf/xacml2.conf
 
 ==== Remote SAML/XACML 2.0 PDP with Argus PAP
 
-[NOTE]
-===========
-Releases 6.5.x of UNICORE offered an other Argus PDP implementation which allows for 
-off-sourcing authorisation decision to a remote Argus PDP daemon. While this implementation
-was working, in the Argus policy language it is impossible to express any rules using
-the resource owner. Therefore creation of a functional policy for UNICORE with Argus 
-is barely possible and this implementation was dropped in UNICORE 6.6.0.  
-===========
-
-
 This PDP allows for mixing local policies with policies downloaded from a remote 
 server using SAML protocol for XACML policy query. This protocol is implemented by
 Argus PAP server https://twiki.cern.ch/twiki/bin/view/EGEE/AuthorizationFramework[Argus PAP].

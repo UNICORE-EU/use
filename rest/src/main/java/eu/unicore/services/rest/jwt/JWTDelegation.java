@@ -26,7 +26,6 @@ public class JWTDelegation implements IAuthCallback {
 	/**
 	 * @param security
 	 * @param properties
-	 * @param keyCache
 	 * @param user - user identity to issue a JWT token for
 	 */
 	public JWTDelegation(IContainerSecurityConfiguration security, JWTServerProperties properties, String user){

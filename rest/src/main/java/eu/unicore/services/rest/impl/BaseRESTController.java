@@ -18,6 +18,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -29,7 +30,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.fzj.unicore.persist.PersistenceException;
-import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.Client;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExtendedResourceStatus;
@@ -354,10 +354,10 @@ public abstract class BaseRESTController extends RESTRendererBase {
 		}
 	}
 
-	protected void assertOwnerLevelAccess() throws AuthorisationException{
+	protected void assertOwnerLevelAccess() {
 		if(resource instanceof SecuredResourceImpl){
 			if(!((SecuredResourceImpl)resource).isOwnerLevelAccess()){
-				throw new AuthorisationException("Access denied! You have to be the resource's owner or server admin to perform this operation.");
+				throw new WebApplicationException(403);
 			}
 		}
 	}

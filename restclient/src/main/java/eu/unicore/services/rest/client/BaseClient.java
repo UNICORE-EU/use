@@ -361,9 +361,6 @@ public class BaseClient {
 		if(key!=null && prefsKey!=null && prefsKey.length()>0) {
 			key = key + prefsKey;
 		}
-		else {
-			key = prefsKey;
-		}
 		return key;
 	}
 	

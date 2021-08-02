@@ -80,7 +80,8 @@ For example, to debug a security/authorisation problem in the UNICORE/X security
 you can set
   
 ------
-log4j.logger.unicore.security=DEBUG
+logger.sec.name=unicore.security
+logger.sec.level=DEBUG
 ------
 
 If you are just interested in XUUDB related output, you can set
