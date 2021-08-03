@@ -62,7 +62,8 @@
   <scm>
     <url>https://github.com/UNICORE-EU/use</url>
     <connection>scm:git:git://github.com/UNICORE-EU/use.git</connection>
-    <developerConnection>scm:git:git://github.com/UNICORE-EU/use.git</developerConnection>
+    <developerConnection>scm:git:ssh://git@github.com/UNICORE-EU/use.git</developerConnection>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
@@ -101,13 +102,11 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- other UNICORE components -->
     <dependency>
       <groupId>de.fzj.unicore</groupId>
       <artifactId>persistence</artifactId>
       <version>${persistence.version}</version>
     </dependency>
-
     <dependency>
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-core</artifactId>
@@ -164,7 +163,6 @@
       </exclusions>
     </dependency>
 
-    <!-- Jetty -->
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
@@ -181,7 +179,6 @@
       <version>${jetty.version}</version>
     </dependency>
 
-    <!-- CXF -->
     <dependency>
       <groupId>com.sun.xml.messaging.saaj</groupId>
       <artifactId>saaj-impl</artifactId>
@@ -282,12 +279,6 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>xmlbeans-maven-plugin</artifactId>
           <version>2.3.3</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-release-plugin</artifactId>
-          <configuration>
-            <tagBase>https://unicore.svn.sourceforge.net/svnroot/unicore/wsrflite/tags</tagBase>
-          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

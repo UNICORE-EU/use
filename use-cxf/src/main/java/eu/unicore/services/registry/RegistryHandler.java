@@ -152,8 +152,11 @@ public class RegistryHandler implements ExternalSystemConnector {
 					for(String registryURL: registryUrls){
 						if(registryURL!=null && registryURL.length()>0){
 							String u=registryURL.trim();
+							if(u.contains("/rest/registries/")) {
+								u = convertURL(u);
+							}
 							externalRegistryURLs.add(u);
-							logger.info("Using registry: "+u);
+							logger.info("Using registry: {}", u);
 						}
 					}
 				}
@@ -162,6 +165,10 @@ public class RegistryHandler implements ExternalSystemConnector {
 				logger.warn("No external registry URLs are defined!");
 			}
 		}
+	}
+
+	String convertURL(String orig) {
+		return orig.replace("/rest/registries/", "/services/Registry?res=");
 	}
 
 	private EndpointReferenceType makeEPR(String url){
