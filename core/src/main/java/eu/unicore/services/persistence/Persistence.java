@@ -1,7 +1,7 @@
 package eu.unicore.services.persistence;
 
 import java.util.Calendar;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -59,12 +59,12 @@ public class Persistence extends AbstractStore{
 	}
 
 	@Override
-	public Collection<String> getUniqueIDs() throws PersistenceException {
+	public List<String> getUniqueIDs() throws PersistenceException {
 		return p.getIDs();
 	}
 
 	@Override
-	public Collection<String> getTaggedResources(String... tags) throws PersistenceException {
+	public List<String> getTaggedResources(String... tags) throws PersistenceException {
 		return p.findIDs("tags", makeTagsUnique(tags));
 	}
 	

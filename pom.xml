@@ -6,7 +6,7 @@
   <packaging>pom</packaging>
   <description>UNICORE service container</description>
   <inceptionYear>2010</inceptionYear>
-  <version>4.2.0</version>
+  <version>4.2.1</version>
   <name>UNICORE Services Environment</name>
  
   <parent>
@@ -68,7 +68,7 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>0.203</persistence.version>
+    <persistence.version>0.204</persistence.version>
     <secutils.version>3.2.1</secutils.version>
     <seclib.version>5.3.1</seclib.version>
     <xuudb.version>2.6.1</xuudb.version>

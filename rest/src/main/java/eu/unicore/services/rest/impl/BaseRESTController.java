@@ -3,7 +3,6 @@ package eu.unicore.services.rest.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -346,7 +345,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 		
 		if(tagSpec!=null){
 			String[] tags = tagSpec.split("[ +,]");
-			Collection<String> tagged = home.getStore().getTaggedResources(tags);
+			List<String> tagged = home.getStore().getTaggedResources(tags);
 			return home.getAccessibleResources(tagged, c);
 		}
 		else{

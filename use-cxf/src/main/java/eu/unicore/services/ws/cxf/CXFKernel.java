@@ -41,11 +41,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 import javax.xml.namespace.QName;
 
-import org.apache.cxf.common.logging.LogUtils;
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
@@ -53,7 +51,6 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.service.Service;
 import org.apache.cxf.ws.addressing.MAPAggregator;
 import org.apache.cxf.ws.addressing.soap.MAPCodec;
-import org.apache.cxf.wsdl.service.factory.ReflectionServiceFactoryBean;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.samly2.trust.TruststoreBasedSamlTrustChecker;
@@ -107,10 +104,6 @@ public class CXFKernel {
 	
 	private CXFKernel(Kernel kernel){
 		this.kernel=kernel;
-		try{
-			// don't want error messages from this class
-			LogUtils.getL7dLogger(ReflectionServiceFactoryBean.class).setLevel(Level.OFF);
-		}catch(Exception ex) {}
 	}
 
 	/**

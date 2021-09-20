@@ -177,17 +177,17 @@ public interface Home extends Runnable, KernelInjectable {
 	 * @param client - client
 	 * @since 3.1.0
 	 */
-	public List<String>getAccessibleResources(Client client) throws PersistenceException;
+	public List<String> getAccessibleResources(Client client) throws PersistenceException;
 
 	/**
 	 * Return the resources that are accessible for the given client.
 	 * Note: the PDP is invoked for each resource
 	 * 
-	 * @param ids - a set of IDs for which accessibility should be checked
+	 * @param ids - a list of IDs for which accessibility should be checked
 	 * @param client - client
 	 * @since 3.1.0
 	 */
-	public List<String>getAccessibleResources(Collection<String> ids, Client client) throws PersistenceException;
+	public List<String> getAccessibleResources(Collection<String> ids, Client client) throws PersistenceException;
 
 	/**
 	 * does this service support notification (i.e. WS-Notification)? If 

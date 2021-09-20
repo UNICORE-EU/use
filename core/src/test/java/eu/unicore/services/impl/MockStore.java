@@ -1,10 +1,10 @@
 package eu.unicore.services.impl;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import eu.unicore.services.Kernel;
@@ -35,12 +35,12 @@ public class MockStore implements Store {
 	public void unlock(Resource inst) {
 	}
 	
-	public Set<String>getUniqueIDs() {
-		return new HashSet<String>();
+	public List<String>getUniqueIDs() {
+		return new ArrayList<>();
 	}
 
-	public Set<String>getTaggedResources(String... tags) {
-		return new HashSet<String>();
+	public List<String>getTaggedResources(String... tags) {
+		return new ArrayList<String>();
 	}
 	
 	public Resource read(String uniqueID) {

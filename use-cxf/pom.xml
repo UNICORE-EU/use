@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>eu.unicore.services</groupId>
   <artifactId>use-wsrflite</artifactId>
-  <version>4.2.0</version>
+  <version>4.2.1</version>
   <parent>
     <groupId>eu.unicore.services</groupId>
     <artifactId>use</artifactId>
-    <version>4.2.0</version>
+    <version>4.2.1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>UNICORE Services Environment WS(RF) support</name>
@@ -53,22 +53,22 @@
     <dependency>
       <groupId>eu.unicore.services</groupId>
       <artifactId>use-core</artifactId>
-      <version>${project.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
     <dependency>
       <groupId>eu.unicore.services</groupId>
       <artifactId>use-wsrftypes</artifactId>
-      <version>${project.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
     <dependency>
       <groupId>eu.unicore.services</groupId>
       <artifactId>use-wsrfclient</artifactId>
-      <version>${project.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
     <dependency>
       <groupId>eu.unicore.services</groupId>
       <artifactId>use-rest</artifactId>
-      <version>${project.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
   </dependencies>
 </project>

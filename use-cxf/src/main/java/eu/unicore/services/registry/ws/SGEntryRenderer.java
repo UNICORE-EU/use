@@ -61,7 +61,9 @@ public class SGEntryRenderer extends ValueRenderer {
 		memberEpr.addNewAddress().setStringValue(value.get(RegistryClient.ENDPOINT));
 		String dn = value.get(RegistryClient.SERVER_IDENTITY);
 		if(dn!=null)WSUtilities.addServerIdentity(memberEpr, dn);
-		QName q = new QName(value.get(RegistryClient.INTERFACE_NAMESPACE), value.get(RegistryClient.INTERFACE_NAME));
+		QName q = new QName(
+				value.getOrDefault(RegistryClient.INTERFACE_NAMESPACE, "undefined"),
+				value.getOrDefault(RegistryClient.INTERFACE_NAME, "undefined"));
 		String pubkey = value.get(RegistryClient.SERVER_PUBKEY);
 		if(pubkey!=null)WSUtilities.addServerPublicKey(memberEpr, pubkey);
 		WSUtilities.addPortType(memberEpr, q);

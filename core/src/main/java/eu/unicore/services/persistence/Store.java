@@ -34,7 +34,7 @@
 package eu.unicore.services.persistence;
 
 import java.util.Calendar;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -77,13 +77,13 @@ public interface Store {
 	 * Retrieve a list of all unique ids. Usually these will be in order as
 	 * ordered by the underlying DB
 	 */
-	public Collection<String> getUniqueIDs() throws PersistenceException;
+	public List<String> getUniqueIDs() throws PersistenceException;
 	
 	/**
 	 * Retrieve a list of all unique ids which are tagged with the given tags. 
 	 * Usually these will be in order as ordered by the underlying DB
 	 */
-	public Collection<String> getTaggedResources(String... tags) throws PersistenceException;
+	public List<String> getTaggedResources(String... tags) throws PersistenceException;
 	
 	/**
 	 * read an instance from storage.

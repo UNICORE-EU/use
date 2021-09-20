@@ -201,7 +201,8 @@ public class Kernel {
 				+ "| |  | | . ` | | || |   | |  | |  _  /|  __|"+ lineSep
 				+ "| |__| | |\\  |_| |_ |____ |__| | | \\ \\| |____"+ lineSep
 				+ " \\____/|_| \\_|_____\\_____\\____/|_|  \\_\\______|"+ lineSep 
-				+ "UNICORE Services Environment, https://www.unicore.eu";
+				+ "UNICORE Services Environment (v"+getVersion()+"), "
+				+ ", https://www.unicore.eu"+ lineSep;
 		return s;
 	}
 

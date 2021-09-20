@@ -59,13 +59,12 @@ public class USEContainer {
 	}
 
 	public static String getVersion(Class<?> versionOf) {
-		String version = versionOf.getPackage().getImplementationVersion(); 
+		String version = versionOf.getPackage().getSpecificationVersion(); 
 		return version != null ? version : "DEVELOPMENT";
 	}
 
 	public final String getHeader() {
-		return (name == null ? "UNICORE Container (USE)" : name) +  
-				 " version " + getVersion();
+		return "UNICORE Container (USE)" + " version " + getVersion();
 	}
 
 	/**

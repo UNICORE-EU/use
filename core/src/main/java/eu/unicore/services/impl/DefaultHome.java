@@ -611,7 +611,7 @@ public abstract class DefaultHome implements Home {
 	@Override
 	public List<String>getAccessibleResources(Collection<String> ids, Client client) {
 		SecurityManager sec = kernel.getSecurityManager();
-		List<String>accessible=new ArrayList<String>();
+		List<String>accessible=new ArrayList<>();
 		for(String id: ids){
 			updateCaches(id);
 			String ownerDN = getOwner(id);
@@ -627,7 +627,7 @@ public abstract class DefaultHome implements Home {
 		return accessible;
 	}
 
-	public Collection<String>getTaggedResources(String...tags) throws PersistenceException {
+	public List<String>getTaggedResources(String...tags) throws PersistenceException {
 		return getStore().getTaggedResources(tags);
 	}
 }
