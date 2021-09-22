@@ -90,9 +90,6 @@ import eu.unicore.util.jetty.HttpServerProperties;
  */
 public class Kernel {
 
-	public static final String VERSION = Kernel.class.getPackage().getImplementationVersion() != null ?
-			Kernel.class.getPackage().getImplementationVersion() : "DEVELOPMENT";
-
 	private static final Logger logger = Log.getLogger(Log.UNICORE, Kernel.class);
 
 	private IMessaging msg;
@@ -179,7 +176,7 @@ public class Kernel {
 	public Kernel(String configurationFile, Properties extraProperties) throws Exception {
 		super();
 		logger.info(getHeader());
-		configurations = new HashSet<UpdateableConfiguration>();
+		configurations = new HashSet<>();
 		externalSystemConnectors = new HashSet<>();
 		subSystems = new HashSet<>();
 		upSince=Calendar.getInstance();
@@ -188,8 +185,13 @@ public class Kernel {
 	}
 
 	public static final String getVersion() {
-		String ver = VERSION != null ? VERSION : "DEVELOPMENT";
-		return ver;
+		return getVersion(Kernel.class);
+	}
+	
+
+	public static String getVersion(Class<?> versionOf) {
+		String version = versionOf.getPackage().getSpecificationVersion(); 
+		return version != null ? version : "DEVELOPMENT";
 	}
 
 	public final String getHeader() {
@@ -202,19 +204,35 @@ public class Kernel {
 				+ "| |__| | |\\  |_| |_ |____ |__| | | \\ \\| |____"+ lineSep
 				+ " \\____/|_| \\_|_____\\_____\\____/|_|  \\_\\______|"+ lineSep 
 				+ "UNICORE Services Environment (v"+getVersion()+"), "
-				+ ", https://www.unicore.eu"+ lineSep;
+				+ "https://www.unicore.eu"+ lineSep;
 		return s;
 	}
 
+	public String getFeatureStatus(){
+		StringBuilder report = new StringBuilder();
+		String newline = System.getProperty("line.separator");
+		report.append("Deployed features");
+		report.append(newline);
+		report.append("*****************");
+		report.append(newline);
+		if(getDeploymentManager().getFeatures().size()==0) {
+			report.append("N/A").append(newline);
+		}
+		for(Map.Entry<String,Feature> f: getDeploymentManager().getFeatures().entrySet()) {
+			report.append(f.getKey())
+			.append(": ")
+			.append("v").append(f.getValue().getVersion())
+			.append(newline);
+		}
+		return report.toString();
+	}
+	
 	public String getConnectionStatus(){
 		StringBuilder report = new StringBuilder();
 		String newline = System.getProperty("line.separator");
+		report.append("External connections");
 		report.append(newline);
-		report.append("************************");
-		report.append(newline);
-		report.append(" External connections");
-		report.append(newline);
-		report.append("************************");
+		report.append("********************");
 		report.append(newline);
 		for(ExternalSystemConnector esc: getExternalSystemConnectors()){
 			report.append(esc.getExternalSystemName());
@@ -223,11 +241,9 @@ public class Kernel {
 			report.append(newline);
 		}
 		report.append(newline);
-		report.append("************************");
+		report.append("Subsystems");
 		report.append(newline);
-		report.append(" Subsystems");
-		report.append(newline);
-		report.append("************************");
+		report.append("***********");
 		report.append(newline);
 		if(subSystems.size()==0) {
 			report.append("N/A").append(newline);
@@ -326,6 +342,7 @@ public class Kernel {
 			externalSystemConnectors.add((ExternalSystemConnector)value);
 		}
 		if(value instanceof ISubSystem){
+			logger.info("Adding "+value.getClass());
 			subSystems.add((ISubSystem)value);
 		}
 	}

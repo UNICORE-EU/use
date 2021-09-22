@@ -25,11 +25,24 @@ public class RegistryClient extends BaseClient {
 		super(url, security, authCallback);
 	}
 
-	public void addEntry(Map<String,String>content) throws Exception {
+	/**
+	 * Add an entry. Reply is the "lifetime" of the entry in seconds, 
+	 * ie. the time the entry will be retained.
+	 * 
+	 * @param content
+	 * @return lifetime in seconds
+	 * @throws Exception
+	 */
+	public long addEntry(Map<String,String>content) throws Exception {
 		JSONObject obj = asJSON(content);
 		HttpResponse response = post(obj);
 		checkError(response);
+		long lifetime = -1;
+		try	{
+			lifetime = Long.parseLong(response.getHeaders("X-UNICORE-Lifetime")[0].getValue());
+		}catch(Exception e) {}
 		close(response);
+		return lifetime;
 	}
 
 	public List<JSONObject> listEntries() throws Exception {

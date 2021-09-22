@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
-import eu.unicore.services.ws.client.ExternalRegistryClient;
 import eu.unicore.util.Log;
 
 

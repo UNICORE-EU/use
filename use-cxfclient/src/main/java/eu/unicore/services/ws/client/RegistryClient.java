@@ -34,6 +34,7 @@ package eu.unicore.services.ws.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -77,7 +78,7 @@ import eu.unicore.util.httpclient.IClientConfiguration;
  * @author demuth
  * @author schuller
  */
-public class RegistryClient extends BaseWSRFClient implements IRegistryQuery{
+public class RegistryClient extends BaseWSRFClient {
 	
 	private static final Logger logger=Log.getLogger(Log.CLIENT,RegistryClient.class);
 	
@@ -208,6 +209,16 @@ public class RegistryClient extends BaseWSRFClient implements IRegistryQuery{
 		return Arrays.asList(entries);
 	}
 	
+	public List<Map<String,String>> listEntries2()throws Exception {
+		List<Map<String,String>> result = new ArrayList<>();
+		for(EntryType e: listEntries()) {
+			if(e.getMemberServiceEPR()!=null) {
+				result.add(RegistryClient.parse(e.getMemberServiceEPR()));
+			}
+		}
+		return result;
+	}
+	
 
 	/**
 	 * checks whether a (WSRF) service can be accessed using the current
@@ -252,5 +263,32 @@ public class RegistryClient extends BaseWSRFClient implements IRegistryQuery{
 		}
 		ad.getAdd().addNewContent();
 		return ad;
+	}
+	
+	public static Map<String,String> parse(EndpointReferenceType memberEPR){
+		Map<String,String> res = new HashMap<>();
+		String dn = WSUtilities.extractServerIDFromEPR(memberEPR);
+		if(dn!=null){
+			res.put(RegistryClient.SERVER_IDENTITY,dn);
+		}
+		QName q = WSUtilities.extractInterfaceName(memberEPR);
+		if(q!=null){
+			res.put(RegistryClient.INTERFACE_NAME,q.getLocalPart());
+			if(q.getNamespaceURI()!=null)res.put(RegistryClient.INTERFACE_NAMESPACE,q.getNamespaceURI());
+		}
+		res.put(RegistryClient.ENDPOINT, memberEPR.getAddress().getStringValue());
+		String pem = WSUtilities.extractPublicKey(memberEPR);
+		if(pem!=null){
+			res.put(RegistryClient.SERVER_PUBKEY,pem);
+		}
+		return res;
+	}
+	
+	/**
+	 * allows to specify custom filtering conditions on the service list
+	 * returned by the registry client
+	 */
+	public interface ServiceListFilter {
+		public boolean accept(EntryType epr);
 	}
 }

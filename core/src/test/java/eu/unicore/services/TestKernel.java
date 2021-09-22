@@ -23,8 +23,10 @@ public class TestKernel extends TestCase {
 		ranStartupTask2=false;
 	}
 
-	public void testHeader() throws Exception{	
-		System.out.println(new Kernel(TestConfigUtil.getInsecureProperties()).getHeader());
+	public void testHeaders() throws Exception{	
+		Kernel k = new Kernel(TestConfigUtil.getInsecureProperties());
+		System.out.println(k.getHeader());
+		System.out.println(k.getConnectionStatus());
 	}
 
 	public void testKernelStartup()throws Exception{
@@ -59,6 +61,11 @@ public class TestKernel extends TestCase {
 		}
 	}
 
+	public void testUSEContainer() throws Exception {
+		USEContainer uas=new USEContainer("src/test/resources/conf/use.properties", "TEST");
+		uas.startSynchronous();
+		uas.getKernel().shutdown();
+	}
 
 	public void testStartKernelUsingPropertiesFile()throws Exception{
 		Kernel k=null;

@@ -27,6 +27,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>eu.unicore</groupId>
+      <artifactId>jproperties-conf</artifactId>
+      <version>1.2.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>eu.unicore.services</groupId>
       <artifactId>use-core</artifactId>
       <version>${project.version}</version>

@@ -42,8 +42,6 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
-import org.oasisOpen.docs.wsrf.sg2.EntryType;
-import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
@@ -51,15 +49,10 @@ import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.Home;
 import eu.unicore.services.Kernel;
-import eu.unicore.services.registry.ws.SGFrontend;
 import eu.unicore.services.security.util.PubkeyCache;
-import eu.unicore.services.ws.WSUtilities;
-import eu.unicore.services.ws.client.ExternalRegistryClient;
 import eu.unicore.services.ws.client.RegistryClient;
-import eu.unicore.services.ws.sg.Registry;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.PropertyChangeListener;
-import eu.unicore.util.httpclient.ClientProperties;
 
 /**
  * It is used to obtain a client for both internal and external <b>default</b> registries, which are
@@ -110,7 +103,7 @@ public class RegistryHandler implements ExternalSystemConnector {
 			}
 		});
 		
-		Home regHome=kernel.getHome(Registry.REGISTRY_SERVICE);
+		Home regHome=kernel.getHome("Registry");
 		if (regHome !=null && regHome instanceof RegistryHomeImpl){
 			isGlobalRegistry = true;
 		}
@@ -151,10 +144,7 @@ public class RegistryHandler implements ExternalSystemConnector {
 							ContainerProperties.EXTERNAL_REGISTRY_KEY);
 					for(String registryURL: registryUrls){
 						if(registryURL!=null && registryURL.length()>0){
-							String u=registryURL.trim();
-							if(u.contains("/rest/registries/")) {
-								u = convertURL(u);
-							}
+							String u = registryURL.trim();
 							externalRegistryURLs.add(u);
 							logger.info("Using registry: {}", u);
 						}
@@ -165,17 +155,6 @@ public class RegistryHandler implements ExternalSystemConnector {
 				logger.warn("No external registry URLs are defined!");
 			}
 		}
-	}
-
-	String convertURL(String orig) {
-		return orig.replace("/rest/registries/", "/services/Registry?res=");
-	}
-
-	private EndpointReferenceType makeEPR(String url){
-		String resID = WSUtilities.extractResourceID(url);
-		if (resID == null)
-			throw new IllegalArgumentException("The URL " + url + " doesn't provide resource identifier");
-		return WSUtilities.makeServiceEPR(url);
 	}
 
 	/**
@@ -208,19 +187,10 @@ public class RegistryHandler implements ExternalSystemConnector {
 	 */ 
 	public ExternalRegistryClient getExternalRegistryClient()throws Exception{
 		if(!usesExternalRegistry())return null;
-		ExternalRegistryClient reg=new ExternalRegistryClient();
 		synchronized(externalRegistryURLs){
-			for(String url: externalRegistryURLs){
-				try{
-					ClientProperties sec=kernel.getClientConfiguration();
-					reg.addClient(new RegistryClient(url, makeEPR(url), sec));
-				}catch(Exception e){
-					logger.error("Could not create client for external registry at <"+url+">",e);
-				}
-			}
+			return ExternalRegistryClient.getExternalRegistryClient(
+					externalRegistryURLs, kernel.getClientConfiguration());
 		}
-		reg.setMode(ExternalRegistryClient.MULTICAST);
-		return reg;
 	}
 
 	@Override
@@ -284,9 +254,8 @@ public class RegistryHandler implements ExternalSystemConnector {
 				ExternalRegistryClient erc = getExternalRegistryClient();
 				PubkeyCache keyCache = PubkeyCache.get(kernel);
 				if(erc==null)return;
-				for(EntryType e: erc.listEntries()){
+				for(Map<String,String>entry: erc.listEntries()){
 					try{
-						Map<String,String>entry = SGFrontend.parse(e.getMemberServiceEPR());
 						String pem = entry.get(RegistryClient.SERVER_PUBKEY);
 						if(pem!=null){
 							String serverDN = entry.get(RegistryClient.SERVER_IDENTITY);

@@ -53,18 +53,9 @@ public class USEContainer {
 
 	protected final String name;
 	protected final Kernel kernel;
-	
-	public String getVersion() {
-		return getVersion(getClass());
-	}
-
-	public static String getVersion(Class<?> versionOf) {
-		String version = versionOf.getPackage().getSpecificationVersion(); 
-		return version != null ? version : "DEVELOPMENT";
-	}
 
 	public final String getHeader() {
-		return "UNICORE Container (USE)" + " version " + getVersion();
+		return "UNICORE Container (USE)" + " version " + Kernel.getVersion();
 	}
 
 	/**
@@ -88,13 +79,14 @@ public class USEContainer {
 		return kernel;
 	}
 	
-	public String getConnectionStatus(){
+	public String getStatusReport(){
 		StringBuilder report = new StringBuilder();
 		String newline = System.getProperty("line.separator");
 		report.append(newline);
-		report.append("Server status report");
+		report.append("SERVER STATUS");
 		report.append(newline);
-		report.append("************************");
+		report.append(newline);
+		report.append(kernel.getFeatureStatus());
 		report.append(newline);
 		report.append(kernel.getConnectionStatus());
 		return report.toString();
@@ -106,9 +98,13 @@ public class USEContainer {
 	}
 
 	private void printInfo(){
-		String msg = getHeader() + 
-		 (kernel.getContainerProperties().getBooleanValue(ContainerProperties.ON_STARTUP_SELFTEST)?
-			getConnectionStatus() : "" );
+		StringBuilder msg = new StringBuilder();
+		msg.append(getHeader());
+		msg.append(System.getProperty("line.separator"));
+		if(kernel.getContainerProperties().getBooleanValue(ContainerProperties.ON_STARTUP_SELFTEST)) {
+			msg.append(getStatusReport());
+			msg.append(System.getProperty("line.separator"));
+		}
 		System.out.println(msg);
 		logger.info(msg);
 	}

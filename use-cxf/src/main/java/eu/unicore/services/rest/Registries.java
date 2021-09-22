@@ -20,6 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.fzj.unicore.persist.PersistenceException;
+import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.registry.RegistryImpl;
 import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.services.rest.impl.ServicesBase;
@@ -64,9 +65,13 @@ public class Registries extends ServicesBase {
 				throw new WebApplicationException("Registry entry must specify an 'Endpoint'",
 						HttpStatus.SC_BAD_REQUEST);
 			}
+			ContainerProperties cfg = kernel.getContainerProperties(); 
+			long refreshIn = cfg.getLongValue(ContainerProperties.WSRF_SGENTRY_TERMINATION_TIME);
 			String entryID = sg.addEntry(endpoint, content, null);
 			String location = "/"+entryID;
-			return Response.created(new URI(location)).build();
+			return Response.created(new URI(location))
+					.header("X-UNICORE-Lifetime", String.valueOf(refreshIn))
+					.build();			
 		}catch(Exception ex){
 			return handleError("Could not create/update registry entry", ex, logger);
 		}

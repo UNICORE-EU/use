@@ -1,6 +1,7 @@
 package eu.unicore.services;
 
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -103,4 +104,7 @@ public class DeploymentManager {
 		return f!=null && f.isEnabled();
 	}
 	
+	public Map<String, Feature> getFeatures(){
+		return Collections.unmodifiableMap(features);
+	}
 }

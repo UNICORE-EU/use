@@ -43,4 +43,9 @@ public interface Feature extends KernelInjectable
 	public default boolean isServiceEnabled(String serviceName) {
 		return true;
 	}
+	
+	public default String getVersion() {
+		return Kernel.getVersion(this.getClass());
+	}
+
 }
