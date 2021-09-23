@@ -12,7 +12,6 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import eu.unicore.bugsreporter.annotation.RegressionTest;
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
 import eu.unicore.services.security.pdp.ActionDescriptor;
@@ -69,7 +68,6 @@ public abstract class AbstractPDPTest
 	}
 	
 	@Test
-	@RegressionTest(url="https://sourceforge.net/tracker/index.php?func=detail&aid=3429753&group_id=102081&atid=633902")
 	public void testNoAction()
 	{
 		try

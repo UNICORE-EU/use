@@ -10,7 +10,6 @@ package eu.unicore.services;
 import java.io.ByteArrayInputStream;
 import java.util.Properties;
 
-import eu.unicore.bugsreporter.annotation.RegressionTest;
 import eu.unicore.services.security.CertificateInfoMetric;
 import eu.unicore.util.Log;
 import junit.framework.TestCase;
@@ -47,7 +46,6 @@ public class TestSecuritySetup extends TestCase
 			"container.security.accesscontrol=false\n" +
 			"container.security.gateway.enable=false";
 
-	@RegressionTest(url="https://sourceforge.net/tracker/index.php?func=detail&aid=3006856&group_id=102081&atid=633902")
 	public void testInvalidSettings()
 	{
 		try

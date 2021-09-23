@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import eu.unicore.bugsreporter.annotation.RegressionTest;
 import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
@@ -122,8 +121,6 @@ public class TestAuthChainFactory extends TestCase{
 		assertTrue(chain.getCombiningPolicy() instanceof TestPolicy);
 	}
 	
-	@RegressionTest(url="https://sourceforge.net/tracker/?func=detail&aid=3165378&group_id=102081&atid=633902",
-			description="Tests MERGE policy including default and valid attribtues also XACML attribtues are tested.")
 	public void testMergePolicy(){
 		CombiningPolicy m=new AttributeSourcesChain.Merge();
 		String[] a1=new String[]{"foo","bar"};
