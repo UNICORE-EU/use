@@ -19,7 +19,6 @@ import java.util.Map;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.TestConfigUtil;
 
-import eu.unicore.bugsreporter.annotation.FunctionalTest;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 
@@ -141,7 +140,6 @@ public class TestFileAttributeSource extends TestCase
 
 
 	
-	@FunctionalTest(id="aip_file")
 	public void testRefresh() throws InterruptedException
 	{
 		String srcF = "src/test/resources/file/testUudb-strict.xml";

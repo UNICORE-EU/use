@@ -2,7 +2,7 @@ package eu.unicore.services.registry;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import de.fzj.unicore.persist.PersistenceException;
@@ -14,7 +14,7 @@ import eu.unicore.services.Kernel;
  * 
  * @author schuller
  */
-public class LocalRegistryClient{
+public class LocalRegistryClient implements IRegistry {
 
 	private final String resID;
 
@@ -55,8 +55,8 @@ public class LocalRegistryClient{
 		}
 	}
 	
-	public Collection<Map<String,String>> listEntries() throws Exception {
-		Collection<Map<String,String>> res = new ArrayList<>();
+	public List<Map<String,String>> listEntries() throws Exception {
+		List<Map<String,String>> res = new ArrayList<>();
 		RegistryImpl reg = null;
 		if(kernel.getMessaging().hasMessages(resID)){
 			reg = (RegistryImpl)getHome().refresh(resID);

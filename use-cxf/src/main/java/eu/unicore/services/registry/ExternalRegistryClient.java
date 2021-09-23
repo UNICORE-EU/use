@@ -26,9 +26,9 @@ import eu.unicore.util.httpclient.ClientProperties;
  * 
  * @author schuller
  */
-public class ExternalRegistryClient {
+public class ExternalRegistryClient implements IRegistry {
 
-	private static final Logger logger=Log.getLogger(Log.CLIENT, ExternalRegistryClient.class);
+	private static final Logger logger = Log.getLogger(Log.CLIENT, ExternalRegistryClient.class);
 
 	protected static final long readd_offset = 60; 
 

@@ -11,7 +11,6 @@ import eu.emi.security.authn.x509.proxy.ProxyCertificate;
 import eu.emi.security.authn.x509.proxy.ProxyCertificateOptions;
 import eu.emi.security.authn.x509.proxy.ProxyGenerator;
 import eu.emi.security.authn.x509.proxy.ProxyUtils;
-import eu.unicore.bugsreporter.annotation.FunctionalTest;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.services.Kernel;
@@ -35,7 +34,6 @@ public class TestXUUDBAuthoriser extends TestCase{
 		xuudb.start(k);
 	}
 
-	@FunctionalTest(id="xuudb_as", description="With client having a proxy certificate.")
 	public void testCheckProxyDN()throws Exception{
 		X509Credential cred = new KeystoreCredential("src/test/resources/xuudb/user-keystore.jks",
 				"the!user".toCharArray(), "the!user".toCharArray(), "demo user", "jks");
@@ -56,7 +54,6 @@ public class TestXUUDBAuthoriser extends TestCase{
 		assertEquals(userName,mock.lastDN);
 	}
 	
-	@FunctionalTest(id="xuudb_as", description="Main test")
 	public void testCheckDNResult()throws Exception{
 		SecurityTokens tokens=new SecurityTokens();
 		X509Certificate[] cert=CertificateUtils.loadCertificateChain(
