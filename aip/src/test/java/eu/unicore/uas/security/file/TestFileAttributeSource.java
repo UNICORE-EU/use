@@ -49,7 +49,6 @@ public class TestFileAttributeSource extends TestCase
 		}
 		
 		assertTrue(NAME.equals(src.getName()));
-		assertTrue(src.getStatusDescription().contains("OK"));
 		return src;
 	}
 	

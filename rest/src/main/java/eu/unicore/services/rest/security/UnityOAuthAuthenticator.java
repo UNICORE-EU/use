@@ -71,7 +71,7 @@ public class UnityOAuthAuthenticator extends UnityBaseSAMLAuthenticator {
 		 * and returns it as an attribute which will be stored in the Client object
 		 */
 		public Map<String,String> extractAttributes(SecurityTokens tokens) {
-			Map<String,String> result = new HashMap<String,String>();
+			Map<String,String> result = new HashMap<>();
 			String[] attr = tokens.getUserPreferences().get("UC_OAUTH_BEARER_TOKEN");
 			if(attr!=null && attr.length>0){
 				result.put("UC_OAUTH_BEARER_TOKEN" , attr[0]);

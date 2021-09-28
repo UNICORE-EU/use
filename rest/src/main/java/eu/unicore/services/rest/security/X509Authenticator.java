@@ -74,9 +74,7 @@ public class X509Authenticator implements IAuthenticator, KernelInjectable  {
 		tokens.setUserName(dn);
 		tokens.setConsignor(certs);
 		tokens.setConsignorTrusted(true);
-		if(logger.isDebugEnabled()){
-			logger.debug("Authenticated X.509 certificate (TLS): <"+dn+">");
-		}
+		logger.debug("Authenticated X.509 certificate (TLS): <{}>", dn);
 		return true;
 	}
 	
@@ -99,9 +97,7 @@ public class X509Authenticator implements IAuthenticator, KernelInjectable  {
 		}
 		tokens.setUserName(dn);
 		tokens.setConsignorTrusted(true);
-		if(logger.isDebugEnabled()){
-			logger.debug("Authenticated X.509 certificate (via Gateway): <"+dn+">");
-		}
+		logger.debug("Authenticated X.509 certificate (via Gateway): <{}>", dn);
 		return true;
 	}
 	
@@ -115,8 +111,8 @@ public class X509Authenticator implements IAuthenticator, KernelInjectable  {
 			dsig.update(token);
 			byte[]sig = Base64.decodeBase64(signature.getBytes());
 			boolean res = dsig.verify(sig);
-			if(!res && logger.isDebugEnabled()){
-				logger.debug("Got invalid signature for DN <"+dn+">");
+			if(!res){
+				logger.debug("Got invalid signature for DN <{}>", dn);
 			}
 			return res;
 		}

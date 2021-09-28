@@ -1,5 +1,6 @@
 package eu.unicore.services.registry;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -15,6 +16,7 @@ import org.oasisOpen.docs.wsrf.sg2.AddDocument;
 import org.oasisOpen.docs.wsrf.sg2.AddResponseDocument;
 import org.w3.x2005.x08.addressing.EndpointReferenceType;
 
+import eu.unicore.services.rest.client.RESTException;
 import eu.unicore.services.rest.client.RegistryClient;
 import eu.unicore.services.ws.WSUtilities;
 import eu.unicore.services.ws.client.Resources;
@@ -67,7 +69,7 @@ public class ExternalRegistryClient implements IRegistry {
 					haveExternalTT = true;
 				}
 			}catch(Exception e){
-				logger.warn(Log.createFaultMessage("Error adding registry entry at <"+address+">" ,e));
+				logger.debug("Error adding registry entry at <{}>: {}", address, e.getMessage());
 			}
 		}
 		// SOAP-WS
@@ -107,13 +109,18 @@ public class ExternalRegistryClient implements IRegistry {
 	 * List all the entries in all the registries. No duplicate filtering
 	 * is applied
 	 */
-	public List<Map<String,String>> listEntries() {
+	public List<Map<String,String>> listEntries() throws IOException {
 		List<Map<String,String>> result = new ArrayList<>();
+		StringBuilder errors = new StringBuilder();
 		for(eu.unicore.services.ws.client.RegistryClient c: wsClients){
 			try{
 				result.addAll(c.listEntries2());
 			}catch(Exception ex){
-				Log.logException("Registry at "+c.getEPR().getAddress().getStringValue()+ " is not available.", ex, logger);
+				String msg = String.format("Registry <%s> is not available: %s", 
+						c.getEPR().getAddress().getStringValue(),
+						Log.createFaultMessage("", ex));
+				logger.debug(msg);
+				errors.append(msg);
 			}
 		}
 		for(eu.unicore.services.rest.client.RegistryClient c: restClients){
@@ -122,9 +129,14 @@ public class ExternalRegistryClient implements IRegistry {
 					result.add(RegistryClient.asMap(o));
 				}
 			}catch(Exception ex){
-				Log.logException("Registry at "+c.getURL()+" is not available.", ex, logger);
-			}
+				String msg = String.format("Registry <%s> is not available: %s", 
+						c.getURL(),
+						Log.createFaultMessage("", ex));
+				if(errors.length()>0)errors.append(". ");
+				errors.append(msg);
+			}	
 		}
+		if(errors.length()>0)throw new IOException(errors.toString());
 		return result;
 	}
 
@@ -138,6 +150,8 @@ public class ExternalRegistryClient implements IRegistry {
 
 	private String connectionStatus=null;
 
+	private long lastChecked = 0;
+
 	/**
 	 * check the connection to the services. If no service 
 	 * replies within the given timeout, returns <code>false</code>
@@ -145,43 +159,53 @@ public class ExternalRegistryClient implements IRegistry {
 	 * @param timeout - connection timeout in milliseconds
 	 */
 	public boolean checkConnection(int timeout){
+		if (!"OK".equals(connectionStatus) && (lastChecked+60000>System.currentTimeMillis()))
+			return false;
+		
 		final StringBuffer status=new StringBuffer();
 		boolean result=false;
 		for(final eu.unicore.services.ws.client.RegistryClient c: wsClients){
-			Callable<Boolean>task=new Callable<Boolean>(){
-				public Boolean call()throws Exception{
-					c.getCurrentTime();
-					return Boolean.TRUE;
+			Callable<String>task=new Callable<String>(){
+				public String call()throws Exception{
+					try {
+						c.getCurrentTime();
+						return "OK";
+					}catch(Exception e) {
+						return Log.createFaultMessage("", e);
+					}
 				}
 			};
-			Boolean res=compute(task, timeout);
-			boolean currentOK=res!=null?res.booleanValue():false;
+			String res = compute(task, timeout);
+			boolean currentOK = res!=null && "OK".equals(res);
 			if(!currentOK){
-				status.append("[NOT AVAILABLE: ").append(c.getEPR().getAddress().getStringValue());
+				status.append("[").append(c.getEPR().getAddress().getStringValue()+" "+res);
 				status.append("] ");
 			}
 			result=result || currentOK;
 		}
 		for(final eu.unicore.services.rest.client.RegistryClient c: restClients){
-			Callable<Boolean>task=new Callable<Boolean>(){
-				public Boolean call()throws Exception{
-					c.getJSON();
-					return Boolean.TRUE;
+			Callable<String>task=new Callable<String>(){
+				public String call()throws Exception{
+					try {
+						c.getJSON();
+						return "OK";
+					}catch(RESTException e) {
+						return e.getErrorMessage();
+					}catch(Exception e) {
+						return Log.createFaultMessage("", e);
+					}
 				}
 			};
-			Boolean res=compute(task, timeout);
-			boolean currentOK=res!=null?res.booleanValue():false;
+			String res = compute(task, timeout);
+			boolean currentOK = res!=null && "OK".equals(res);
 			if(!currentOK){
-				status.append("[NOT AVAILABLE: ").append(c.getURL());
+				status.append("[").append(c.getURL()+": "+res);
 				status.append("] ");
 			}
 			result=result || currentOK;
 		}
-		
-		
-		if(result)connectionStatus="OK";
-		else connectionStatus=status.toString();
-
+		connectionStatus = result? "OK" : status.toString();
+		lastChecked = System.currentTimeMillis();
 		return result;
 	}
 
@@ -190,12 +214,12 @@ public class ExternalRegistryClient implements IRegistry {
 		return connectionStatus;		
 	}
 
-	private Boolean compute(Callable<Boolean>task, int timeout){
+	private String compute(Callable<String>task, int timeout){
 		try{
-			Future<Boolean>f = Resources.getExecutorService().submit(task);
+			Future<String>f = Resources.getExecutorService().submit(task);
 			return f.get(timeout, TimeUnit.MILLISECONDS);
 		}catch(Exception ex){
-			return Boolean.FALSE;
+			return "ERROR";
 		}
 	}
 

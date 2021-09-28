@@ -46,7 +46,7 @@ public class XUUDBDynamicAttributeSource extends XUUDBAuthoriserBase implements
 		if (xuudb != null)
 			return xuudb;
 		try {
-			IClientConfiguration sec = kernel.getClientConfiguration().clone();
+			IClientConfiguration sec = kernel.getClientConfiguration();
 			return new WSClientFactory(sec).createPlainWSProxy(
 					IDynamicAttributesPublic.class, getXUUDBUrl()
 							+ IDynamicAttributesPublic.SERVICE_NAME);

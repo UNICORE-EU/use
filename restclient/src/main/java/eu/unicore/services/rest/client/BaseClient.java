@@ -3,10 +3,13 @@ package eu.unicore.services.rest.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
@@ -441,22 +444,30 @@ public class BaseClient {
 
 	protected String extractErrorMessage(HttpResponse response) {
 		String errMsg = null;
-		if(response.getEntity()!=null){
+		try{
+			String content = EntityUtils.toString(response.getEntity());
 			try{
-				errMsg = EntityUtils.toString(response.getEntity());
-				try{
-					JSONObject o = new JSONObject(errMsg);
-					errMsg = o.optString("errorMessage");
-				}catch(Exception ex){
-					
+				JSONObject jO=new JSONObject(content);
+				for(String key: Arrays.asList("errorMessage", "message")) {
+					errMsg = jO.optString(key, null);
+					if(errMsg!=null)break;
 				}
-			}catch(IOException ex){
-				errMsg = "n/a";
+				if(errMsg==null)errMsg = jO.toString();
+			}catch(Exception ex){
+				errMsg = extractHTMLError(content);
 			}
-		}
+		}catch(Exception ex){}
 		return errMsg;
 	}
+
+	private static final Pattern errorPattern = Pattern.compile("<title>(.*)</title>");
 	
+	public static String extractHTMLError(String html) {
+		Matcher m = errorPattern.matcher(html);
+		if(m.find())return m.group(1).trim();
+		else return "n/a";
+	}
+
 	public SessionIDProvider getSessionIDProvider() {
 		return sessionIDProvider;
 	}

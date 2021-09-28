@@ -93,7 +93,6 @@ public class TestCombiningAlgorithms extends TestCase
 			assertTrue(userDN.contains("Demo User"));
 		
 			IAttributeSource aip = kernel.getContainerSecurityConfiguration().getAip();
-			System.out.println(aip.getStatusDescription());
 			SecurityTokens st = new SecurityTokens();
 			st.setUserName(userDN);
 			st.setConsignorTrusted(true);

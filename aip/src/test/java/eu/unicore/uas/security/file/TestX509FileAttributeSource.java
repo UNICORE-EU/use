@@ -44,7 +44,6 @@ public class TestX509FileAttributeSource extends TestCase
 		}
 		
 		assertTrue(NAME.equals(src.getName()));
-		assertTrue(src.getStatusDescription().contains("OK"));
 		return src;
 	}
 	

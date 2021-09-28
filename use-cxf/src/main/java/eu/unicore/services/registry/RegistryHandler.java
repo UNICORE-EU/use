@@ -236,7 +236,7 @@ public class RegistryHandler implements ExternalSystemConnector {
 				}
 				else{
 					status=Status.DOWN;
-					statusMessage = "CAN'T CONNECT TO REGISTRY";
+					statusMessage = "CAN'T CONNECT ["+erc.getConnectionStatus()+"]";
 				}
 			}
 		}catch(Exception ex){

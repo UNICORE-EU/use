@@ -165,31 +165,24 @@ public abstract class XUUDBAuthoriserBase implements IAttributeSourceBase, Exter
 			cb.notOK(statusMessage);
 		}
 	}
-	
-	public String getXUUDBConnectionStatus() {
-		updateXUUDBConnectionStatus();
-		return statusMessage;
-	}
 
-	public String getStatusDescription() {
-		return getXUUDBConnectionStatus();
-	}
-
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public String getConnectionStatusMessage(){
-		return getXUUDBConnectionStatus();
+		updateXUUDBConnectionStatus();
+		return statusMessage;
 	}
-	
+
+	@Override
 	public Status getConnectionStatus(){
 		return status;
 	}
-	
-	/**
-	 * simple name of the external system
-	 */
+
+	@Override
 	public String getExternalSystemName(){
 		return name +" attribute source";
 	}

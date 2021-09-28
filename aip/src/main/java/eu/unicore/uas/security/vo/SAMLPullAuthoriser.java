@@ -12,13 +12,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
+import eu.unicore.samly2.exceptions.SAMLErrorResponseException;
+import eu.unicore.samly2.exceptions.SAMLValidationException;
+import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
+import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.Kernel;
+import eu.unicore.services.ThreadingServices;
+import eu.unicore.services.utils.CircuitBreaker;
+import eu.unicore.services.utils.TimeoutRunner;
 import eu.unicore.uas.security.vo.conf.IPullConfiguration;
 import eu.unicore.uas.security.vo.conf.PropertiesBasedConfiguration;
 import eu.unicore.util.Log;
@@ -31,10 +39,17 @@ import eu.unicore.util.httpclient.IClientConfiguration;
  *  
  * @author K. Benedyczak
  */
-public class SAMLPullAuthoriser extends SAMLAttributeSourceBase
+public class SAMLPullAuthoriser extends SAMLAttributeSourceBase implements ExternalSystemConnector
 {
 	private static final Logger log = Log.getLogger(IPullConfiguration.LOG_PFX, SAMLPullAuthoriser.class);
+
 	private VOAttributeFetcher fetcher;
+
+	protected Status status = Status.UNKNOWN;	
+
+	protected String statusMessage = "N/A";
+
+	protected CircuitBreaker cb;
 
 	@Override
 	public void configure(String name) throws ConfigurationException {
@@ -45,12 +60,12 @@ public class SAMLPullAuthoriser extends SAMLAttributeSourceBase
 	public void start(Kernel kernel) throws Exception {
 		this.kernel=kernel;
 
-		if (!isEnabled)
-			return;
-
+		cb = new CircuitBreaker("Attribute_Source_"+name);
+		kernel.getMetricRegistry().register(cb.getName(), cb);
+		
 		try
 		{
-			IClientConfiguration cc = kernel.getClientConfiguration().clone();
+			IClientConfiguration cc = kernel.getClientConfiguration();
 			if(cc instanceof DefaultClientConfiguration &&
 				conf.getValue(PropertiesBasedConfiguration.CFG_VO_SERVICE_USERNAME)!=null){
 					DefaultClientConfiguration dcc = (DefaultClientConfiguration)cc;
@@ -60,11 +75,10 @@ public class SAMLPullAuthoriser extends SAMLAttributeSourceBase
 					log.debug("Authenticating to Unity with username/password.");
 			}
 			fetcher = new VOAttributeFetcher(conf, cc);
+			isEnabled = true;
 		} catch (Exception e)
 		{
-			isEnabled = false;
-			log.error("Error in VO subsystem configuration (PULL mode): " 
-				+ e.toString() + "\n PULL MODE WILL BE DISABLED");
+			log.error("Error in VO subsystem configuration (PULL mode): {}. PULL MODE WILL BE DISABLED", e.toString());
 		}
 
 		super.initFinal(log, VOAttributeFetcher.ALL_PULLED_ATTRS_KEY, false);
@@ -76,9 +90,14 @@ public class SAMLPullAuthoriser extends SAMLAttributeSourceBase
 			throws IOException
 	{
 		if (!isEnabled)
-			throw new IOException("The pull SAML authoriser is disabled");
-
-		fetcher.authorise(tokens);
+			throw new IOException("Attribute source "+name+" is disabled");
+		
+		if(!cb.isOK())
+			throw new IOException("Attribute source "+name+" is temporarily unavailable");
+		
+		try {
+			fetcher.authorise(tokens);
+		}catch(SAMLValidationException sve) {}
 		
 		@SuppressWarnings("unchecked")
 		Map<String, List<ParsedAttribute>> allAttributes = (Map<String, List<ParsedAttribute>>) 
@@ -86,20 +105,71 @@ public class SAMLPullAuthoriser extends SAMLAttributeSourceBase
 		List<ParsedAttribute> serviceAttributesOrig = allAttributes.get(conf.getVOServiceURL());
 		List<ParsedAttribute> serviceAttributes;
 		if (serviceAttributesOrig != null)
-			serviceAttributes = new ArrayList<ParsedAttribute>(serviceAttributesOrig);
+			serviceAttributes = new ArrayList<>(serviceAttributesOrig);
 		else
-			serviceAttributes = new ArrayList<ParsedAttribute>();
+			serviceAttributes = new ArrayList<>();
 		
 		return assembleAttributesHolder(serviceAttributes, otherAuthoriserInfo, 
 				conf.isPulledGenericAttributesEnabled());
 	}
+	
+	private void checkConnection() {
+		if(!isEnabled) {
+			status = Status.NOT_APPLICABLE;
+			statusMessage = "n/a (not enabled)";
+		}
+		else {
+			final SecurityTokens st = new SecurityTokens();
+			st.setUserName(Client.ANONYMOUS_CLIENT_DN);
+			st.setConsignorTrusted(true);
+			ThreadingServices ts = kernel.getContainerProperties()
+					.getThreadingServices();
+			
+			Callable<String> check = new Callable<String>() {
+				public String call() throws Exception {
+					try {
+						fetcher.authorise(st);
+						return "OK";
+					}catch(SAMLErrorResponseException sre) {
+						return "OK";
+					}
+					catch(Exception sre) {
+						return Log.createFaultMessage("ERROR", sre);
+					}
+				}
+			};
+			String result = TimeoutRunner.compute(check, ts, 3000);
+			if ("OK".equals(result)) {
+				statusMessage = "OK [" + name
+						+ " connected to " + fetcher.getServerURL() + "]";
+				status = Status.OK;
+				cb.OK();
+			}
+			else{
+				statusMessage = "CAN'T CONNECT" + " ["+(result!=null ? result : "")+"]";
+				status = Status.DOWN;
+				cb.notOK(statusMessage);
+			}
+		}
+	}
 
 	@Override
-	public String getStatusDescription()
-	{
-		return "SAML Pull Attribute source ["+name+"]: " + (isEnabled ? "OK" : 
-			"DISABLED (browse previous log entries for the reason)");
+	public String getConnectionStatusMessage(){
+		checkConnection();
+		return statusMessage;
 	}
+
+	@Override
+	public Status getConnectionStatus(){
+		checkConnection();
+		return status;
+	}
+
+	@Override
+	public String getExternalSystemName(){
+		return name +" attribute source";
+	}
+
 }
 
 

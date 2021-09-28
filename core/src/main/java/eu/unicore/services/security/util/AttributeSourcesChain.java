@@ -84,19 +84,20 @@ public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeS
 			throw new IllegalStateException("This object must be started prior to be used.");
 		SubjectAttributesHolder resultMap = new SubjectAttributesHolder(initial.getPreferredVos());
 		for (IAttributeSource a: chain){
-			NDC.push(a.getName());
+			String name = a.getName();
+			NDC.push(name);
 			try{
 				SubjectAttributesHolder current = a.getAttributes(tokens, resultMap);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Attribute source {} returned the following attributes:\n{}", a.getName(), current);
+					logger.debug("Attribute source {} returned the following attributes:\n{}", name, current);
 				}
 				if (!combiner.combineAttributes(resultMap, current)) {
-					logger.debug("Attributes combiner decided to stop processing attribute sources at {}", a.getName());
+					logger.debug("Attributes combiner decided to stop processing attribute sources at {}", name);
 					break;
 				}
 			}
 			catch(Exception e){
-				Log.logException("Attribute source <"+a.getClass()+"> not available.", e, logger);
+				Log.logException("Attribute source <"+name+"> not available.", e, logger);
 			}
 			finally{
 				NDC.pop();

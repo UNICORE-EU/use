@@ -1,8 +1,6 @@
 package eu.unicore.services.rest.security;
 
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 
@@ -10,19 +8,16 @@ import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.unicore.samly2.SAMLBindings;
 import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.assertion.AssertionParser;
-import eu.unicore.samly2.assertion.AttributeAssertionParser;
 import eu.unicore.samly2.elements.NameID;
 import eu.unicore.samly2.exceptions.SAMLValidationException;
 import eu.unicore.samly2.trust.TruststoreBasedSamlTrustChecker;
 import eu.unicore.samly2.validators.SSOAuthnAssertionValidator;
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.SecurityTokens;
-import eu.unicore.security.etd.TrustDelegation;
 import eu.unicore.security.wsutil.samlclient.AuthnResponseAssertions;
 import eu.unicore.security.wsutil.samlclient.SAMLAuthnClient;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
-import xmlbeans.org.oasis.saml2.assertion.AssertionDocument;
 
 /**
  * Base class for authenticating to Unity via SAML.
@@ -74,29 +69,12 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 			if(dn != null){
 				tokens.setUserName(dn);
 				tokens.setConsignorTrusted(true);
-				tokens.setTrustDelegationTokens(getTDTokens(auth));
-				// TODO store other assertions too?
 			}	
 		}
 		else{
 			logger.debug("No authentication assertion found!");
 		}
 	}
-
-	protected List<TrustDelegation> getTDTokens(AuthnResponseAssertions auth){
-		List<TrustDelegation> tds = new ArrayList<TrustDelegation>();
-		for (AttributeAssertionParser attributeAssertion: auth.getAttributeAssertions()) {
-			AssertionDocument attributeAssertionXml = attributeAssertion.getXMLBeanDoc();
-			try {
-				TrustDelegation td = new TrustDelegation(attributeAssertionXml);
-				tds.add(td);
-			} catch (Exception e){ 
-				//not a TD, OK
-			}
-		}
-		return tds;
-	}
-
 
 	protected void validate(AuthnResponseAssertions authn){
 		X509CertChainValidator x509 = kernel.getContainerSecurityConfiguration().getTrustedAssertionIssuers();

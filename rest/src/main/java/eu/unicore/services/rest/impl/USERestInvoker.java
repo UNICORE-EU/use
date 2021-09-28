@@ -143,9 +143,7 @@ public class USERestInvoker extends JAXRSInvoker {
 			// get and inject the resource and the model
 			try{
 				if(home!=null && resourceID!=null){
-					if(logger.isDebugEnabled()){
-						logger.debug("Invoking on resource ID : "+resourceID);
-					}
+					logger.debug("Invoking on resource ID : {}", resourceID);
 					r = needLock ? home.getForUpdate(resourceID) : home.get(resourceID);
 					br.setModel(r.getModel());
 					br.setResource(r);

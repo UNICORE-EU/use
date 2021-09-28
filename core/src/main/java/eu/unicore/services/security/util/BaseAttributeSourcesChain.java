@@ -40,7 +40,7 @@ import java.util.Properties;
 import org.apache.log4j.NDC;
 
 import eu.unicore.security.SubjectAttributesHolder;
-import eu.unicore.services.ExternalSystemConnector;
+import eu.unicore.services.ISubSystem;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.IAttributeSourceBase;
 import eu.unicore.util.configuration.ConfigurationException;
@@ -69,7 +69,7 @@ import eu.unicore.util.configuration.ConfigurationException;
  * @author schuller
  * @author golbi
  */
-public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> implements IAttributeSourceBase {
+public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> implements IAttributeSourceBase, ISubSystem {
 
 	protected List<T> chain;
 	protected List<String> names;
@@ -107,9 +107,7 @@ public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> 
 			NDC.push(names.get(i));
 			try {
 				T aip = chain.get(i);
-				if(aip instanceof ExternalSystemConnector){
-					kernel.getExternalSystemConnectors().add((ExternalSystemConnector)aip);
-				}
+				kernel.register(aip);
 				aip.start(kernel);
 			} finally {
 				NDC.pop();
@@ -122,17 +120,22 @@ public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> 
 	public String getStatusDescription() {
 		assert started : "This object must be started before use.";
 		StringBuilder sb=new StringBuilder();
-		String newline = System.getProperty("line.separator");
 		if(chain.size()==0){
 			sb.append("N/A");
 		}
-		if(chain.size()>1){
-			sb.append(" Combining policy: ").append(String.valueOf(combiner));
-		}
-		for(T a: chain){
-			sb.append(newline );
-			sb.append(" * ");
-			sb.append(a.getStatusDescription());
+		else {
+			for(T a: chain){
+				if(a instanceof ISubSystem) {
+					sb.append(((ISubSystem) a).getStatusDescription()).append(" ");
+				}
+				else{
+					sb.append(a.getClass().getSimpleName()).append(" ");
+				}
+			}
+			if(chain.size()>1){
+				sb.append(System.getProperty("line.separator"));
+				sb.append(" * combining policy: ").append(String.valueOf(combiner));
+			}
 		}
 		return sb.toString();
 	}

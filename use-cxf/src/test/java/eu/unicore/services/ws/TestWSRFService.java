@@ -154,7 +154,7 @@ public class TestWSRFService extends JettyTestCase{
 		assertEquals("test123",uid);
 		EndpointReferenceType epr=EndpointReferenceType.Factory.newInstance();
 		epr.addNewAddress().setStringValue(getBaseurl()+"/example?res="+uid);
-		return new BaseWSRFClient(epr, kernel.getClientConfiguration().clone());
+		return new BaseWSRFClient(epr, kernel.getClientConfiguration());
 	}
 
 }

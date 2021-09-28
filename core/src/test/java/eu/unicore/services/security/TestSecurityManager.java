@@ -177,11 +177,6 @@ public class TestSecurityManager extends TestCase {
 		}
 
 		@Override
-		public String getName()	{
-			return null;
-		}
-
-		@Override
 		public SubjectAttributesHolder getAttributes(SecurityTokens tokens,
 				SubjectAttributesHolder otherAuthoriserInfo)
 				throws IOException {
@@ -218,11 +213,6 @@ public class TestSecurityManager extends TestCase {
 
 		public void setBooleanProperty(boolean v) {
 			dbooleanProperty = v;
-		}
-
-		@Override
-		public String getName()	{
-			return null;
 		}
 
 		@Override

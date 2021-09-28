@@ -145,12 +145,6 @@ public class X509FileAttributeSource extends FileAttributeSourceBase implements 
 		}
 	}
 
-	@Override
-	public String getStatusDescription()
-	{
-		return "X509 File Attribute Source [" + getName() + "]: " + 
-				status + ", using map file " + uudbFile.getAbsolutePath();
-	}
 }
 
 

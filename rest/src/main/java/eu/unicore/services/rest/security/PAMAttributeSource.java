@@ -21,11 +21,6 @@ public class PAMAttributeSource implements IAttributeSource {
 	public void start(Kernel kernel) throws Exception {}
 
 	@Override
-	public String getStatusDescription() {
-		return "PAM Attribute Source: OK";
-	}
-
-	@Override
 	public String getName() {
 		return "PAM";
 	}

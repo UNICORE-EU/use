@@ -208,25 +208,6 @@ public class Kernel {
 		return s;
 	}
 
-	public String getFeatureStatus(){
-		StringBuilder report = new StringBuilder();
-		String newline = System.getProperty("line.separator");
-		report.append("Deployed features");
-		report.append(newline);
-		report.append("*****************");
-		report.append(newline);
-		if(getDeploymentManager().getFeatures().size()==0) {
-			report.append("N/A").append(newline);
-		}
-		for(Map.Entry<String,Feature> f: getDeploymentManager().getFeatures().entrySet()) {
-			report.append(f.getKey())
-			.append(": ")
-			.append("v").append(f.getValue().getVersion())
-			.append(newline);
-		}
-		return report.toString();
-	}
-	
 	public String getConnectionStatus(){
 		StringBuilder report = new StringBuilder();
 		String newline = System.getProperty("line.separator");
@@ -338,12 +319,14 @@ public class Kernel {
 	public <T> void setAttribute(Class<T>key, T value){
 		logger.debug("Storing attribute: {}", key.getName());
 		attributes.put(key, value);
-		if(value instanceof ExternalSystemConnector){
-			externalSystemConnectors.add((ExternalSystemConnector)value);
+	}
+
+	public void register(Object candidate) {
+		if(candidate!=null && candidate instanceof ExternalSystemConnector) {
+			externalSystemConnectors.add((ExternalSystemConnector)candidate);
 		}
-		if(value instanceof ISubSystem){
-			logger.info("Adding "+value.getClass());
-			subSystems.add((ISubSystem)value);
+		if(candidate!=null && candidate instanceof ISubSystem) {
+			subSystems.add((ISubSystem)candidate);
 		}
 	}
 
@@ -571,10 +554,10 @@ public class Kernel {
 		try {
 			IAttributeSource aip = containerSecurityConfiguration.getAip();
 			aip.start(this);
-			setAttribute(IAttributeSource.class, aip);
+			register(aip);
 			IDynamicAttributeSource dap = containerSecurityConfiguration.getDap();
 			dap.start(this);
-			setAttribute(IDynamicAttributeSource.class, dap);
+			register(dap);
 		} catch (Exception e) {
 			throw new ConfigurationException(e.getMessage(), e);
 		}

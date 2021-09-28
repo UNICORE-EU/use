@@ -89,7 +89,7 @@ public class JWTAuthenticator implements IAuthenticator, KernelInjectable {
 		}
 		tokens.setUserName(subject);
 		tokens.setConsignorTrusted(true);
-		
+		tokens.setConsignorName(subject);
 		return true;
 	}
 	

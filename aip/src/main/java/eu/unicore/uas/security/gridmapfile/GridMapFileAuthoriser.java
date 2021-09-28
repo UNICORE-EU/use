@@ -46,8 +46,6 @@ public class GridMapFileAuthoriser implements IAttributeSource
 
 	private String name;
 
-	private String status = "OK";
-
 	private Map<String,List<String>> map;
 
 	@Override
@@ -94,27 +92,23 @@ public class GridMapFileAuthoriser implements IAttributeSource
 	private void parse() throws ConfigurationException
 	{
 		if (mapFile==null) {
-			status = "FAILED";
 			throw new ConfigurationException("Config error for gridmap attribute source <"+name+
 					">: property 'file' must be set.");
 		}
 		if(!mapFile.exists())
 		{
-			status = "FAILED";
 			throw new ConfigurationException("Could not parse grid-mapfile as it does not exist. " +
 					"Please change it in your attribute source configuration " +
 					"(look for properties named uas.security.attributes.*");
 		}
 		if(mapFile.isDirectory())
 		{
-			status = "FAILED";
 			throw new ConfigurationException("Could not parse grid-mapfile as it is a directory. " +
 					"Please change it in your attribute source configuration " +
 					"(look for properties named uas.security.attributes.*");
 		}
 		if(!mapFile.canRead())
 		{
-			status = "FAILED";
 			throw new ConfigurationException("Could not parse grid-mapfile as it cannot be read. " +
 					"Please check permissions of the file "+mapFile.getAbsolutePath());
 		}
@@ -123,15 +117,6 @@ public class GridMapFileAuthoriser implements IAttributeSource
 		map = parser.parse();
 
 		logger.info("User attributes were loaded from the file " + mapFile);
-	}
-
-
-
-	@Override
-	public String getStatusDescription()
-	{
-		return "File Attribute Source [" + name + "]: " + 
-				status + ", using map file " + mapFile.getAbsolutePath();
 	}
 
 	@Override

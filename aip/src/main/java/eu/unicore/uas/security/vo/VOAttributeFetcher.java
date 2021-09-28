@@ -55,7 +55,6 @@ public class VOAttributeFetcher
 	private final IPullConfiguration pullConfiguration;
 	private final IClientConfiguration clientConfiguration;
 	private final int cacheTtl;
-
 	private final Cache<String, List<ParsedAttribute>> cache;
 	
 	public static final int MAX_ELEMS = 128;
@@ -81,6 +80,10 @@ public class VOAttributeFetcher
 		else return null;
 	}
 	
+	public String getServerURL() {
+		return pullConfiguration.getVOServiceURL();
+	}
+
 	/**
 	 * Gets attributes from the VO service of the effective user (as returned by tokens
 	 * parameter). Attributes are inserted into {@link SecurityTokens} context 
@@ -88,21 +91,15 @@ public class VOAttributeFetcher
 	 * of {@link ParsedAttribute} objects. 
 	 *  
 	 * @param tokens
-	 * @throws IOException
+	 * @throws IOException communication errors
 	 */
-	public void authorise(SecurityTokens tokens) throws IOException
+	public void authorise(SecurityTokens tokens) throws SAMLValidationException
 	{
 		String dn = tokens.getEffectiveUserName();
 		if (dn == null)
 			throw new IllegalStateException("Can't authorize unknown user!");
 		NameID subject = new NameID(dn, SAMLConstants.NFORMAT_DN);
-		try
-		{
-			getAttributes(subject, tokens);
-		} catch (Exception e)
-		{
-			throw new IOException("Unable to retrieve attributes from remote SAML service: " + e.toString(), e);
-		}
+		getAttributes(subject, tokens);
 	}
 	
 	
@@ -116,14 +113,14 @@ public class VOAttributeFetcher
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	private void getAttributes(NameID subject, SecurityTokens tokens) throws Exception
+	private void getAttributes(NameID subject, SecurityTokens tokens) throws SAMLValidationException
 	{
 		String voServerAddress = pullConfiguration.getVOServiceURL();
 		Map<String, List<ParsedAttribute>> allAttributes = 
 				(Map<String, List<ParsedAttribute>>) tokens.getContext().get(ALL_PULLED_ATTRS_KEY);
 		if (allAttributes == null)
 		{
-			allAttributes = new HashMap<String, List<ParsedAttribute>>();
+			allAttributes = new HashMap<>();
 			tokens.getContext().put(ALL_PULLED_ATTRS_KEY, allAttributes);
 		}
 		
@@ -140,12 +137,12 @@ public class VOAttributeFetcher
 				if (cachedAttrs != null)
 				{
 					log.debug("Returning cached attributes for {}", subject);
-					attrs = new ArrayList<ParsedAttribute>(cachedAttrs.size());
+					attrs = new ArrayList<>(cachedAttrs.size());
 					attrs.addAll(cachedAttrs);
 				} else
 				{
 					attrs = doRealReceive(subject);
-					cachedAttrs = new ArrayList<ParsedAttribute>(attrs.size());
+					cachedAttrs = new ArrayList<>(attrs.size());
 					cachedAttrs.addAll(attrs);
 					cache.put(comparableSubjectDN, cachedAttrs);
 				}
@@ -163,23 +160,15 @@ public class VOAttributeFetcher
 				log.error("Can't authenticate to the VO " +
 					"server as the local server - probably the local server doesn't " +
 					"have the read access to the VO server.");
-			} else
-				log.error("SAML error occured during VO server query: " + e);
+			}
 			throw e;
-		} catch (SAMLValidationException e)
-		{
-			log.error("Problem retrieving attributes from the VO service: " + e.getMessage());
-			throw e;
-		} 
-		
+		}
 		if (attrs.size() == 0)
 		{
 			log.debug("Got empty list of attributes from the VO service");
-			throw new Exception();
 		}
 
 		allAttributes.put(voServerAddress, attrs);
-		return;
 	}
 	
 	protected List<ParsedAttribute> doRealReceive(NameID subject) throws SAMLValidationException 

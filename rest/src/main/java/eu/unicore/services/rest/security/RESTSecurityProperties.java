@@ -87,6 +87,7 @@ public class RESTSecurityProperties extends PropertiesHelper {
 				chain.configure(authName, this);
 			}
 			auth = chain;
+			kernel.register(auth);
 		}
 	}
 	

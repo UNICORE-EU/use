@@ -32,7 +32,6 @@
 
 package eu.unicore.services.security;
 
-import eu.unicore.services.ISubSystem;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.util.AttributeSourceConfigurator;
 import eu.unicore.util.configuration.ConfigurationException;
@@ -64,7 +63,7 @@ import eu.unicore.util.configuration.ConfigurationException;
  * @author schuller
  * @author golbi
  */
-public interface IAttributeSourceBase extends ISubSystem {
+public interface IAttributeSourceBase {
 
 	/**
 	 * Configures the source. After calling this method it must be ensured that configuration is sane.
@@ -81,4 +80,10 @@ public interface IAttributeSourceBase extends ISubSystem {
 	 */
 	public void start(Kernel kernel)throws Exception;
 
+	/**
+	 * should return the name this was configured with
+	 */
+	public default String getName() {
+		return getClass().getSimpleName();
+	};
 }

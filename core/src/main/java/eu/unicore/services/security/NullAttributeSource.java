@@ -15,15 +15,10 @@ import eu.unicore.util.configuration.ConfigurationException;
 public class NullAttributeSource implements IAttributeSource, IDynamicAttributeSource {
 	public NullAttributeSource(){}
 	@Override
-	public String getStatusDescription(){ return "(No dynamic attribute source configured)"; }
-	@Override
-	public String getName() { return "Dynamic attributes"; }
-	@Override
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens,
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException		{
 		return new SubjectAttributesHolder();
 	}
-	
 	@Override
 	public void configure(String name) throws ConfigurationException {
 	}

@@ -181,11 +181,6 @@ public class TestSecurityInfoRenderer extends AbstractClientTest {
 		}
 
 		@Override
-		public String getStatusDescription() {
-			return "OK";
-		}
-
-		@Override
 		public String getName() {
 			return "MOCK-AIP";
 		}

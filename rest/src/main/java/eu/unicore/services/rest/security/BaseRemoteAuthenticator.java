@@ -71,7 +71,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 			
 	@Override
 	public final boolean authenticate(Message message, SecurityTokens tokens) {
-		DefaultClientConfiguration clientCfg = kernel.getClientConfiguration().clone();
+		DefaultClientConfiguration clientCfg = kernel.getClientConfiguration();
 		clientCfg.setSslAuthn(doTLSAuthN);
 		Object cacheKey = extractCredentials(clientCfg, message, tokens);
 		if(cacheKey == null)return false;
@@ -89,10 +89,9 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 				cache.put(cacheKey, new CacheEntry<T>(auth,expires));
 			}
 			extractAuthInfo(auth, tokens);
-
 			String dn = tokens.getUserName();
-			if(logger.isDebugEnabled() && dn!=null){
-				logger.debug("Authenticated "+(cacheHit?"(cached) ":"")+"via "+this+": <"+dn+">");
+			if(dn!=null){
+				logger.debug("Successfully authenticated (cached: {}) via {}: <{}>", cacheHit, this, dn);
 			}
 		}catch(Exception ex){
 			Log.logException("Error authenticating using "+address, ex, logger);

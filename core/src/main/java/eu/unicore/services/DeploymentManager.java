@@ -63,6 +63,7 @@ public class DeploymentManager {
 		Boolean enable = Boolean.FALSE;
 		try{
 			String ftName = ft.getName();
+			String ftVersion = ft.getVersion();
 			features.put(ftName, ft);
 			enable = ft.isEnabled();
 			if(enable){
@@ -87,10 +88,10 @@ public class DeploymentManager {
 					logger.info("Running <{}>", r.getClass().getName());
 					r.run();
 				}
-				logger.info("Feature <{}> successfully deployed.", ftName);
+				logger.info("Feature {} v{} successfully deployed.", ftName, ftVersion);
 			}
 			else{
-				logger.info("Feature <{}> successfully deployed.", ftName);
+				logger.info("Feature <{}> disabled, skipping.", ftName);
 			}
 		}catch(Exception ex){
 			String msg = Log.createFaultMessage("Cannot deploy feature <"+ft.getName()+">", ex);

@@ -26,6 +26,7 @@ import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.canl.SSLContextCreator;
+import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.uas.security.vo.UnicoreAttributesHandler;
@@ -49,7 +50,7 @@ import eu.unicore.util.configuration.ConfigurationException;
  * @author valley
  * @author delaruelle
  */
-public class LDAPAttributeSource implements IAttributeSource {
+public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConnector {
 
 	private static final Logger logger=Log.getLogger(Log.SECURITY,LDAPAttributeSource.class);
 	public static final int DEFAULT_PORT= 389;
@@ -95,6 +96,9 @@ public class LDAPAttributeSource implements IAttributeSource {
 
 	private JMXStats jmxStats = new JMXStats();
 
+	private Status status = Status.UNKNOWN;
+	private String statusMessage;
+	
 	@Override
 	public void configure(String name) throws ConfigurationException
 	{
@@ -392,9 +396,24 @@ public class LDAPAttributeSource implements IAttributeSource {
 	}
 	
 	@Override
-	public String getStatusDescription(){
+	public Status getConnectionStatus(){
+		return status;
+	}
+	
+	@Override
+	public String getExternalSystemName() {
+		return name;
+	}
+	
+	@Override
+	public String getConnectionStatusMessage(){
+		checkConnection();	
+		return statusMessage;
+	}
+		
+	private void checkConnection() {
 		if(!isEnabled)
-			return "No LDAP configured";
+			statusMessage = "No LDAP configured";
 
 		//make a small ldap connection test : search for the first level of root DN
 		DirContext testCnx;
@@ -403,10 +422,12 @@ public class LDAPAttributeSource implements IAttributeSource {
 		try {
 			testCnx = makeEndpoint();
 			testCnx.search(this.rootdn, "objectClass=*", ctls);
-		} catch(NamingException e){
-			return "LDAP Attribute Source ERROR ["+name+" connected to "+ldapURL+"]";
+			status=Status.OK;
+			statusMessage = "OK ["+name+" connected to "+ldapURL+"]";
+		} catch(Exception e){
+			statusMessage = Log.createFaultMessage("ERROR", e);
+			status = Status.DOWN;
 		}
-		return "LDAP Attribute Source OK ["+name+" connected to "+ldapURL+"]";
 	}
 	
 	@Override

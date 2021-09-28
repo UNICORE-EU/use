@@ -36,7 +36,7 @@ public class WSRFStartupTask extends AbstractStartupTask {
 		
 		RegistryHandler registryHandler = new RegistryHandler(kernel);
 		kernel.setAttribute(RegistryHandler.class, registryHandler);
-		
+		kernel.register(registryHandler);
 		if (!registryCreator.isGlobalRegistry())
 			forceRefreshRegistryEntries();
 		

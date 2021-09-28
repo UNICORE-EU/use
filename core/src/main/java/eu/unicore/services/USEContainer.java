@@ -81,13 +81,8 @@ public class USEContainer {
 	
 	public String getStatusReport(){
 		StringBuilder report = new StringBuilder();
-		String newline = System.getProperty("line.separator");
-		report.append(newline);
 		report.append("SERVER STATUS");
-		report.append(newline);
-		report.append(newline);
-		report.append(kernel.getFeatureStatus());
-		report.append(newline);
+		report.append(System.getProperty("line.separator"));
 		report.append(kernel.getConnectionStatus());
 		return report.toString();
 	}

@@ -122,16 +122,12 @@ public class AuthNHandler implements ContainerRequestFilter {
 			session = getSession(message, sessionID);
 			token = session.getTokens();
 			token.getContext().put(SecuritySessionUtils.REUSED_MARKER_KEY, Boolean.TRUE);
-			if(logger.isDebugEnabled()){
-				logger.debug("Re-using session "+sessionID+" for <"+session.getUserKey()+">");
-			}
+			logger.debug("Re-using session {} for <{}>", sessionID, session.getUserKey());
 		}
 		if(response == null){
 			handleUserPreferences(message, token);
 			Client c = createClient(token);
-			if(logger.isDebugEnabled()){
-				logger.debug("Authenticated client: "+c);
-			}
+			logger.debug("Authenticated client: {}", c);
 			AuthZAttributeStore.setClient(c);
 			// make sure session info goes to the client
 			PostInvokeHandler.setSession(session);
@@ -189,14 +185,11 @@ public class AuthNHandler implements ContainerRequestFilter {
 		boolean isDelegationToken = etd && 
 				subject!=null && issuer!=null && subject!=issuer;
 		if(isDelegationToken){
-			// TD mode
 			jwt.verifyJWTToken(bearerToken);
 			tokens.setUserName(subject);
 			tokens.setConsignorTrusted(true);
 			tokens.setConsignorName(issuer);
-			if(logger.isDebugEnabled()){
-				logger.debug("Trust delegated authentication as <"+subject+"> via JWT issued by <"+issuer+">");
-			}
+			logger.debug("Trust delegated authentication as <{}> via JWT issued by <{}>", subject, issuer);
 		}
 	}
 	
@@ -226,10 +219,8 @@ public class AuthNHandler implements ContainerRequestFilter {
 	}
 
 	public Client createClient(SecurityTokens tokens) {
-		if(logger.isDebugEnabled()){
-			logger.debug("Authenticated user: "+tokens.getEffectiveUserName());
-		}
-		Client client =  kernel.getSecurityManager().createClientWithAttributes(tokens);
+		logger.debug("Authenticated user: {}", tokens.getEffectiveUserName());
+		Client client = kernel.getSecurityManager().createClientWithAttributes(tokens);
 		if(client!=null && client.getSecurityTokens()!=null){
 			kernel.getSecurityManager().collectDynamicAttributes(client);
 		}

@@ -135,13 +135,6 @@ public class FileAttributeSource extends FileAttributeSourceBase implements IAtt
 		}
 		map = map2;
 	}
-	
-	@Override
-	public String getStatusDescription()
-	{
-		return "File Attribute Source [" + getName() + "]: " + 
-			status + ", using map file " + uudbFile.getAbsolutePath();
-	}
 
 	public void setMatching(String val) {
 		if (val.equalsIgnoreCase(MatchingTypes.STRICT.name()))

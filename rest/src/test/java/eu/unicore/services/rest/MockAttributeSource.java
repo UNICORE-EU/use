@@ -22,11 +22,6 @@ public class MockAttributeSource implements IAttributeSource {
 	}
 
 	@Override
-	public String getStatusDescription() {
-		return "OK";
-	}
-
-	@Override
 	public String getName() {
 		return "Mock";
 	}

@@ -76,6 +76,7 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 			configureAuth(RESTSecurityProperties.PREFIX+dotName, properties.rawProperties, auth);
 			chain.add(auth);
 			s.addAll(auth.getAuthSchemes());
+			kernel.register(auth);
 			logger.info("Enabled REST authentication: "+auth);
 		}
 		catch(Exception e){

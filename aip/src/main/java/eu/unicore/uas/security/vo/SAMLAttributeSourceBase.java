@@ -28,13 +28,12 @@ public abstract class SAMLAttributeSourceBase implements IAttributeSource
 	protected UnicoreAttributesHandler specialAttrsHandler;
 	protected String configFile;
 	protected String name;
-	protected boolean isEnabled;
+	protected boolean isEnabled = false;
 	protected Kernel kernel;
 	
 	protected void initConfig(Logger log, String name)
 	{
 		this.name = name;
-		isEnabled = false;
 		try
 		{
 			conf = new PropertiesBasedConfiguration(configFile);
