@@ -47,9 +47,7 @@ public class TestAdminService {
 	public void testGetSingleMetric() throws Exception {
 		BaseClient client = getClient();
 		JSONObject o = client.getJSON().getJSONObject("metrics");
-		String value = o.getString("use.rest.callFrequency");
-		assertNotNull(value);
-		System.out.println(value);
+		assertNotNull(o.getString("use.security.ServerIdentity"));
 	}
 
 	@Test
