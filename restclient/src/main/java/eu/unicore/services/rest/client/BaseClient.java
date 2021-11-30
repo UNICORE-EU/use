@@ -97,8 +97,11 @@ public class BaseClient {
 			if(userPrefs.get("uid")!=null) {
 				userPreferences.setUid(userPrefs.get("uid")[0]);
 			}
-			if(userPrefs.get("pgid")!=null) {
-				userPreferences.setUid(userPrefs.get("pgid")[0]);
+			if(userPrefs.get("group")!=null) {
+				userPreferences.setGroup(userPrefs.get("group")[0]);
+			}
+			if(userPrefs.get("supplementaryGroups")!=null) {
+				userPreferences.setSupplementaryGroups(userPrefs.get("supplementaryGroups"));
 			}
 		}catch(Exception ex) {
 			Log.logException("Cannot configure user preferences.", ex);

@@ -268,7 +268,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 		}
 		if(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS.equalsIgnoreCase(key)
 				|| "supgids".equalsIgnoreCase(key)){
-			preferences.put(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS, value.split("+"));
+			preferences.put(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS, value.split("\\+"));
 			return;
 		}
 		if(IAttributeSource.ATTRIBUTE_SELECTED_VO.equalsIgnoreCase(key)

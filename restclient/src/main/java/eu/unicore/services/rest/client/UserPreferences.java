@@ -33,11 +33,19 @@ public class UserPreferences {
 	}
 
 	public String getGroup() {
-		return prefs.get("pgid");
+		return prefs.get("group");
 	}
 
 	public void setGroup(String pgid) {
-		prefs.put("pgid", pgid);
+		prefs.put("group", pgid);
+	}
+
+	public String getSupplementaryGroups() {
+		return prefs.get("supgids");
+	}
+
+	public void setSupplementaryGroups(String... supgids) {
+		prefs.put("supgids", String.join("+", supgids));
 	}
 
 	public String getRole() {
