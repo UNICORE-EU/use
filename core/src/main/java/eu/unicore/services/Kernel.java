@@ -608,8 +608,6 @@ public class Kernel {
 		jetty.start();
 
 		startupTasks = deployServices();
-		
-		state = State.running;
 	
 		ServiceLoader<StartupTask> sl = ServiceLoader.load(StartupTask.class);
 		new StartupTasksRunner().runStartupTasks(this, sl);
@@ -617,6 +615,8 @@ public class Kernel {
 		for(Home h: homes.values()){
 			h.run();
 		}
+		
+		state = State.running;
 	
 		//run remaining init tasks after basic setup is complete
 		if(startupTasks!=null){

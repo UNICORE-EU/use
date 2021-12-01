@@ -86,7 +86,7 @@ public class ThreadingServices {
         			final AtomicInteger threadNumber = new AtomicInteger(1);
 		        	public Thread newThread(Runnable r) {
 		        		Thread t = new Thread(r);
-		        		t.setName("wsrflite-sched-"+threadNumber.getAndIncrement());
+		        		t.setName("use-sched-"+threadNumber.getAndIncrement());
 		        		return t;
 		        	}
 				});
@@ -104,7 +104,7 @@ public class ThreadingServices {
         			final AtomicInteger threadNumber = new AtomicInteger(1);
 		        	public Thread newThread(Runnable r) {
 		        		Thread t = new Thread(r);
-		        		t.setName("wsrflite-executor-"+threadNumber.getAndIncrement());
+		        		t.setName("use-exec-"+threadNumber.getAndIncrement());
 		        		return t;
 		        	}
 				});

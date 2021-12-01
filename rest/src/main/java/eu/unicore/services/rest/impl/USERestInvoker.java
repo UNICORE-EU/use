@@ -81,7 +81,7 @@ public class USERestInvoker extends JAXRSInvoker {
 			}
 		}
 		if(!kernel.isAvailable()){
-			throw new ResourceUnavailableException("Service container is not (yet) operational.");
+			throw new ResourceUnavailableException("Service container is <" + kernel.getState() + ">, not (yet) operational.");
 		}
 		return super.invoke(exchange, request);
 	}

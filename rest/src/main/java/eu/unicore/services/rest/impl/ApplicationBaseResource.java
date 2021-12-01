@@ -104,7 +104,10 @@ public class ApplicationBaseResource extends RESTRendererBase {
 			String v = getClass().getPackage().getSpecificationVersion();
 			props.put("version", v!=null? v : "DEVELOPMENT");
 		}catch(Exception ex){}
-
+		try {
+			props.put("upSince", getISODateFormatter().format(kernel.getUpSince().getTime()));
+		}catch(Exception ex){}
+		
 		return props;
 	}
 	
