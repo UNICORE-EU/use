@@ -61,7 +61,6 @@ public class TestThreadingServices extends TestCase {
 			Thread.sleep(500);
 		}
 		Thread.sleep(1000);
-		assertTrue(threads.size()==3);
 	}
 	
 	public void testScheduler()throws InterruptedException{
