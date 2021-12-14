@@ -14,10 +14,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Resource pool providing centralized thread/execution management
  * Offers scheduled execution, and an execution queue.
- * In the simplest form:
  * <code>
  *  Runnable task=...;
- *  ThreadingServices.get(kernel).getExecutorService().execute(task);
+ *  ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
+ *  ts.getExecutorService().execute(task);
  * </code>
  * 
  * @see ExecutorService

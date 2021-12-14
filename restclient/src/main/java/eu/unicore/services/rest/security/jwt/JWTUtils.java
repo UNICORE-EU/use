@@ -167,4 +167,5 @@ public class JWTUtils {
 	public static void verifyClaims(JWTClaimsSet claims) throws BadJWTException {
 		new DefaultJWTClaimsVerifier<SecurityContext>(null, null).verify(claims, null);
 	}
+
 }

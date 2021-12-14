@@ -5,6 +5,7 @@ import java.util.Properties;
 import java.util.Random;
 
 import org.junit.Test;
+import org.junit.Assert;
 
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.services.rest.security.jwt.JWTUtils;
@@ -62,7 +63,7 @@ public class TestJWTUtils {
 		String secret = new String(keydata);
 		p.put("container.security.rest.jwt.hmacSecret", secret);
 		JWTServerProperties jwtProps = new JWTServerProperties(p);
-		JWTHelper jwt = new JWTHelper(jwtProps, cp, null);
+		JWTHelper jwt = new JWTHelper(jwtProps, cp, new PubkeyCache());
 		String token = jwt.createETDToken("CN=Some User,OU=Users", -72000);
 		System.out.println("Token: "+token);
 		System.out.println("Payload: "+JWTUtils.getPayload(token));
@@ -79,5 +80,26 @@ public class TestJWTUtils {
 			}
 		};
 	}
-	
+
+	@Test
+	public void testLoadLocalTrustedIssuers() throws Exception {
+		ContainerSecurityProperties cp = getContainerSecurityProperties();
+		Properties p = new Properties();
+		JWTServerProperties jwtProps = new JWTServerProperties(p);
+		PubkeyCache pc = new PubkeyCache();
+		new JWTHelper(jwtProps, cp, pc);
+
+		p.put("container.security.rest.jwt."+JWTServerProperties.TRUSTED_ISSUER_CERT_LOCATIONS+"1",
+				"no_such_file");
+		jwtProps = new JWTServerProperties(p);
+		pc = new PubkeyCache();
+		new JWTHelper(jwtProps, cp, pc);
+
+		p.put("container.security.rest.jwt."+JWTServerProperties.TRUSTED_ISSUER_CERT_LOCATIONS+"1",
+				"src/test/resources/cacert.pem");
+		jwtProps = new JWTServerProperties(p);
+		pc = new PubkeyCache();
+		new JWTHelper(jwtProps, cp, pc);
+		Assert.assertNotNull(pc.getPublicKey("CN=Demo CA,O=UNICORE,C=EU"));
+	}
 }

@@ -20,34 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class Resources {
 	
-	/**
-	 * property key for setting the core thread pool size for the 
-	 * scheduled execution service
-	 */
-	public static final String CORE_POOL_SIZE="wsrflite.resources.scheduled.size";
-	
-	/**
-	 * property key for setting the timeout in millis for removing idle threads
-	 */
-	public static final String POOL_TIMEOUT="wsrflite.resources.scheduled.idletime";
-	
-	/**
-	 * property key for setting the minimum thread pool size for the 
-	 * scheduled execution service
-	 */
-	public static final String EXEC_CORE_POOL_SIZE="wsrflite.resources.executor.minsize";
-	
-	/**
-	 * property key for setting the maximum thread pool size for the 
-	 * scheduled execution service
-	 */
-	public static final String EXEC_MAX_POOL_SIZE="wsrflite.resources.executor.maxsize";
-	
-	/**
-	 * property key for setting the timeout in millis for removing idle threads
-	 */
-	public static final String EXEC_POOL_TIMEOUT="wsrflite.resources.executor.idletime";
-	
 	private Resources(){}
 	
 	private static boolean isConfigured=false;
@@ -99,25 +71,25 @@ public class Resources {
         			final AtomicInteger threadNumber = new AtomicInteger(1);
 		        	public Thread newThread(Runnable r) {
 		        		Thread t = new Thread(r);
-		        		t.setName("client-sched-"+threadNumber.getAndIncrement());
+		        		t.setName("use-client-sched-"+threadNumber.getAndIncrement());
 		        		return t;
 		        	}
 				});
 	}
 	
 	protected static void configureExecutor(){
-		int min=2;
-		int max=32;
-		int idle=50;
+		int min=0;
+		int max=16;
+		int idle=10;
 		
 		executor=new ThreadPoolExecutor(min,max,
-				idle,TimeUnit.MILLISECONDS,
+				idle,TimeUnit.SECONDS,
 				new LinkedBlockingQueue<Runnable>(),
 				new ThreadFactory(){
         			final AtomicInteger threadNumber = new AtomicInteger(1);
 		        	public Thread newThread(Runnable r) {
 		        		Thread t = new Thread(r);
-		        		t.setName("wsrflite-executor-"+threadNumber.getAndIncrement());
+		        		t.setName("use-client-exec-"+threadNumber.getAndIncrement());
 		        		return t;
 		        	}
 				});

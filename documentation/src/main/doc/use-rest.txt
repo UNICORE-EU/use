@@ -147,19 +147,21 @@ server, contact unicore-support for details.
 Configuring JWT Delegation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Beginning with UNICORE 8.0.0, delegation is fully supported for REST
-services.  The delegating server creates a JWT token containing user
+UNICORE has a delegation mechanism for REST services.
+The delegating server creates a JWT token containing user
 authentication information and signs it with its private key. The
 receiving server can check the signature using the sender's public
 key.
 
-Public keys are distributed via the shared service Registry.
+The public keys that servers use to verify the JWT signatures
+are by default distributed via the shared service Registry.
 
-The lifetime of the issued tokens is 300 seconds by default, which can be changed
-via
+If required, you can load additional public keys for trusted services
+from local PEM files using the following
 
 ----
-container.security.rest.jwt.lifetime=300
+container.security.rest.jwt.trustedLocalIssuer.1=<path_to_local_PEM_file>
+container.security.rest.jwt.trustedLocalIssuer.2=...
 ----
 
 
@@ -173,3 +175,12 @@ container.security.rest.jwt.hmacSecret=....
 
 This secret must be the same on all the UNICORE servers that are
 supposed to trust each other.
+
+
+The lifetime of the tokens issued by the server is 300 seconds by
+default, which can be changed via
+
+----
+container.security.rest.jwt.lifetime=300
+----
+

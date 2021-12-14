@@ -48,10 +48,6 @@ public class JWTProperties extends PropertiesHelper {
 	public JWTProperties(Properties properties) {
 		super(PREFIX, properties, META, propsLogger);
 	}
-	
-	public boolean useKey(){
-		return getHMACSecret()==null;
-	}
 
 	public String getHMACSecret(){
 		return getValue(PROP_HMAC_SECRET);
