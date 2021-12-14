@@ -97,9 +97,9 @@ public class ThreadingServices {
 		int max=kernelCfg.getIntValue(ContainerProperties.EXEC_MAX_POOL_SIZE);
 		int idle=kernelCfg.getIntValue(ContainerProperties.EXEC_POOL_TIMEOUT);
 		
-		executor=new ThreadPoolExecutor(min,max,
+		executor=new ThreadPoolExecutor(min, max,
 				idle,TimeUnit.MILLISECONDS,
-				new LinkedBlockingQueue<Runnable>(),
+				new LinkedBlockingQueue<>(1),
 				new ThreadFactory(){
         			final AtomicInteger threadNumber = new AtomicInteger(1);
 		        	public Thread newThread(Runnable r) {
@@ -108,7 +108,6 @@ public class ThreadingServices {
 		        		return t;
 		        	}
 				});
-
 	}
 	
 	/**

@@ -1,12 +1,13 @@
 package eu.unicore.services;
 
-import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.TestCase;
 
@@ -32,73 +33,59 @@ public class TestThreadingServices extends TestCase {
 		assertNull("Should timeout",r1);
 	}
 
-	volatile int running=0;
+	AtomicInteger running = new AtomicInteger(0);
 	
 	public void testExecutor()throws InterruptedException{
-		running=0;
+		running.set(0);
 		ContainerProperties cp = new ContainerProperties(new Properties(), false);
-		final Set<String> threads=new HashSet<String>();
-		for(int i=0;i<3;i++){
+		final Set<String> threads = ConcurrentHashMap.newKeySet();
+		int poolSize = cp.getIntValue(ContainerProperties.EXEC_CORE_POOL_SIZE);
+		for(int i=0;i<poolSize+1;i++){
 			Runnable r=new Runnable(){
 				public void run(){
 					String tName=Thread.currentThread().getName();
-					synchronized(TestThreadingServices.this){
-						increment();
-						threads.add(tName);
-					}
+					running.incrementAndGet();
+					threads.add(tName);
 					try{
 						Thread.sleep(1000);
 					}catch(InterruptedException ie){}
-					synchronized(TestThreadingServices.this){
-						decrement();
-					}
+					running.decrementAndGet();
 				}
 			};
 			cp.getThreadingServices().getExecutorService().execute(r);
 		}
 		Thread.sleep(500);
-		while(running>0){
+		while(running.get()>0){
 			Thread.sleep(500);
 		}
 		Thread.sleep(1000);
+		assertTrue("Have "+threads.size(), threads.size()==poolSize);
 	}
 	
 	public void testScheduler()throws InterruptedException{
-		running=0;
+		running.set(0);
 		ContainerProperties cp = new ContainerProperties(new Properties(), false);
-		final Set<String> threads=new HashSet<String>();
+		final Set<String> threads = ConcurrentHashMap.newKeySet();
 		for(int i=0;i<3;i++){
 			Runnable r=new Runnable(){
 				public void run(){
 					String tName=Thread.currentThread().getName();
-					synchronized(TestThreadingServices.this){
-						increment();
-						threads.add(tName);
-					}
+					running.incrementAndGet();
+					threads.add(tName);
 					try{
 						Thread.sleep(1000);
 					}catch(InterruptedException ie){}
-					synchronized(TestThreadingServices.this){
-						decrement();
-					}
+					running.decrementAndGet();
 				}
 			};
 			cp.getThreadingServices().getScheduledExecutorService().schedule(r, 0, TimeUnit.MILLISECONDS);
 		}
 		Thread.sleep(500);
-		while(running>0){
+		while(running.get()>0){
 			Thread.sleep(500);
 		}
 		Thread.sleep(1000);
-		assertTrue(threads.size()==3);
+		assertTrue("Have "+threads.size(), threads.size()==cp.getIntValue(ContainerProperties.CORE_POOL_SIZE));
 	}
-		
-	
-	synchronized void increment(){
-		running++;
-	}
-	synchronized void decrement(){
-		running--;
-	}
-	
+
 }

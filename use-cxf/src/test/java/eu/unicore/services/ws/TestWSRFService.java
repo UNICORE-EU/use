@@ -77,7 +77,6 @@ public class TestWSRFService extends JettyTestCase{
 		in.setGetResourceProperty(TerminationTimeDocument.type.getDocumentElementName());
 		
 		ExecutorService es=kernel.getContainerProperties().getThreadingServices().getExecutorService();
-		
 		final AtomicBoolean r1_finished = new AtomicBoolean();
 		final AtomicBoolean r2_finished = new AtomicBoolean();
 		final AtomicLong r1_start=new AtomicLong();

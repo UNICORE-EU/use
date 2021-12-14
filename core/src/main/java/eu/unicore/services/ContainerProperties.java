@@ -193,7 +193,7 @@ public class ContainerProperties extends PropertiesHelper {
 				setDescription("Defines the thread pool size for the execution of scheduled services."));
 		META.put(POOL_TIMEOUT, new PropertyMD("60000").
 				setDescription("Timeout in millis for removing idle threads."));
-		META.put(EXEC_CORE_POOL_SIZE, new PropertyMD("1").
+		META.put(EXEC_CORE_POOL_SIZE, new PropertyMD("2").setPositive().
 				setDescription("The minimum thread pool size for the internal execution service"));
 		META.put(EXEC_MAX_POOL_SIZE, new PropertyMD("16").
 				setDescription("The maximum thread pool size for the internal execution service"));
