@@ -30,7 +30,7 @@ Username-password file
 ~~~~~~~~~~~~~~~~~~~~~~
 
 
-The FILE mechanism uses a map file containing username, password
+The FILE mechanism uses a local map file containing username, password
 and the DN. Required configuration is the location of the file.
 
 ----------
@@ -74,12 +74,19 @@ with authenticator of type "oauth-rp with cxf-oauth-bearer".
 ----------
 container.security.rest.authentication.UNITY-OAUTH.class=eu.unicore.services.rest.security.UnityOAuthAuthenticator
 container.security.rest.authentication.UNITY-OAUTH.address=https://localhost:2443/unicore-soapidp-oidc/saml2unicoreidp-soap/AuthenticationService
+-----------
+
+You can configure an additional validation of the Unity assertions
+using the configured "trusted assertion issuer" certificate(s):
+
+------------
 # validate the received assertions?
 container.security.rest.authentication.UNITY-OAUTH.validate=true
 ----------
 
-UNICORE must be configured to trust the assertions issued by the Unity server, please
-refer to the relevant section on trusted assertion issuers in the manual.
+For this to work, UNICORE needs to public key of the Unity server as
+one of the "trusted assertion issuers", please refer to the relevant
+section on trusted assertion issuers in the manual.
 
 Unity authentication using username/password
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -90,13 +97,20 @@ and uses this to authenticate to Unity, retrieving an authentication assertion.
 ----------
 container.security.rest.authentication.UNITY.class=eu.unicore.services.rest.security.UnitySAMLAuthenticator
 container.security.rest.authentication.UNITY.address=https://localhost:2443/unicore-soapidp/saml2unicoreidp-soap/AuthenticationService
+----------
+
+You can configure an additional validation of the Unity assertions
+using the configured "trusted assertion issuer" certificate(s):
+
+------------
 # validate the received assertions?
 container.security.rest.authentication.UNITY.validate=true
 ----------
 
+For this to work, UNICORE needs to public key of the Unity server as
+one of the "trusted assertion issuers", please refer to the relevant
+section on trusted assertion issuers in the manual.
 
-UNICORE must be configured to trust the assertions issued by the Unity server, please
-refer to the relevant section on trusted assertion issuers in the manual.
 
 X.509 certificate
 ~~~~~~~~~~~~~~~~~
@@ -140,11 +154,13 @@ OAuth2 authentication using a Bearer token
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 It is also possible in principle to directly authenticate to an OAuth2
-server, contact unicore-support for details.
+server, contact unicore-support for details. However, Unity is much
+more flexible and feature rich, so we strongly recommend using Unity
+as a bridge to any third party IdPs you might want to use.
 
 
 
-Configuring JWT Delegation
+Customizing JWT Delegation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 UNICORE has a delegation mechanism for REST services.
@@ -153,11 +169,20 @@ authentication information and signs it with its private key. The
 receiving server can check the signature using the sender's public
 key.
 
+The lifetime of the tokens issued by the server is 300 seconds by
+default, which can be changed via
+
+----
+container.security.rest.jwt.lifetime=300
+----
+
 The public keys that servers use to verify the JWT signatures
 are by default distributed via the shared service Registry.
 
-If required, you can load additional public keys for trusted services
-from local PEM files using the following
+This works out of the box, and does not require any configuration.
+
+However, if required, you can load additional public keys for trusted
+services from local PEM files using the following
 
 ----
 container.security.rest.jwt.trustedLocalIssuer.1=<path_to_local_PEM_file>
@@ -176,11 +201,7 @@ container.security.rest.jwt.hmacSecret=....
 This secret must be the same on all the UNICORE servers that are
 supposed to trust each other.
 
-
-The lifetime of the tokens issued by the server is 300 seconds by
-default, which can be changed via
-
-----
-container.security.rest.jwt.lifetime=300
-----
+Not that a server with HMAC secret defined will still trust
+certificate-based JWT tokens, but will always use HMAC to sign its own
+delegation tokens.
 
