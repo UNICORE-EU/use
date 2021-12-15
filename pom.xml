@@ -69,8 +69,8 @@
   <properties>
     <compiler.fork>false</compiler.fork>
     <persistence.version>0.205</persistence.version>
-    <secutils.version>3.2.2</secutils.version>
-    <seclib.version>5.3.3</seclib.version>
+    <secutils.version>3.2.3</secutils.version>
+    <seclib.version>5.3.4</seclib.version>
     <xuudb.version>2.6.1</xuudb.version>
     <saaj.version>1.5.1</saaj.version>
     <cxf.version>3.4.4</cxf.version>
