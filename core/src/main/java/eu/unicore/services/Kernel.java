@@ -33,7 +33,6 @@
 package eu.unicore.services;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -53,7 +52,6 @@ import com.codahale.metrics.MetricRegistry;
 
 import de.fzj.unicore.persist.PersistenceFactory;
 import de.fzj.unicore.persist.PersistenceProperties;
-import de.fzj.unicore.persist.cluster.Cluster;
 import eu.unicore.security.wsutil.SecuritySessionStore;
 import eu.unicore.services.admin.AdminAction;
 import eu.unicore.services.admin.AdminActionLoader;
@@ -67,7 +65,6 @@ import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.IContainerSecurityConfiguration;
 import eu.unicore.services.security.IDynamicAttributeSource;
 import eu.unicore.services.security.SecurityManager;
-import eu.unicore.services.security.util.ClusteredSessionStore;
 import eu.unicore.services.server.ContainerHttpServerProperties;
 import eu.unicore.services.server.GatewayHandler;
 import eu.unicore.services.server.JettyServer;
@@ -435,12 +432,7 @@ public class Kernel {
 		SecuritySessionStore securitySessionStore = getAttribute(SecuritySessionStore.class);
 		if(securitySessionStore == null){
 			int sessionsPerUser = getContainerSecurityConfiguration().getMaxSessionsPerUser();
-			if(isClusterEnabled()){
-				securitySessionStore = new ClusteredSessionStore(sessionsPerUser, getCluster());
-			}
-			else{
-				securitySessionStore = new SecuritySessionStore(sessionsPerUser);
-			}
+			securitySessionStore = new SecuritySessionStore(sessionsPerUser);
 			setAttribute(SecuritySessionStore.class, securitySessionStore);
 		}
 		return securitySessionStore;
@@ -490,20 +482,6 @@ public class Kernel {
 			}
 		}
 		return result;
-	}
-	
-	public boolean isClusterEnabled(){
-		return persistenceProperties.getBooleanValue(PersistenceProperties.DB_LOCKS_DISTRIBUTED);
-	}
-	
-	public Cluster getCluster() {
-		if(!isClusterEnabled())return null;
-		try{
-			return Cluster.getInstance(persistenceProperties.getFileValueAsString(
-				PersistenceProperties.DB_CLUSTER_CONFIG, false));
-		}catch(FileNotFoundException fe){
-			throw new ConfigurationException("Cannot setup cluster instance", fe);
-		}
 	}
 	
 	/**

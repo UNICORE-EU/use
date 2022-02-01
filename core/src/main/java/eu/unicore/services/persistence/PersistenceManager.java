@@ -39,7 +39,6 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.persist.PersistenceProperties;
 import de.fzj.unicore.persist.impl.LockSupport;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.Kernel;
@@ -136,7 +135,7 @@ public class PersistenceManager {
 	}
 
 	/**
-	 * removes the {@link Store} instance of a WSRF Web Service from the PersistenceManager.<br>
+	 * removes the {@link Store} instance of a stateful service from the PersistenceManager.<br>
 	 * @param serviceName - the service name
 	 */
 	public void removePersist(String serviceName) {
@@ -149,8 +148,7 @@ public class PersistenceManager {
 	 */
 	public synchronized LockSupport getLockSupport(){
 		if(lockSupport==null){
-			String config=kernel.getPersistenceProperties().getValue(PersistenceProperties.DB_CLUSTER_CONFIG);
-			lockSupport=new LockSupport(config,"__use_internal__");
+			lockSupport=new LockSupport("__use_internal__");
 		}
 		return lockSupport;
 	}	

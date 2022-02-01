@@ -9,7 +9,9 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.json.JSONObject;
 
@@ -80,12 +82,12 @@ public class JWTUtils {
 		return sig.serialize();
 	}
 	
-	private static JWTClaimsSet buildClaimsSet(String user, long lifetime, String issuer, Map<String,String> claims) throws Exception {
+	public static JWTClaimsSet buildClaimsSet(String user, long lifetime, String issuer, Map<String,String> claims) throws Exception {
 		JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder(); 
 		builder.issueTime(new Date(System.currentTimeMillis()))
 				.subject(user)
 				.issuer(issuer)
-				.expirationTime(new Date(new Date().getTime() + lifetime * 1000));
+				.expirationTime(new Date(System.currentTimeMillis() + (lifetime * 1000)));
 		if(claims!=null){
 			for(Map.Entry<String, String>claim: claims.entrySet()){
 				builder.claim(claim.getKey(), claim.getValue());
@@ -127,7 +129,7 @@ public class JWTUtils {
 		throw new IllegalArgumentException("no verifier for "+pk.getClass());
 	}
 	
-	public static void verifyJWTToken(String token, PublicKey pk) throws Exception {
+	public static void verifyJWTToken(String token, PublicKey pk) throws AuthenticationException {
 		try{
 			SignedJWT sig = SignedJWT.parse(token);
 			verifyClaims(sig.getJWTClaimsSet());
@@ -164,8 +166,10 @@ public class JWTUtils {
 		}
 	}
 	
-	public static void verifyClaims(JWTClaimsSet claims) throws BadJWTException {
-		new DefaultJWTClaimsVerifier<SecurityContext>(null, null).verify(claims, null);
+	static void verifyClaims(JWTClaimsSet claims) throws BadJWTException {
+		Set<String>requiredClaims = new HashSet<>();
+		requiredClaims.add("exp");
+		new DefaultJWTClaimsVerifier<SecurityContext>(null, requiredClaims).verify(claims, null);
 	}
 
 }

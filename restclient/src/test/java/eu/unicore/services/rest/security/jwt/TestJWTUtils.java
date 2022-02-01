@@ -2,11 +2,15 @@ package eu.unicore.services.rest.security.jwt;
 
 import java.io.File;
 import java.security.PublicKey;
+import java.util.Date;
 import java.util.Random;
 
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.proc.BadJWTException;
 
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.services.rest.security.sshkey.Password;
@@ -72,4 +76,13 @@ public class TestJWTUtils {
 		}
 	}
 
+	@Test(expected=BadJWTException.class)
+	public void testFailOnMissingClaims() throws Exception{
+		JWTClaimsSet c = new JWTClaimsSet.Builder()
+				.issueTime(new Date(System.currentTimeMillis()))
+				.subject("CN=subject")
+				.issuer("CN=issuer")
+				.build();
+		JWTUtils.verifyClaims(c);
+	}
 }
