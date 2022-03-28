@@ -125,6 +125,10 @@
           <groupId>com.sun.xml.ws</groupId>
           <artifactId>jaxws-ri</artifactId>
         </exclusion>
+	<exclusion>
+          <groupId>xml-apis</groupId>
+          <artifactId>xml-apis</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>

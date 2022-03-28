@@ -13,6 +13,7 @@ import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.jaxrs.model.OperationResourceInfo;
 import org.apache.cxf.message.Exchange;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import com.codahale.metrics.Meter;
 
@@ -71,6 +72,7 @@ public class USERestInvoker extends JAXRSInvoker {
 	
 	@Override
 	public Object invoke(Exchange exchange, Object request){
+		ThreadContext.clearAll();
 		if(!kernel.isAvailable()) {
 			int i=0;
 			while(!kernel.isAvailable() && i<30) {

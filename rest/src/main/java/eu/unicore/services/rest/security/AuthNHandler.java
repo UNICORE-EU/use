@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
 
 import eu.unicore.security.AuthorisationException;
@@ -85,6 +86,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
+		ThreadContext.clearAll();
 		Message message = PhaseInterceptorChain.getCurrentMessage();
 		Response res = handleRequest(message);
 		if(res!=null){
