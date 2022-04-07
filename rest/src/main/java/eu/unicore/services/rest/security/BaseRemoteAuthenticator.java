@@ -108,7 +108,9 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	 * @param clientCfg
 	 * @param message
 	 * @param tokens
-	 * @return an object suitable as key for the credential cache - e.g. the user DN, bearer token,...
+	 * @return an object suitable as key for the credential cache - e.g. the user DN,
+	 *         bearer token,... or <code>null</code> if there is no authentication
+	 *         material in the message
 	 */
 	protected abstract Object extractCredentials(DefaultClientConfiguration clientCfg, Message message, SecurityTokens tokens);
 

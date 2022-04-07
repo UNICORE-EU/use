@@ -1,5 +1,6 @@
 package eu.unicore.services.rest;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -56,4 +57,11 @@ public class TestUtils {
 		assertTrue(o3 instanceof JSONObject);
 	}
 	
+	@Test
+	public void testTemplateExpansion() throws Exception {
+		String template = "x=%foo, y=%bar";
+		JSONObject context = new JSONObject("{foo: 123, bar: 456}");
+		String expanded = RESTUtils.expandTemplate(template, context);
+		assertEquals("x=123, y=456", expanded);
+	}
 }

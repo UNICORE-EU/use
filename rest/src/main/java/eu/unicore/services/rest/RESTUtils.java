@@ -45,6 +45,15 @@ public class RESTUtils {
 		return res;
 	}
 	
+	public static String expandTemplate(String template, JSONObject context) {
+		Map<String,String> vars = asMap(context);
+		for(String key: vars.keySet()) {
+			if(template.contains("%"+key)) {
+				template = template.replace("%"+key, vars.get(key));
+			}
+		}
+		return template;
+	}
 	
 	public static Map<String,String>asMap(JSONObject o){
 		return BaseClient.asMap(o);

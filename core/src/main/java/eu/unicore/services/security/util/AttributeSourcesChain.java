@@ -97,7 +97,7 @@ public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeS
 				}
 			}
 			catch(Exception e){
-				Log.logException("Attribute source <"+name+"> not available.", e, logger);
+				logger.error(Log.createFaultMessage("Attribute source <"+name+"> not available.", e));
 			}
 			finally{
 				NDC.pop();
