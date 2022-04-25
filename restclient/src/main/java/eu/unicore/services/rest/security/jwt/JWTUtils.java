@@ -26,6 +26,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.crypto.opts.AllowWeakRSAKey;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWT;
@@ -107,26 +108,32 @@ public class JWTUtils {
 	}
 
 	public static JWSSigner getSigner(PrivateKey pk) throws Exception {
+		JWSSigner signer = null;
 		if(pk instanceof RSAPrivateKey){
-			return new RSASSASigner(pk
+			signer = new RSASSASigner(pk
 					// TODO remove once our demo-ca keys are 2048
 					, Collections.singleton((JWSSignerOption) AllowWeakRSAKey.getInstance())
 			);
 		}
-		if(pk instanceof ECPrivateKey){
-			return new ECDSASigner((ECPrivateKey)pk);
+		else if(pk instanceof ECPrivateKey){
+			signer = new ECDSASigner((ECPrivateKey)pk);
 		}
-		throw new IllegalArgumentException("no signer for "+pk.getClass());
+		if(signer==null)throw new IllegalArgumentException("no signer for "+pk.getClass());
+		signer.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
+		return signer;
 	}
 	
 	public static JWSVerifier getVerifier(PublicKey pk) throws Exception {
+		JWSVerifier verifier = null;
 		if(pk instanceof RSAPublicKey){
-			return new RSASSAVerifier((RSAPublicKey)pk);
+			verifier = new RSASSAVerifier((RSAPublicKey)pk);
 		}
-		if(pk instanceof ECPublicKey){
-			return new ECDSAVerifier((ECPublicKey)pk);
+		else if(pk instanceof ECPublicKey){
+			verifier = new ECDSAVerifier((ECPublicKey)pk);
 		}
-		throw new IllegalArgumentException("no verifier for "+pk.getClass());
+		if(verifier==null)throw new IllegalArgumentException("no verifier for "+pk.getClass());
+		verifier.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
+		return verifier;
 	}
 	
 	public static void verifyJWTToken(String token, PublicKey pk) throws AuthenticationException {
