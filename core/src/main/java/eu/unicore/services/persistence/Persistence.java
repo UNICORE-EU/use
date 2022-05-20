@@ -20,7 +20,7 @@ import eu.unicore.services.exceptions.UnableToSetTerminationTimeException;
 import eu.unicore.util.Log;
 
 /**
- * use the Persistence framework for storing wsrf instances
+ * use the Persistence framework for storing resource instances
  * 
  * @author schuller
  */
