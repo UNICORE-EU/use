@@ -114,7 +114,7 @@ public class TestRestSecurity {
 	@Test
 	public void testJWTDelegationAuth() throws Exception {
 		String dn = "CN=Demo User, O=UNICORE, C=EU";
-		String issuer = "CN=Demo UNICORE/X,O=UNICORE,C=EU";
+		String issuer = "CN=UNICOREX,O=UNICORE,C=EU";
 		
 		HttpClient client=HttpUtils.createClient(url, kernel.getClientConfiguration());
 		HttpGet get=new HttpGet(url+"/"+sName+"/User");
@@ -135,7 +135,7 @@ public class TestRestSecurity {
 	@Test
 	public void testBaseClientWithDelegation() throws Exception {
 		String dn = "CN=Demo User, O=UNICORE, C=EU";
-		String issuer = "CN=Demo UNICORE/X,O=UNICORE,C=EU";
+		String issuer = "CN=UNICOREX,O=UNICORE,C=EU";
 		String resource = url+"/"+sName+"/User";
 
 		JWTServerProperties props = new JWTServerProperties(new Properties());
