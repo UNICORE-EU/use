@@ -23,15 +23,13 @@ public class TestJWTUtils {
 	public void testHMAC() throws Exception {
 		String key = new String("12345678901234567890123456789012");
 		String token = JWTUtils.createJWTToken("demouser", 72000, "demouser", key, null);
-		
+		Assert.assertTrue(JWTUtils.isHMAC(token));
 		JSONObject payload = JWTUtils.getPayload(token);
 		Assert.assertEquals("demouser", payload.getString("sub"));
 		Assert.assertEquals("demouser", payload.getString("iss"));
 		JSONObject headers = JWTUtils.getHeaders(token);
 		System.out.println(headers);
 		System.out.println(payload);
-		
-		// verify
 		JWTUtils.verifyJWTToken(token, key);
 	}
 	
@@ -55,11 +53,12 @@ public class TestJWTUtils {
 
 	@Test
 	public void testKeybasedJWT() throws Exception {
-		String[] keys = {"id_rsa", "id_ecdsa", "id_ecdsa_384"};
+		String[] keys = {"id_rsa", "id_ecdsa", "id_ecdsa_384", "id_ed25519"};
 		for(String k : keys){
 			File key = new File("src/test/resources/ssh/"+k);
 			SSHKey sk = new SSHKey("demouser", key, new Password("test123".toCharArray()), 300);
 			String token = sk.getToken();
+			Assert.assertFalse(JWTUtils.isHMAC(token));
 			JSONObject payload = JWTUtils.getPayload(token);
 			Assert.assertEquals("demouser", payload.getString("sub"));
 			Assert.assertEquals("demouser", payload.getString("iss"));

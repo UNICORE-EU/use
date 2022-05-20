@@ -166,12 +166,12 @@ public class AuthNHandler implements ContainerRequestFilter {
 			}
 		}
 	}
-	
 
 	/**
 	 * check syntax and validate.
-	 * 
-	 * no-op if the token is not a well-formed JWT token
+	 *
+	 * no-op if the token is not a well-formed JWT token,
+	 * or if it is not a delegation token
 	 */
 	protected void validateJWT(String bearerToken, SecurityTokens tokens) throws Exception {
 		JSONObject payload;

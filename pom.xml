@@ -78,6 +78,8 @@
     <httpclient.version>4.5.13</httpclient.version>
     <metrics.version>4.1.14</metrics.version>
     <jwt.version>9.22</jwt.version>
+    <tink.version>1.6.1</tink.version>
+    <sshj.version>0.31.0</sshj.version>
   </properties>
 
   <modules>
@@ -142,7 +144,6 @@
 	</exclusion>
       </exclusions>
     </dependency>
-
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
@@ -243,6 +244,31 @@
       <artifactId>nimbus-jose-jwt</artifactId>
       <version>${jwt.version}</version>
     </dependency>
+    <dependency>
+    <groupId>com.google.crypto.tink</groupId>
+    <artifactId>tink</artifactId>
+     <version>${tink.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.hierynomus</groupId>
+      <artifactId>sshj</artifactId>
+      <version>${sshj.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15on</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+          </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>net.i2p.crypto</groupId>
+      <artifactId>eddsa</artifactId>
+      <version>0.3.0</version>
+   </dependency>
   </dependencies>
  </dependencyManagement>
 

@@ -6,7 +6,6 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,17 +17,20 @@ import org.json.JSONObject;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
-import com.nimbusds.jose.JWSSignerOption;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
+import com.nimbusds.jose.crypto.Ed25519Signer;
+import com.nimbusds.jose.crypto.Ed25519Verifier;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
-import com.nimbusds.jose.crypto.opts.AllowWeakRSAKey;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
@@ -37,6 +39,8 @@ import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 
 import eu.unicore.security.AuthenticationException;
+import net.i2p.crypto.eddsa.EdDSAPrivateKey;
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public class JWTUtils {
 
@@ -101,8 +105,11 @@ public class JWTUtils {
 		if(pk instanceof RSAPrivateKey){
 			return JWSAlgorithm.RS256;
 		}
-		if(pk instanceof ECPrivateKey){
+		else if(pk instanceof ECPrivateKey){
 			return JWSAlgorithm.ES256;
+		}
+		else if (pk instanceof EdDSAPrivateKey) {
+			return JWSAlgorithm.EdDSA;
 		}
 		throw new IllegalArgumentException("no algorithm for "+pk.getClass());
 	}
@@ -110,13 +117,17 @@ public class JWTUtils {
 	public static JWSSigner getSigner(PrivateKey pk) throws Exception {
 		JWSSigner signer = null;
 		if(pk instanceof RSAPrivateKey){
-			signer = new RSASSASigner(pk
-					// TODO remove once our demo-ca keys are 2048
-					, Collections.singleton((JWSSignerOption) AllowWeakRSAKey.getInstance())
-			);
+			signer = new RSASSASigner(pk);
 		}
 		else if(pk instanceof ECPrivateKey){
 			signer = new ECDSASigner((ECPrivateKey)pk);
+		}
+		else if(pk instanceof EdDSAPrivateKey) {
+			EdDSAPrivateKey epk = (EdDSAPrivateKey)pk;
+			OctetKeyPair key = new OctetKeyPair.Builder(Curve.Ed25519, Base64URL.encode(epk.getAbyte()))
+					.d(Base64URL.encode(epk.getSeed())).algorithm(JWSAlgorithm.EdDSA)
+					.keyID("1").build();
+			signer = new Ed25519Signer(key);
 		}
 		if(signer==null)throw new IllegalArgumentException("no signer for "+pk.getClass());
 		signer.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
@@ -130,6 +141,12 @@ public class JWTUtils {
 		}
 		else if(pk instanceof ECPublicKey){
 			verifier = new ECDSAVerifier((ECPublicKey)pk);
+		}
+		else if(pk instanceof EdDSAPublicKey){
+			EdDSAPublicKey edKey = (EdDSAPublicKey)pk;
+			OctetKeyPair key = new OctetKeyPair.Builder(Curve.Ed25519, Base64URL.encode(edKey.getAbyte()))
+					.d(null).algorithm(JWSAlgorithm.EdDSA).keyID("1").build();
+			verifier = new Ed25519Verifier(key);
 		}
 		if(verifier==null)throw new IllegalArgumentException("no verifier for "+pk.getClass());
 		verifier.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
@@ -173,10 +190,19 @@ public class JWTUtils {
 		}
 	}
 	
+	public static boolean isHMAC(String token) throws AuthenticationException {
+		try {
+			JSONObject headers = JWTUtils.getHeaders(token);
+			return headers.getString("alg").startsWith("HS");
+		}catch(Exception e) {
+			throw new AuthenticationException("Invalid token", e);
+		}
+	}
+	
 	static void verifyClaims(JWTClaimsSet claims) throws BadJWTException {
 		Set<String>requiredClaims = new HashSet<>();
 		requiredClaims.add("exp");
 		new DefaultJWTClaimsVerifier<SecurityContext>(null, requiredClaims).verify(claims, null);
 	}
-
+	
 }

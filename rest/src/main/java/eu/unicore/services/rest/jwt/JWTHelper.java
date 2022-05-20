@@ -67,7 +67,7 @@ public class JWTHelper {
 	}
 
 	public void verifyJWTToken(String token) throws Exception {
-		if(preferences.getHMACSecret()!=null) {
+		if(preferences.getHMACSecret()!=null && JWTUtils.isHMAC(token)) {
 			try{
 				JWTUtils.verifyJWTToken(token, preferences.getHMACSecret());
 				return;

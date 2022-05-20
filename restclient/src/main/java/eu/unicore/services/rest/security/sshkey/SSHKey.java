@@ -43,8 +43,9 @@ public class SSHKey implements IAuthCallback {
 	}
 	
 	public String getToken() throws Exception {
-		if(token == null)createToken();
-		if(!tokenStillValid())createToken();
+		if(token == null || !tokenStillValid()) {
+			createToken();
+		}
 		return token;
 	}
 	
