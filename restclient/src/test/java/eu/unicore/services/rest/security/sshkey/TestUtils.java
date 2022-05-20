@@ -11,6 +11,8 @@ import java.security.interfaces.RSAPublicKey;
 import org.junit.Assert;
 import org.junit.Test;
 
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
+
 public class TestUtils {
 
 	@Test
@@ -49,4 +51,12 @@ public class TestUtils {
 		Assert.assertNotNull(pub);
 	}
 
+	@Test
+	public void testED25519() throws Exception {
+		File key = new File("src/test/resources/ssh/id_ed25519");
+		PrivateKey pk = SSHUtils.readPrivateKey(key, new Password("test123".toCharArray()));
+		Assert.assertNotNull(pk);
+		EdDSAPublicKey pub = (EdDSAPublicKey)SSHUtils.readPublicKey(new File("src/test/resources/ssh/id_ed25519.pub"));
+		Assert.assertNotNull(pub);
+	}
 }
