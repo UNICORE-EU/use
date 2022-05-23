@@ -35,18 +35,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>eu.unicore.services</groupId>
-      <artifactId>use-wsrflite</artifactId>
-      <version>${project.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>eu.unicore.services</groupId>
-      <artifactId>use-wsrfclient</artifactId>
-      <version>${project.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>de.fzj.unicore.xuudb</groupId>
       <artifactId>xuudb-common</artifactId>
     </dependency>
