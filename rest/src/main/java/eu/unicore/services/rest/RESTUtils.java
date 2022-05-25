@@ -23,7 +23,6 @@ public class RESTUtils {
 	public static String makeHref(Kernel kernel, String resourceBase, String id){
 		return kernel.getContainerProperties().getContainerURL()+"/rest/"+resourceBase+"/"+id;
 	}
-	
 
 	/**
 	 * create full URLs to REST resources

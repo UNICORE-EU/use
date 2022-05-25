@@ -64,4 +64,5 @@ public class TestUtils {
 		String expanded = RESTUtils.expandTemplate(template, context);
 		assertEquals("x=123, y=456", expanded);
 	}
+
 }

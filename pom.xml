@@ -84,14 +84,10 @@
 
   <modules>
     <module>core</module>
-    <module>wsrftypes</module>
-    <module>use-cxfclient</module>
-    <module>use-cxf</module>
     <module>restclient</module>
     <module>rest</module>
     <module>pdp</module> 
     <module>aip</module>
-    <module>documentation</module>
   </modules>
 
   <dependencyManagement>
