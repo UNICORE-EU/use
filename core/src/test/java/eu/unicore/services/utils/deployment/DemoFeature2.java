@@ -10,12 +10,12 @@ public class DemoFeature2 extends FeatureImpl {
 	
 	public DemoFeature2() {
 		this.name = "demo2";
-		getStartupTasks().add(new Runnable(){
-			public void run(){
-				System.out.println("This is feature <demo2>.");
-				initWasRun = true;
-			}
-		});
+	}
+	
+	@Override
+	public void initialise() throws Exception {
+		System.out.println("This is feature <demo2>.");
+		initWasRun = true;
 	}
 
 	public boolean isEnabled(){

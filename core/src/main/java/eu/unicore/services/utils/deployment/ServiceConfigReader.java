@@ -118,8 +118,9 @@ public class ServiceConfigReader implements IServiceConfigurator {
 	}
 
 	protected void deployFeature(Feature ft){
-		kernel.getDeploymentManager().deployFeature(ft);
-		startupTasks.addAll(ft.getStartupTasks());
+		if(kernel.getDeploymentManager().deployFeature(ft)) {
+			startupTasks.addAll(ft.getStartupTasks());
+		}
 	}
 	
 	protected void deployService(DeploymentDescriptor dd){

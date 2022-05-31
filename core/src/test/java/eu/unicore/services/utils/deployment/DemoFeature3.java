@@ -17,5 +17,4 @@ public class DemoFeature3 extends FeatureImpl {
 			}
 		});
 	}
-
 }
