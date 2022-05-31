@@ -22,13 +22,13 @@ public class FeatureImpl implements Feature {
 
 	protected Kernel kernel;
 
-	private final List<Runnable> initTasks = new ArrayList<>();
+	private final List<Runnable> startupTasks = new ArrayList<>();
 	private final Map<String, Class<? extends Home>> homeClasses = new HashMap<>();
 	private final List<DeploymentDescriptor> dd = new ArrayList<>();
 	
 	@Override
-	public List<Runnable> getInitTasks(){
-		return initTasks;
+	public List<Runnable> getStartupTasks(){
+		return startupTasks;
 	}
 	
 	@Override
@@ -76,6 +76,10 @@ public class FeatureImpl implements Feature {
 		Boolean enable = kernel.getContainerProperties().getBooleanValue("feature."+name+"."+serviceName+".enable");
 		if(enable==null)enable=Boolean.TRUE;
 		return enable;
+	}
+	
+	public void initialise() throws Exception {
+		
 	}
 	
 	public String toString(){

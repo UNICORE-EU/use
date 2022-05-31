@@ -100,17 +100,17 @@ public class Kernel {
 	private final MetricRegistry metricRegistry = new MetricRegistry();
 	
 	private final Map<String, Home> homes = Collections
-			.synchronizedMap(new HashMap<String, Home>());
+			.synchronizedMap(new HashMap<>());
 
 	private final Map<String, Service> services = Collections
-			.synchronizedMap(new HashMap<String, Service>());
+			.synchronizedMap(new HashMap<>());
 
 	private final Map<String, ServiceFactory> serviceFactories = Collections
-			.synchronizedMap(new HashMap<String, ServiceFactory>());
+			.synchronizedMap(new HashMap<>());
 
 	private GatewayHandler gwHandler;
 
-	private List<PropertyChecker> propertyCheckers = new ArrayList<PropertyChecker>();
+	private List<PropertyChecker> propertyCheckers = new ArrayList<>();
 	private ContainerProperties containerConfiguration;
 	private ContainerSecurityProperties containerSecurityConfiguration;
 	private USEClientProperties clientConfiguration;

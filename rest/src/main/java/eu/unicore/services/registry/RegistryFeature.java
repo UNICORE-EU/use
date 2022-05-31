@@ -37,8 +37,11 @@ public class RegistryFeature extends FeatureImpl {
 		super.setKernel(kernel);
 		this.properties = new RegistryFeatureProperties(SERVICE_NAME, kernel.getContainerProperties());
 		this.isSharedRegistry = "shared".equalsIgnoreCase(properties.getValue("mode"));
-		getInitTasks().add(new RegistryStartupTask(kernel));
-		
+	}
+
+	@Override
+	public void initialise() throws Exception {
+		new RegistryStartupTask(kernel).run();
 	}
 
 	@Override

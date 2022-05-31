@@ -38,7 +38,7 @@ public class ServiceConfigReader implements IServiceConfigurator {
 	
 	private final Kernel kernel;
 	
-	private final List<Runnable> initTasks = new ArrayList<>();
+	private final List<Runnable> startupTasks = new ArrayList<>();
 	
 	/**
 	 * Configure from the given file. This file will be watched for changes using 
@@ -108,7 +108,7 @@ public class ServiceConfigReader implements IServiceConfigurator {
 						logger.info("Found startup task <{}>", c);
 						Class<?>clazz = Class.forName(c);
 						Object o=kernel.load(clazz);
-						initTasks.add((Runnable)o);
+						startupTasks.add((Runnable)o);
 					}catch(Exception e){
 						Log.logException("Error setting up startup task " + c, e, logger);
 					}
@@ -119,6 +119,7 @@ public class ServiceConfigReader implements IServiceConfigurator {
 
 	protected void deployFeature(Feature ft){
 		kernel.getDeploymentManager().deployFeature(ft);
+		startupTasks.addAll(ft.getStartupTasks());
 	}
 	
 	protected void deployService(DeploymentDescriptor dd){
@@ -151,7 +152,7 @@ public class ServiceConfigReader implements IServiceConfigurator {
 			throw new ServiceDeploymentException("No factory available for service type <"+dd.getType()+">");
 		}
 		kernel.getDeploymentManager().deployService(f.build(dd));
-		initTasks.addAll(dd.getInitTasks());
+		startupTasks.addAll(dd.getInitTasks());
 	}
 
 	/**
@@ -159,7 +160,7 @@ public class ServiceConfigReader implements IServiceConfigurator {
 	 * configuration as service init tasks
 	 */
 	public List<Runnable>getInitTasks(){
-		return initTasks;
+		return startupTasks;
 	}
 
 	/**

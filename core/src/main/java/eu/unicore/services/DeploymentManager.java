@@ -84,10 +84,7 @@ public class DeploymentManager {
 						logger.info("Service <{}> is disabled, skipping.", dd.getName());
 					}
 				}
-				for(Runnable r: ft.getInitTasks()){
-					logger.info("Running <{}>", r.getClass().getName());
-					r.run();
-				}
+				ft.initialise();
 				logger.info("Feature {} v{} successfully deployed.", ftName, ftVersion);
 			}
 			else{

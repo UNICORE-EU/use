@@ -10,7 +10,7 @@ public class DemoFeature3 extends FeatureImpl {
 	
 	public DemoFeature3() {
 		this.name = "demo3";
-		getInitTasks().add(new Runnable(){
+		getStartupTasks().add(new Runnable(){
 			public void run(){
 				System.out.println("This is feature <demo3>.");
 				initWasRun = true;
