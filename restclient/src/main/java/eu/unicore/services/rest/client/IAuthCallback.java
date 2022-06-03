@@ -8,7 +8,7 @@ import org.apache.http.HttpMessage;
  * @author schuller
  */
 public interface IAuthCallback {
-	
+
 	/**
 	 * add authentication headers
 	 * 
@@ -24,4 +24,12 @@ public interface IAuthCallback {
 	public default String getSessionKey() {
 		return toString();
 	}
+
+	/**
+	 * identifier of the concrete auth implementation
+	 */
+	public default String getType() {
+		return getClass().getSimpleName();
+	}
+
 }
