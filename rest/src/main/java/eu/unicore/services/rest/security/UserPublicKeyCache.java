@@ -58,7 +58,7 @@ public class UserPublicKeyCache {
 
 
 	public void setFile(String fileName) {
-		this.dbFile = new File(fileName);
+		if(fileName!=null)this.dbFile = new File(fileName);
 	}
 	
 	public void setUseAuthorizedKeys(boolean useAuthorizedKeys) {

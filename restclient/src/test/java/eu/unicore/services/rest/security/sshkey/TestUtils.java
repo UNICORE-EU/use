@@ -2,6 +2,7 @@ package eu.unicore.services.rest.security.sshkey;
 
 import java.io.File;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPublicKey;
@@ -59,4 +60,14 @@ public class TestUtils {
 		EdDSAPublicKey pub = (EdDSAPublicKey)SSHUtils.readPublicKey(new File("src/test/resources/ssh/id_ed25519.pub"));
 		Assert.assertNotNull(pub);
 	}
+	
+	@Test
+	public void testPuttyKey() throws Exception {
+		File key = new File("src/test/resources/ssh/putty-key");
+		PrivateKey pk = SSHUtils.readPrivateKey(key, new Password((char[])null));
+		Assert.assertNotNull(pk);
+		PublicKey pub = SSHUtils.readPublicKey(new File("src/test/resources/ssh/putty-key.pub"));
+		Assert.assertNotNull(pub);
+	}
+
 }

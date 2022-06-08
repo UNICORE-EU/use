@@ -65,7 +65,7 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		keyCache.setUseAuthorizedKeys(useAuthorizedKeys);
 		keyCache.setUpdateInterval(updateInterval);
 		keyCache.setDnTemplate(dnTemplate);
-		if(useAuthorizedKeys) {
+		if(useAuthorizedKeys && userInfo!=null) {
 			try {
 				@SuppressWarnings("unchecked")
 				Class<? extends UserInfoSource>userInfoClass = (Class<? extends UserInfoSource>)Class.forName(userInfo);

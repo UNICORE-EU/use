@@ -53,7 +53,7 @@ public class TestJWTUtils {
 
 	@Test
 	public void testKeybasedJWT() throws Exception {
-		String[] keys = {"id_rsa", "id_ecdsa", "id_ecdsa_384", "id_ed25519"};
+		String[] keys = {"id_rsa", "id_ecdsa", "id_ecdsa_384", "id_ed25519", "putty-key"};
 		for(String k : keys){
 			File key = new File("src/test/resources/ssh/"+k);
 			SSHKey sk = new SSHKey("demouser", key, new Password("test123".toCharArray()), 300);
