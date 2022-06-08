@@ -4,16 +4,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.services.Kernel;
@@ -36,7 +35,7 @@ public class UserPublicKeyCache {
 	private long lastUpdated;
 	private String dnTemplate = "CN=%s, OU=ssh-local-users";
 
-	private List<UserInfoSource>sources = new ArrayList<>();
+	private final Collection <UserInfoSource>sources = new HashSet<>();
 
 	public static synchronized UserPublicKeyCache get(Kernel kernel){
 		UserPublicKeyCache pc = kernel.getAttribute(UserPublicKeyCache.class);
@@ -77,6 +76,10 @@ public class UserPublicKeyCache {
 		this.dnTemplate = dnTemplate;
 	}
 
+	public Collection <UserInfoSource> getUserInfoSources() {
+		return sources;
+	}
+	
 	protected synchronized void updateDB() throws IOException {
 		if(dbFile==null)return;
 		if(lastUpdated == 0 || dbFile.lastModified() > lastUpdated){
@@ -112,8 +115,8 @@ public class UserPublicKeyCache {
 		
 		for(UserInfoSource lServer: sources){
 			try{
-				String response = lServer.getUserInfo(requestedUserName);
-				parseUserInfo(response, requestedUserName, dn, attributes);
+				Collection<String> response = lServer.getAcceptedKeys(requestedUserName);
+				if(response!=null)parseUserInfo(response, requestedUserName, dn, attributes);
 			}
 			catch(Exception ex){
 				Log.logException("Could not get info for user <"+requestedUserName+">", ex, logger);
@@ -134,15 +137,12 @@ public class UserPublicKeyCache {
 		return attr;
 	}
 
-	protected void parseUserInfo(String info, String user, String dn, Collection<AttributesHolder> attrs) throws IOException {
-		for(String line: IOUtils.readLines(new StringReader(info))){
-			if(line.startsWith("Accepted key")){
-				String key = line.split(":",2)[1];
-				if(!hasEntry(attrs,key)){
-					if(isValidKey(key)){
-						attrs.add(new AttributesHolder(user,key,dn));
-						logger.info("Added SSH pub key for <{}>", user);
-					}
+	protected void parseUserInfo(Collection<String> keys, String user, String dn, Collection<AttributesHolder> attrs) throws IOException {
+		for(String key: keys){
+			if(!hasEntry(attrs,key)){
+				if(isValidKey(key)){
+					attrs.add(new AttributesHolder(user,key,dn));
+					logger.info("Added SSH pub key for <{}>", user);
 				}
 			}
 		}
@@ -231,10 +231,10 @@ public class UserPublicKeyCache {
 	
 	public interface UserInfoSource {
 		/**
-		 * retrieve keys etc
+		 * retrieve accepted keys
 		 * @param userName
 		 * @return
 		 */
-		public String getUserInfo(String userName);
+		public Collection<String> getAcceptedKeys(String userName);
 	}
 }

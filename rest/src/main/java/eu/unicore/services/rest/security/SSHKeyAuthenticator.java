@@ -19,6 +19,7 @@ import eu.unicore.services.Kernel;
 import eu.unicore.services.KernelInjectable;
 import eu.unicore.services.rest.security.UserPublicKeyCache.AttributeHolders;
 import eu.unicore.services.rest.security.UserPublicKeyCache.AttributesHolder;
+import eu.unicore.services.rest.security.UserPublicKeyCache.UserInfoSource;
 import eu.unicore.services.rest.security.jwt.JWTUtils;
 import eu.unicore.services.rest.security.sshkey.SSHKeyUC;
 import eu.unicore.services.rest.security.sshkey.SSHUtils;
@@ -26,6 +27,7 @@ import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.AuthAttributesCollector.PAMAttributes;
 import eu.unicore.services.utils.Pair;
 import eu.unicore.util.Log;
+import eu.unicore.util.configuration.ConfigurationException;
 
 /**
  * Authenticate by checking tokens using the SSH public key(s) 
@@ -46,6 +48,7 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 	private String file;
 	private long updateInterval = 600;
 	private boolean useAuthorizedKeys = true;
+	private String userInfo;
 
 	private final static Collection<String> s = new ArrayList<>(); 
 	static{
@@ -53,18 +56,24 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		s.add("UNICORE-SSH-KEY");
 	}
 
-	private Kernel kernel;
-
 	private UserPublicKeyCache keyCache = null;
 	
 	@Override
 	public void setKernel(Kernel kernel){
-		this.kernel = kernel;
-		keyCache = new UserPublicKeyCache();
+		keyCache = UserPublicKeyCache.get(kernel);
 		keyCache.setFile(file);
 		keyCache.setUseAuthorizedKeys(useAuthorizedKeys);
 		keyCache.setUpdateInterval(updateInterval);
 		keyCache.setDnTemplate(dnTemplate);
+		if(useAuthorizedKeys) {
+			try {
+				@SuppressWarnings("unchecked")
+				Class<? extends UserInfoSource>userInfoClass = (Class<? extends UserInfoSource>)Class.forName(userInfo);
+				keyCache.getUserInfoSources().add(kernel.load(userInfoClass));
+			}catch(Exception ex) {
+				throw new ConfigurationException("Could not load user info class <"+userInfo+">", ex);
+			}
+		}
 	}
 
 	@Override
@@ -207,8 +216,10 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		this.dnTemplate = dnTemplate;
 	}
 
+	public void setUserInfo(String userInfo) {
+		this.userInfo = userInfo;
+	}
 
-	
 	// store attributes for AuthAttributesCollector to pick up
 	private void storeAttributes(String requestedUser, SecurityTokens tokens){
 		PAMAttributes attr = new PAMAttributes();

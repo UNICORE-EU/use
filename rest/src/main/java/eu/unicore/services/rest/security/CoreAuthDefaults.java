@@ -15,6 +15,7 @@ public class CoreAuthDefaults implements AuthenticatorDefaults {
 		defs.put("FILE", FilebasedAuthenticator.class.getName());
 		defs.put("UNITY-OAUTH", UnityOAuthAuthenticator.class.getName());
 		defs.put("UNITY-PASSWORD", UnitySAMLAuthenticator.class.getName());
+		defs.put("SSHKEY", SSHKeyAuthenticator.class.getName());
 	}
 
 	@Override
