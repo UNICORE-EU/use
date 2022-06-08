@@ -33,7 +33,7 @@ public class TestGridmapFileAuthoriser {
 		IAttributeSource attrSource=k.getContainerSecurityConfiguration().getAip();
 		assertNotNull(attrSource);
 		AttributeSourcesChain chain=(AttributeSourcesChain)attrSource;
-		GridMapFileAuthoriser gmf=(GridMapFileAuthoriser)chain.getChain().get(0);
+		GridMapFileAuthoriser gmf=(GridMapFileAuthoriser)chain.getChain().get(1);
 		assertNotNull(gmf);
 	}
 }
