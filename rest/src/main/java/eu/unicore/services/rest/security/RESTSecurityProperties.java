@@ -103,7 +103,7 @@ public class RESTSecurityProperties extends PropertiesHelper {
 		@Override
 		public boolean authenticate(Message message, SecurityTokens tokens) {
 			//NOP
-			return true;
+			return false;
 		}
 		
 		@SuppressWarnings("unchecked")

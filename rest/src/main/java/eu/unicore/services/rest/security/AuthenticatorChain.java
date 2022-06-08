@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -55,22 +56,30 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 					break;
 				}
 			}catch(Exception ex){
-				Log.logException("Error using authenticator <"+a.getClass().getName()+">", ex, logger);
+				logger.debug("Error using authenticator <{}>: {}",
+						a.getClass().getName(),
+						Log.getDetailMessage(ex));
 			}
 		}
 		return haveAuth;
 	}
 	
+	private static Map<String,String>aliases = new HashMap<>();
+	static {
+		aliases.put("eu.unicore.uftp.authserver.authenticate.SSHKeyAuthenticator",
+					SSHKeyAuthenticator.class.getName());
+	}
+
 	public void configure(String name, RESTSecurityProperties properties) throws ConfigurationException {
 		String dotName = RESTSecurityProperties.PROP_AUTHN_PREFIX + "." + name + ".";
 		String clazz = properties.getValue(dotName + "class");
-		
 		if (clazz==null) {
 			clazz = getDefaultClass(name);
 			if(clazz==null)
 			throw new ConfigurationException("Inconsistent REST authentication chain definition: " +
 					"expected <"+dotName+"class> property with IAuthenticator implementation.");
 		}
+		clazz = aliases.getOrDefault(clazz, clazz);
 		try{
 			IAuthenticator auth = (IAuthenticator)(Class.forName(clazz).getConstructor().newInstance());
 			configureAuth(RESTSecurityProperties.PREFIX+dotName, properties.rawProperties, auth);

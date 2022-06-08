@@ -72,9 +72,9 @@ public class TestAuthChainFactory extends TestCase{
 		a.start(new Kernel(TestConfigUtil.getInsecureProperties()));
 		
 		List<IAttributeSource>authZChain=chain.getChain();
-		assertEquals(2, authZChain.size());
-		assertTrue(authZChain.get(0) instanceof TestAuthZ2);
-		assertTrue(authZChain.get(1) instanceof TestAuthZ);
+		assertEquals(3, authZChain.size());
+		assertTrue(authZChain.get(1) instanceof TestAuthZ2);
+		assertTrue(authZChain.get(2) instanceof TestAuthZ);
 	}
 
 	public void testChainCombiningPolicy()throws Exception{
@@ -93,7 +93,7 @@ public class TestAuthChainFactory extends TestCase{
 		
 		AttributeSourcesChain chain=(AttributeSourcesChain)a;
 		List<IAttributeSource>authZChain=chain.getChain();
-		assertEquals(2, authZChain.size());
+		assertEquals(3, authZChain.size());
 		assertTrue(authZChain.get(0) instanceof TestAuthZ2);
 		assertTrue(authZChain.get(1) instanceof TestAuthZ);
 		assertTrue(chain.getCombiningPolicy() instanceof FirstApplicable);
@@ -115,7 +115,7 @@ public class TestAuthChainFactory extends TestCase{
 
 		AttributeSourcesChain chain=(AttributeSourcesChain)a;
 		List<IAttributeSource>authZChain=chain.getChain();
-		assertEquals(2, authZChain.size());
+		assertEquals(3, authZChain.size());
 		assertTrue(authZChain.get(0) instanceof TestAuthZ2);
 		assertTrue(authZChain.get(1) instanceof TestAuthZ);
 		assertTrue(chain.getCombiningPolicy() instanceof TestPolicy);
@@ -215,35 +215,28 @@ public class TestAuthChainFactory extends TestCase{
 		assertFalse(s.contains("spam"));
 	}
 	
-	public void testFirstAccessiblePolicy(){
-		try
-		{
-			Properties props=new Properties();
-			props.setProperty(PREFIX+PROP_CHECKACCESS, "false");
-			props.put(PREFIX+PROP_AIP_ORDER,"TEST2 TEST1 TEST3");
-			props.put(PREFIX+PROP_AIP_PREFIX+".TEST1.class",TestAuthZError.class.getName());
-			props.put(PREFIX+PROP_AIP_PREFIX+".TEST2.class",TestAuthZSingle1.class.getName());
-			props.put(PREFIX+PROP_AIP_PREFIX+".TEST3.class",TestAuthZSingle2.class.getName());
-			props.put(PREFIX+PROP_AIP_COMBINING_POLICY, AttributeSourcesChain.FirstAccessible.NAME);
-			ContainerSecurityProperties k=new ContainerSecurityProperties(props, 
-					new DefaultAuthnAndTrustConfiguration());
-			IAttributeSource chain=k.getAip();
-			chain.start(new Kernel(TestConfigUtil.getInsecureProperties()));
-			SubjectAttributesHolder newAttributes;
+	public void testFirstAccessiblePolicy() throws Exception {
+		Properties props = new Properties();
+		props.setProperty(PREFIX+PROP_CHECKACCESS, "false");
+		props.put(PREFIX+PROP_AIP_ORDER,"TEST2 TEST1 TEST3");
+		props.put(PREFIX+PROP_AIP_PREFIX+".TEST1.class",TestAuthZError.class.getName());
+		props.put(PREFIX+PROP_AIP_PREFIX+".TEST2.class",TestAuthZSingle1.class.getName());
+		props.put(PREFIX+PROP_AIP_PREFIX+".TEST3.class",TestAuthZSingle2.class.getName());
+		props.put(PREFIX+PROP_AIP_COMBINING_POLICY, AttributeSourcesChain.FirstAccessible.NAME);
+		ContainerSecurityProperties k = new ContainerSecurityProperties(props, 
+				new DefaultAuthnAndTrustConfiguration());
+		IAttributeSource chain = k.getAip();
+		chain.start(new Kernel(TestConfigUtil.getInsecureProperties()));
+		SubjectAttributesHolder newAttributes;
 
-			newAttributes = chain.getAttributes(new SecurityTokens(), new SubjectAttributesHolder());
-			String[]x=newAttributes.getValidIncarnationAttributes().get("test");
-			assertEquals(2,x.length);
-			String s=String.valueOf(Arrays.asList(x));
-			assertTrue(s.contains("bar"));
-			assertTrue(s.contains("foo"));
-			assertFalse(s.contains("ham"));
-			assertFalse(s.contains("spam"));
-		} catch (Exception e)
-		{
-			fail("Exception in AttrSourcesChain: " + e);
-		}
-		
+		newAttributes = chain.getAttributes(new SecurityTokens(), new SubjectAttributesHolder());
+		String[]x = newAttributes.getValidIncarnationAttributes().get("test");
+		assertEquals(2,x.length);
+		String s=String.valueOf(Arrays.asList(x));
+		assertTrue(s.contains("bar"));
+		assertTrue(s.contains("foo"));
+		assertFalse(s.contains("ham"));
+		assertFalse(s.contains("spam"));
 	}
 
 	private Properties prepareProperties() {

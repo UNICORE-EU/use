@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -35,6 +36,10 @@ import eu.unicore.services.rest.client.IAuthCallback;
 import eu.unicore.services.rest.client.UsernamePassword;
 import eu.unicore.services.rest.jwt.JWTDelegation;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
+import eu.unicore.services.rest.security.sshkey.Password;
+import eu.unicore.services.rest.security.sshkey.SSHKey;
+import eu.unicore.services.rest.security.sshkey.SSHKeyUC;
+import eu.unicore.services.rest.security.sshkey.SSHUtils;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.services.server.JettyServer;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
@@ -163,6 +168,26 @@ public class TestRestSecurity {
 		
 	}
 	
+	@Test
+	public void testBaseClientWithJWT() throws Exception {
+		String resource = url+"/"+sName+"/User";
+		IAuthCallback auth = new SSHKey("demouser", new File("src/test/resources/id_ed25519"),
+				new Password("test123".toCharArray()));
+		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
+		JSONObject reply = bc.getJSON();
+		System.out.println("Service reply: "+reply.toString(2));
+	}
+
+	@Test
+	public void testBaseClientWithLegacySSHKey() throws Exception {
+		String resource = url+"/"+sName+"/User";
+		SSHKeyUC auth = SSHUtils.createAuthData(new File("src/test/resources/id_ed25519"),
+				"test123".toCharArray(), String.valueOf(System.currentTimeMillis()));
+		auth.username = "demouser";
+		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
+		JSONObject reply = bc.getJSON();
+		System.out.println("Service reply: "+reply.toString(2));
+	}
 
 	public static class MyApplication extends Application {
 		@Override

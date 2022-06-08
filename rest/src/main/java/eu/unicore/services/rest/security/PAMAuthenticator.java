@@ -14,7 +14,8 @@ import eu.unicore.security.HTTPAuthNTokens;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.CXFUtils;
 import eu.unicore.services.rest.security.BaseRemoteAuthenticator.CacheEntry;
-import eu.unicore.services.rest.security.PAMAttributeSource.PAMAttributes;
+import eu.unicore.services.security.AuthAttributesCollector;
+import eu.unicore.services.security.AuthAttributesCollector.PAMAttributes;
 import eu.unicore.util.Log;
 
 /**
@@ -74,7 +75,7 @@ public class PAMAuthenticator implements IAuthenticator {
 		PAMAttributes attr = new PAMAttributes();
 		attr.uid = unixUser.getUserName();
 		attr.groups = unixUser.getGroups().toArray(new String[unixUser.getGroups().size()]);
-		tokens.getContext().put(PAMAttributeSource.PAM_ATTRIBUTES, attr);
+		tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, attr);
 	}
 
 	public void setDNTemplate(String dnTemplate){

@@ -295,7 +295,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		} catch (ConfigurationException e)
 		{
 			logger.info("Trusted SAML assertion issuers truststore is not defined! " +
-					"Unity-based authentication will not work.");
+					"Validating Unity assertions will not work.");
 			setTrustedAssertionIssuers(new BinaryCertChainValidator(false));
 		}
 		

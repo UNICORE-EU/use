@@ -12,8 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.NDC;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.security.SecurityTokens;
@@ -67,7 +67,7 @@ public class AttributesCallback implements AttributeHandlingCallback
 	@SuppressWarnings("unchecked")
 	public Map<String, String> extractAttributes(SecurityTokens tokens)
 	{
-		NDC.push(name);
+		ThreadContext.push(name);
 		try
 		{
 			logger.debug("extractAttributes called");
@@ -87,7 +87,7 @@ public class AttributesCallback implements AttributeHandlingCallback
 			return ret;
 		} finally
 		{
-			NDC.pop();
+			ThreadContext.pop();
 		}
 	}
 }

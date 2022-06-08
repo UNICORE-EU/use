@@ -9,14 +9,15 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.PhaseInterceptorChain;
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
 
+import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
@@ -102,7 +103,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 		}
 		catch(eu.unicore.security.SecurityException ex){
 			Log.logException("User authentication/authorisation failed", ex, logger);
-			throw new WebApplicationException(ex, 403);
+			throw new WebApplicationException(ex, HttpStatus.SC_FORBIDDEN);
 		}
 	}
 
@@ -197,20 +198,16 @@ public class AuthNHandler implements ContainerRequestFilter {
 	
 	protected Response processNoDelegation(Message message, SecurityTokens token){
 		IAuthenticator auth = kernel.getAttribute(RESTSecurityProperties.class).getAuthenticator();
-		boolean haveAuth  = auth.authenticate(message, token);
-		if(!haveAuth
+		boolean haveCredentials  = auth.authenticate(message, token);
+		if(!haveCredentials
 				&& kernel.getAttribute(RESTSecurityProperties.class).forbidNoCreds()
-				&& kernel.getContainerSecurityConfiguration().isAccessControlEnabled()
-				) {
-			//this is mostly useful to force browsers to ask the user for credentials
-			String realm = kernel.getContainerProperties().getContainerURL();
-			ResponseBuilder res = Response.status(401);
-			for(String scheme: auth.getAuthSchemes()){
-				res.header("WWW-Authenticate", scheme+" realm="+realm);
-			}
-			return res.build();
+				&& kernel.getContainerSecurityConfiguration().isAccessControlEnabled()) {
+			throw new AuthenticationException("Authentication failed - no credentials.");
 		}
-		// continue request processing
+		if(haveCredentials && token.getEffectiveUserName()==null) {
+			throw new AuthenticationException("Authentication failed - credentials could not be verified.");
+		}
+		// OK - continue request processing
 		return null;
 	}
 

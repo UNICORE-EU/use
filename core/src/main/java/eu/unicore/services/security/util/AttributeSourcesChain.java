@@ -36,11 +36,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.ThreadContext;
 
 import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
+import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.util.Log;
@@ -85,7 +86,7 @@ public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeS
 		SubjectAttributesHolder resultMap = new SubjectAttributesHolder(initial.getPreferredVos());
 		for (IAttributeSource a: chain){
 			String name = a.getName();
-			NDC.push(name);
+			ThreadContext.push(name);
 			try{
 				SubjectAttributesHolder current = a.getAttributes(tokens, resultMap);
 				if (logger.isDebugEnabled()) {
@@ -100,7 +101,7 @@ public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeS
 				logger.error(Log.createFaultMessage("Attribute source <"+name+"> not available.", e));
 			}
 			finally{
-				NDC.pop();
+				ThreadContext.pop();
 			}
 		}
 		return resultMap;
@@ -108,8 +109,8 @@ public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeS
 
 	@Override
 	protected void initOrder() throws ConfigurationException {
-		chain = new ArrayList<IAttributeSource>();
-		names = new ArrayList<String>();
+		chain = new ArrayList<>();
+		names = new ArrayList<>();
 		if (orderString == null) {			
 			String nn = name == null ? "" : "." + name;
 			throw new ConfigurationException("Configuration inconsistent, " +
@@ -125,6 +126,17 @@ public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeS
 			chain.add(AttributeSourceConfigurator.configureAttributeSource(auth, 
 					ContainerSecurityProperties.PROP_AIP_PREFIX, properties));
 			names.add(auth);
+		}
+		// add AuthAttributesCollector if not already defined via config
+		for(IAttributeSource as: chain) {
+			if(as instanceof AuthAttributesCollector)return;
+		}
+		if (MergeLastOverrides.NAME.equalsIgnoreCase(combinerName)){
+			chain.add(0, new AuthAttributesCollector());
+			names.add(0, "DEFAULT");
+		}else {
+			chain.add(new AuthAttributesCollector());
+			names.add("DEFAULT");
 		}
 	}
 	

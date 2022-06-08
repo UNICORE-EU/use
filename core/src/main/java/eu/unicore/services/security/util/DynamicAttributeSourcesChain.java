@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.ThreadContext;
 
 import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.Client;
@@ -66,7 +66,7 @@ public class DynamicAttributeSourcesChain extends BaseAttributeSourcesChain<IDyn
 		assert started : "This object must be started before use.";
 		SubjectAttributesHolder resultMap = new SubjectAttributesHolder(initial.getPreferredVos());
 		for (IDynamicAttributeSource a: chain){
-			NDC.push(a.getName());
+			ThreadContext.push(a.getName());
 			try{
 				SubjectAttributesHolder current = a.getAttributes(client, resultMap);
 				if (logger.isDebugEnabled()) {
@@ -83,7 +83,7 @@ public class DynamicAttributeSourcesChain extends BaseAttributeSourcesChain<IDyn
 				Log.logException("Dynamic attribute source <"+a.getClass()+"> not available.", e, logger);
 			}
 			finally{
-				NDC.pop();
+				ThreadContext.pop();
 			}
 		}
 		return resultMap;

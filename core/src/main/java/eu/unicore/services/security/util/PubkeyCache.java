@@ -12,13 +12,11 @@ public class PubkeyCache {
 	final Map<String, PublicKey>map = new ConcurrentHashMap<>();
 	
 	public PublicKey getPublicKey(String subject){
-		if(subject!=null)subject = X500NameUtils.getComparableForm(subject);
-		return map.get(subject);
+		return map.get(X500NameUtils.getComparableForm(subject));
 	}
 	
 	public void update(String subject, PublicKey pubkey){
-		if(subject!=null)subject = X500NameUtils.getComparableForm(subject);
-		map.put(subject, pubkey);
+		map.put(X500NameUtils.getComparableForm(subject), pubkey);
 	}
 	
 	public static synchronized PubkeyCache get(Kernel kernel){

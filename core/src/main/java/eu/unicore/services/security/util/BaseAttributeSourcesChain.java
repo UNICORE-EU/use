@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.ThreadContext;
 
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.services.ISubSystem;
@@ -88,11 +88,11 @@ public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> 
 		this.name = name;
 		initOrder();
 		for(int i=0; i<chain.size(); i++){
-			NDC.push(names.get(i));
+			ThreadContext.push(names.get(i));
 			try {
 				chain.get(i).configure(names.get(i));
 			} finally {
-				NDC.pop();
+				ThreadContext.pop();
 			}
 		}
 		initCombiningPolicy();
@@ -104,13 +104,13 @@ public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> 
 	@Override
 	public void start(Kernel kernel) throws Exception {
 		for(int i=0; i<chain.size(); i++){
-			NDC.push(names.get(i));
+			ThreadContext.push(names.get(i));
 			try {
 				T aip = chain.get(i);
 				kernel.register(aip);
 				aip.start(kernel);
 			} finally {
-				NDC.pop();
+				ThreadContext.pop();
 			}
 		}
 		started = true;
