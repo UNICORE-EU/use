@@ -1,12 +1,5 @@
 package eu.unicore.services.registry;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import eu.unicore.services.DeploymentDescriptor;
-import eu.unicore.services.Home;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.registry.RegistryServiceDescriptor;
 import eu.unicore.services.utils.deployment.FeatureImpl;
@@ -37,16 +30,6 @@ public class RegistryFeature extends FeatureImpl {
 		super.setKernel(kernel);
 		this.properties = new RegistryFeatureProperties(SERVICE_NAME, kernel.getContainerProperties());
 		this.isSharedRegistry = "shared".equalsIgnoreCase(properties.getValue("mode"));
-	}
-
-	@Override
-	public void initialise() throws Exception {
-		new RegistryStartupTask(kernel).run();
-	}
-
-	@Override
-	public Map<String, Class<? extends Home>> getHomeClasses(){
-		Map<String, Class<? extends Home>> homeClasses = new HashMap<>();
 		if(isSharedRegistry) {
 			homeClasses.put("Registry", RegistryHomeImpl.class);
 			homeClasses.put("ServiceGroupEntry", RegistryEntryHomeImpl.class);
@@ -55,13 +38,12 @@ public class RegistryFeature extends FeatureImpl {
 			homeClasses.put("Registry", LocalRegistryHomeImpl.class);
 			homeClasses.put("ServiceGroupEntry", LocalRegistryEntryHomeImpl.class);
 		}
-		return homeClasses;
-	}
-	
-	public List<DeploymentDescriptor> getServices(){
-		List<DeploymentDescriptor> services = new ArrayList<>();
 		services.add(new RegistryServiceDescriptor(kernel));		
-		return services;
+	}
+
+	@Override
+	public void initialise() throws Exception {
+		new RegistryStartupTask(kernel).run();
 	}
 
 }

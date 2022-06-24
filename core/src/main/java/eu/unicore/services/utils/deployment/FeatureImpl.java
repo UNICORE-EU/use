@@ -22,23 +22,25 @@ public class FeatureImpl implements Feature {
 
 	protected Kernel kernel;
 
-	private final List<Runnable> startupTasks = new ArrayList<>();
-	private final Map<String, Class<? extends Home>> homeClasses = new HashMap<>();
-	private final List<DeploymentDescriptor> dd = new ArrayList<>();
-	
+	protected final List<Runnable> startupTasks = new ArrayList<>();
+
+	protected final Map<String, Class<? extends Home>> homeClasses = new HashMap<>();
+
+	protected final List<DeploymentDescriptor> services = new ArrayList<>();
+
 	@Override
-	public List<Runnable> getStartupTasks(){
+	public final List<Runnable> getStartupTasks(){
 		return startupTasks;
 	}
 	
 	@Override
-	public Map<String, Class<? extends Home>> getHomeClasses() {
+	public final Map<String, Class<? extends Home>> getHomeClasses() {
 		return homeClasses;
 	}
 
 	@Override
-	public List<DeploymentDescriptor> getServices() {
-		return dd;
+	public final List<DeploymentDescriptor> getServices() {
+		return services;
 	}
 	
 	public String getName() {
