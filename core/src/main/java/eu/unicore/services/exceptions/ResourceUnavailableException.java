@@ -1,7 +1,7 @@
 package eu.unicore.services.exceptions;
 
 /**
- * thrown when a ws-resource cannot be accessed, for example 
+ * thrown when a Resource cannot be accessed, for example 
  * because it is still in use
  * 
  * @author schuller

@@ -19,6 +19,7 @@ import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.XACMLAttribute;
 import eu.unicore.security.wsutil.client.WSClientFactory;
 import eu.unicore.services.Kernel;
+import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.IDynamicAttributeSource;
 import eu.unicore.util.Log;
@@ -110,10 +111,10 @@ public class XUUDBDynamicAttributeSource extends XUUDBAuthoriserBase implements
 	public SubjectAttributesHolder getAttributes(Client client,
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException {
 		if (!isEnabled)
-			throw new IOException("The XUUDB attribute source is disabled");
+			throw new SubsystemUnavailableException("The XUUDB attribute source is disabled");
 
 		if(!cb.isOK())
-			throw new IOException("Attribute source "+name+" is temporarily unavailable");
+			throw new SubsystemUnavailableException("Attribute source "+name+" is unavailable");
 		
 		SubjectAttributesHolder map;
 

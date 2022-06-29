@@ -22,6 +22,7 @@ import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.wsutil.client.WSClientFactory;
 import eu.unicore.services.Kernel;
+import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.util.Log;
@@ -59,10 +60,10 @@ public class XUUDBAuthoriser extends XUUDBAuthoriserBase implements
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens,
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException {
 		if (!isEnabled)
-			throw new IOException("Attribute source "+name+" is disabled");
+			throw new SubsystemUnavailableException("Attribute source "+name+" is disabled");
 		
 		if(!cb.isOK())
-			throw new IOException("Attribute source "+name+" is temporarily unavailable");
+			throw new SubsystemUnavailableException("Attribute source "+name+" unavailable");
 		
 		SubjectAttributesHolder map;
 		X509Certificate cert = (X509Certificate) tokens.getEffectiveUserCertificate();

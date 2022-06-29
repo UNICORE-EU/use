@@ -157,8 +157,8 @@ public abstract class RESTRendererBase implements KernelInjectable {
 		b.table();
 		for(Map.Entry<String,Object> e: status.entrySet()){
 			b.tr();
-			b.td().text(e.getKey()).end();
-			b.td().text(getHTMLValue(e.getValue())).end();
+			b.td().bftext(e.getKey()).end();
+			b.td().text(getHTMLValue(e.getValue(), 0)).end();
 			b.end();
 		}
 		b.end();
@@ -197,7 +197,7 @@ public abstract class RESTRendererBase implements KernelInjectable {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected String getHTMLValue(Object value) throws Exception{
+	protected String getHTMLValue(Object value, int nestingLevel) throws Exception{
 		HtmlBuilder b = null;
 		if(value instanceof Collection<?>){
 			b = new HtmlBuilder(true);
@@ -205,7 +205,7 @@ public abstract class RESTRendererBase implements KernelInjectable {
 			b.ul();
 			for(Object e: collection){
 				b.li();
-				b.text(getHTMLValue(e));
+				b.text(getHTMLValue(e, nestingLevel+1));
 				b.end();
 			}
 			b.end();
@@ -216,9 +216,13 @@ public abstract class RESTRendererBase implements KernelInjectable {
 			b.ul();
 			for(Map.Entry<Object,Object> e: map.entrySet()){
 				b.li();
-				b.bftext(String.valueOf(e.getKey()));
+			    if(nestingLevel<1) {
+			    	b.bftext(String.valueOf(e.getKey()));
+			    }else {
+			    	b.text(String.valueOf(e.getKey())+":");
+			    }
 				b.text("&nbsp;");
-				b.text(getHTMLValue(e));
+				b.text(getHTMLValue(e.getValue(), nestingLevel+1));
 				b.end();
 			}
 			b.end();

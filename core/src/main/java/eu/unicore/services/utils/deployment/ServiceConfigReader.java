@@ -105,12 +105,12 @@ public class ServiceConfigReader implements IServiceConfigurator {
 						c=c.trim();
 						if (c.length()==0)
 							continue;
-						logger.info("Found startup task <{}>", c);
 						Class<?>clazz = Class.forName(c);
 						Object o=kernel.load(clazz);
+						logger.info("Loaded startup task <{}>", c);
 						startupTasks.add((Runnable)o);
 					}catch(Exception e){
-						Log.logException("Error setting up startup task " + c, e, logger);
+						logger.warn("Error loading startup task <{}>: {}", c, Log.createFaultMessage("", e));
 					}
 				}
 			}

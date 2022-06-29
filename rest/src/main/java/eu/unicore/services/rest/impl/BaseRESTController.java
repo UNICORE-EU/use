@@ -107,14 +107,13 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	@Path("/{uniqueID}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@ConcurrentAccess(allow=true)
-	public Response getJSONRepresentation(@PathParam("uniqueID") String id, @QueryParam("fields")String fieldSpec) throws Exception {
+	public Response getRepresentation1(@PathParam("uniqueID") String id, @QueryParam("fields")String fieldSpec) throws Exception {
 		try{
 			parsePropertySpec(fieldSpec);
-			JSONObject o = getJSON();
 			ResponseBuilderImpl res = new ResponseBuilderImpl();
 			res.status(Status.OK);
 			res.type(MediaType.APPLICATION_JSON);
-			res.entity(o.toString());
+			res.entity(getJSON().toString());
 			return res.build();
 		}
 		catch(Exception ex){
@@ -129,12 +128,12 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	@Path("/{uniqueID}")
 	@Produces(MediaType.TEXT_HTML)
 	@ConcurrentAccess(allow=true)
-	public Response getHTMLRepresentation(@PathParam("uniqueID") String id) throws Exception {
+	public Response getRepresentation2(@PathParam("uniqueID") String id) throws Exception {
 		try{
 			ResponseBuilderImpl res = new ResponseBuilderImpl();
 			res.status(Status.OK);
 			res.type(MediaType.TEXT_HTML);
-			res.entity( getHTML());
+			res.entity(getHTML());
 			return res.build();
 		}
 		catch(Exception ex){
@@ -209,7 +208,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	 */
 	protected boolean doSetProperty(String name, String value) throws Exception {
 		if("acl".equals(name)){
-			List<String> update = new ArrayList<String>();
+			List<String> update = new ArrayList<>();
 			update.add(value);
 			setACL(update);
 			return true;
@@ -239,7 +238,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	 */
 	protected boolean doSetProperty(String name, JSONArray value) throws Exception {
 		if("acl".equals(name)){
-			List<String> update = new ArrayList<String>();
+			List<String> update = new ArrayList<>();
 			for(int i=0;i<value.length();i++){
 				update.add(String.valueOf(value.get(i)));
 			}
@@ -247,7 +246,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 			return true;
 		}
 		if("tags".equals(name)){
-			List<String> update = new ArrayList<String>();
+			List<String> update = new ArrayList<>();
 			for(int i=0;i<value.length();i++){
 				update.add(String.valueOf(value.get(i)));
 			}
@@ -272,7 +271,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	}
 
 	protected Map<String,Object>getProperties() throws Exception {
-		Map<String,Object> props = new HashMap<String, Object>();
+		Map<String,Object> props = new HashMap<>();
 		Model model = getModel();
 		String resourceID = model.getUniqueID();
 		if(model instanceof SecuredResourceModel){
@@ -292,8 +291,9 @@ public abstract class BaseRESTController extends RESTRendererBase {
 			props.put("currentTime", getISODateFormatter().format(new Date()));
 		}
 		if(model instanceof BaseModel){
-			props.put("resourceStatus", String.valueOf(((BaseModel)model).getResourceStatus()));
-			props.put("resourceStatusMessage", String.valueOf(((BaseModel)model).getResourceStatusDetails()));
+			BaseModel bm = (BaseModel)model;
+			props.put("resourceStatus", String.valueOf(bm.getResourceStatus()));
+			props.put("resourceStatusMessage", String.valueOf(bm.getResourceStatusDetails()));
 			
 		}
 		if(resource!=null && resource instanceof ExtendedResourceStatus){
@@ -310,7 +310,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	}
 
 	protected List<String>renderACL(List<ACLEntry>acl){
-		List<String> res = new ArrayList<String>();
+		List<String> res = new ArrayList<>();
 		for(ACLEntry e: acl){
 			res.add(e.getAccessType()+":"+e.getMatchType()+":"+e.getRequiredValue());
 		}
@@ -320,7 +320,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	protected boolean setACL(List<String>acl){
 		if(model instanceof SecuredResourceModel){
 			assertOwnerLevelAccess();
-			List<ACLEntry> update = new ArrayList<ACLEntry>();
+			List<ACLEntry> update = new ArrayList<>();
 			for(String e: acl){
 				ACLEntry x = ACLEntry.parse(e);
 				update.add(x);

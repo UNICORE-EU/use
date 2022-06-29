@@ -41,6 +41,7 @@ import org.apache.logging.log4j.ThreadContext;
 import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
+import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.IAttributeSource;
@@ -97,8 +98,11 @@ public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeS
 					break;
 				}
 			}
+			catch(SubsystemUnavailableException e){
+				logger.debug("Attribute source <"+name+"> (temporarily) not available.");
+			}
 			catch(Exception e){
-				logger.error(Log.createFaultMessage("Attribute source <"+name+"> not available.", e));
+				logger.error(Log.createFaultMessage("Error accessing attribute source <"+name+">", e));
 			}
 			finally{
 				ThreadContext.pop();
