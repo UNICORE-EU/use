@@ -107,7 +107,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	@Path("/{uniqueID}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@ConcurrentAccess(allow=true)
-	public Response getRepresentation1(@PathParam("uniqueID") String id, @QueryParam("fields")String fieldSpec) throws Exception {
+	public Response getJSONRepresentation(@PathParam("uniqueID") String id, @QueryParam("fields")String fieldSpec) throws Exception {
 		try{
 			parsePropertySpec(fieldSpec);
 			ResponseBuilderImpl res = new ResponseBuilderImpl();
@@ -128,7 +128,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	@Path("/{uniqueID}")
 	@Produces(MediaType.TEXT_HTML)
 	@ConcurrentAccess(allow=true)
-	public Response getRepresentation2(@PathParam("uniqueID") String id) throws Exception {
+	public Response getHTMLRepresentation(@PathParam("uniqueID") String id) throws Exception {
 		try{
 			ResponseBuilderImpl res = new ResponseBuilderImpl();
 			res.status(Status.OK);
