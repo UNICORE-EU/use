@@ -61,6 +61,7 @@ public class TestUtils {
 	public void testTemplateExpansion() throws Exception {
 		String template = "x=%foo, y=%bar";
 		JSONObject context = new JSONObject("{foo: 123, bar: 456}");
+		System.out.println(context.toString(2));
 		String expanded = RESTUtils.expandTemplate(template, context);
 		assertEquals("x=123, y=456", expanded);
 	}

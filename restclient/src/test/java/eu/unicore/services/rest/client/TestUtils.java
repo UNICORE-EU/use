@@ -1,5 +1,8 @@
 package eu.unicore.services.rest.client;
 
+import java.util.Map;
+
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -36,5 +39,13 @@ public class TestUtils {
 				"<body><h1 style=\"color: red;\">HTTP Error: 500</h1>Error reason:\n";
 		String err = BaseClient.extractHTMLError(html);
 		Assert.assertTrue(err.contains("Failed to process POST request"));
+	}
+
+	@Test
+	public void testJSONConversions() throws Exception {
+		JSONObject o = new JSONObject("{foo: 123, bar: \"456\"}");
+		Map<String,String> map = BaseClient.asMap(o);
+		Assert.assertEquals("123", map.get("foo"));
+		Assert.assertEquals("456", map.get("bar"));
 	}
 }

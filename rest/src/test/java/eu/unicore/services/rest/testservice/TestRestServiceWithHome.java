@@ -230,7 +230,7 @@ public class TestRestServiceWithHome {
 		System.out.println("Accessing "+resource);
 		MockResourceWithHome.fail_on_getproperties = true;
 		JSONObject res = client.asJSON(client.get(ContentType.APPLICATION_JSON));
-		assertEquals("500", res.getString("status"));
+		assertEquals("500", String.valueOf(res.get("status")));
 		assertTrue(res.getString("errorMessage").contains("Failure for testing"));
 		client.delete();
 		MockResourceWithHome.fail_on_getproperties = false;
@@ -241,7 +241,7 @@ public class TestRestServiceWithHome {
 
 		@Override
 		public Set<Class<?>> getClasses() {
-			Set<Class<?>>classes=new HashSet<Class<?>>();
+			Set<Class<?>>classes = new HashSet<>();
 			classes.add(MockResourceWithHome.class);
 			return classes;
 		}

@@ -46,6 +46,7 @@ public class RESTUtils {
 	
 	public static String expandTemplate(String template, JSONObject context) {
 		Map<String,String> vars = asMap(context);
+		System.out.println(vars);
 		for(String key: vars.keySet()) {
 			if(template.contains("%"+key)) {
 				template = template.replace("%"+key, vars.get(key));

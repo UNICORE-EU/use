@@ -16,9 +16,10 @@ import eu.unicore.util.Log;
  * by the smallest termination time returned by the external registries minus a grace period (60 secs).
  * In case the external registries fail to respond, the lifetime supplied to Add() is used, or 
  * as fallback, a fixed interval of 5 minutes. This mechanism ensures that the external registries are 
- * in a reasonably up-to-date state.
- *  
- * 
+ * in a reasonably up-to-date state.<br/>
+ *
+ * Entries can be flagged as "internal", so they WON'T get pushed.
+ *
  * @author demuth
  * @author schuller
  */
@@ -30,12 +31,15 @@ public class LocalRegistryImpl extends RegistryImpl {
 	 * push entry to any configured external registries.
 	 * The lifetime of the new entry is determined by the external registry, or 
 	 * the time supplied to this method, or a 5 minute fallback.
+	 * (pushing can be disabled by setting "InternalEntry" to "true"
+	 * in the content map)
 	 */
 	@Override
 	protected Calendar pushToExternalRegistries(String endpoint, Map<String,String>content, Calendar requestedTT) {
 		try {
 			RegistryHandler rh = kernel.getAttribute(RegistryHandler.class);
-			if(rh!=null && rh.usesExternalRegistry()){
+			if(rh!=null && rh.usesExternalRegistry()
+					&& !Boolean.parseBoolean(content.get(MARK_ENTRY_AS_INTERNAL))){
 				ExternalRegistryClient externalRegistryClient = rh.getExternalRegistryClient();
 				requestedTT = externalRegistryClient.addRegistryEntry(endpoint, content);
 				logger.debug("Will try to re-add entry for <{}> at: ", endpoint, requestedTT.getTime());

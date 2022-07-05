@@ -133,5 +133,8 @@ public class RegistryImpl extends ResourceImpl {
 	public static final String SERVER_IDENTITY = "ServerIdentity";
 	public static final String SERVER_PUBKEY = "ServerPublicKey";
 	
-
+	// flags an entry as internal, so it won't get pushed to
+	// any external registries
+	public static final String MARK_ENTRY_AS_INTERNAL = "InternalEntry";
+	
 }

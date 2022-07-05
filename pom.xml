@@ -70,16 +70,17 @@
     <compiler.fork>false</compiler.fork>
     <persistence.version>0.300</persistence.version>
     <secutils.version>3.2.3</secutils.version>
-    <seclib.version>5.3.4</seclib.version>
+    <seclib.version>5.3.6</seclib.version>
+    <json.version>20220320</json.version>
     <xuudb.version>2.6.2</xuudb.version>
     <saaj.version>1.5.1</saaj.version>
-    <cxf.version>3.4.4</cxf.version>
-    <jetty.version>9.4.44.v20210927</jetty.version>
+    <cxf.version>3.5.3</cxf.version>
+    <jetty.version>9.4.48.v20220622</jetty.version>
     <httpclient.version>4.5.13</httpclient.version>
-    <metrics.version>4.1.14</metrics.version>
-    <jwt.version>9.22</jwt.version>
+    <metrics.version>4.2.10</metrics.version>
+    <jwt.version>9.23</jwt.version>
     <tink.version>1.6.1</tink.version>
-    <sshj.version>0.31.0</sshj.version>
+    <sshj.version>0.33.0</sshj.version>
   </properties>
 
   <modules>
@@ -99,7 +100,11 @@
       <version>4.13.1</version>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>${json.version}</version>
+    </dependency>
     <dependency>
       <groupId>de.fzj.unicore</groupId>
       <artifactId>persistence</artifactId>
@@ -228,12 +233,12 @@
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>4.5.1</version>
+      <version>5.12.1</version>
     </dependency>
     <dependency>
       <groupId>org.kohsuke</groupId>
       <artifactId>libpam4j</artifactId>
-      <version>1.10</version>
+      <version>1.11</version>
     </dependency>
     <dependency>
       <groupId>com.nimbusds</groupId>

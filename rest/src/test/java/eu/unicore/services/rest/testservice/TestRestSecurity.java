@@ -17,6 +17,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Application;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -54,6 +55,7 @@ public class TestRestSecurity {
 	
 	@BeforeClass
 	public static void startServer()throws Exception{
+		FileUtils.deleteQuietly(new File("target/data"));
 		kernel=new Kernel("src/test/resources/use.properties");
 		kernel.start();			
 		DeploymentDescriptorImpl dd = new DeploymentDescriptorImpl();
@@ -133,7 +135,7 @@ public class TestRestSecurity {
 		System.out.println("Service reply: "+reply.toString(2));
 		Assert.assertEquals(dn, reply.getString("dn"));
 		Assert.assertEquals(issuer, reply.getString("td_consignor"));
-		Assert.assertEquals("true", reply.getString("td_status"));
+		Assert.assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
 	}
 	
 
@@ -162,8 +164,7 @@ public class TestRestSecurity {
 			}
 			Assert.assertEquals(dn, reply.getString("dn"));
 			Assert.assertEquals(issuer, reply.getString("td_consignor"));
-			Assert.assertEquals("true", reply.getString("td_status"));
-			
+			Assert.assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
 		}
 		
 	}
