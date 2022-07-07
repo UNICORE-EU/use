@@ -68,8 +68,8 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>0.300</persistence.version>
-    <secutils.version>3.2.3</secutils.version>
+    <persistence.version>0.301</persistence.version>
+    <secutils.version>3.2.5</secutils.version>
     <seclib.version>5.3.6</seclib.version>
     <json.version>20220320</json.version>
     <xuudb.version>2.6.2</xuudb.version>
@@ -97,7 +97,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -228,7 +228,7 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.7</version>
+      <version>2.11.0</version>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>

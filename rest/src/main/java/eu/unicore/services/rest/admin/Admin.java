@@ -45,7 +45,7 @@ public class Admin extends BaseRESTController {
 	
 	@Override
 	protected Map<String,Object>getProperties() throws Exception {
-		Map<String,Object> status = new HashMap<String, Object>();
+		Map<String,Object> status = new HashMap<>();
 		status.put("upSince", String.valueOf(kernel.getUpSince().getTime()));
 		status.put("containerVersion", String.valueOf(Kernel.getVersion()));
 		status.put("connectionStatus", getConnectionStatus());
