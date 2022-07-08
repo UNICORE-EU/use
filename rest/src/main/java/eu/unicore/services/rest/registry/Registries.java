@@ -95,7 +95,7 @@ public class Registries extends ServicesBase {
 	}
 
 	protected Map<String,Object>renderEntry(String endpoint, Map<String,String> value){
-		Map<String,Object> map = new HashMap<String,Object>();
+		Map<String,Object> map = new HashMap<>();
 		String href = convertToREST(endpoint);
 		if(href!=null){
 			map.put("wsrf",endpoint);
@@ -119,13 +119,14 @@ public class Registries extends ServicesBase {
 	
 	private static final Pattern wsrfURLPattern = Pattern.compile("(https||http)://(.*)/services/([^?]*)\\?res=(.*)");
 	
-	private static final Map<String,String>conv = new HashMap<String,String>();
+	private static final Map<String,String>conv = new HashMap<>();
 	
 	static{
 		conv.put("StorageManagement", "core/storages");
 		conv.put("TargetSystemFactoryService", "core/factories");
 		conv.put("StorageFactory", "core/storagefactories");
 		conv.put("WorkflowFactory", "workflows");
+		conv.put("Registry", "registries");	
 	}
 	
 	/**

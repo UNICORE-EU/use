@@ -72,7 +72,7 @@
     <secutils.version>3.2.5</secutils.version>
     <seclib.version>5.3.6</seclib.version>
     <json.version>20220320</json.version>
-    <xuudb.version>2.6.2</xuudb.version>
+    <xuudb.version>2.7.0</xuudb.version>
     <saaj.version>1.5.1</saaj.version>
     <cxf.version>3.5.3</cxf.version>
     <jetty.version>9.4.48.v20220622</jetty.version>
