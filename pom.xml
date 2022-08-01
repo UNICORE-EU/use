@@ -69,13 +69,14 @@
   <properties>
     <compiler.fork>false</compiler.fork>
     <persistence.version>0.301</persistence.version>
-    <secutils.version>3.2.5</secutils.version>
-    <seclib.version>5.3.6</seclib.version>
+    <secutils.version>3.3.0</secutils.version>
+    <seclib.version>5.4.0</seclib.version>
+    <jaxb.version>2.3.3</jaxb.version>
     <json.version>20220320</json.version>
     <xuudb.version>2.7.0</xuudb.version>
     <saaj.version>1.5.1</saaj.version>
     <cxf.version>3.5.3</cxf.version>
-    <jetty.version>9.4.48.v20220622</jetty.version>
+    <jetty.version>10.0.11</jetty.version>
     <httpclient.version>4.5.13</httpclient.version>
     <metrics.version>4.2.10</metrics.version>
     <jwt.version>9.23</jwt.version>
@@ -149,6 +150,11 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>${httpclient.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>${jaxb.version}</version>
     </dependency>
 
     <dependency>

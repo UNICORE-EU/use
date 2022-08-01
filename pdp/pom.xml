@@ -35,11 +35,14 @@
       <artifactId>secutils-cxf</artifactId>
     </dependency>
     <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.herasaf.xacml.core</groupId>
       <artifactId>herasaf-xacml-core</artifactId>
       <version>1.0.1.RELEASE</version>
       <exclusions>
-        <!-- we require JDK 1.8 which has JAXB built in -->
         <exclusion>
           <groupId>com.sun.xml.bind</groupId>
           <artifactId>jaxb-impl</artifactId>

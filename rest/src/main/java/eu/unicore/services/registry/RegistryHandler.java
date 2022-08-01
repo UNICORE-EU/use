@@ -50,6 +50,7 @@ import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.Home;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.client.RegistryClient;
+import eu.unicore.services.rest.registry.Registries;
 import eu.unicore.services.security.util.PubkeyCache;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.PropertyChangeListener;
@@ -145,6 +146,9 @@ public class RegistryHandler implements ExternalSystemConnector {
 					for(String registryURL: registryUrls){
 						if(registryURL!=null && registryURL.length()>0){
 							String u = registryURL.trim();
+							if(!u.contains("/rest/registries/")) {
+								u = Registries.convertToREST(u);
+							}
 							externalRegistryURLs.add(u);
 							logger.info("Using registry: {}", u);
 						}
