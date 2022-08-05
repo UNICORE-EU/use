@@ -9,7 +9,6 @@ import org.apache.xmlbeans.XmlObject;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.services.utils.Utilities;
 import eu.unicore.util.Log;
-import eu.unicore.util.httpclient.ETDClientSettings;
 
 /**
  * Callback class that handles additional attributes in the User assertion.
@@ -33,9 +32,6 @@ public class UserAttributeCallback implements eu.unicore.security.UserAttributeH
 	 * @param mainToken - the security tokens
 	 */
 	public void processUserDefinedAttribute(String name, String nameFormat, XmlObject[]values, SecurityTokens mainToken){
-		if (!nameFormat.equals(ETDClientSettings.SAML_ATTRIBUTE_REQUEST_NAMEFORMAT))
-			logger.debug("Ignoring request for unknown attribute of type <{}>", nameFormat);
-		
 		Map<String, String[]> preferences = mainToken.getUserPreferences();
 		if (genericAttributeHandle(IAttributeSource.ATTRIBUTE_XLOGIN, 
 				preferences, name, values, false)) 

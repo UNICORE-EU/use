@@ -11,6 +11,7 @@ import javax.security.auth.x500.X500Principal;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.impl.OpensslNameUtils;
+import eu.unicore.services.utils.Pair;
 
 
 public class TestGridMapFileParsing {
@@ -19,12 +20,10 @@ public class TestGridMapFileParsing {
 	@Test
 	public void testSingleLine() throws Exception{
 		Pair<String,String[]> mapping = GridMapFileParser.parseLine("\"/C=DE/O=GridGermany/OU=Forschungszentrum Juelich GmbH/CN=Morris Riedel\" communig");
-
 		X500Principal x500 = new X500Principal("CN=Morris Riedel,OU=Forschungszentrum Juelich GmbH,O=GridGermany,C=DE");
 		String normalizedDN = OpensslNameUtils.normalize(OpensslNameUtils.convertFromRfc2253(x500.getName(), true));
 		assertEquals(normalizedDN, mapping.getM1());
 		assertEquals("communig", mapping.getM2()[0]);
-
 	}
 
 

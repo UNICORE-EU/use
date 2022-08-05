@@ -90,7 +90,7 @@ public class BaseClient {
 
 	protected void setupUserPreferences() {
 		try {
-			Map<String, String[]> userPrefs = security.getETDSettings().getRequestedUserAttributes2();
+			Map<String, String[]> userPrefs = security.getRequestedUserAttributes();
 			if(userPrefs.get("role")!=null) {
 				userPreferences.setRole(userPrefs.get("role")[0]);
 			}

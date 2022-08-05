@@ -69,8 +69,8 @@
   <properties>
     <compiler.fork>false</compiler.fork>
     <persistence.version>0.301</persistence.version>
-    <secutils.version>3.3.0</secutils.version>
-    <seclib.version>5.4.0</seclib.version>
+    <secutils.version>3.3.1</secutils.version>
+    <seclib.version>5.4.1</seclib.version>
     <jaxb.version>2.3.3</jaxb.version>
     <json.version>20220320</json.version>
     <xuudb.version>2.7.0</xuudb.version>

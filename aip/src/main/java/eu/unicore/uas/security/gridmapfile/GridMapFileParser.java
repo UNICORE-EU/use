@@ -15,6 +15,7 @@ import java.util.StringTokenizer;
 import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.impl.OpensslNameUtils;
+import eu.unicore.services.utils.Pair;
 import eu.unicore.util.Log;
 
 

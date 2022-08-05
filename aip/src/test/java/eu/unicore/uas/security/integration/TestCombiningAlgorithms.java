@@ -71,7 +71,6 @@ public class TestCombiningAlgorithms extends TestCase
 				"unicore".toCharArray(), "jks", -1));
 		sec.setSslAuthn(true);
 		sec.setSslEnabled(true);
-		sec.getETDSettings().setIssuerCertificateChain(sec.getCredential().getCertificateChain());
 		sec.getHttpClientProperties().setProperty(HttpClientProperties.SO_TIMEOUT, "600000");
 		sec.getHttpClientProperties().setProperty(HttpClientProperties.CONNECT_TIMEOUT, "5000");
 		return sec;

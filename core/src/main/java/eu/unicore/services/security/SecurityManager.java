@@ -81,17 +81,14 @@ public final class SecurityManager {
 
 	private final IContainerSecurityConfiguration securityConfig;
 	
-	private static final ThreadLocal<Boolean> localCalls = new ThreadLocal<Boolean>();
+	private static final ThreadLocal<Boolean> localCalls = new ThreadLocal<>();
 	
-	private Set<AttributeHandlingCallback> attribHandlingCallbacks=new HashSet<AttributeHandlingCallback>();
-
-	private DSignCheck signatureChecker;
+	private Set<AttributeHandlingCallback> attribHandlingCallbacks=new HashSet<>();
 	
 	private OperationTypesUtil operationTypesUtil;
 
 	public SecurityManager(IContainerSecurityConfiguration securityConfig) {
 		this.securityConfig = securityConfig;
-		this.signatureChecker = new DSignCheck(securityConfig.isSigningRequired());
 		this.operationTypesUtil = new OperationTypesUtil();
 	}
 
@@ -397,13 +394,6 @@ public final class SecurityManager {
 		return client;
 	}
 
-	/**
-	 * @return object providing signature checking API
-	 */
-	public DSignCheck getSignatureChecker() {
-		return signatureChecker;
-	}
-	
 	private Decision checkAuthzInternal(Client c, ActionDescriptor action, ResourceDescriptor d) {
 		PDPResult res;
 		try {

@@ -1,7 +1,7 @@
 package eu.unicore.services.utils;
 
 /**
- * Convenience class for storing pairs of objects (e.g. Lists of mappings)
+ * Convenience class for storing pairs of objects
  * @author Alexander Lukichev
  *
  * @param <T1>
