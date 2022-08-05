@@ -144,5 +144,8 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 		return "OAuth Bearer Token ["+adr+"]";
 	}
 
-	
+	@Override
+	public String getExternalSystemName(){
+		return  "OIDC Server @"+simpleAddress;
+	}
 }

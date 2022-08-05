@@ -74,6 +74,7 @@ public class ApplicationBaseResource extends RESTRendererBase {
 				X509Certificate cert = kernel.getContainerSecurityConfiguration().getCredential().getCertificate();
 				cred.put("dn", cert.getSubjectX500Principal().getName());
 				cred.put("issuer", cert.getIssuerX500Principal().getName());
+				cred.put("expires", getISODateFormatter().format(cert.getNotAfter()));
 			}catch(Exception ex) {}
 			props.put("credential", cred);
 		}

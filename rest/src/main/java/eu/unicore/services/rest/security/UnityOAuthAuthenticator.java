@@ -79,5 +79,5 @@ public class UnityOAuthAuthenticator extends UnityBaseSAMLAuthenticator {
 			return result;
 		}
 	}
-	
+
 }

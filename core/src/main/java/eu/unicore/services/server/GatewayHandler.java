@@ -130,8 +130,9 @@ public class GatewayHandler implements ExternalSystemConnector{
 			status=Status.NOT_APPLICABLE;
 			statusMessage="N/A (no gateway used)";
 		}
-		else{ 
-			if(TimeoutRunner.compute(getCheckConnectionTask(url, secure), threadingSrv, 2000)!=null){
+		else{
+			Boolean result = TimeoutRunner.compute(getCheckConnectionTask(url, secure), threadingSrv, 2000);
+			if(result!=null && result){
 				status=Status.OK;
 				statusMessage="OK [connected to "+url+"]";
 			}

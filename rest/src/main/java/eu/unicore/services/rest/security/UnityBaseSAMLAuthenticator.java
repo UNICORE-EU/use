@@ -129,4 +129,10 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 			throw e;
 		}
 	}
+
+	@Override
+	public String getExternalSystemName(){
+		return  "Unity @ "+simpleAddress;
+	}
+
 }

@@ -44,4 +44,5 @@ public class UnitySAMLAuthenticator extends UnityBaseSAMLAuthenticator {
 		
 		return username+":"+new String(password);
 	}
+
 }

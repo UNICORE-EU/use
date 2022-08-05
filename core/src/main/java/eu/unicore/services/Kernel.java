@@ -320,10 +320,14 @@ public class Kernel {
 
 	public void register(Object candidate) {
 		if(candidate!=null && candidate instanceof ExternalSystemConnector) {
-			externalSystemConnectors.add((ExternalSystemConnector)candidate);
+			if(!externalSystemConnectors.contains(candidate)) {
+				externalSystemConnectors.add((ExternalSystemConnector)candidate);
+			}
 		}
 		if(candidate!=null && candidate instanceof ISubSystem) {
-			subSystems.add((ISubSystem)candidate);
+			if(!subSystems.contains(candidate)) {
+				subSystems.add((ISubSystem)candidate);
+			}
 		}
 	}
 

@@ -22,7 +22,7 @@ public class RegistryApplication extends Application implements USERestApplicati
 
 	@Override
 	public Set<Class<?>> getClasses() {
-		Set<Class<?>>classes=new HashSet<Class<?>>();
+		Set<Class<?>>classes=new HashSet<>();
 		classes.add(Registries.class);
 		return classes;
 	}
