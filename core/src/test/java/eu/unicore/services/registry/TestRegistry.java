@@ -62,11 +62,10 @@ public class TestRegistry {
 	}
 
 	private String update(String endpoint, Map<String,String>content) throws Exception {
-		RegistryHome home = (RegistryHome)kernel.getHome("Registry");
-		RegistryImpl registry = (RegistryImpl)home.getForUpdate("default_registry");
-		registry.addEntry(endpoint, content, null);
-		home.persist(registry);
-		return registry.getModel().getEntryID(endpoint);
+		try(RegistryImpl registry = (RegistryImpl)kernel.getHome("Registry").getForUpdate("default_registry")){
+			registry.addEntry(endpoint, content, null);
+			return registry.getModel().getEntryID(endpoint);
+		}
 	}
 
 	protected void setupServices(Kernel kernel) throws Exception {

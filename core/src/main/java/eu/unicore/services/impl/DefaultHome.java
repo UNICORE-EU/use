@@ -123,7 +123,7 @@ public abstract class DefaultHome implements Home {
 		instanceChecking = new InstanceChecking(this);
 		expiryChecker = new ExpiryChecker();
 		instanceChecking.addChecker(expiryChecker);
-		secInfoCache = new LoadingMap<String,Pair<String,List<ACLEntry>>>(
+		secInfoCache = new LoadingMap<>(
 				new Function<String, Pair<String,List<ACLEntry>>>() {
 					public Pair<String,List<ACLEntry>> apply(String id) {
 						try{
@@ -313,11 +313,9 @@ public abstract class DefaultHome implements Home {
 		}
 
 		public Resource refresh(String id) throws ResourceUnknownException, ResourceUnavailableException {
-			try{
-				Resource resource = serviceInstances.getForUpdate(id,locking_timeout,TimeUnit.SECONDS);
+			try(Resource resource = serviceInstances.getForUpdate(id,locking_timeout,TimeUnit.SECONDS)){
 				if(resource==null)throw new ResourceUnknownException("Instance with ID <"+id+"> does not exist");
 				processMessages(resource);
-				persist(resource);
 				return resource;
 			}catch(PersistenceException pe){
 				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",pe);

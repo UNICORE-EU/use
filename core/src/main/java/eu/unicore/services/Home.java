@@ -94,7 +94,7 @@ public interface Home extends Runnable, KernelInjectable {
 	 * @param instance
 	 * @throws Exception 
 	 */
-	public void persist(Resource instance) throws Exception;
+	public void persist(Resource instance) throws PersistenceException;
 
 	/**
 	 * Lock the given instance, i.e. upgrade from "read" to "write permission"

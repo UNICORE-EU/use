@@ -38,9 +38,7 @@ public abstract class AsynchActionWithCallback<T extends Resource> implements Ru
 		}catch(RuntimeException ex){
 			re=ex;
 		}
-		T resource=null;
-		try{
-			resource=(T)home.getForUpdate(resourceID);
+		try(T resource = (T)home.getForUpdate(resourceID)){
 			if(re==null){
 				taskFinished(resource);
 			}
@@ -50,15 +48,6 @@ public abstract class AsynchActionWithCallback<T extends Resource> implements Ru
 		}
 		catch(Exception ex){
 			Log.logException("Error", ex, log);
-		}
-		finally{
-			if(resource!=null){
-				try{
-					home.persist(resource);
-				}catch(Exception ex){
-					Log.logException("Error persisting", ex, log);
-				}
-			}
 		}
 	}
 

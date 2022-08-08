@@ -37,6 +37,7 @@ import java.util.Calendar;
 
 import org.apache.logging.log4j.Logger;
 
+import de.fzj.unicore.persist.PersistenceException;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExtendedResourceStatus;
 import eu.unicore.services.Home;
@@ -209,6 +210,11 @@ public abstract class ResourceImpl extends SecuredResourceImpl implements Extend
 	@Override
 	public void setResourceStatus(ResourceStatus status) {
 		getModel().setResourceStatus(status);
+	}
+
+	@Override
+	public void close() throws PersistenceException {
+		home.persist(this);
 	}
 
 }

@@ -2,6 +2,7 @@ package eu.unicore.services;
 
 import java.util.Collection;
 
+import de.fzj.unicore.persist.PersistenceException;
 import eu.unicore.services.messaging.PullPoint;
 
 /**
@@ -11,11 +12,11 @@ import eu.unicore.services.messaging.PullPoint;
  * Resource instances. 
  * 
  * To persist a Resource, the hosting environment calls {@link #passivate()}, and
- * stores the resulting Model instance
+ * stores the resulting Model instance.
  *
  * @author schuller
  */
-public interface Resource {
+public interface Resource extends AutoCloseable {
 
 	/**
 	 * called when the resource is first created and 
@@ -128,4 +129,10 @@ public interface Resource {
 	 * @return Collection of child IDs that were found and destroyed
 	 */
 	public Collection<String> deleteChildren(Collection<String>children);
+
+	/**
+	 * auto-close for try-with-resources statements
+	 */
+	@Override
+	public void close() throws PersistenceException;
 }

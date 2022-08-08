@@ -34,24 +34,14 @@ public class LocalRegistryClient implements IRegistry {
 
 	public String addEntry(String endpoint, Map<String,String>content, Calendar requestedTT) 
 	throws Exception {
-		Home home = getHome();
-		RegistryImpl reg = null;
-		try{
-			reg = (RegistryImpl)home.getForUpdate(resID);
+		try (RegistryImpl reg = (RegistryImpl)getHome().getForUpdate(resID)){
 			return reg.addEntry(endpoint, content, requestedTT);
-		}finally{
-			if(reg!=null)home.persist(reg);
 		}
 	}
 	
 	public void refresh(String endpoint) throws Exception {
-		Home home = getHome();
-		RegistryImpl reg = null;
-		try{
-			reg = (RegistryImpl)home.getForUpdate(resID);
+		try (RegistryImpl reg = (RegistryImpl)getHome().getForUpdate(resID)){
 			reg.refresh(endpoint);
-		}finally{
-			if(reg!=null)home.persist(reg);
 		}
 	}
 	

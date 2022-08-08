@@ -121,7 +121,7 @@ public class TestExpireWSResources {
 			public Resource get(String resourceId) {
 				if(resourceId.equals(item.getUniqueID()))return item;
 				if(resourceId.equals(item2.getUniqueID()))return item2;
-				return null;
+				throw new ResourceUnknownException("Unknown: "+resourceId);
 			}
 
 			@Override
@@ -130,7 +130,7 @@ public class TestExpireWSResources {
 			ResourceUnavailableException {
 				if(id.equals(item.getUniqueID()))return item;
 				if(id.equals(item2.getUniqueID()))return item2;
-				return null;
+				throw new ResourceUnknownException("Unknown: "+id);
 			}
 
 		};
@@ -183,4 +183,5 @@ public class TestExpireWSResources {
 		Calendar tt2=home.getTerminationTime(item2.getUniqueID());
 		assertNull(tt2);
 	}
+
 }

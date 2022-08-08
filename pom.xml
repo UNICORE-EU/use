@@ -68,7 +68,7 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>0.301</persistence.version>
+    <persistence.version>0.302</persistence.version>
     <secutils.version>3.3.1</secutils.version>
     <seclib.version>5.4.1</seclib.version>
     <jaxb.version>2.3.3</jaxb.version>
@@ -124,6 +124,10 @@
           <groupId>org.apache.xmlbeans</groupId>
           <artifactId>xmlbeans</artifactId>
         </exclusion>
+	 <exclusion>
+          <groupId>xalan</groupId>
+          <artifactId>xalan</artifactId>
+        </exclusion>
 	<exclusion>
           <groupId>com.sun.xml.ws</groupId>
           <artifactId>jaxws-ri</artifactId>
@@ -142,6 +146,10 @@
 	<exclusion>
           <groupId>com.sun.xml.ws</groupId>
           <artifactId>jaxws-ri</artifactId>
+	</exclusion>
+	<exclusion>
+          <groupId>xalan</groupId>
+          <artifactId>xalan</artifactId>
 	</exclusion>
       </exclusions>
     </dependency>
