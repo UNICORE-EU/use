@@ -40,8 +40,7 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 	}
 
 	protected AuthnResponseAssertions performAuth(DefaultClientConfiguration clientCfg) throws Exception{
-		AuthnResponseAssertions auth = doAuth(kernel.getContainerSecurityConfiguration().getCredential().getSubjectName(), 
-				kernel.getContainerProperties().getBaseUrl(), clientCfg);
+		AuthnResponseAssertions auth = doAuth(kernel.getContainerProperties().getBaseUrl(), clientCfg);
 		if(validate)validate(auth);
 		return auth;
 	}
@@ -104,23 +103,18 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 	}
 
 	/**
-	 * @param targetIdentity - the identity to get an TD assertion for
 	 * @param targetUrl - the URL of the service to delegate to
 	 * @param clientCfg - security settings for making the call to Unity
 	 * 
 	 * @throws MalformedURLException
 	 * @throws SAMLValidationException
 	 */
-	protected AuthnResponseAssertions doAuth(String targetIdentity, String targetUrl, 
+	protected AuthnResponseAssertions doAuth(String targetUrl, 
 			DefaultClientConfiguration clientCfg) throws MalformedURLException, SAMLValidationException
 	{
 		SAMLAuthnClient client = new SAMLAuthnClient(address, clientCfg);
 
-		NameID requester;
-		if (targetIdentity != null)
-			requester = new NameID(targetIdentity, SAMLConstants.NFORMAT_DN);
-		else
-			requester = new NameID(targetUrl, SAMLConstants.NFORMAT_ENTITY);
+		NameID requester = new NameID(targetUrl, SAMLConstants.NFORMAT_ENTITY);
 		try{
 			return client.authenticate(SAMLConstants.NFORMAT_DN, requester, targetUrl);
 		}catch(RuntimeException e){
