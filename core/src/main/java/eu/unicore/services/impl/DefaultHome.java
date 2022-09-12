@@ -48,7 +48,6 @@ import java.util.function.Function;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.persist.PersistenceException;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
@@ -164,7 +163,7 @@ public abstract class DefaultHome implements Home {
 					try{
 						doPerInstanceActivation(id);
 					}
-					catch(PersistenceException e){
+					catch(Exception e){
 						recoverInstanceActivationError(e, id, logIt);
 						logIt = true;			
 						iter.remove();
@@ -184,7 +183,7 @@ public abstract class DefaultHome implements Home {
 		/**
 		 * Called when checking the stored data on server start runs into an error. 
 		 */
-		protected void recoverInstanceActivationError(PersistenceException e, String id, boolean logIt){
+		protected void recoverInstanceActivationError(Exception e, String id, boolean logIt){
 			Throwable cause=e;
 			while(cause.getCause()!=null){
 				cause=cause.getCause();
@@ -207,12 +206,12 @@ public abstract class DefaultHome implements Home {
 		 * 
 		 * @param id
 		 */
-		protected void doPerInstanceActivation(String id) throws PersistenceException {
+		protected void doPerInstanceActivation(String id) throws Exception {
 			Pair<String, List<ACLEntry>> secInfo = readSecurityInfo(id);
 			if(secInfo!=null)secInfoCache.put(id, secInfo);
 		}
 
-		private Pair<String, List<ACLEntry>> readSecurityInfo(String id) throws PersistenceException {
+		private Pair<String, List<ACLEntry>> readSecurityInfo(String id) throws Exception {
 			Resource r = serviceInstances.read(id);
 			if(r!=null){
 				if(r.getModel() instanceof SecuredResourceModel){
@@ -306,10 +305,15 @@ public abstract class DefaultHome implements Home {
 		public void setServiceName(String serviceName){this.serviceName=serviceName;}
 
 
-		public Resource get(String id)throws ResourceUnknownException,PersistenceException{
-			Resource wsrfInstance = serviceInstances.read(id);
-			if(wsrfInstance==null)throw new ResourceUnknownException("Instance with ID <"+id+"> does not exist");
-			return wsrfInstance;
+		public Resource get(String id)throws ResourceUnknownException, ResourceUnavailableException{
+			Resource res = null;
+			try{
+				res = serviceInstances.read(id);
+			}catch(Exception e) {
+				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",e);
+			}
+			if(res==null)throw new ResourceUnknownException("Instance with ID <"+buildFullServiceID(id)+"> does not exist");
+			return res;
 		}
 
 		public Resource refresh(String id) throws ResourceUnknownException, ResourceUnavailableException {
@@ -317,10 +321,10 @@ public abstract class DefaultHome implements Home {
 				if(resource==null)throw new ResourceUnknownException("Instance with ID <"+id+"> does not exist");
 				processMessages(resource);
 				return resource;
-			}catch(PersistenceException pe){
-				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",pe);
 			}catch(TimeoutException te){
 				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> is not available.");
+			}catch(Exception pe){
+				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",pe);
 			}
 		}
 
@@ -335,12 +339,10 @@ public abstract class DefaultHome implements Home {
 			try{
 				serviceInstances.lock(resource,locking_timeout,TimeUnit.SECONDS);
 				processMessages(resource);
-			}catch(InterruptedException ie){
-				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(resource.getUniqueID())+"> cannot be accessed",ie);
-			}catch(PersistenceException pe){
-				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(resource.getUniqueID())+"> cannot be accessed",pe);
 			}catch(TimeoutException te){
 				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(resource.getUniqueID())+"> is not available.");
+			}catch(Exception pe){
+				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(resource.getUniqueID())+"> cannot be accessed",pe);
 			}
 		}
 
@@ -350,10 +352,10 @@ public abstract class DefaultHome implements Home {
 				if(resource==null)throw new ResourceUnknownException("Instance with ID <"+id+"> does not exist");
 				processMessages(resource);
 				return resource;
-			}catch(PersistenceException pe){
-				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",pe);
 			}catch(TimeoutException te){
 				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> is not available.");
+			}catch(Exception pe){
+				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",pe);
 			}
 		}
 
@@ -406,7 +408,7 @@ public abstract class DefaultHome implements Home {
 		 */
 		protected void postInitialise(Resource instance){}
 
-		public void persist(Resource instance)throws PersistenceException{
+		public void persist(Resource instance)throws Exception{
 			serviceInstances.persist(instance);
 			if(instance.getModel() instanceof SecuredResourceModel){
 				SecuredResourceModel srm = (SecuredResourceModel)instance.getModel();
@@ -414,13 +416,13 @@ public abstract class DefaultHome implements Home {
 			}
 		}
 
-		public Calendar getTerminationTime(String uniqueID)throws PersistenceException{
+		public Calendar getTerminationTime(String uniqueID)throws Exception{
 			updateTT();
 			return terminationTimes.get(uniqueID);
 		}
 
 		//re-load tt time map from the persistence layer
-		protected void updateTT()throws PersistenceException{
+		protected void updateTT()throws Exception{
 			synchronized (ttLock) {
 				if(System.currentTimeMillis()-lastAccessed<tt_update_interval)return;
 				if(serviceInstances!=null){
@@ -510,7 +512,7 @@ public abstract class DefaultHome implements Home {
 			secInfoCache.remove(resourceId);
 		}
 
-		public long getNumberOfInstances()throws PersistenceException{
+		public long getNumberOfInstances()throws Exception{
 			return serviceInstances.size();
 		}
 
@@ -623,7 +625,7 @@ public abstract class DefaultHome implements Home {
 		}
 
 		@Override
-		public List<String>getAccessibleResources(Client client) throws PersistenceException {
+		public List<String>getAccessibleResources(Client client) throws Exception {
 			return getAccessibleResources(getStore().getUniqueIDs(), client);
 		}
 
@@ -646,7 +648,7 @@ public abstract class DefaultHome implements Home {
 			return accessible;
 		}
 
-		public List<String>getTaggedResources(String...tags) throws PersistenceException {
+		public List<String>getTaggedResources(String...tags) throws Exception {
 			return getStore().getTaggedResources(tags);
 		}
 	}

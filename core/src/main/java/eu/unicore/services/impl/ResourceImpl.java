@@ -37,14 +37,13 @@ import java.util.Calendar;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.persist.PersistenceException;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExtendedResourceStatus;
 import eu.unicore.services.Home;
 import eu.unicore.services.InitParameters;
+import eu.unicore.services.InitParameters.TerminationMode;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Model;
-import eu.unicore.services.InitParameters.TerminationMode;
 import eu.unicore.services.exceptions.TerminationTimeChangeRejectedException;
 import eu.unicore.services.exceptions.UnableToSetTerminationTimeException;
 import eu.unicore.services.messaging.PullPoint;
@@ -213,8 +212,12 @@ public abstract class ResourceImpl extends SecuredResourceImpl implements Extend
 	}
 
 	@Override
-	public void close() throws PersistenceException {
-		home.persist(this);
+	public void close() {
+		try{
+			home.persist(this);
+		}catch(Exception e) {
+			Log.logException("Could not persist <"+home.getServiceName()+" "+getUniqueID()+">" , e);
+		}
 	}
 
 }

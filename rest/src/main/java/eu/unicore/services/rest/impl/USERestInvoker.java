@@ -17,7 +17,6 @@ import org.apache.logging.log4j.ThreadContext;
 
 import com.codahale.metrics.Meter;
 
-import de.fzj.unicore.persist.PersistenceException;
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
 import eu.unicore.security.SEIOperationType;
@@ -154,8 +153,9 @@ public class USERestInvoker extends JAXRSInvoker {
 						exchange.put(HOME, home);
 					}
 				}
-			}catch(PersistenceException pe){
-				throw new RuntimeException(pe);
+			}catch(ResourceUnavailableException pe){
+				Response resp = RESTRendererBase.handleError(503, "Cannot access requested resource", pe, logger);
+				throw new WebApplicationException(resp);
 			}
 			catch(ResourceUnknownException rue){
 				Response resp = Response.status(Status.NOT_FOUND).build();

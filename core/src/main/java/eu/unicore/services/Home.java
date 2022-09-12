@@ -58,9 +58,9 @@ public interface Home extends Runnable, KernelInjectable {
 	 *  
 	 * @param id the ID of the resource
 	 * @throws ResourceUnknownException if no such resource exists
-	 * @throws PersistenceException  if database/persistence problems occur
+	 * @throws ResourceUnavailableException  if other errors occur
 	 */
-	public Resource get(String id)throws ResourceUnknownException, PersistenceException;
+	public Resource get(String id)throws ResourceUnknownException, ResourceUnavailableException;
 
 
 	/**
@@ -70,7 +70,7 @@ public interface Home extends Runnable, KernelInjectable {
 	 * @throws ResourceUnknownException if no such resource exists
 	 * @throws PersistenceException  if database/persistence problems occur
 	 */
-	public Resource refresh(String id)throws ResourceUnknownException, PersistenceException;
+	public Resource refresh(String id)throws ResourceUnknownException, ResourceUnavailableException;
 
 	/**
 	 * Get a wsrf instance for update (i.e. aquire a lock)
@@ -94,7 +94,7 @@ public interface Home extends Runnable, KernelInjectable {
 	 * @param instance
 	 * @throws Exception 
 	 */
-	public void persist(Resource instance) throws PersistenceException;
+	public void persist(Resource instance) throws Exception;
 
 	/**
 	 * Lock the given instance, i.e. upgrade from "read" to "write permission"
@@ -121,9 +121,9 @@ public interface Home extends Runnable, KernelInjectable {
 	 * @param resourceId
 	 * @return Calendar (null if instance does not expire)
 	 * @throws ResourceUnknownException
-	 * @throws PersistenceException 
+	 * @throws Exception 
 	 */
-	public Calendar getTerminationTime(String resourceId) throws ResourceUnknownException, PersistenceException;
+	public Calendar getTerminationTime(String resourceId) throws ResourceUnknownException, Exception;
 
 	/**
 	 * Set the termination time of an WS-Resource
@@ -131,7 +131,6 @@ public interface Home extends Runnable, KernelInjectable {
 	 * @param resourceId
 	 * @param newTT - new termination time
 	 * 
-	 * @throws ResourceUnknownException
 	 */
 	public void setTerminationTime(String resourceId, Calendar newTT)
 			throws ResourceUnknownException,TerminationTimeChangeRejectedException,UnableToSetTerminationTimeException;
@@ -149,7 +148,7 @@ public interface Home extends Runnable, KernelInjectable {
 	 * @return long
 	 * @throws PersistenceException 
 	 */
-	public long getNumberOfInstances() throws PersistenceException;
+	public long getNumberOfInstances() throws Exception;
 
 	/**
 	 * Stop the expiry checker for this service
@@ -177,7 +176,7 @@ public interface Home extends Runnable, KernelInjectable {
 	 * @param client - client
 	 * @since 3.1.0
 	 */
-	public List<String> getAccessibleResources(Client client) throws PersistenceException;
+	public List<String> getAccessibleResources(Client client) throws Exception;
 
 	/**
 	 * Return the resources that are accessible for the given client.
@@ -187,14 +186,7 @@ public interface Home extends Runnable, KernelInjectable {
 	 * @param client - client
 	 * @since 3.1.0
 	 */
-	public List<String> getAccessibleResources(Collection<String> ids, Client client) throws PersistenceException;
-
-	/**
-	 * does this service support notification (i.e. WS-Notification)? If 
-	 * this returns true, WSRFlite will periodically wake up each service instance
-	 * if necessary to check for new events
-	 */
-	public boolean supportsNotification();
+	public List<String> getAccessibleResources(Collection<String> ids, Client client) throws Exception;
 
 	public Kernel getKernel();
 

@@ -2,7 +2,6 @@ package eu.unicore.services.registry;
 
 import java.util.Collection;
 
-import de.fzj.unicore.persist.PersistenceException;
 import eu.unicore.services.Resource;
 import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.util.Log;
@@ -39,7 +38,7 @@ public class LocalRegistryEntryHomeImpl extends DefaultHome {
 					Log.logException("Error refreshing registry entry.", ex, logger);
 				}
 			}
-		}catch(PersistenceException pe){
+		}catch(Exception pe){
 			throw new RuntimeException(pe);
 		}
 	}

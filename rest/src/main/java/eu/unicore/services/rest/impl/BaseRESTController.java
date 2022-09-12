@@ -340,7 +340,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	 * @param tagSpec optional tags (space or comma separated)
 	 * @throws PersistenceException
 	 */
-	protected List<String>getAccessibleResources(String tagSpec) throws PersistenceException { 
+	protected List<String>getAccessibleResources(String tagSpec) throws Exception { 
 		Client c=AuthZAttributeStore.getClient(); 
 		
 		if(tagSpec!=null){

@@ -38,11 +38,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.persist.PersistenceException;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Resource;
 import eu.unicore.util.Log;
@@ -74,7 +72,7 @@ public abstract class AbstractStore implements Store {
 		instances=new ConcurrentHashMap<String,Resource>();
 	}
 
-	public void persist(Resource inst)throws PersistenceException{
+	public void persist(Resource inst)throws Exception{
 		settings=kernel.getPersistenceManager().getPersistenceSettings(inst.getClass());
 		if(settings.isLoadOnce())instances.put(inst.getUniqueID(),inst);
 		ResourceBean bean=
@@ -87,7 +85,7 @@ public abstract class AbstractStore implements Store {
 		_persist(bean);
 	}
 
-	public void lock(Resource inst, long timeout, TimeUnit units) throws InterruptedException,PersistenceException, TimeoutException{
+	public void lock(Resource inst, long timeout, TimeUnit units) throws Exception{
 		ResourceBean bean=
 				new ResourceBean(
 						inst.getUniqueID(),
@@ -114,14 +112,13 @@ public abstract class AbstractStore implements Store {
 		}
 	}
 
-	protected abstract void _lock(ResourceBean dao,long timeout, TimeUnit timeUnit)
-			throws InterruptedException,PersistenceException,TimeoutException;
+	protected abstract void _lock(ResourceBean dao,long timeout, TimeUnit timeUnit) throws Exception;
 	
-	protected abstract void _unlock(ResourceBean bean)throws PersistenceException;
+	protected abstract void _unlock(ResourceBean bean)throws Exception;
 
-	protected abstract void _persist(ResourceBean bean)throws PersistenceException;
+	protected abstract void _persist(ResourceBean bean)throws Exception;
 
-	public Resource read(String uniqueID)throws PersistenceException{
+	public Resource read(String uniqueID)throws Exception{
 		Resource inst=null;
 		if(settings.isLoadOnce()){
 			inst=instances.get(uniqueID);
@@ -130,16 +127,9 @@ public abstract class AbstractStore implements Store {
 				return inst;
 			}
 		}
-		ResourceBean bean=null;
-		try {
-			bean = _read(uniqueID);
-			if(bean!=null){							
-				inst = createResource(bean);
-			}
-		}
-		catch (PersistenceException pe){ throw pe; }
-		catch (Exception e) {
-			throw new PersistenceException( "Error reading instance <"+uniqueID+"> of service '"+serviceName+"'.",e);
+		ResourceBean bean = _read(uniqueID);
+		if(bean!=null){							
+			inst = createResource(bean);
 		}
 		return inst;
 	}
@@ -182,42 +172,33 @@ public abstract class AbstractStore implements Store {
 		return inst;
 	}
 	
-	protected abstract ResourceBean _read(String uniqueID) throws PersistenceException;
+	protected abstract ResourceBean _read(String uniqueID) throws Exception;
 
 
-	public Resource getForUpdate(String uniqueID, long time, TimeUnit timeUnit) throws PersistenceException,TimeoutException{
+	public Resource getForUpdate(String uniqueID, long time, TimeUnit timeUnit) throws Exception{
 		Resource inst=null;
 		if(settings.isLoadOnce()){
 			inst=instances.get(uniqueID);
-			if(inst!=null){
-				return inst;
-			}
 		}
-		ResourceBean bean=null;
-		try {
-			bean = _getForUpdate(uniqueID, time, timeUnit);
+		else {
+			ResourceBean bean = _getForUpdate(uniqueID, time, timeUnit);
 			if(bean!=null){							
 				inst=createResource(bean);
 			}
-		}
-		catch (TimeoutException te){ throw te; }
-		catch (PersistenceException pe){ throw pe; }
-		catch (Exception e) {
-			throw new PersistenceException( "Error reading instance <"+uniqueID+"> of service '"+serviceName+"'.",e);
 		}
 		return inst;
 	}
 
 	protected abstract ResourceBean _getForUpdate(String uniqueID, long time, TimeUnit timeUnit) throws Exception;
 
-	public void remove(String uniqueID)throws PersistenceException{
+	public void remove(String uniqueID)throws Exception{
 		_remove(uniqueID);
 		if(settings.isLoadOnce())instances.remove(uniqueID);
 	}
 
-	protected abstract void _remove(String uniqueID)throws PersistenceException;
+	protected abstract void _remove(String uniqueID) throws Exception;
 
-	public int size()throws PersistenceException{
+	public int size() throws Exception{
 		return getUniqueIDs().size();
 	}
 

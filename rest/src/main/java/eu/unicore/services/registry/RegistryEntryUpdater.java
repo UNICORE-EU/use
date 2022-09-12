@@ -35,10 +35,8 @@ import java.util.Calendar;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.persist.PersistenceException;
 import eu.unicore.services.Home;
 import eu.unicore.services.Kernel;
-import eu.unicore.services.exceptions.ResourceUnknownException;
 import eu.unicore.services.impl.InstanceChecker;
 import eu.unicore.util.Log;
 
@@ -52,7 +50,7 @@ public class RegistryEntryUpdater implements InstanceChecker {
 
 	private static final Logger logger = Log.getLogger(Log.SERVICES+".registry", RegistryEntryUpdater.class);
 	
-	public boolean check(Home home, String id)throws ResourceUnknownException,PersistenceException{
+	public boolean check(Home home, String id)throws Exception{
 		Calendar c=home.getTerminationTime(id);
 		logger.debug("Checking <{} {}> TT = {}", home.getServiceName(), id, (c!=null?c.getTime():"none"));
 		//if for some reason the TT is null, force a refresh (in contrast to the usual expiry check)

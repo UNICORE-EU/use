@@ -270,7 +270,7 @@ public abstract class RESTRendererBase implements KernelInjectable {
 		String msg = null;
 		if(cause!=null) {
 			msg  = Log.createFaultMessage(message, cause);
-			if(status>499)Log.logException(message, cause, logger);
+			if(status>499 && logger!=null)Log.logException(message, cause, logger);
 		}
 		else msg = message;
 		

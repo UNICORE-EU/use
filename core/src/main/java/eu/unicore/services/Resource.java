@@ -2,7 +2,6 @@ package eu.unicore.services;
 
 import java.util.Collection;
 
-import de.fzj.unicore.persist.PersistenceException;
 import eu.unicore.services.messaging.PullPoint;
 
 /**
@@ -134,5 +133,5 @@ public interface Resource extends AutoCloseable {
 	 * auto-close for try-with-resources statements
 	 */
 	@Override
-	public void close() throws PersistenceException;
+	public void close();
 }

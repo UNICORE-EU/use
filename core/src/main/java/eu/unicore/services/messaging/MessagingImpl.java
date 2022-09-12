@@ -69,7 +69,7 @@ public class MessagingImpl implements IMessaging{
 		}catch(PersistenceException pe){
 			throw new MessagingException(pe);
 		}
-		providers=new HashMap<String,IMessagingProvider>();
+		providers = new HashMap<>();
 	}
 
 	protected Persist<MessageBean>createStore()throws PersistenceException{
@@ -77,7 +77,7 @@ public class MessagingImpl implements IMessaging{
 		return res;
 	} 
 	
-	public int getStoredMessages()throws PersistenceException{
+	public int getStoredMessages()throws Exception{
 		return store.getRowCount();
 	}
 
@@ -94,7 +94,7 @@ public class MessagingImpl implements IMessaging{
 	public boolean hasMessages(String destination){
 		try{
 			return store.getRowCount("destination", destination)>0;
-		}catch(PersistenceException ex){
+		}catch(Exception ex){
 			return false;
 		}
 	}
@@ -138,7 +138,7 @@ public class MessagingImpl implements IMessaging{
 						Message next=next();
 						try{
 							store.write(new MessageBean(next.getMessageId(),destination, next));
-						}catch(PersistenceException pe){
+						}catch(Exception pe){
 							logger.warn("Could not write message.");
 						}
 					}
@@ -171,8 +171,12 @@ public class MessagingImpl implements IMessaging{
 	 * remove all content
 	 * @throws PersistenceException
 	 */
-	public void cleanup()throws PersistenceException{
-		store.removeAll();
+	public void cleanup() {
+		try {
+			store.removeAll();
+		}catch(Exception e) {
+			Log.logException("", e);
+		}
 	}
 
 

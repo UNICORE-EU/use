@@ -37,7 +37,6 @@ import java.util.Calendar;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.persist.PersistenceException;
 import eu.unicore.services.Home;
 import eu.unicore.services.Resource;
 import eu.unicore.services.exceptions.ResourceUnavailableException;
@@ -54,7 +53,7 @@ public class ExpiryChecker implements InstanceChecker {
 
 	private static final Logger logger=Log.getLogger(Log.UNICORE,ExpiryChecker.class);
 
-	public boolean check(Home home, String id)throws ResourceUnknownException, PersistenceException {
+	public boolean check(Home home, String id)throws Exception {
 		Calendar c=home.getTerminationTime(id);
 		if(c==null)return false;
 		logger.debug("Checking {}/{} TT={}", home.getServiceName(), id, c.getTime());

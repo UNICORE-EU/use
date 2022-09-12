@@ -12,7 +12,7 @@
   <parent>
     <groupId>eu.unicore</groupId>
     <artifactId>unicore-parent</artifactId>
-    <version>2.1</version>  
+    <version>2.2</version>
   </parent>
 
   <developers>
@@ -68,7 +68,7 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>0.302</persistence.version>
+    <persistence.version>0.400</persistence.version>
     <secutils.version>3.3.1</secutils.version>
     <seclib.version>5.4.1</seclib.version>
     <jaxb.version>2.3.3</jaxb.version>
@@ -78,10 +78,10 @@
     <cxf.version>3.5.3</cxf.version>
     <jetty.version>10.0.11</jetty.version>
     <httpclient.version>4.5.13</httpclient.version>
-    <metrics.version>4.2.10</metrics.version>
-    <jwt.version>9.23</jwt.version>
-    <tink.version>1.6.1</tink.version>
-    <sshj.version>0.33.0</sshj.version>
+    <metrics.version>4.2.12</metrics.version>
+    <jwt.version>9.24.4</jwt.version>
+    <tink.version>1.7.0</tink.version>
+    <sshj.version>0.34.0</sshj.version>
   </properties>
 
   <modules>
@@ -340,50 +340,10 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <configuration>
-            <forkCount>1</forkCount>
-	    <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
-            <useSystemClassloader>true</useSystemClassloader>
-            <failIfNoTests>false</failIfNoTests>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-eclipse-plugin</artifactId>
           <configuration>
             <useProjectReferences>false</useProjectReferences>
           </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>cobertura-maven-plugin</artifactId>
-          <version>2.5.2</version>
-          <configuration>
-            <instrumentation>
-              <excludes>
-                <!-- exclude generated xmlbeans code-->
-                <exclude>xmlbeans/**/*.class</exclude>
-                <exclude>org/unigrids/services/atomic/**/*.class</exclude>
-                <exclude>de/fzj/unicore/wsrflite/xmlbeans/impl/*TypeImp*.class</exclude>
-                <exclude>de/fzj/unicore/wsrflite/xmlbeans/impl/*DocumentImp*.class</exclude>
-                <exclude>org/ogf/**/*.class</exclude>
-                <exclude>org/ggf/**/*.class</exclude>
-                <exclude>org/w3/**/*.class</exclude>
-                <exclude>org/xmlsoap/**/*.class</exclude>
-                <exclude>org/oasisOpen/**/*.class</exclude>
-	        <exclude>schemaorg_apache_xmlbeans/**/*.class</exclude>
-              </excludes>
-            </instrumentation>
-            <aggregate>true</aggregate>
-          </configuration>
-          <executions>
-            <execution>
-              <goals>
-                <goal>clean</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>

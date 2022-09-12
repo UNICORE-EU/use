@@ -5,12 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.logging.log4j.Logger;
 
 import de.fzj.unicore.persist.Persist;
-import de.fzj.unicore.persist.PersistenceException;
 import de.fzj.unicore.persist.PersistenceFactory;
 import de.fzj.unicore.persist.PersistenceProperties;
 import de.fzj.unicore.persist.impl.PersistImpl;
@@ -59,12 +57,12 @@ public class Persistence extends AbstractStore{
 	}
 
 	@Override
-	public List<String> getUniqueIDs() throws PersistenceException {
+	public List<String> getUniqueIDs() throws Exception {
 		return p.getIDs();
 	}
 
 	@Override
-	public List<String> getTaggedResources(String... tags) throws PersistenceException {
+	public List<String> getTaggedResources(String... tags) throws Exception {
 		return p.findIDs("tags", makeTagsUnique(tags));
 	}
 	
@@ -78,23 +76,23 @@ public class Persistence extends AbstractStore{
 	}
 	
 	@Override
-	protected void _persist(ResourceBean data)throws PersistenceException {
+	protected void _persist(ResourceBean data)throws Exception {
 		p.write(data);
 	}
 
 	@Override
-	protected ResourceBean _read(String uniqueID) throws PersistenceException{
+	protected ResourceBean _read(String uniqueID) throws Exception{
 		return p.read(uniqueID);
 	}
 
 	@Override
 	protected ResourceBean _getForUpdate(String uniqueID,long time, TimeUnit timeUnit) 
-			throws PersistenceException, InterruptedException, TimeoutException{
+			throws Exception {
 		return p.getForUpdate(uniqueID,time,timeUnit);
 	}
 
 	@Override
-	protected void _remove(String uniqueID)throws PersistenceException {
+	protected void _remove(String uniqueID) {
 		try{
 			p.remove(uniqueID);
 		}catch(Exception e){
@@ -111,15 +109,15 @@ public class Persistence extends AbstractStore{
 		p.purge();
 	}
 
-	protected void _lock(ResourceBean dao,long timeout, TimeUnit timeUnit)throws InterruptedException,PersistenceException,TimeoutException{
+	protected void _lock(ResourceBean dao,long timeout, TimeUnit timeUnit)throws Exception {
 		p.lock(dao.getUniqueID(), timeout, timeUnit);
 	}
 
-	protected void _unlock(ResourceBean dao)throws PersistenceException{
+	protected void _unlock(ResourceBean dao)throws Exception{
 		p.unlock(dao);
 	}
 
-	public void removeAll()throws PersistenceException{
+	public void removeAll()throws Exception{
 		p.removeAll();
 	}
 
@@ -130,19 +128,19 @@ public class Persistence extends AbstractStore{
 		try{
 			isShutdown=true;
 			p.shutdown();
-		}catch(PersistenceException pe){
+		}catch(Exception pe){
 			logger.error("Error shutting down persistence for <"+getServiceName()+">",pe);
 		}
 	}
 
 	public Map<String, Calendar> getTerminationTimes(){
-		Map<String,Calendar>tt=new ConcurrentHashMap<String, Calendar>();
+		Map<String,Calendar>tt=new ConcurrentHashMap<>();
 		try{
 			Map<String,String>tts=terminationTime.getColumnValues("millis");
 			for(Map.Entry<String,String> e: tts.entrySet()){
 			    tt.put(e.getKey(), InstanceInfoBean.getCalendar(e.getValue()));
 			}
-		}catch(PersistenceException pe){
+		}catch(Exception pe){
 			Log.logException("Error getting termination times from data base.", pe,logger);
 		}	
 		return tt;
@@ -161,8 +159,7 @@ public class Persistence extends AbstractStore{
 		}
 	}
 
-	private synchronized void initTerminationTimeStore()
-			throws PersistenceException,InstantiationException,ClassNotFoundException,IllegalAccessException{
+	private synchronized void initTerminationTimeStore() throws Exception {
 		if(terminationTime!=null)return;
 		PersistenceDescriptor pd=PersistenceDescriptor.get(InstanceInfoBean.class);
 		pd.setTableName("TerminationTimes");
