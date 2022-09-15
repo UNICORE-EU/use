@@ -51,6 +51,10 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>eu.unicore.security</groupId>
+      <artifactId>secutils-cxf</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.xmlbeans</groupId>
       <artifactId>xmlbeans-jdk8</artifactId>
       <version>2.6.0</version>
