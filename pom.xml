@@ -70,9 +70,10 @@
     <compiler.fork>false</compiler.fork>
     <persistence.version>0.400</persistence.version>
     <secutils.version>3.3.1</secutils.version>
-    <seclib.version>5.4.1</seclib.version>
+    <seclib.version>5.4.3</seclib.version>
     <jaxb.version>2.3.3</jaxb.version>
     <json.version>20220320</json.version>
+    <gson.version>2.9.1</gson.version>
     <xuudb.version>2.7.0</xuudb.version>
     <saaj.version>1.5.1</saaj.version>
     <cxf.version>3.5.3</cxf.version>
@@ -104,6 +105,11 @@
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
       <version>${json.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>${gson.version}</version>
     </dependency>
     <dependency>
       <groupId>de.fzj.unicore</groupId>
