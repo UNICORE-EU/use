@@ -86,10 +86,16 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		HttpServletRequest request = CXFUtils.getServletRequest(message);
 		Pair<String,String> authInfo = null;
 		boolean jwtMode = true;
+		boolean haveCredentials = false;
 		if(request.getHeader(SSHKeyUC.HEADER_PLAINTEXT_TOKEN)==null){
-			authInfo = authenticateJWT(message, tokens);
+			String bearerToken = CXFUtils.getBearerToken(message);
+			if(bearerToken!=null) {
+				haveCredentials = true;
+				authInfo = authenticateJWT(bearerToken, tokens);
+			}
 		}
 		else {
+			haveCredentials = true;
 			authInfo = authenticateLegacy(message, tokens);
 			jwtMode = false;
 		}
@@ -101,7 +107,7 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 			tokens.setConsignorTrusted(true);
 			storeAttributes(requestedUserName, tokens);
 		}
-		return true;
+		return haveCredentials;
 	}
 
 	private Pair<String,String> authenticateLegacy(Message message, SecurityTokens tokens) {
@@ -148,30 +154,27 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		return null;
 	}
 	
-	private Pair<String,String> authenticateJWT(Message message, SecurityTokens tokens) {
-		String bearerToken = CXFUtils.getBearerToken(message);
-		if(bearerToken != null) {
+	private Pair<String,String> authenticateJWT(String bearerToken, SecurityTokens tokens) {
+		try{
+			JSONObject json = null;
 			try{
-				JSONObject json = null;
-				try{
-					json = JWTUtils.getPayload(bearerToken);
-				}catch(Exception e) {
-					logger.debug("Not a JSON/JWT token");
-					return null;
-				}
-				String exp = json.optString("exp", null);
-				if(exp==null)throw new AuthenticationException("JWT Token does not specify a lifetime ('exp' attribute).");
-				String subject = json.getString("sub");
-				String issuer = json.getString("iss");
-				if(!subject.equals(issuer)){
-					// delegation - not handled here, but in AuthHandler
-					throw new IllegalStateException("Subject and issuer do not match.");
-				}
-				String dn = jwtTokenAuth(subject, bearerToken);
-				if(dn!=null)return new Pair<>(subject, dn);
-			}catch(Exception jtd){
-				new AuthenticationException("Malformed Bearer token.", jtd);
+				json = JWTUtils.getPayload(bearerToken);
+			}catch(Exception e) {
+				logger.debug("Not a JSON/JWT token");
+				return null;
 			}
+			String exp = json.optString("exp", null);
+			if(exp==null)throw new AuthenticationException("JWT Token does not specify a lifetime ('exp' attribute).");
+			String subject = json.getString("sub");
+			String issuer = json.getString("iss");
+			if(!subject.equals(issuer)){
+				// delegation - not handled here, but in AuthHandler.
+				throw new IllegalStateException("Subject and issuer do not match.");
+			}
+			String dn = jwtTokenAuth(subject, bearerToken);
+			if(dn!=null)return new Pair<>(subject, dn);
+		}catch(Exception jtd){
+			new AuthenticationException("Malformed Bearer token.", jtd);
 		}
 		return null;
 	}

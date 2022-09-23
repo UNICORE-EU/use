@@ -71,7 +71,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 	
 	public AuthNHandler(Kernel kernel, SecuritySessionStore sessionStore){
 		this.kernel = kernel;
-		useSessions = kernel.getContainerSecurityConfiguration().isSessionsEnabled();
+		this.useSessions = kernel.getContainerSecurityConfiguration().isSessionsEnabled();
 		this.sessionStore = sessionStore;
 
 		JWTServerProperties p = new JWTServerProperties(kernel.getContainerProperties().getRawProperties());
@@ -81,7 +81,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 			cache.update(secConfig.getCredential().getSubjectName(), 
 					secConfig.getCredential().getCertificate().getPublicKey());
 		}catch(Exception ex){}
-		jwt = new JWTHelper(p, kernel.getContainerSecurityConfiguration(), cache);
+		this.jwt = new JWTHelper(p, kernel.getContainerSecurityConfiguration(), cache);
 	}
 
 
@@ -130,7 +130,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 		if(response == null){
 			handleUserPreferences(message, token);
 			Client c = createClient(token);
-			logger.debug("Authenticated client: {}", c);
+			logger.debug("Client: {}", c);
 			AuthZAttributeStore.setClient(c);
 			// make sure session info goes to the client
 			PostInvokeHandler.setSession(session);
@@ -143,7 +143,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 	 * 
 	 * @param message
 	 * @param token
-	 * @return null if client is authenticated, a 401 response otherwise 
+	 * @return null if client is authenticated, a 'forbidden' response otherwise 
 	 */
 	private Response process(Message message, SecurityTokens token) {
 		token.setClientIP(establishClientIP(message));
@@ -218,7 +218,6 @@ public class AuthNHandler implements ContainerRequestFilter {
 	}
 
 	public Client createClient(SecurityTokens tokens) {
-		logger.debug("Authenticated user: {}", tokens.getEffectiveUserName());
 		Client client = kernel.getSecurityManager().createClientWithAttributes(tokens);
 		if(client!=null && client.getSecurityTokens()!=null){
 			kernel.getSecurityManager().collectDynamicAttributes(client);
