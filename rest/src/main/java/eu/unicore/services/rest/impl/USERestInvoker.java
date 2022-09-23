@@ -114,8 +114,16 @@ public class USERestInvoker extends JAXRSInvoker {
 		// TODO is there a safer way in CXF to decide this?
 		boolean isSubresource = action == null;
 		
-		
-		OperationType opType = "GET".equals(action) ? OperationType.read : OperationType.modify;
+		OperationType opType = null;
+		if("GET".equals(action)) {
+			opType = OperationType.read;
+		}
+		else if ("POST".equals(action)) {
+			opType = OperationType.write;
+		}
+		else {
+			opType = OperationType.modify;
+		}
 		SEIOperationType opAnnotation = method.getAnnotation(SEIOperationType.class);
 		if(opAnnotation!=null){
 			opType = opAnnotation.value();
