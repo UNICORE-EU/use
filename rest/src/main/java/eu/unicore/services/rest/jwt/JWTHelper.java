@@ -12,7 +12,6 @@ import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.Client;
-import eu.unicore.security.SecurityTokens;
 import eu.unicore.services.rest.security.jwt.JWTUtils;
 import eu.unicore.services.security.IContainerSecurityConfiguration;
 import eu.unicore.services.security.util.PubkeyCache;
@@ -39,18 +38,6 @@ public class JWTHelper {
 		loadLocalTrustedIssuers();
 	}
 	
-	public JWTHelper(JWTServerProperties preferences, String issuer, PubkeyCache keyCache){
-		this.preferences = preferences;
-		this.securityProperties = null;
-		this.issuer = issuer;
-		this.keyCache = keyCache;
-		loadLocalTrustedIssuers();
-	}
-	
-	public String createJWTToken(SecurityTokens tokens) throws Exception {
-		return createETDToken(tokens.getEffectiveUserName());
-	}
-
 	public String createETDToken(String user) throws Exception {
 		return createETDToken(user,preferences.getTokenValidity());
 	}
@@ -80,6 +67,7 @@ public class JWTHelper {
 	}
 	
 	private void loadLocalTrustedIssuers() {
+		if(keyCache==null)return;
 		List<String> localTrusted = preferences.getListOfValues(JWTServerProperties.TRUSTED_ISSUER_CERT_LOCATIONS);
 		for(String location: localTrusted) {
 			try(InputStream is = new FileInputStream(location)){
