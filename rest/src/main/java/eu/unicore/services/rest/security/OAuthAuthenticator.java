@@ -43,9 +43,6 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 	protected boolean validate = false;
 	protected String clientID;
 	protected String clientSecret;
-	protected String validationAddress;
-
-	protected boolean useUserInfo = true;
 
 	public void setDnTemplate(String dnTemplate) {
 		this.dnTemplate = dnTemplate;
@@ -59,16 +56,8 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 		this.clientSecret = clientSecret;
 	}
 
-	public void setValidationAddress(String validationAddress) {
-		this.validationAddress = validationAddress;
-	}
-
 	public void setValidate(boolean validate) {
 		this.validate = validate;
-	}
-	
-	public void setUseUserInfo(boolean useUserInfo) {
-		this.useUserInfo = useUserInfo;
 	}
 
 	@Override
@@ -98,7 +87,7 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 		if(validate) {
 			userData = validate(token, clientCfg);
 		}
-		if(useUserInfo) {
+		else {
 			IAuthCallback cb = new IAuthCallback() {
 				@Override
 				public void addAuthenticationHeaders(HttpMessage httpMessage) throws Exception {
@@ -107,41 +96,39 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 			};
 			userData = new BaseClient(address, clientCfg, cb).getJSON();
 		}
+		logger.debug("User data: {}", userData);
 		return userData;
 	}
 
 	protected JSONObject validate(String token, DefaultClientConfiguration clientCfg) throws Exception {
-		HttpPost post = new HttpPost(validationAddress);
+		HttpPost post = new HttpPost(address);
 		List<NameValuePair> postParameters = new ArrayList<>();
 	    postParameters.add(new BasicNameValuePair("client_id", clientID));
 	    postParameters.add(new BasicNameValuePair("client_secret", clientSecret));
 	    postParameters.add(new BasicNameValuePair("token", token));
 	    post.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
-		HttpClient client = HttpUtils.createClient(validationAddress, clientCfg);
+		HttpClient client = HttpUtils.createClient(address, clientCfg);
 		HttpResponse response = client.execute(post);
 		String reply = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 		JSONObject j = new JSONObject(reply);
-		logger.debug("Validation result: {}", j);
 		if(!j.optBoolean("active", false))throw new Exception("Token validation failed");
 		return j;
 	}
 
 	protected void extractAuthInfo(JSONObject auth, SecurityTokens tokens){
-		logger.debug("Got User info {}", auth);
 		boolean active = auth.optBoolean("active", true);
-		if(!active) {
-			return;
-		}
-		String expanded = RESTUtils.expandTemplate(dnTemplate, auth);
-		if(!dnTemplate.equals(expanded)){
-			tokens.setUserName(expanded);
-			tokens.setConsignorTrusted(true);
+		if(active) {
+			String expanded = RESTUtils.expandTemplate(dnTemplate, auth);
+			if(!dnTemplate.equals(expanded)){
+				tokens.setUserName(expanded);
+				tokens.setConsignorTrusted(true);
+			}
 		}
 	}
-	
+
 	public String toString(){
-		String adr = useUserInfo? address : validationAddress;
-		return "OAuth Bearer Token ["+adr+"]";
+		String mode = validate ? "validate" : "userinfo";
+		return "OAuth Bearer Token ["+address+ " mode="+mode+"]";
 	}
 
 	@Override

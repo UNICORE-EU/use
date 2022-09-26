@@ -84,6 +84,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	/**
 	 * do we check if the consignor assertion is signed?
 	 */
+	@Deprecated
 	public final static String PROP_CHECK_CONSIGNOR_SIGNATURE = "gateway.checkSignature";
 
 	/**
@@ -118,6 +119,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	/**
 	 * do we require signatures on certain messages 
 	 */
+	@Deprecated
 	public static final String PROP_REQUIRE_SIGNATURES = "signatures";
 
 	/**
@@ -176,7 +178,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	
 	
 	@DocumentationReferenceMeta
-	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
+	public final static Map<String, PropertyMD> META = new HashMap<>();
 	static
 	{
 		META.put(PROP_SSL_ENABLED, new PropertyMD("true").
@@ -195,7 +197,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 						"either the site must be secured (usually via firewall) to disable " +
 						"non-gateway access or the verification of gateway's assertions must be enabled."));
 		META.put(PROP_CHECK_CONSIGNOR_SIGNATURE, new PropertyMD("true").
-				setDescription("Controls whether gateway's authentication assertions are verified."));
+				setDeprecated().setDescription("(deprecated)"));
 		META.put(PROP_GATEWAY_CERT, new PropertyMD().setPath().
 				setDescription("Path to gateway's certificate file in PEM or DER format. " +
 					"Note that DER format is used only for files with '.der' extension. It is used " +
@@ -214,9 +216,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		META.put(PROP_GATEWAY_WAIT, new PropertyMD("true").
 				setDescription("Controls whether to wait for the gateway at startup."));
 		META.put(PROP_REQUIRE_SIGNATURES, new PropertyMD("false").
-				setDescription("Controls whether signatures (providing non-repudiation guarantees) on key " +
-						"requests should be required. If the system is setup without user certificates, " +
-						"signatures must be disabled."));
+				setDeprecated().setDescription("(deprecated)"));
 		META.put(PROP_AIP_PREFIX, new PropertyMD().setCanHaveSubkeys().
 				setDescription("Prefix used for configurations of particular attribute sources."));
 		META.put(PROP_AIP_ORDER, new PropertyMD().setDescription("Attribute sources in invocation order."));
