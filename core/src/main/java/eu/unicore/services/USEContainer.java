@@ -105,7 +105,7 @@ public class USEContainer {
 	}
 	
 	/**
-	 * start the UAS
+	 * start the container
 	 * 
 	 * args: mandatory config file name
 	 * 

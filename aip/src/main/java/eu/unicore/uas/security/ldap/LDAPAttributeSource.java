@@ -73,28 +73,26 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 	private String name;
 	private Kernel kernel;
 	private boolean isEnabled = false;
-	private Integer port;
+	private Integer port = DEFAULT_PORT;
 	//host contains also the protocol section of the URI (ldap/ldaps) 
-	private String host;
-	private String rootdn;
-	private String ldapfilter;
-	private String authentication;
-	private String principal;
-	private String credentials;
-	private String DNAttrName;
-	private String loginAttrName;
-	private String roleAttrName;
-	private String roleDefaultValue;
+	private String host = DEFAULT_HOST;
+	private String rootdn = DEFAULT_ROOTDN;
+	private String ldapfilter = DEFAULT_LDAPFILTER;
+	private String authentication = DEFAULT_AUTHENTICATION;
+	private String principal = DEFAULT_PRINCIPAL;
+	private String credentials = DEFAULT_CREDENTIAL;
+	private String DNAttrName = DEFAULT_DNATTRNAME;
+	private String loginAttrName = DEFAULT_LOGINATTRNAME;
+	private String roleAttrName = DEFAULT_ROLEATTRNAME;
+	private String roleDefaultValue = DEFAULT_ROLEDEFAULTVALUE;
 	private String groupAttrName;
-	private String groupDefaultValue;
+	private String groupDefaultValue = DEFAULT_PROJECTDEFAULTVALUE;
 	private boolean cacheCredentials=true;
-	private Integer maxConnectionRetry;
+	private Integer maxConnectionRetry = DEFAULT_LDAP_MAX_CONNECT_RETRY;
 
 	private String ldapURL=null;
 	private DirContext ldap;
 	private CredentialCache cache;
-
-	private JMXStats jmxStats = new JMXStats();
 
 	private Status status = Status.UNKNOWN;
 	private String statusMessage;
@@ -103,32 +101,6 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 	public void configure(String name) throws ConfigurationException
 	{
 		this.name = name;
-		if (port == null)
-			port = DEFAULT_PORT;
-		if (host == null)
-			host = DEFAULT_HOST;
-		if (rootdn == null)
-			rootdn = DEFAULT_ROOTDN;
-		if (ldapfilter == null)
-			ldapfilter = DEFAULT_LDAPFILTER;
-		if (authentication == null)
-			authentication = DEFAULT_AUTHENTICATION;
-		if (principal == null)
-			principal = DEFAULT_PRINCIPAL;
-		if (credentials == null)
-			credentials = DEFAULT_CREDENTIAL;
-		if (DNAttrName == null)
-			DNAttrName = DEFAULT_DNATTRNAME;
-		if (loginAttrName == null)
-			loginAttrName = DEFAULT_LOGINATTRNAME;
-		if (roleAttrName == null)
-			roleAttrName = DEFAULT_ROLEATTRNAME;
-		if (roleDefaultValue == null)
-			roleDefaultValue = DEFAULT_ROLEDEFAULTVALUE;
-		if (groupDefaultValue == null)
-			groupDefaultValue = DEFAULT_PROJECTDEFAULTVALUE;
-		if (maxConnectionRetry == null)
-			maxConnectionRetry = DEFAULT_LDAP_MAX_CONNECT_RETRY;
 	}
 
 	@Override
@@ -136,10 +108,9 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 	{
 		this.kernel = kernel;
 		ldapURL = host + ":" + port + "/" ;
-		logger.info("LDAP attribute source '" + name +
-				"': connecting to LDAP at <"+ldapURL+">");
+		logger.info("LDAP attribute source '{}': connecting to LDAP at <{}", name, ldapURL);
 		if(cacheCredentials)
-			logger.debug("LDAP " + name + " will cache credentials.");
+			logger.debug("LDAP {} will cache credentials.", name);
 		isEnabled = true;
 		try {
 			ldap = makeEndpoint();
@@ -223,9 +194,6 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens,
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException
 	{
-		long begin=System.currentTimeMillis();
-		jmxStats.incTotalAuth();
-		
 		String cacheKey = X500NameUtils.getComparableForm(tokens.getEffectiveUserName());
 		SubjectAttributesHolder map = getCachingCredentials()? cache.read(cacheKey) : null;
 		
@@ -233,11 +201,7 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 			map=checkDN(tokens);
 			if(getCachingCredentials())
 				cache.put(tokens.toString(),map);
-		} else {
-			if(getCachingCredentials())
-				jmxStats.incCacheHits();
 		}
-		jmxStats.publishTime(System.currentTimeMillis()-begin);
 		return map;
 	}
 
@@ -251,15 +215,12 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 		SubjectAttributesHolder map = null;
 
 		String dn=tokens.getEffectiveUserName();
-		jmxStats.addAccessor(dn);
 		//build ldap filter : DN match + filter settings
 		String filter = "("+DNAttrName+"="+dn+")";
 		if (ldapfilter != "") 
 			filter = "(&" + filter +  ldapfilter + ")";
-		if(logger.isDebugEnabled()){
-			logger.debug("LDAP request: "+filter);
-		}
-		
+		logger.debug("LDAP request: {}", filter);
+
 		String[] returnAttrs = { loginAttrName, roleAttrName, groupAttrName };
 		SearchControls ctls = new SearchControls();
 		ctls.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -287,7 +248,6 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 						throw ioe;
 					}
 				}
-				
 				//We try to reconnect to LDAP server and then retry
 				while (true) {
 					try {
@@ -316,14 +276,14 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 	public SubjectAttributesHolder makeAuthInfo(NamingEnumeration<SearchResult> enm) throws NamingException {
 		SearchResult res;
 		Attributes resAttrs;
-		List<String> role = new ArrayList<String>();
-		List<String> xlogin = new ArrayList<String>();
-		List<String> group = new ArrayList<String>();
+		List<String> role = new ArrayList<>();
+		List<String> xlogin = new ArrayList<>();
+		List<String> group = new ArrayList<>();
 
 		//in case null enumeration
 		if (enm == null) {
 			//return empty SubjectAttributesHolder
-			return new SubjectAttributesHolder(new HashMap<String,String[]>(), new HashMap<String,String[]>());
+			return new SubjectAttributesHolder(new HashMap<>(), new HashMap<>());
 		}
 		//loop for each ldap results
 		while (enm.hasMore()) {
@@ -358,12 +318,9 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 				Log.logException("LDAP Referral available",e,logger);
 			}
 		}
-		if(logger.isDebugEnabled()){
-			String reply="[xlogin="+xlogin+", role="+role+", groups="+group+"]";
-			logger.debug("LDAP reply: "+reply);
-		}
-		Map<String,String[]> map=new HashMap<String,String[]>();
-		Map<String,String[]> mapDef=new HashMap<String,String[]>();
+		logger.debug("LDAP reply: [xlogin={}, role={}, groups={}]", xlogin, role, group);
+		Map<String,String[]> map = new HashMap<>();
+		Map<String,String[]> mapDef = new HashMap<>();
 		if (xlogin.size() > 0) {
 			map.put(IAttributeSource.ATTRIBUTE_XLOGIN,(String[]) xlogin.toArray(new String[xlogin.size()]));
 			mapDef.put(IAttributeSource.ATTRIBUTE_XLOGIN,new String[] {xlogin.get(0)});
@@ -439,7 +396,7 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 	
 	private DirContext makeEndpoint() throws NamingException {
 
-		Hashtable<String,String> env = new Hashtable<String,String>();
+		Hashtable<String,String> env = new Hashtable<>();
 		env.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
 		env.put(Context.PROVIDER_URL, host+":"+port);
 		env.put(Context.SECURITY_AUTHENTICATION, authentication);
