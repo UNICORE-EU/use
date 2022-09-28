@@ -56,9 +56,14 @@ public class RegistryClient extends BaseClient {
 		for(int i=0; i<entries.length(); i++){
 			try{
 				JSONObject o = entries.getJSONObject(i);
-				String type = o.optString("type", o.optString(INTERFACE_NAME, null));
-				if(serviceType!=null && serviceType.equalsIgnoreCase(type)){
+				if(serviceType==null) {
 					result.add(o);
+				}
+				else {
+					String type = o.optString("type", o.optString(INTERFACE_NAME, null));
+					if(type!=null && serviceType.equalsIgnoreCase(type)){
+						result.add(o);
+					}
 				}
 			}catch(Exception ex){}
 		}

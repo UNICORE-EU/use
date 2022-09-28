@@ -70,7 +70,7 @@ public class RegistryHandler implements ExternalSystemConnector {
 	 * the set of external registry URLs. It is updated whenever the property file
 	 * changes using the {@link #updateExternalRegistryURLs()} method
 	 */
-	private final Set<String> externalRegistryURLs = new HashSet<String>();
+	private final Set<String> externalRegistryURLs = new HashSet<>();
 	private LocalRegistryClient registryClient = null;
 	protected ScheduledExecutorService scheduledExecutor = null;
 	private final Kernel kernel;
