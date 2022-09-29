@@ -6,7 +6,7 @@
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
 
-package eu.unicore.uas.security.vo;
+package eu.unicore.uas.security.saml;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,8 +27,8 @@ import eu.unicore.services.Kernel;
 import eu.unicore.services.ThreadingServices;
 import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.services.utils.TimeoutRunner;
-import eu.unicore.uas.security.vo.conf.IPullConfiguration;
-import eu.unicore.uas.security.vo.conf.PropertiesBasedConfiguration;
+import eu.unicore.uas.security.saml.conf.IPullConfiguration;
+import eu.unicore.uas.security.saml.conf.PropertiesBasedConfiguration;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
@@ -39,11 +39,11 @@ import eu.unicore.util.httpclient.IClientConfiguration;
  *  
  * @author K. Benedyczak
  */
-public class SAMLPullAuthoriser extends SAMLAttributeSourceBase implements ExternalSystemConnector
+public class SAMLAttributeSource extends SAMLAttributeSourceBase implements ExternalSystemConnector
 {
-	private static final Logger log = Log.getLogger(IPullConfiguration.LOG_PFX, SAMLPullAuthoriser.class);
+	private static final Logger log = Log.getLogger(IPullConfiguration.LOG_PFX, SAMLAttributeSource.class);
 
-	private VOAttributeFetcher fetcher;
+	private SAMLAttributeFetcher fetcher;
 
 	protected Status status = Status.UNKNOWN;	
 
@@ -67,21 +67,21 @@ public class SAMLPullAuthoriser extends SAMLAttributeSourceBase implements Exter
 		{
 			IClientConfiguration cc = kernel.getClientConfiguration();
 			if(cc instanceof DefaultClientConfiguration &&
-				conf.getValue(PropertiesBasedConfiguration.CFG_VO_SERVICE_USERNAME)!=null){
+				conf.getValue(PropertiesBasedConfiguration.CFG_SERVER_USERNAME)!=null){
 					DefaultClientConfiguration dcc = (DefaultClientConfiguration)cc;
 					dcc.setHttpAuthn(true);
-					dcc.setHttpUser(conf.getValue(PropertiesBasedConfiguration.CFG_VO_SERVICE_USERNAME));
-					dcc.setHttpPassword(conf.getValue(PropertiesBasedConfiguration.CFG_VO_SERVICE_PASSWORD));
+					dcc.setHttpUser(conf.getValue(PropertiesBasedConfiguration.CFG_SERVER_USERNAME));
+					dcc.setHttpPassword(conf.getValue(PropertiesBasedConfiguration.CFG_SERVER_PASSWORD));
 					log.debug("Authenticating to Unity with username/password.");
 			}
-			fetcher = new VOAttributeFetcher(conf, cc);
+			fetcher = new SAMLAttributeFetcher(conf, cc);
 			isEnabled = true;
 		} catch (Exception e)
 		{
 			log.error("Error in VO subsystem configuration (PULL mode): {}. PULL MODE WILL BE DISABLED", e.toString());
 		}
 
-		super.initFinal(log, VOAttributeFetcher.ALL_PULLED_ATTRS_KEY, false);
+		super.initFinal(log, SAMLAttributeFetcher.ALL_PULLED_ATTRS_KEY, false);
 	}
 
 	@Override
@@ -101,8 +101,8 @@ public class SAMLPullAuthoriser extends SAMLAttributeSourceBase implements Exter
 		
 		@SuppressWarnings("unchecked")
 		Map<String, List<ParsedAttribute>> allAttributes = (Map<String, List<ParsedAttribute>>) 
-				tokens.getContext().get(VOAttributeFetcher.ALL_PULLED_ATTRS_KEY);
-		List<ParsedAttribute> serviceAttributesOrig = allAttributes.get(conf.getVOServiceURL());
+				tokens.getContext().get(SAMLAttributeFetcher.ALL_PULLED_ATTRS_KEY);
+		List<ParsedAttribute> serviceAttributesOrig = allAttributes.get(conf.getAttributeQueryServiceURL());
 		List<ParsedAttribute> serviceAttributes;
 		if (serviceAttributesOrig != null)
 			serviceAttributes = new ArrayList<>(serviceAttributesOrig);
@@ -167,7 +167,7 @@ public class SAMLPullAuthoriser extends SAMLAttributeSourceBase implements Exter
 
 	@Override
 	public String getExternalSystemName(){
-		return name +" attribute source";
+		return name +" Attribute Source " + fetcher.getSimpleAddress();
 	}
 
 }

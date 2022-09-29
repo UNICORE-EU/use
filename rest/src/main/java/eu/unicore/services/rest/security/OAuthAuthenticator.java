@@ -133,6 +133,6 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 
 	@Override
 	public String getExternalSystemName(){
-		return  "OIDC Server @"+simpleAddress;
+		return  "OIDC Server "+simpleAddress;
 	}
 }

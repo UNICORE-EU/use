@@ -2,7 +2,7 @@
  * Copyright (c) 2011 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE file for licensing information.
  */
-package eu.unicore.uas.security.vo;
+package eu.unicore.uas.security.saml;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,7 +15,7 @@ import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.XACMLAttribute;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.IAttributeSource;
-import eu.unicore.uas.security.vo.conf.PropertiesBasedConfiguration;
+import eu.unicore.uas.security.saml.conf.PropertiesBasedConfiguration;
 import eu.unicore.util.configuration.ConfigurationException;
 
 /**
@@ -39,7 +39,7 @@ public abstract class SAMLAttributeSourceBase implements IAttributeSource
 			conf = new PropertiesBasedConfiguration(configFile);
 		} catch (IOException e)
 		{
-			throw new ConfigurationException("Can't read configuration of the VO subsystem: " +
+			throw new ConfigurationException("Can't read configuration of the SAML subsystem: " +
 					e.getMessage());
 		}
 		isEnabled = true;
@@ -47,14 +47,14 @@ public abstract class SAMLAttributeSourceBase implements IAttributeSource
 	
 	protected void initFinal(Logger log, String key, boolean pushMode)
 	{
-		log.info("Adding VO attributes callbacks");
+		log.info("Adding SAML attributes callbacks");
 		AttributesCallback callback = new AttributesCallback(key, name);
 		kernel.getSecurityManager().addCallback(callback);
 		
-		UnicoreAttributeMappingDef []initializedMappings = VOCommonUtils.fillMappings(
-				conf.getSourceProperties(), VOCommonUtils.mappings, log);
+		UnicoreAttributeMappingDef []initializedMappings = Utils.fillMappings(
+				conf.getSourceProperties(), Utils.mappings, log);
 		if (log.isDebugEnabled())
-			log.debug(VOCommonUtils.createMappingsDesc(initializedMappings));
+			log.debug(Utils.createMappingsDesc(initializedMappings));
 		specialAttrsHandler = new UnicoreAttributesHandler(conf, initializedMappings, pushMode);
 	}
 	
@@ -62,7 +62,7 @@ public abstract class SAMLAttributeSourceBase implements IAttributeSource
 			SubjectAttributesHolder otherAuthoriserInfo, boolean addGeneric)
 	{
 		SubjectAttributesHolder ret = new SubjectAttributesHolder(otherAuthoriserInfo.getPreferredVos());
-		String preferredScope = VOCommonUtils.handlePreferredVo(otherAuthoriserInfo.getPreferredVos(), 
+		String preferredScope = Utils.handlePreferredVo(otherAuthoriserInfo.getPreferredVos(), 
 				conf.getScope(), otherAuthoriserInfo.getSelectedVo());
 		List<ParsedAttribute> convertedAttributes = UVOSAttributeProfile.splitByScopes(serviceAttributes);
 		UnicoreIncarnationAttributes uia = specialAttrsHandler.extractUnicoreAttributes(

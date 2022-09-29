@@ -37,9 +37,9 @@ import eu.unicore.util.configuration.ConfigurationException;
  * 
  * @author demuth
  */
-public class GridMapFileAuthoriser implements IAttributeSource 
+public class GridMapFileAttributeSource implements IAttributeSource 
 {
-	private static final Logger logger = Log.getLogger(Log.SECURITY, GridMapFileAuthoriser.class);
+	private static final Logger logger = Log.getLogger(Log.SECURITY, GridMapFileAttributeSource.class);
 
 	//map file, its name is set via setFile()
 	private File mapFile;

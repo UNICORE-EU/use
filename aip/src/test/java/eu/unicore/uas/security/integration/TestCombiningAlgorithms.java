@@ -20,8 +20,8 @@ import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.uas.security.file.FileAttributeSource;
 import eu.unicore.uas.security.ldap.LDAPAttributeSource;
-import eu.unicore.uas.security.vo.SAMLPullAuthoriser;
-import eu.unicore.uas.security.xuudb.XUUDBAuthoriser;
+import eu.unicore.uas.security.saml.SAMLAttributeSource;
+import eu.unicore.uas.security.xuudb.XUUDBAttributeSource;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import eu.unicore.util.httpclient.HttpClientProperties;
 import junit.framework.TestCase;
@@ -48,10 +48,10 @@ public class TestCombiningAlgorithms extends TestCase
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".LDAP.ldapCredential", "bar");
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".LDAP.ldapMaxConnectionsRetry", "1");
 
-		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".VO-PULL.class", SAMLPullAuthoriser.class.getName());
+		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".VO-PULL.class", SAMLAttributeSource.class.getName());
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".VO-PULL.configurationFile", "src/test/resources/vo-pull.config");
 		
-		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".XUUDB.class", XUUDBAuthoriser.class.getName());
+		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".XUUDB.class", XUUDBAttributeSource.class.getName());
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".XUUDB.xuudbHost", "http://localhost");
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".XUUDB.xuudbPort", "62998");
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".XUUDB.xuudbGCID", "DUMMY");

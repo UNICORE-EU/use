@@ -1,4 +1,4 @@
-package eu.unicore.uas.security.vo.basic;
+package eu.unicore.uas.security.saml.basic;
 
 
 import java.io.IOException;

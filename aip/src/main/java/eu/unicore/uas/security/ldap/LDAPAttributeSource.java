@@ -29,7 +29,7 @@ import eu.unicore.security.canl.SSLContextCreator;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.IAttributeSource;
-import eu.unicore.uas.security.vo.UnicoreAttributesHandler;
+import eu.unicore.uas.security.saml.UnicoreAttributesHandler;
 import eu.unicore.uas.security.xuudb.CredentialCache;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;

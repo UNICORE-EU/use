@@ -19,7 +19,7 @@ public class TestGridmapFileAuthoriser {
 	public void testErrorMissingFile()throws Exception{
 		Properties p = TestConfigUtil.getInsecureProperties();
 		p.setProperty(PREFIX+PROP_AIP_ORDER, "GMF");
-		p.setProperty(PREFIX+PROP_AIP_PREFIX+".GMF.class", GridMapFileAuthoriser.class.getName());
+		p.setProperty(PREFIX+PROP_AIP_PREFIX+".GMF.class", GridMapFileAttributeSource.class.getName());
 		new Kernel(p);
 	}
 	
@@ -27,13 +27,13 @@ public class TestGridmapFileAuthoriser {
 	public void testCorrectSetup()throws Exception{
 		Properties p = TestConfigUtil.getInsecureProperties();
 		p.setProperty(PREFIX+PROP_AIP_ORDER, "GMF");
-		p.setProperty(PREFIX+PROP_AIP_PREFIX+".GMF.class", GridMapFileAuthoriser.class.getName());
+		p.setProperty(PREFIX+PROP_AIP_PREFIX+".GMF.class", GridMapFileAttributeSource.class.getName());
 		p.setProperty(PREFIX+PROP_AIP_PREFIX+".GMF.file", "src/test/resources/gridmapfile/grid-mapfile");
 		Kernel k=new Kernel(p);
 		IAttributeSource attrSource=k.getContainerSecurityConfiguration().getAip();
 		assertNotNull(attrSource);
 		AttributeSourcesChain chain=(AttributeSourcesChain)attrSource;
-		GridMapFileAuthoriser gmf=(GridMapFileAuthoriser)chain.getChain().get(1);
+		GridMapFileAttributeSource gmf=(GridMapFileAttributeSource)chain.getChain().get(1);
 		assertNotNull(gmf);
 	}
 }

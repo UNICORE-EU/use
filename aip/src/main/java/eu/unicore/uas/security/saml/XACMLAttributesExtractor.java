@@ -5,7 +5,7 @@
  * Created on 29-01-2011
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
-package eu.unicore.uas.security.vo;
+package eu.unicore.uas.security.saml;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.samly2.attrprofile.UVOSAttributeProfile.ScopedStringValue;
 import eu.unicore.security.XACMLAttribute;
-import eu.unicore.uas.security.vo.conf.IBaseVOConfiguration;
+import eu.unicore.uas.security.saml.conf.IBaseConfiguration;
 import eu.unicore.util.Log;
 
 /**
@@ -26,7 +26,7 @@ import eu.unicore.util.Log;
  */
 public class XACMLAttributesExtractor
 {
-	private static final Logger logger = Log.getLogger(IBaseVOConfiguration.LOG_PFX, XACMLAttributesExtractor.class);
+	private static final Logger logger = Log.getLogger(IBaseConfiguration.LOG_PFX, XACMLAttributesExtractor.class);
 	
 	
 	public static List<XACMLAttribute> getSubjectAttributes(List<ParsedAttribute> authzAttribs, String scope)

@@ -11,14 +11,6 @@
   <name>UNICORE Services Environment PDP</name>
   <description>UNICORE Services Environment Policy Decision Point implementations</description>
 
-  <repositories>
-    <repository>
-      <id>unicore.eu</id>
-      <name>UNICORE repository</name>
-      <url>https://unicore-dev.zam.kfa-juelich.de/maven</url>
-    </repository>
-  </repositories>
-
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

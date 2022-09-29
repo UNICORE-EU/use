@@ -6,7 +6,7 @@
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
 
-package eu.unicore.uas.security.vo;
+package eu.unicore.uas.security.saml;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +18,7 @@ import org.apache.logging.log4j.ThreadContext;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.services.security.util.AttributeHandlingCallback;
-import eu.unicore.uas.security.vo.conf.IBaseVOConfiguration;
+import eu.unicore.uas.security.saml.conf.IBaseConfiguration;
 import eu.unicore.util.Log;
 
 /**
@@ -28,7 +28,7 @@ import eu.unicore.util.Log;
  */
 public class AttributesCallback implements AttributeHandlingCallback
 {
-	private static final Logger logger = Log.getLogger(IBaseVOConfiguration.LOG_PFX, AttributesCallback.class);
+	private static final Logger logger = Log.getLogger(IBaseConfiguration.LOG_PFX, AttributesCallback.class);
 	
 	private String id;
 	private String name;

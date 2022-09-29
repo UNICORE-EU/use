@@ -27,7 +27,7 @@ import eu.unicore.util.Log;
 public class GridMapFileParser
 {
 	
-	private static final Logger logger = Log.getLogger(Log.SECURITY, GridMapFileAuthoriser.class);
+	private static final Logger logger = Log.getLogger(Log.SECURITY, GridMapFileAttributeSource.class);
 	
 	private final File gridMapFile;
 

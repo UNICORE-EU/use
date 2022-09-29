@@ -2,7 +2,7 @@
  * Copyright (c) 2011 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE file for licensing information.
  */
-package eu.unicore.uas.security.vo.basic;
+package eu.unicore.uas.security.saml.basic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,36 +13,37 @@ import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.samly2.attrprofile.UVOSAttributeProfile;
 import eu.unicore.samly2.attrprofile.UVOSAttributeProfile.ScopedStringValue;
-import eu.unicore.uas.security.vo.VOCommonUtils;
+import eu.unicore.uas.security.saml.Utils;
+
 import static org.junit.Assert.*;
 
 /**
  * @author K. Benedyczak
  */
-public class TestVoUtils 
+public class TestUtils 
 {
 	@Test
 	public void testPreferredVoSelection()
 	{
-		String res = VOCommonUtils.handlePreferredVo(new String[] {"/uudb/subvo"}, "/uudb", null);
+		String res = Utils.handlePreferredVo(new String[] {"/uudb/subvo"}, "/uudb", null);
 		assertEquals("/uudb/subvo", res);
 
-		res = VOCommonUtils.handlePreferredVo(new String[] {}, "/uudb", null);
+		res = Utils.handlePreferredVo(new String[] {}, "/uudb", null);
 		assertNull(res);
 
-		res = VOCommonUtils.handlePreferredVo(null, "/uudb", null);
+		res = Utils.handlePreferredVo(null, "/uudb", null);
 		assertNull(res);
 		
-		res = VOCommonUtils.handlePreferredVo(new String[] {"/a", "/uudb/subvo"}, "/uudb", null);
+		res = Utils.handlePreferredVo(new String[] {"/a", "/uudb/subvo"}, "/uudb", null);
 		assertEquals("/uudb/subvo", res);
 
-		res = VOCommonUtils.handlePreferredVo(new String[] {"/a", "/uudb/subvo/subsub"}, "/uudb", null);
+		res = Utils.handlePreferredVo(new String[] {"/a", "/uudb/subvo/subsub"}, "/uudb", null);
 		assertEquals("/uudb/subvo/subsub", res);
 
-		res = VOCommonUtils.handlePreferredVo(new String[] {"/a", "/uudb/subvo/subsub", "/b"}, "/uudb", "/b");
+		res = Utils.handlePreferredVo(new String[] {"/a", "/uudb/subvo/subsub", "/b"}, "/uudb", "/b");
 		assertEquals("/uudb/subvo/subsub", res);
 
-		res = VOCommonUtils.handlePreferredVo(new String[] {"/a", "/uudb"}, "/uudb", "/a");
+		res = Utils.handlePreferredVo(new String[] {"/a", "/uudb"}, "/uudb", "/a");
 		assertNull(res);
 	}
 	

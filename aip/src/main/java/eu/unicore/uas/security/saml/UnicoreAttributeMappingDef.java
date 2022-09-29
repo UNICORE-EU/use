@@ -5,7 +5,7 @@
  * Created on 07-10-2010
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
-package eu.unicore.uas.security.vo;
+package eu.unicore.uas.security.saml;
 
 /**
  * This structure defines UNICORE incarnation attribute mapping (from saml name).

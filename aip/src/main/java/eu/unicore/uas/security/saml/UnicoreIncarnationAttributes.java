@@ -5,7 +5,7 @@
  * Created on 28-01-2011
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
-package eu.unicore.uas.security.vo;
+package eu.unicore.uas.security.saml;
 
 import java.util.HashMap;
 import java.util.Iterator;

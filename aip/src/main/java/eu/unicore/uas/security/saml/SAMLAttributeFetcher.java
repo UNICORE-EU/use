@@ -6,10 +6,11 @@
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
 
-package eu.unicore.uas.security.vo;
+package eu.unicore.uas.security.saml;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,26 +32,26 @@ import eu.unicore.samly2.exceptions.SAMLServerException;
 import eu.unicore.samly2.exceptions.SAMLValidationException;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.samlclient.SAMLAttributeQueryClient;
-import eu.unicore.uas.security.vo.conf.IPullConfiguration;
+import eu.unicore.uas.security.saml.conf.IPullConfiguration;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.IClientConfiguration;
 
 
 /**
- * This class fetches user's attributes from the VO service, which is
+ * This class fetches user's attributes from the SAML Attribute Query service, which is
  * statically configured in the configuration. Attributes received are passed for
  * later use as an input of an XACML policy check.
  * @author K. Benedyczak
  */
-public class VOAttributeFetcher
+public class SAMLAttributeFetcher
 {
 	/**
 	 * Prefix of key used in security context to mark value with the list of 
-	 * all Attributes received. It is combined with a VO server URL.
+	 * all Attributes received. It is combined with a SAML server URL.
 	 */
-	public static final String ALL_PULLED_ATTRS_KEY = "SAMLPullAuthoriser_ALLpulledattrs";
+	public static final String ALL_PULLED_ATTRS_KEY = "SAMLAttributeFetcher_ALLpulledattrs";
 	
-	private static final Logger log = Log.getLogger(IPullConfiguration.LOG_PFX, VOAttributeFetcher.class);
+	private static final Logger log = Log.getLogger(IPullConfiguration.LOG_PFX, SAMLAttributeFetcher.class);
 	
 	private final IPullConfiguration pullConfiguration;
 	private final IClientConfiguration clientConfiguration;
@@ -59,7 +60,10 @@ public class VOAttributeFetcher
 	
 	public static final int MAX_ELEMS = 128;
 
-	public VOAttributeFetcher(IPullConfiguration cc, IClientConfiguration secProv) throws Exception
+	// SAML service host without full endpoint
+	private String simpleAddress;
+
+	public SAMLAttributeFetcher(IPullConfiguration cc, IClientConfiguration secProv) throws Exception
 	{
 		this.pullConfiguration = cc;
 		this.clientConfiguration = secProv;
@@ -81,12 +85,23 @@ public class VOAttributeFetcher
 	}
 	
 	public String getServerURL() {
-		return pullConfiguration.getVOServiceURL();
+		return pullConfiguration.getAttributeQueryServiceURL();
 	}
 
+	public synchronized String getSimpleAddress() {
+		if(simpleAddress==null) {
+			try {
+				URL u = new URL(getServerURL());
+				simpleAddress = u.getProtocol()+"://"+u.getAuthority();
+			}catch(Exception e) {
+				this.simpleAddress = getServerURL();
+			}
+		}
+		return simpleAddress;
+	}
 	/**
-	 * Gets attributes from the VO service of the effective user (as returned by tokens
-	 * parameter). Attributes are inserted into {@link SecurityTokens} context 
+	 * Gets attributes for effective user (as returned by tokens parameter).
+	 * Attributes are inserted into {@link SecurityTokens} context 
 	 * (under a key ALL_PULLED_ATTRS_KEY+serverURL) as a {@link List} 
 	 * of {@link ParsedAttribute} objects. 
 	 *  
@@ -104,8 +119,8 @@ public class VOAttributeFetcher
 	
 	
 	/**
-	 * This works as follows: first it is checked if another VOFetcher pulled the 
-	 * attributes from our current VO server. If so then the list is returned.  
+	 * This works as follows: first it is checked if another attribute fetcher pulled the 
+	 * attributes from our current SAML server. If so then the list is returned.  
 	 * Next we check if we have something cached. If not then 
 	 * attributes are really pulled (and cached and stored in a context).
 	 * @param subject
@@ -115,7 +130,7 @@ public class VOAttributeFetcher
 	@SuppressWarnings("unchecked")
 	private void getAttributes(NameID subject, SecurityTokens tokens) throws SAMLValidationException
 	{
-		String voServerAddress = pullConfiguration.getVOServiceURL();
+		String voServerAddress = pullConfiguration.getAttributeQueryServiceURL();
 		Map<String, List<ParsedAttribute>> allAttributes = 
 				(Map<String, List<ParsedAttribute>>) tokens.getContext().get(ALL_PULLED_ATTRS_KEY);
 		if (allAttributes == null)
@@ -157,15 +172,15 @@ public class VOAttributeFetcher
 						X500NameUtils.getReadableForm(subject.getXBean().getStringValue()));
 			} else if (SAMLConstants.SubStatus.STATUS2_AUTHN_FAILED.equals(e.getSamlSubErrorId()))
 			{
-				log.error("Can't authenticate to the VO " +
+				log.error("Can't authenticate to the SAML " +
 					"server as the local server - probably the local server doesn't " +
-					"have the read access to the VO server.");
+					"have the read access to the SAML server.");
 			}
 			throw e;
 		}
 		if (attrs.size() == 0)
 		{
-			log.debug("Got empty list of attributes from the VO service");
+			log.debug("Got empty list of attributes from the SAML service");
 		}
 
 		allAttributes.put(voServerAddress, attrs);
@@ -176,7 +191,7 @@ public class VOAttributeFetcher
 		SAMLAttributeQueryClient client;
 		try
 		{
-			client = new SAMLAttributeQueryClient(pullConfiguration.getVOServiceURL(), 
+			client = new SAMLAttributeQueryClient(pullConfiguration.getAttributeQueryServiceURL(), 
 					clientConfiguration);
 		} catch (MalformedURLException e)
 		{
@@ -185,10 +200,10 @@ public class VOAttributeFetcher
 		
 		log.debug("Performing SAML query for attributes of {}",
 				() -> X500NameUtils.getReadableForm(subject.getXBean().getStringValue()));
-		String samlId = pullConfiguration.getServerURI();
+		String samlId = pullConfiguration.getLocalServerURI();
 		NameID myID;
 		if (samlId != null)
-			myID = new NameID(pullConfiguration.getServerURI(), SAMLConstants.NFORMAT_ENTITY);
+			myID = new NameID(pullConfiguration.getLocalServerURI(), SAMLConstants.NFORMAT_ENTITY);
 		else
 			myID = new NameID(clientConfiguration.getCredential().getSubjectName(), 
 					SAMLConstants.NFORMAT_DN);

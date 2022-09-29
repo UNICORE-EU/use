@@ -6,7 +6,7 @@
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
 
-package eu.unicore.uas.security.vo;
+package eu.unicore.uas.security.saml;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,13 +17,13 @@ import java.util.Properties;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.services.security.IAttributeSource;
-import eu.unicore.uas.security.vo.conf.PropertiesBasedConfiguration;
+import eu.unicore.uas.security.saml.conf.PropertiesBasedConfiguration;
 
 /**
- * Misc methods useful for both {@link SAMLPullAuthoriser} and {@link SAMLPushAuthoriser}.
+ * Misc methods
  * @author golbi
  */
-public class VOCommonUtils
+public class Utils
 {
 	public static final UnicoreAttributeMappingDef[] mappings = {
 		new UnicoreAttributeMappingDef(IAttributeSource.ATTRIBUTE_XLOGIN, false, true),

@@ -6,7 +6,7 @@
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
 
-package eu.unicore.uas.security.vo;
+package eu.unicore.uas.security.saml;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.samly2.attrprofile.UVOSAttributeProfile;
 import eu.unicore.samly2.attrprofile.UVOSAttributeProfile.ScopedStringValue;
-import eu.unicore.uas.security.vo.conf.IBaseVOConfiguration;
+import eu.unicore.uas.security.saml.conf.IBaseConfiguration;
 import eu.unicore.util.Log;
 
 
@@ -40,7 +40,7 @@ import eu.unicore.util.Log;
  */
 public class UnicoreAttributesHandler
 {
-	private static final Logger log = Log.getLogger(IBaseVOConfiguration.LOG_PFX, UnicoreAttributesHandler.class);
+	private static final Logger log = Log.getLogger(IBaseConfiguration.LOG_PFX, UnicoreAttributesHandler.class);
 
 	/**
 	 * Maps SAML attribute names to unicore attribute definitions. Whenever
@@ -55,11 +55,11 @@ public class UnicoreAttributesHandler
 	protected final String uudbScope;
 	
 	
-	public UnicoreAttributesHandler(IBaseVOConfiguration c, UnicoreAttributeMappingDef[] mappings, boolean pushMode) 
+	public UnicoreAttributesHandler(IBaseConfiguration c, UnicoreAttributeMappingDef[] mappings, boolean pushMode) 
 	{
 		uudbScope = c.getScope();
-		this.mappings = new HashMap<String, UnicoreAttributeMappingDef>();
-		this.mappingsUnicore = new HashMap<String, UnicoreAttributeMappingDef>();
+		this.mappings = new HashMap<>();
+		this.mappingsUnicore = new HashMap<>();
 		for (UnicoreAttributeMappingDef mapping: mappings)
 		{
 			if (mapping.getSamlName() == null && mapping.getDefSamlName() == null)
@@ -77,10 +77,10 @@ public class UnicoreAttributesHandler
 	public UnicoreIncarnationAttributes extractUnicoreAttributes(List<ParsedAttribute> from, String selectedVo, 
 			boolean remove)
 	{
-		Map<String, List<String>> retValid = new HashMap<String, List<String>>();
-		Map<String, List<String>> retDefault = new HashMap<String, List<String>>();
-		Map<String, List<String>> retVoValid = new HashMap<String, List<String>>();
-		Map<String, List<String>> retVoDefault = new HashMap<String, List<String>>();
+		Map<String, List<String>> retValid = new HashMap<>();
+		Map<String, List<String>> retDefault = new HashMap<>();
+		Map<String, List<String>> retVoValid = new HashMap<>();
+		Map<String, List<String>> retVoDefault = new HashMap<>();
 		
 		for (int i=from.size() - 1; i >= 0; i--)
 		{

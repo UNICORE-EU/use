@@ -9,14 +9,6 @@
   </parent>
   <name>UNICORE Services Environment Core</name>
 
-  <repositories>
-    <repository>
-      <id>unicore.eu</id>
-      <name>UNICORE repository</name>
-      <url>https://unicore-dev.zam.kfa-juelich.de/maven</url>
-    </repository>
-  </repositories>
-
   <build>
     <plugins>
       <plugin>
@@ -28,21 +20,7 @@
             <exclude>**/*Mock*</exclude>
             <exclude>**/*$*</exclude>
           </excludes>
-          <forkMode>pertest</forkMode>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptors>
-            <descriptor>src/main/assembly/dep.xml</descriptor>
-          </descriptors>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <configuration>
-          <tagBase>https://unicore.svn.sourceforge.net/svnroot/unicore/wsrflite/wsrfcore/tags</tagBase> 
+          <reuseForks>false</reuseForks>
         </configuration>
       </plugin>
     </plugins>

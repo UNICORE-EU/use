@@ -6,7 +6,7 @@
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
 
-package eu.unicore.uas.security.vo.basic;
+package eu.unicore.uas.security.saml.basic;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -20,11 +20,11 @@ import org.junit.Test;
 import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.samly2.attrprofile.UVOSAttributeProfile.ScopedStringValue;
-import eu.unicore.uas.security.vo.UnicoreAttributeMappingDef;
-import eu.unicore.uas.security.vo.UnicoreAttributesHandler;
-import eu.unicore.uas.security.vo.UnicoreIncarnationAttributes;
-import eu.unicore.uas.security.vo.VOCommonUtils;
-import eu.unicore.uas.security.vo.conf.PropertiesBasedConfiguration;
+import eu.unicore.uas.security.saml.UnicoreAttributeMappingDef;
+import eu.unicore.uas.security.saml.UnicoreAttributesHandler;
+import eu.unicore.uas.security.saml.UnicoreIncarnationAttributes;
+import eu.unicore.uas.security.saml.Utils;
+import eu.unicore.uas.security.saml.conf.PropertiesBasedConfiguration;
 import eu.unicore.util.Log;
 
 
@@ -184,7 +184,7 @@ public class UnicoreAttributesHandlerTest
 			cfg = new PropertiesBasedConfiguration(
 					"src/test/resources/mappingsTest.properties");
 			
-			UnicoreAttributeMappingDef[] filledMappings = VOCommonUtils.fillMappings(cfg.getSourceProperties(),
+			UnicoreAttributeMappingDef[] filledMappings = Utils.fillMappings(cfg.getSourceProperties(),
 					mappings, Log.getLogger("unicore",this.getClass()));
 			UnicoreAttributesHandler h = new UnicoreAttributesHandler(cfg, filledMappings, !pullMode);
 			return h.extractUnicoreAttributes(attrs, selectedVo, true);

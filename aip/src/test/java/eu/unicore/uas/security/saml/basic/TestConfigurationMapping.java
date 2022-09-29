@@ -6,7 +6,7 @@
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
 
-package eu.unicore.uas.security.vo.basic;
+package eu.unicore.uas.security.saml.basic;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -14,9 +14,9 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import eu.unicore.uas.security.vo.UnicoreAttributeMappingDef;
-import eu.unicore.uas.security.vo.VOCommonUtils;
-import eu.unicore.uas.security.vo.conf.PropertiesBasedConfiguration;
+import eu.unicore.uas.security.saml.UnicoreAttributeMappingDef;
+import eu.unicore.uas.security.saml.Utils;
+import eu.unicore.uas.security.saml.conf.PropertiesBasedConfiguration;
 import eu.unicore.util.Log;
 
 public class TestConfigurationMapping
@@ -38,7 +38,7 @@ public class TestConfigurationMapping
 		{
 			cfg = new PropertiesBasedConfiguration(
 					"src/test/resources/mappingsTest.properties");
-			UnicoreAttributeMappingDef[] filledMappings = VOCommonUtils.fillMappings(
+			UnicoreAttributeMappingDef[] filledMappings = Utils.fillMappings(
 					cfg.getSourceProperties(), mappings, Log.getLogger("unicore",this.getClass()));
 			assertTrue(filledMappings.length == 7);
 		} catch (Exception e)
@@ -61,7 +61,7 @@ public class TestConfigurationMapping
 		{
 			cfg = new PropertiesBasedConfiguration(
 					"src/test/resources/mappingsTest.properties");
-			UnicoreAttributeMappingDef initializedMappings[] = VOCommonUtils.fillMappings(
+			UnicoreAttributeMappingDef initializedMappings[] = Utils.fillMappings(
 					cfg.getSourceProperties(), mappings, Log.getLogger("unicore",this.getClass()));
 
 			for (UnicoreAttributeMappingDef map: initializedMappings)

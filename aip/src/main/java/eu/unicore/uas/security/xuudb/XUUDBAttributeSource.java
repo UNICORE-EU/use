@@ -34,11 +34,11 @@ import eu.unicore.util.httpclient.IClientConfiguration;
  * @author schuller
  * @author golbi
  */
-public class XUUDBAuthoriser extends XUUDBAuthoriserBase implements
+public class XUUDBAttributeSource extends XUUDBAuthoriserBase implements
 		IAttributeSource {
 
 	private static final Logger logger = Log.getLogger(Log.SECURITY,
-			XUUDBAuthoriser.class);
+			XUUDBAttributeSource.class);
 
 	private IPublic xuudb;
 

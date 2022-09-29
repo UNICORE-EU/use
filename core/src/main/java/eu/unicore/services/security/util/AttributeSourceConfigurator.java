@@ -9,6 +9,7 @@
 package eu.unicore.services.security.util;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -30,11 +31,23 @@ import eu.unicore.util.configuration.PropertyGroupHelper;
  * @author golbi
  */
 public class AttributeSourceConfigurator {
+
 	private static final Logger logger=Log.getLogger(Log.SECURITY,AttributeSourceConfigurator.class);
 	
+	final static Map<String,String> DEFAULTS = new HashMap<>();
+
+	static {
+		DEFAULTS.put("FILE", "eu.unicore.uas.security.file.FileAttributeSource");
+		DEFAULTS.put("XUUDB", "eu.unicore.uas.security.xuudb.XUUDBAttributeSource");
+		DEFAULTS.put("SAML", "eu.unicore.uas.security.saml.SAMLAttributeSource");
+		DEFAULTS.put("GRIDMAP-FILE", "eu.unicore.uas.security.gridmapfile.GridMapFileAttributeSource");
+		DEFAULTS.put("LDAP", "eu.unicore.uas.security.ldap.LDAPAttributeSource");
+	}
+
 	public static IAttributeSource configureAttributeSource(String name, String subPrefix, Properties properties) {
 		String dotName = ContainerSecurityProperties.PREFIX + subPrefix + "." + name + ".";
 		String clazz = properties.getProperty(dotName + "class");
+		clazz = handleOldOrMissingClass(clazz, name);
 		if (clazz==null)
 			throw new IllegalArgumentException("Inconsistent attribute sources chain definition: " +
 					"expected <"+dotName+"class> property with attribute source implementation.");
@@ -87,6 +100,22 @@ public class AttributeSourceConfigurator {
 			} catch (Exception e) {
 				throw new RuntimeException("Bug: can't set properties on chain: " + e.toString(), e);
 			}
+	}
+	
+	// accept older attribute source class names
+	private static String handleOldOrMissingClass(String clazz, String name) {
+		if("eu.unicore.uas.security.xuudb.XUUDBAuthoriser".equals(clazz)) {
+			logger.warn("DEPRECATION: found old class name for '"+name+"' attribute source");
+			clazz = DEFAULTS.get("XUUDB");
+		}
+		if("eu.unicore.uas.security.gridmapfile.GridMapFileAuthoriser".equals(clazz)) {
+			logger.warn("DEPRECATION: found old class name for '"+name+"' attribute source");
+			clazz = DEFAULTS.get("GRIDMAP-FILE");
+		}
+		if(clazz==null) {
+			clazz = DEFAULTS.get(name);
+		}
+		return clazz;
 	}
 
 }

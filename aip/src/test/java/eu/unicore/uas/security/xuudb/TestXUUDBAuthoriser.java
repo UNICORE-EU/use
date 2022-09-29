@@ -20,13 +20,13 @@ import junit.framework.TestCase;
 
 public class TestXUUDBAuthoriser extends TestCase{
 
-	XUUDBAuthoriser xuudb;
+	XUUDBAttributeSource xuudb;
 	MockXUUDB mock;
 	
 	@Override
 	protected void setUp()throws Exception{
 		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
-		xuudb=new XUUDBAuthoriser();
+		xuudb=new XUUDBAttributeSource();
 		xuudb.setXuudbCache(false);
 		mock=new MockXUUDB();
 		xuudb.setEndpoint(mock);
