@@ -50,7 +50,6 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 	
 	public static final String CFG_SCOPE = "group"; 
 
-	public static final String CFG_SAML_ISSUER_URI = "issuerURI";
 	public static final String CFG_LOCAL_SERVER_URI = "localServerURI";
 	
 	public static final String CFG_ATTRIBUTE_QUERY_URL = "attributeQueryURL";
@@ -83,8 +82,6 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 				setDescription("If certificate-based authentication to the SAML server is disabled, you might be able to use username/password. This sets the username."));
 		DEFAULTS.put(CFG_SERVER_PASSWORD, new PropertyMD().
 				setDescription("If certificate-based authentication to the SAML server is disabled, you might be able to use username/password. This sets the password."));
-		DEFAULTS.put(CFG_SAML_ISSUER_URI, new PropertyMD().
-				setDescription("Identification URI of the SAML service providing attributes for this source. Only attributes issued by this issuer will be honoured."));
 		DEFAULTS.put(TruststoreProperties.DEFAULT_PREFIX, new PropertyMD().setCanHaveSubkeys().
 				setDescription("Properties starting with this prefix are used to configure validation of SAML assertion issuers certificates. Trust anchors should contain only the trusted SAML servers certificates. All options are the same as those for other UNICORE truststores."));
 		DEFAULTS.put(CFG_INCARNATION_ATTR_PFX, new PropertyMD().setCanHaveSubkeys().
@@ -107,10 +104,6 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 				Collections.singleton(new LoggingStoreUpdateListener()), 
 				PREFIX+TruststoreProperties.DEFAULT_PREFIX);
 		trustChecker = new TruststoreBasedSamlTrustChecker(trustProperties.getValidator());
-		if (getSAMLIssuerURI() == null)
-			throw new ConfigurationException("For the VO subsystem, the " + 
-					getKeyDescription(CFG_SAML_ISSUER_URI) + " property must be defined.");
-
 		initPull();
 	}
 
@@ -150,12 +143,6 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 		return getValue(CFG_ATTRIBUTE_QUERY_URL);
 	}
 
-	@Override
-	public String getSAMLIssuerURI()
-	{
-		return getValue(CFG_SAML_ISSUER_URI);
-	}
-	
 	@Override
 	public boolean isPulledSignatureVerficationEnabled()
 	{

@@ -27,11 +27,6 @@ public interface IBaseConfiguration
 	 * @return URI identifying the server.
 	 */
 	public String getLocalServerURI();
-	
-	/**
-	 * @return URI identifying the VO server.
-	 */
-	public String getSAMLIssuerURI();
 
 	/**
 	 * @return scope / group of attributes that we honor
