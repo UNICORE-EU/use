@@ -120,12 +120,15 @@ public class SAMLAttributeSource extends SAMLAttributeSourceBase implements Exte
 		}
 		else {
 			final SecurityTokens st = new SecurityTokens();
-			st.setUserName(Client.ANONYMOUS_CLIENT_DN);
+			String dn = Client.ANONYMOUS_CLIENT_DN;
+			try {
+				dn = kernel.getContainerSecurityConfiguration().getCredential().getSubjectName();
+			}catch(Exception e) {}
+			st.setUserName(dn);
 			st.setConsignorTrusted(true);
-			ThreadingServices ts = kernel.getContainerProperties()
-					.getThreadingServices();
-			
-			Callable<String> check = new Callable<String>() {
+
+			ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
+			Callable<String> check = new Callable<>() {
 				public String call() throws Exception {
 					try {
 						fetcher.authorise(st);
