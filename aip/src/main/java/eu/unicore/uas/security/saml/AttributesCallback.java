@@ -12,14 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.services.security.util.AttributeHandlingCallback;
-import eu.unicore.uas.security.saml.conf.IBaseConfiguration;
-import eu.unicore.util.Log;
 
 /**
  * Puts SAML attributes (in UVOS Attribute form(at)) into Client. Rather not used anywhere
@@ -28,8 +25,6 @@ import eu.unicore.util.Log;
  */
 public class AttributesCallback implements AttributeHandlingCallback
 {
-	private static final Logger logger = Log.getLogger(IBaseConfiguration.LOG_PFX, AttributesCallback.class);
-	
 	private String id;
 	private String name;
 	
@@ -70,19 +65,16 @@ public class AttributesCallback implements AttributeHandlingCallback
 		ThreadContext.push(name);
 		try
 		{
-			logger.debug("extractAttributes called");
 			Map<String, Object> ctx = tokens.getContext();
 			if (ctx == null)
 				return null;
-			Map<String, String> ret = new HashMap<String, String>();
 			HashMap<String, List<ParsedAttribute>> authzAttribsMap = 
 					(HashMap<String, List<ParsedAttribute>>) ctx.get(id);
 			if (authzAttribsMap == null)
 				return null;
-			logger.debug("Found attributes in SecurityToken, extracting them " +
-					"to be inserted into Client's attributes");
 			// TODO this is probably useless, but we cannot store arbitrary
 			// objects, it would mess up persistence
+			Map<String, String> ret = new HashMap<>();
 			ret.put(id, authzAttribsMap.toString());
 			return ret;
 		} finally

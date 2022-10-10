@@ -25,6 +25,7 @@ import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.ThreadingServices;
+import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.services.utils.TimeoutRunner;
 import eu.unicore.uas.security.saml.conf.IPullConfiguration;
@@ -90,10 +91,10 @@ public class SAMLAttributeSource extends SAMLAttributeSourceBase implements Exte
 			throws IOException
 	{
 		if (!isEnabled)
-			throw new IOException("Attribute source "+name+" is disabled");
+			throw new SubsystemUnavailableException("Attribute source "+name+" is disabled");
 		
 		if(!cb.isOK())
-			throw new IOException("Attribute source "+name+" is temporarily unavailable");
+			throw new SubsystemUnavailableException("Attribute source "+name+" is temporarily unavailable");
 		
 		try {
 			fetcher.authorise(tokens);
