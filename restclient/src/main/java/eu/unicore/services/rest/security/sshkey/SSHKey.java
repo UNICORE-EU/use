@@ -6,6 +6,7 @@ import java.security.PrivateKey;
 
 import org.apache.http.HttpMessage;
 
+import eu.emi.security.authn.x509.helpers.PasswordSupplier;
 import eu.unicore.services.rest.client.IAuthCallback;
 import eu.unicore.services.rest.security.jwt.JWTUtils;
 
@@ -17,7 +18,7 @@ import eu.unicore.services.rest.security.jwt.JWTUtils;
 public class SSHKey implements IAuthCallback {
 
 	private final File privateKey;
-	private final Password password;
+	private final PasswordSupplier password;
 	private final String user;
 	private final long lifetime; 
 	
@@ -25,11 +26,11 @@ public class SSHKey implements IAuthCallback {
 	
 	private long issued; 
 	
-	public SSHKey(String user, File privateKey, Password password){
+	public SSHKey(String user, File privateKey, PasswordSupplier password){
 		this(user, privateKey, password, 300);
 	}
 	
-	public SSHKey(String user, File privateKey, Password password, long lifetime){
+	public SSHKey(String user, File privateKey, PasswordSupplier password, long lifetime){
 		this.user = user;
 		this.privateKey = privateKey;
 		this.password = password;

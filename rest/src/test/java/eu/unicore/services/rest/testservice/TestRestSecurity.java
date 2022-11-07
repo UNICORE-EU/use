@@ -37,7 +37,7 @@ import eu.unicore.services.rest.client.IAuthCallback;
 import eu.unicore.services.rest.client.UsernamePassword;
 import eu.unicore.services.rest.jwt.JWTDelegation;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
-import eu.unicore.services.rest.security.sshkey.Password;
+import eu.unicore.services.rest.security.sshkey.PasswordSupplierImpl;
 import eu.unicore.services.rest.security.sshkey.SSHKey;
 import eu.unicore.services.rest.security.sshkey.SSHKeyUC;
 import eu.unicore.services.rest.security.sshkey.SSHUtils;
@@ -173,7 +173,7 @@ public class TestRestSecurity {
 	public void testBaseClientWithJWT() throws Exception {
 		String resource = url+"/"+sName+"/User";
 		IAuthCallback auth = new SSHKey("demouser", new File("src/test/resources/id_ed25519"),
-				new Password("test123".toCharArray()));
+				new PasswordSupplierImpl("test123".toCharArray()));
 		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
 		JSONObject reply = bc.getJSON();
 		System.out.println("Service reply: "+reply.toString(2));

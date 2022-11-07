@@ -13,7 +13,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.BadJWTException;
 
 import eu.unicore.security.AuthenticationException;
-import eu.unicore.services.rest.security.sshkey.Password;
+import eu.unicore.services.rest.security.sshkey.PasswordSupplierImpl;
 import eu.unicore.services.rest.security.sshkey.SSHKey;
 import eu.unicore.services.rest.security.sshkey.SSHUtils;
 
@@ -56,7 +56,7 @@ public class TestJWTUtils {
 		String[] keys = {"id_rsa", "id_ecdsa", "id_ecdsa_384", "id_ed25519", "putty-key"};
 		for(String k : keys){
 			File key = new File("src/test/resources/ssh/"+k);
-			SSHKey sk = new SSHKey("demouser", key, new Password("test123".toCharArray()), 300);
+			SSHKey sk = new SSHKey("demouser", key, new PasswordSupplierImpl("test123".toCharArray()), 300);
 			String token = sk.getToken();
 			Assert.assertFalse(JWTUtils.isHMAC(token));
 			JSONObject payload = JWTUtils.getPayload(token);

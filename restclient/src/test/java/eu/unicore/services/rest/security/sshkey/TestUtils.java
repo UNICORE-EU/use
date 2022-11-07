@@ -19,7 +19,7 @@ public class TestUtils {
 	@Test
 	public void testRSAKey() throws Exception {
 		File key = new File("src/test/resources/ssh/id_rsa");
-		RSAPrivateKey pk = (RSAPrivateKey)SSHUtils.readPrivateKey(key, new Password("test123".toCharArray()));
+		RSAPrivateKey pk = (RSAPrivateKey)SSHUtils.readPrivateKey(key, new PasswordSupplierImpl("test123".toCharArray()));
 		Assert.assertNotNull(pk);
 		RSAPublicKey pub = (RSAPublicKey)SSHUtils.readPublicKey(new File("src/test/resources/ssh/id_rsa.pub"));
 		Assert.assertNotNull(pub);
@@ -28,7 +28,7 @@ public class TestUtils {
 	@Test
 	public void testDSAKey() throws Exception {
 		File key = new File("src/test/resources/ssh/id_dsa");
-		DSAPrivateKey pk = (DSAPrivateKey)SSHUtils.readPrivateKey(key, new Password("test123".toCharArray()));
+		DSAPrivateKey pk = (DSAPrivateKey)SSHUtils.readPrivateKey(key, new PasswordSupplierImpl("test123".toCharArray()));
 		Assert.assertNotNull(pk);
 		DSAPublicKey pub = (DSAPublicKey)SSHUtils.readPublicKey(new File("src/test/resources/ssh/id_dsa.pub"));
 		Assert.assertNotNull(pub);
@@ -37,7 +37,7 @@ public class TestUtils {
 	@Test
 	public void testECDSAKey() throws Exception {
 		File key = new File("src/test/resources/ssh/id_ecdsa");
-		PrivateKey pk = SSHUtils.readPrivateKey(key, new Password("test123".toCharArray()));
+		PrivateKey pk = SSHUtils.readPrivateKey(key, new PasswordSupplierImpl("test123".toCharArray()));
 		Assert.assertNotNull(pk);
 		ECPublicKey pub = (ECPublicKey)SSHUtils.readPublicKey(new File("src/test/resources/ssh/id_ecdsa.pub"));
 		Assert.assertNotNull(pub);
@@ -46,7 +46,7 @@ public class TestUtils {
 	@Test
 	public void testECDSAKey2() throws Exception {
 		File key = new File("src/test/resources/ssh/id_ecdsa");
-		PrivateKey pk = SSHUtils.readPrivateKey(key, new Password("test123".toCharArray()));
+		PrivateKey pk = SSHUtils.readPrivateKey(key, new PasswordSupplierImpl("test123".toCharArray()));
 		Assert.assertNotNull(pk);
 		ECPublicKey pub = (ECPublicKey)SSHUtils.readPublicKey(new File("src/test/resources/ssh/id_ecdsa_384.pub"));
 		Assert.assertNotNull(pub);
@@ -55,7 +55,7 @@ public class TestUtils {
 	@Test
 	public void testED25519() throws Exception {
 		File key = new File("src/test/resources/ssh/id_ed25519");
-		PrivateKey pk = SSHUtils.readPrivateKey(key, new Password("test123".toCharArray()));
+		PrivateKey pk = SSHUtils.readPrivateKey(key, new PasswordSupplierImpl("test123".toCharArray()));
 		Assert.assertNotNull(pk);
 		EdDSAPublicKey pub = (EdDSAPublicKey)SSHUtils.readPublicKey(new File("src/test/resources/ssh/id_ed25519.pub"));
 		Assert.assertNotNull(pub);
@@ -64,7 +64,7 @@ public class TestUtils {
 	@Test
 	public void testPuttyKey() throws Exception {
 		File key = new File("src/test/resources/ssh/putty-key");
-		PrivateKey pk = SSHUtils.readPrivateKey(key, new Password((char[])null));
+		PrivateKey pk = SSHUtils.readPrivateKey(key, new PasswordSupplierImpl((char[])null));
 		Assert.assertNotNull(pk);
 		PublicKey pub = SSHUtils.readPublicKey(new File("src/test/resources/ssh/putty-key.pub"));
 		Assert.assertNotNull(pub);
