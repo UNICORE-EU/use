@@ -26,16 +26,16 @@ import eu.unicore.services.persistence.Store;
 public interface Home extends Runnable, KernelInjectable {
 
 	/**
-	 * activate the service using the given name
+	 * Activate the service using the given name
 	 * Called when the container brings up the service
 	 * @throws Exception 
 	 */
-	public void activateHome(String serviceName) throws Exception;
+	public void start(String serviceName) throws Exception;
 
 	/**
-	 * passivate the service. Called when the container is shut down.
+	 * Shutdown the service, releasing any held resources. Called when the container is shut down.
 	 */
-	public void passivateHome();
+	public void shutdown();
 
 	/**
 	 * notify the service that the container configuration might have changed.

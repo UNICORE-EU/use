@@ -264,8 +264,14 @@ public class Kernel {
 			try {
 				s.stop();
 			} catch (Throwable t) {
-				logger.error("Error during shutdown of service <" + s.getName()
-						+ ">", t);
+				logger.error("Error during shutdown of service <{}>", s.getName(), t);
+			}
+		}
+		for (Home h : homes.values()) {
+			try {
+				h.shutdown();
+			} catch (Throwable t) {
+				logger.error("Error during shutdown of resource <{}>", h.getServiceName(), t);
 			}
 		}
 	}

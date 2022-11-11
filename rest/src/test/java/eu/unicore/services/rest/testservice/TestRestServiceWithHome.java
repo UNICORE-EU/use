@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,6 +26,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
@@ -35,19 +37,18 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.Home;
 import eu.unicore.services.InitParameters;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Resource;
 import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.services.messaging.Message;
-import eu.unicore.services.persistence.Persistence;
 import eu.unicore.services.rest.Link;
 import eu.unicore.services.rest.RestService;
 import eu.unicore.services.rest.USEResource;
 import eu.unicore.services.rest.USERestApplication;
 import eu.unicore.services.rest.client.BaseClient;
+import eu.unicore.services.rest.client.RESTException;
 import eu.unicore.services.rest.impl.BaseRESTController;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
@@ -61,9 +62,9 @@ public class TestRestServiceWithHome {
 
 	@BeforeClass
 	public static void setup() throws Exception {
+		FileUtils.deleteQuietly(new File("target/data"));
 		Properties p = TestConfigUtil.getInsecureProperties();
 		p.setProperty("persistence.directory", "target/data");
-		p.setProperty("container."+ContainerProperties.WSRF_PERSIST_CLASSNAME,Persistence.class.getName());
 		p.setProperty("container.host", "localhost");
 		p.setProperty("container.port", "55333");
 		k=new Kernel(p);
@@ -156,6 +157,7 @@ public class TestRestServiceWithHome {
 
 		// test exception handling
 		client.setURL(resource+"/fail");
+		client.setAutomaticErrorChecking(false);
 		client.get(ContentType.APPLICATION_JSON);
 		// resource must not be locked!
 		try{
@@ -229,9 +231,13 @@ public class TestRestServiceWithHome {
 		client.setURL(resource);
 		System.out.println("Accessing "+resource);
 		MockResourceWithHome.fail_on_getproperties = true;
-		JSONObject res = client.asJSON(client.get(ContentType.APPLICATION_JSON));
-		assertEquals("500", String.valueOf(res.get("status")));
-		assertTrue(res.getString("errorMessage").contains("Failure for testing"));
+		try{
+			client.getJSON();
+			fail("Expected exception here");
+		}catch(RESTException re) {
+			assertEquals(500, re.getStatus());
+			assertTrue(re.getErrorMessage().contains("Failure for testing"));
+		}
 		client.delete();
 		MockResourceWithHome.fail_on_getproperties = false;
 	}
@@ -250,7 +256,7 @@ public class TestRestServiceWithHome {
 		public void initialize(Kernel kernel)throws Exception {
 			Home home = new MockHome();
 			home.setKernel(kernel);
-			home.activateHome("counter");
+			home.start("counter");
 			kernel.putHome(home);
 		}
 

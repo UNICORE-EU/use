@@ -73,7 +73,7 @@ public class DeploymentManager {
 					if(home==null){
 						home = h.getValue().getConstructor().newInstance();
 						home.setKernel(kernel);
-						home.activateHome(name);
+						home.start(name);
 						kernel.putHome(home);					}
 				}
 				for(DeploymentDescriptor dd: ft.getServices()){

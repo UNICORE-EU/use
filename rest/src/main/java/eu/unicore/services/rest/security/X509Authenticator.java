@@ -86,7 +86,7 @@ public class X509Authenticator implements IAuthenticator, KernelInjectable  {
 		if(consignerInfo==null)return false;
 		String dn = null;
 		String dsig = null;
-		NameValuePair[] parsed = new BasicHeaderValueParser().parseParameters(consignerInfo, new ParserCursor(0, 16384));
+		NameValuePair[] parsed = new BasicHeaderValueParser().parseParameters(consignerInfo, new ParserCursor(0, consignerInfo.length()));
 		for(NameValuePair p: parsed){
 			if("DN".equals(p.getName()))dn=p.getValue();
 			if("DSIG".equals(p.getName()))dsig=p.getValue();

@@ -134,7 +134,8 @@ public abstract class DefaultHome implements Home {
 				});
 	}
 
-	public void activateHome(String serviceName)throws Exception{
+	@Override
+	public void start(String serviceName)throws Exception{
 		if(serviceName==null || "".equals(serviceName)){
 			throw new IllegalArgumentException("Must specify a service name.");
 		}
@@ -275,6 +276,7 @@ public abstract class DefaultHome implements Home {
 		/**
 		 * stops expiry checks 
 		 */
+		@Override
 		public void stopExpiryCheckNow(){
 			try{
 				instanceChecking.removeChecker(expiryChecker);
@@ -286,9 +288,11 @@ public abstract class DefaultHome implements Home {
 		/**
 		 * called when the container shuts down
 		 */
-		public void passivateHome(){
-			logger.info("[{}] Shutting down.", serviceName);
+		@Override
+		public void shutdown(){
+			if(isShuttingDown)return;
 			isShuttingDown=true;
+			logger.info("[{}] Shutting down.", serviceName);
 			if (serviceInstances != null)
 				serviceInstances.shutdown();
 		}
@@ -296,15 +300,17 @@ public abstract class DefaultHome implements Home {
 		/**
 		 * the container has been restarted or the container config has changed
 		 */
+		@Override
 		public void notifyConfigurationRefresh(){
 			lastRefreshNotificationInstant=System.currentTimeMillis();
 		}
 
+		@Override
 		public String getServiceName(){return serviceName;}
 
 		public void setServiceName(String serviceName){this.serviceName=serviceName;}
 
-
+		@Override
 		public Resource get(String id)throws ResourceUnknownException, ResourceUnavailableException{
 			Resource res = null;
 			try{
@@ -316,6 +322,7 @@ public abstract class DefaultHome implements Home {
 			return res;
 		}
 
+		@Override
 		public Resource refresh(String id) throws ResourceUnknownException, ResourceUnavailableException {
 			try(Resource resource = serviceInstances.getForUpdate(id,locking_timeout,TimeUnit.SECONDS)){
 				if(resource==null)throw new ResourceUnknownException("Instance with ID <"+id+"> does not exist");
@@ -335,6 +342,7 @@ public abstract class DefaultHome implements Home {
 		 * @param resource
 		 * @throws ResourceUnavailableException
 		 */
+		@Override
 		public void lock(Resource resource) throws ResourceUnavailableException {
 			try{
 				serviceInstances.lock(resource,locking_timeout,TimeUnit.SECONDS);
@@ -346,6 +354,7 @@ public abstract class DefaultHome implements Home {
 			}
 		}
 
+		@Override
 		public Resource getForUpdate(String id) throws ResourceUnknownException, ResourceUnavailableException {
 			try{
 				Resource resource = serviceInstances.getForUpdate(id,locking_timeout,TimeUnit.SECONDS);
@@ -408,6 +417,7 @@ public abstract class DefaultHome implements Home {
 		 */
 		protected void postInitialise(Resource instance){}
 
+		@Override
 		public void persist(Resource instance)throws Exception{
 			serviceInstances.persist(instance);
 			if(instance.getModel() instanceof SecuredResourceModel){
@@ -416,6 +426,7 @@ public abstract class DefaultHome implements Home {
 			}
 		}
 
+		@Override
 		public Calendar getTerminationTime(String uniqueID)throws Exception{
 			updateTT();
 			return terminationTimes.get(uniqueID);
@@ -432,6 +443,7 @@ public abstract class DefaultHome implements Home {
 			}
 		}
 
+		@Override
 		public void setTerminationTime(String uniqueID, Calendar c)throws TerminationTimeChangeRejectedException,UnableToSetTerminationTimeException{
 			//check if maximum termination time is exceeded
 			Integer maxLifetime=null;
@@ -512,10 +524,12 @@ public abstract class DefaultHome implements Home {
 			secInfoCache.remove(resourceId);
 		}
 
+		@Override
 		public long getNumberOfInstances()throws Exception{
 			return serviceInstances.size();
 		}
 
+		@Override
 		public Store getStore() {
 			return serviceInstances;
 		}
@@ -524,6 +538,7 @@ public abstract class DefaultHome implements Home {
 			this.serviceInstances = serviceInstances;
 		}
 
+		@Override
 		public boolean isShuttingDown(){
 			return isShuttingDown;
 		}
@@ -605,14 +620,17 @@ public abstract class DefaultHome implements Home {
 		 * 
 		 * By default, nothing is done here.
 		 */
+		@Override
 		public void run(){
 			//NOP
 		}
 
+		@Override
 		public Kernel getKernel(){
 			return kernel;
 		}
 
+		@Override
 		public void setKernel(Kernel kernel){
 			this.kernel=kernel;
 		}

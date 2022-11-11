@@ -92,7 +92,8 @@ public class TestExpireWSResources {
 
 			public String getServiceName(){return "test123";}
 
-			public void activateHome(String n)throws Exception{
+			@Override
+			public void start(String n)throws Exception{
 				serviceInstances=createStore();
 				assertNotNull(serviceInstances);
 				//set TT of "testid" to Now minus one hour
@@ -105,8 +106,6 @@ public class TestExpireWSResources {
 					e.printStackTrace();
 				}
 			}
-
-			public void passivateHome(){};
 
 			@Override
 			protected Resource doCreateInstance() {
@@ -134,7 +133,7 @@ public class TestExpireWSResources {
 			}
 
 		};
-		home.activateHome("test");
+		home.start("test");
 	}
 
 	protected Store createStore() throws Exception{

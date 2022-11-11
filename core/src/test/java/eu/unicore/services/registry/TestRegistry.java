@@ -101,11 +101,12 @@ public class TestRegistry {
 		@Override
 		public void start() throws Exception {
 			home.setKernel(kernel);
-			home.activateHome(getName());
+			home.start(getName());
 		}
 
 		@Override
 		public void stop() throws Exception {
+			home.shutdown();
 		}
 
 		@Override
@@ -154,11 +155,12 @@ public class TestRegistry {
 		@Override
 		public void start() throws Exception {
 			home.setKernel(kernel);
-			home.activateHome(getName());
+			home.start(getName());
 		}
 
 		@Override
 		public void stop() throws Exception {
+			home.shutdown();
 		}
 
 		@Override

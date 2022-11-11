@@ -18,18 +18,15 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpMessage;
-import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.InputStreamEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.StatusLine;
-
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,6 +69,8 @@ public class BaseClient {
 	private final Deque<String>urlStack = new ArrayDeque<>();
 	
 	protected UserPreferences userPreferences = new UserPreferences();
+	
+	protected boolean errorChecking = true;
 	
 	public BaseClient(String url, IClientConfiguration security){
 		this(url,security,null);
@@ -184,7 +183,6 @@ public class BaseClient {
 	 */
 	public JSONObject getJSON(ContentType accept) throws Exception {
 		ClassicHttpResponse response = get(accept==null ? ContentType.APPLICATION_JSON : accept);
-		checkError(response);
 		return asJSON(response);
 	}
 	
@@ -220,9 +218,7 @@ public class BaseClient {
 	public ClassicHttpResponse put(InputStream content, ContentType type) throws Exception {
 		HttpPut put=new HttpPut(url);
 		put.setEntity(new InputStreamEntity(content, type));
-		ClassicHttpResponse response = execute(put);
-		checkError(response);
-		return response;
+		return execute(put);
 	}
 	
 	/**
@@ -232,7 +228,6 @@ public class BaseClient {
 		HttpPut put=new HttpPut(url);
 		put.setEntity(new InputStreamEntity(content, type));
 		try(ClassicHttpResponse response = execute(put)){
-			checkError(response);
 			EntityUtils.consumeQuietly(response.getEntity());
 		}
 	}
@@ -247,9 +242,7 @@ public class BaseClient {
 		HttpPut put=new HttpPut(url);
 		put.setHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
 		put.setEntity(new StringEntity(content.toString(), ContentType.APPLICATION_JSON));
-		ClassicHttpResponse response = execute(put);
-		checkError(response);
-		return response;
+		return execute(put);
 	}
 
 	/**
@@ -294,7 +287,6 @@ public class BaseClient {
 	 */
 	public void postQuietly(JSONObject content) throws Exception {
 		try(ClassicHttpResponse response = post(content)){
-			checkError(response);
 			EntityUtils.consume(response.getEntity());
 		}
 	}
@@ -305,7 +297,6 @@ public class BaseClient {
 	public void delete() throws Exception {
 		HttpDelete d=new HttpDelete(url);
 		try(ClassicHttpResponse response = execute(d)){
-			checkError(response);
 			EntityUtils.consume(response.getEntity());
 		}
 	}
@@ -352,7 +343,7 @@ public class BaseClient {
 			return new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
 		}
 		finally{
-			close(response);
+			response.close();
 		}
 	}
 	
@@ -407,6 +398,7 @@ public class BaseClient {
 				}
 			}catch(Exception ex){/*ignored*/}
 		}
+		checkError(response);
 		return response;
 	}
 
@@ -418,13 +410,6 @@ public class BaseClient {
 		return response;
 	}
 
-	public void close(HttpResponse response) {
-		if(response instanceof CloseableHttpResponse){
-			try{ ((CloseableHttpResponse)response).close(); }
-			catch(IOException e) {}
-		}
-	}
-
 	/**
 	 * Check if the response represents an error (i.e., HTTP status >= 400). In case of
 	 * an error, error information is extracted an a RESTException is thrown.
@@ -433,9 +418,9 @@ public class BaseClient {
 	 * @throws RESTException - in case the response represents an error
 	 */
 	public void checkError(ClassicHttpResponse response) throws RESTException {
-		if(response.getCode()>399){
+		if(errorChecking && response.getCode()>399){
 			String message = extractErrorMessage(response);
-			close(response);			
+			IOUtils.closeQuietly(response);
 			throw new RESTException(response.getCode(), response.getReasonPhrase(), message);
 		}
 	}
@@ -473,6 +458,16 @@ public class BaseClient {
 	public void setSessionIDProvider(SessionIDProvider sessionIDProvider) {
 		this.sessionIDProvider = sessionIDProvider;
 	}
+	
+	/**
+	 * Enable/disable automatic error checking after every request.
+	 * Enabled by default - usually the best option.
+	 * @param errorChecking
+	 */
+	public void setAutomaticErrorChecking(boolean errorChecking) {
+		this.errorChecking = errorChecking;
+	}
+
 
 	public static Map<String,String> asMap(JSONObject o){
 		Map<String,String>result=new HashMap<>();

@@ -75,7 +75,7 @@ public class TestResourceImpl extends TestCase {
 		ResourceImpl r=new _ResourceImpl();
 		MockHome h=new MockHome();
 		h.setKernel(kernel);
-		h.activateHome("test");
+		h.start("test");
 		r.setHome(h);
 		r.setKernel(kernel);
 		r.initialise(initMap);
@@ -154,7 +154,7 @@ public class TestResourceImpl extends TestCase {
 		Kernel kernel = new Kernel(p);
 		
 		h.setKernel(kernel);
-		h.activateHome("test");
+		h.start("test");
 		
 		InitParameters initobjs=new InitParameters();
 		

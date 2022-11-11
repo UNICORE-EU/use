@@ -52,14 +52,14 @@ public class MockService implements Service{
 		stopped=false;
 		if(home!=null){
 			home.setKernel(kernel);
-			home.activateHome(name);
+			home.start(name);
 		}
 	}
 
 	public void stop() {
 		stopped=true;
 		if(home!=null){
-			home.passivateHome();
+			home.shutdown();
 		}
 	}
 

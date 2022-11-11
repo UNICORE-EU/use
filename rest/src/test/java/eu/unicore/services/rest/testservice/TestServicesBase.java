@@ -17,13 +17,11 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.Home;
 import eu.unicore.services.InitParameters;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Resource;
 import eu.unicore.services.impl.DefaultHome;
-import eu.unicore.services.persistence.Persistence;
 import eu.unicore.services.rest.RestService;
 import eu.unicore.services.rest.USEResource;
 import eu.unicore.services.rest.USERestApplication;
@@ -42,7 +40,6 @@ public class TestServicesBase {
 		FileUtils.deleteQuietly(new File("target/data"));
 		Properties p = TestConfigUtil.getInsecureProperties();
 		p.setProperty("persistence.directory", "target/data");
-		p.setProperty("container."+ContainerProperties.WSRF_PERSIST_CLASSNAME,Persistence.class.getName());
 		p.setProperty("container.host", "localhost");
 		p.setProperty("container.port", "55333");
 		k=new Kernel(p);
@@ -64,6 +61,7 @@ public class TestServicesBase {
 
 	@Test
 	public void testPagedResults()throws Exception {
+		System.out.println(k.getHome("counter").getStore().getUniqueIDs());
 		for(int i=0;i<10;i++){
 			HomeApplication.createTestInstance(k);
 		}
@@ -122,7 +120,7 @@ public class TestServicesBase {
 
 		@Override
 		public Set<Class<?>> getClasses() {
-			Set<Class<?>>classes=new HashSet<Class<?>>();
+			Set<Class<?>>classes=new HashSet<>();
 			classes.add(MockResource.class);
 			return classes;
 		}
@@ -131,7 +129,7 @@ public class TestServicesBase {
 		public void initialize(Kernel kernel)throws Exception {
 			Home home = new MockHome();
 			home.setKernel(kernel);
-			home.activateHome("counter");
+			home.start("counter");
 			kernel.putHome(home);
 		}
 

@@ -34,15 +34,11 @@ public class RegistryClient extends BaseClient {
 	 * @throws Exception
 	 */
 	public long addEntry(Map<String,String>content) throws Exception {
-		JSONObject obj = asJSON(content);
-		ClassicHttpResponse response = post(obj);
-		checkError(response);
-		long lifetime = -1;
-		try	{
-			lifetime = Long.parseLong(response.getHeaders("X-UNICORE-Lifetime")[0].getValue());
-		}catch(Exception e) {}
-		close(response);
-		return lifetime;
+		try(ClassicHttpResponse response = post(asJSON(content))){
+			return Long.parseLong(response.getHeaders("X-UNICORE-Lifetime")[0].getValue());
+		}catch(Exception ex) {
+			return -1;
+		}
 	}
 
 	public List<JSONObject> listEntries() throws Exception {
