@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.PrivateKey;
 
-import org.apache.http.HttpMessage;
+import org.apache.hc.core5.http.HttpMessage;
 
 import eu.emi.security.authn.x509.helpers.PasswordSupplier;
 import eu.unicore.services.rest.client.IAuthCallback;

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.HttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -35,7 +35,7 @@ public class RegistryClient extends BaseClient {
 	 */
 	public long addEntry(Map<String,String>content) throws Exception {
 		JSONObject obj = asJSON(content);
-		HttpResponse response = post(obj);
+		ClassicHttpResponse response = post(obj);
 		checkError(response);
 		long lifetime = -1;
 		try	{

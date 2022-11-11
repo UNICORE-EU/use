@@ -13,8 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.transport.http.AbstractHTTPDestination;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicHeaderValueParser;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.message.BasicHeaderValueParser;
+import org.apache.hc.core5.http.message.ParserCursor;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.security.SecurityTokens;
@@ -85,7 +86,7 @@ public class X509Authenticator implements IAuthenticator, KernelInjectable  {
 		if(consignerInfo==null)return false;
 		String dn = null;
 		String dsig = null;
-		NameValuePair[] parsed = BasicHeaderValueParser.parseParameters(consignerInfo, new BasicHeaderValueParser());
+		NameValuePair[] parsed = new BasicHeaderValueParser().parseParameters(consignerInfo, new ParserCursor(0, 16384));
 		for(NameValuePair p: parsed){
 			if("DN".equals(p.getName()))dn=p.getValue();
 			if("DSIG".equals(p.getName()))dsig=p.getValue();

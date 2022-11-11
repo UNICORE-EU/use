@@ -6,7 +6,7 @@
   <packaging>pom</packaging>
   <description>UNICORE service container</description>
   <inceptionYear>2010</inceptionYear>
-  <version>4.4.1</version>
+  <version>4.5.0</version>
   <name>UNICORE Services Environment</name>
  
   <parent>
@@ -68,17 +68,17 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>0.400</persistence.version>
-    <secutils.version>3.3.1</secutils.version>
-    <seclib.version>5.4.3</seclib.version>
+    <persistence.version>0.401</persistence.version>
+    <secutils.version>3.4.0-SNAPSHOT</secutils.version>
+    <seclib.version>6.0.0</seclib.version>
     <jaxb.version>2.3.3</jaxb.version>
-    <json.version>20220320</json.version>
+    <json.version>20220924</json.version>
     <gson.version>2.9.1</gson.version>
     <xuudb.version>2.7.0</xuudb.version>
     <saaj.version>1.5.1</saaj.version>
-    <cxf.version>3.5.3</cxf.version>
-    <jetty.version>10.0.11</jetty.version>
-    <httpclient.version>4.5.13</httpclient.version>
+    <cxf.version>3.5.4</cxf.version>
+    <jetty.version>10.0.12</jetty.version>
+    <httpclient.version>5.2</httpclient.version>
     <metrics.version>4.2.12</metrics.version>
     <jwt.version>9.24.4</jwt.version>
     <tink.version>1.7.0</tink.version>
@@ -160,8 +160,8 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
       <version>${httpclient.version}</version>
     </dependency>
     <dependency>

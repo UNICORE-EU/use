@@ -3,7 +3,7 @@ package eu.unicore.services.rest.client;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.http.HttpMessage;
+import org.apache.hc.core5.http.HttpMessage;
 
 public class UserPreferences {
 

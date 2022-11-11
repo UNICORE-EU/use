@@ -16,9 +16,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Application;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,12 +68,12 @@ public class TestRestService {
 		HttpClient client=HttpUtils.createClient(url, kernel.getClientConfiguration());
 		HttpGet get=new HttpGet(url+"/"+sName+"/User");
 		get.addHeader("Accept", "application/json");
-		HttpResponse response=client.execute(get);
-		int status=response.getStatusLine().getStatusCode();
-		assertEquals(200, status);
-		assertEquals(invoked+1, MockResource.invocationCounter.get());
-		String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-		System.out.println("Service reply: "+reply);
+		try(ClassicHttpResponse response=client.executeOpen(null, get, HttpClientContext.create())){
+			assertEquals(200, response.getCode());
+			assertEquals(invoked+1, MockResource.invocationCounter.get());
+			String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+			System.out.println("Service reply: "+reply);
+		}
 		kernel.getContainerProperties().setProperty("messageLogging.test", "false");
 	}
 
@@ -97,19 +98,17 @@ public class TestRestService {
 		HttpClient client=HttpUtils.createClient(url, kernel.getClientConfiguration());
 
 		HttpGet get=new HttpGet(url+"/rest/test2/foo");
-		HttpResponse response=client.execute(get);
-		int status=response.getStatusLine().getStatusCode();
-		assertEquals(200, status);
-		String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-		System.out.println("Service 'foo' reply: "+reply);
-
+		try(ClassicHttpResponse response=client.executeOpen(null, get, HttpClientContext.create())){
+			assertEquals(200, response.getCode());
+			String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+			System.out.println("Service 'foo' reply: "+reply);
+		}
 		get=new HttpGet(url+"/rest/test2/bar");
-		response=client.execute(get);
-		status=response.getStatusLine().getStatusCode();
-		assertEquals(200, status);
-		reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-		System.out.println("Service 'bar' reply: "+reply);
-
+		try(ClassicHttpResponse response=client.executeOpen(null, get, HttpClientContext.create())){
+			assertEquals(200, response.getCode());
+			String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+			System.out.println("Service 'bar' reply: "+reply);
+		}
 	}
 
 	@Before

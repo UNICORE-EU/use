@@ -1,7 +1,7 @@
 package eu.unicore.services.rest.security.sshkey;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpMessage;
+import org.apache.hc.client5.http.utils.Base64;
+import org.apache.hc.core5.http.HttpMessage;
 
 import eu.unicore.services.rest.client.IAuthCallback;
 

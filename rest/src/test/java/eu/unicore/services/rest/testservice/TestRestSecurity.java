@@ -19,9 +19,10 @@ import javax.ws.rs.core.Application;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.AfterClass;
@@ -82,31 +83,30 @@ public class TestRestSecurity {
 		HttpGet get=new HttpGet(url+"/"+sName+"/User");
 		IAuthCallback pwd = new UsernamePassword("demouser", "test123");
 		pwd.addAuthenticationHeaders(get);
-		HttpResponse response=client.execute(get);
-		int status=response.getStatusLine().getStatusCode();
-		assertEquals(200, status);
-		assertEquals(invoked+1, MockResource.invocationCounter.get());
-		JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
-		System.out.println("Service reply: "+reply.toString(2));
-		assertTrue(checkSessionInfo(response));
-		String sessionID = response.getFirstHeader(SecuritySessionUtils.SESSION_ID_HEADER).getValue();
-		get=new HttpGet(url+"/"+sName+"/User");
-		get.addHeader(SecuritySessionUtils.SESSION_ID_HEADER, sessionID);
-		response=client.execute(get);
-		status=response.getStatusLine().getStatusCode();
-		assertEquals(200, status);
-		assertTrue(checkSessionInfo(response));
-
+		try(ClassicHttpResponse response=client.executeOpen(null, get, HttpClientContext.create())){
+			assertEquals(200, response.getCode());
+			assertEquals(invoked+1, MockResource.invocationCounter.get());
+			JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
+			System.out.println("Service reply: "+reply.toString(2));
+			assertTrue(checkSessionInfo(response));
+			String sessionID = response.getFirstHeader(SecuritySessionUtils.SESSION_ID_HEADER).getValue();
+			get=new HttpGet(url+"/"+sName+"/User");
+			get.addHeader(SecuritySessionUtils.SESSION_ID_HEADER, sessionID);
+		}
+		try(ClassicHttpResponse response=client.executeOpen(null, get, HttpClientContext.create())){
+			assertEquals(200, response.getCode());
+			assertTrue(checkSessionInfo(response));
+		}
 		// invalid session must give a 432 response
 		get=new HttpGet(url+"/"+sName+"/User");
 		get.addHeader(SecuritySessionUtils.SESSION_ID_HEADER, "123");
-		response=client.execute(get);
-		status=response.getStatusLine().getStatusCode();
-		assertEquals(432, status);
-		assertFalse(checkSessionInfo(response));
+		try(ClassicHttpResponse response=client.executeOpen(null, get, HttpClientContext.create())){
+			assertEquals(432, response.getCode());
+			assertFalse(checkSessionInfo(response));
+		}
 	}
 
-	private boolean checkSessionInfo(HttpResponse response){
+	private boolean checkSessionInfo(ClassicHttpResponse response){
 		try{
 			String sessionID = response.getFirstHeader(SecuritySessionUtils.SESSION_ID_HEADER).getValue();
 			String lifetime = response.getFirstHeader(SecuritySessionUtils.SESSION_LIFETIME_HEADER).getValue();
@@ -128,14 +128,14 @@ public class TestRestSecurity {
 		JWTServerProperties props = new JWTServerProperties(new Properties());
 		IAuthCallback pwd = new JWTDelegation(kernel.getContainerSecurityConfiguration(), props, dn);
 		pwd.addAuthenticationHeaders(get);
-		HttpResponse response=client.execute(get);
-		int status=response.getStatusLine().getStatusCode();
-		assertEquals(200, status);
-		JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
-		System.out.println("Service reply: "+reply.toString(2));
-		Assert.assertEquals(dn, reply.getString("dn"));
-		Assert.assertEquals(issuer, reply.getString("td_consignor"));
-		Assert.assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
+		try(ClassicHttpResponse response=client.executeOpen(null, get, HttpClientContext.create())){
+			assertEquals(200, response.getCode());
+			JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
+			System.out.println("Service reply: "+reply.toString(2));
+			Assert.assertEquals(dn, reply.getString("dn"));
+			Assert.assertEquals(issuer, reply.getString("td_consignor"));
+			Assert.assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
+		}
 	}
 	
 

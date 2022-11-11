@@ -337,23 +337,12 @@ public final class SecurityManager {
 	private Client createSecureClient(final SecurityTokens tokens) {
 		Client client=new Client();
 		client.setAuthenticatedClient(tokens);
-		
-		if (client.getType() == Client.Type.ANONYMOUS) {
-			return client;
-		}
-		
-		assembleClientAttributes(client, tokens);
-		if(logger.isDebugEnabled()){
-			logger.debug("Client info (after static AIPs):\n{}", client.toString());
-			try{
-				SecurityTokens st=client.getSecurityTokens();
-				if (st!=null)
-					logger.debug("TD Chain length={}", st.getTrustDelegationTokens().size());
-			}catch(Exception e){
-				logger.debug("No TD.");
+		if (client.getType() != Client.Type.ANONYMOUS) {
+			assembleClientAttributes(client, tokens);
+			if(logger.isDebugEnabled()){
+				logger.debug("Client info (after static AIPs):\n{}", client.toString());
 			}
 		}
-		
 		return client;
 	}
 	

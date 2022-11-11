@@ -2,9 +2,9 @@ package eu.unicore.services;
 
 import java.util.Properties;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
 
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.server.ContainerHttpServerProperties;
@@ -29,9 +29,7 @@ public class TestServer extends TestCase{
 			//fire a request at the service
 			HttpClient client=HttpUtils.createClient(server.getUrls()[0].toString(), k.getClientConfiguration());
 			HttpGet get=new HttpGet(server.getUrls()[0]+"/mock/test");
-			HttpResponse response=client.execute(get);
-			int status=response.getStatusLine().getStatusCode();
-			assertEquals(200, status);
+			client.execute(null, get, new BasicHttpClientResponseHandler());
 			assertEquals(1, s1.getInvocationCount());
 		} finally {
 			server.stop();

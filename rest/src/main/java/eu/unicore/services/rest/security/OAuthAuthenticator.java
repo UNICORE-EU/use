@@ -1,19 +1,20 @@
 package eu.unicore.services.rest.security;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.cxf.message.Message;
-import org.apache.http.HttpMessage;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.HttpMessage;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
@@ -106,10 +107,9 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 	    postParameters.add(new BasicNameValuePair("client_id", clientID));
 	    postParameters.add(new BasicNameValuePair("client_secret", clientSecret));
 	    postParameters.add(new BasicNameValuePair("token", token));
-	    post.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
+	    post.setEntity(new UrlEncodedFormEntity(postParameters, Charset.forName("UTF-8")));
 		HttpClient client = HttpUtils.createClient(address, clientCfg);
-		HttpResponse response = client.execute(post);
-		String reply = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+		String reply = client.execute(null, post, HttpClientContext.create(), new BasicHttpClientResponseHandler());
 		JSONObject j = new JSONObject(reply);
 		if(!j.optBoolean("active", false))throw new Exception("Token validation failed");
 		return j;

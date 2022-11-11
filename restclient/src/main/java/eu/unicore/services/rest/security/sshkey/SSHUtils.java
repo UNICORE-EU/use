@@ -9,8 +9,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.StringTokenizer;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.hc.client5.http.utils.Base64;
 
 import com.hierynomus.sshj.key.KeyAlgorithm;
 

@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.PhaseInterceptorChain;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
@@ -148,7 +148,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 	private Response process(Message message, SecurityTokens token) {
 		token.setClientIP(establishClientIP(message));
 		processDelegation(message, token);
-		if(token.isTrustDelegationValidated()){
+		if(token.getConsignorName()!=null && token.isConsignorTrusted()){
 			// valid delegation - continue with the request
 			return null;
 		}

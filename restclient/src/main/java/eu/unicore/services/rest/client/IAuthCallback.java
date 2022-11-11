@@ -1,6 +1,6 @@
 package eu.unicore.services.rest.client;
 
-import org.apache.http.HttpMessage;
+import org.apache.hc.core5.http.HttpMessage;
 
 /**
  * callback to add authentication headers to REST calls

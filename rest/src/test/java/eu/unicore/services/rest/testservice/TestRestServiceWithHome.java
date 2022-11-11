@@ -26,9 +26,10 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.entity.ContentType;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -94,11 +95,12 @@ public class TestRestServiceWithHome {
 		BaseClient client=new BaseClient(resource,k.getClientConfiguration());
 
 		for(int i=0; i<invocations ; i++){
-			HttpResponse response=client.post(null);
-			int status=client.getLastHttpStatus();
-			assertEquals(200, status);
-			String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-			System.out.println("Service reply: "+reply);
+			try(ClassicHttpResponse response = client.post(null)){
+				int status = client.getLastHttpStatus();
+				assertEquals(200, status);
+				String reply = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+				System.out.println("Service reply: "+reply);
+			}
 		}
 		CounterModel m = (CounterModel) k.getHome("counter").get("my_counter").getModel();
 		assertEquals(invocations, m.getCounter());
@@ -106,29 +108,27 @@ public class TestRestServiceWithHome {
 		resource  = url+"/"+sName+"/my_counter/value";
 		client.setURL(resource);
 		System.out.println("Accessing "+resource);
-		HttpResponse response=client.get(ContentType.WILDCARD);
-		int status=client.getLastHttpStatus();
-		assertEquals(200, status);
-		String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-		System.out.println("Service reply: "+reply);
-
+		try(ClassicHttpResponse response = client.get(ContentType.WILDCARD)){
+			int status = client.getLastHttpStatus();
+			assertEquals(200, status);
+			String reply = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+			System.out.println("Service reply: "+reply);
+		}
 		// set value
 		resource  = url+"/"+sName+"/my_counter/value";
 		client.setURL(resource);
 		
 		String v = "100";
 		System.out.println("Putting value: "+v);
-
-		response=client.put(new ByteArrayInputStream(v.getBytes()),ContentType.APPLICATION_JSON);
-		status=client.getLastHttpStatus();
-		assertEquals("Got: "+response.getStatusLine(),200, status);
-
+		try(ClassicHttpResponse response=client.put(new ByteArrayInputStream(v.getBytes()),ContentType.APPLICATION_JSON)){
+			int status=client.getLastHttpStatus();
+			assertEquals("Got: "+new StatusLine(response), 200, status);
+		}
 		resource  = url+"/"+sName+"/my_counter/NO_SUCH_PROPERTY";
 		client.setURL(resource);
-		try{
-			response=client.put(new ByteArrayInputStream(v.getBytes()),ContentType.APPLICATION_JSON);
-		}catch(Exception ex){
-			status=client.getLastHttpStatus();
+		try(ClassicHttpResponse response = client.put(new ByteArrayInputStream(v.getBytes()),ContentType.APPLICATION_JSON)){
+		}catch(Exception ex) {
+			int status=client.getLastHttpStatus();
 			assertEquals("Did not get the expected 404", 404, status);
 		}
 
@@ -137,12 +137,12 @@ public class TestRestServiceWithHome {
 		client.setURL(resource);
 		JSONObject o = client.getJSON();
 		System.out.println(o.toString(2));
-
-		String html = EntityUtils.toString(client.get(ContentType.TEXT_HTML).getEntity());
-		assertNotNull(html);
-		assertTrue(html.contains("action:foo"));
-		assertTrue(html.contains("terminationTime"));
-
+		try(ClassicHttpResponse response = client.get(ContentType.TEXT_HTML)){
+			String html = EntityUtils.toString(response.getEntity());
+			assertNotNull(html);
+			assertTrue(html.contains("action:foo"));
+			assertTrue(html.contains("terminationTime"));
+		}
 		// check messages to resources are processed properly when using the
 		// REST interface
 		CounterResource.processedMessages=0;
@@ -186,23 +186,23 @@ public class TestRestServiceWithHome {
 		BaseClient client=new BaseClient(url,k.getClientConfiguration());
 		String resource  = url+"/"+sName+"/my_counter";
 		client.setURL(resource);
-		HttpResponse response=client.post(null);
+		client.postQuietly(null);
 		// set properties via PUT
 		JSONObject setP = new JSONObject();
 		String aclE = "modify:DN:CN=Demo";
 		setP.put("acl", aclE);
 		setP.put("terminationTime", "23:59");
 		setP.put("noSuchProperty", "foo");
-		response=client.put(setP);
-		int status=client.getLastHttpStatus();
-		assertEquals(200, status);
-		String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-		System.out.println("Service reply: "+reply);
-		JSONObject replyJ = new JSONObject(reply);
-		assertEquals("OK",replyJ.getString("acl"));
-		assertEquals("OK",replyJ.getString("terminationTime"));
-		assertTrue(replyJ.getString("noSuchProperty").contains("not found"));
-
+		try(ClassicHttpResponse response = client.put(setP)){
+			int status=client.getLastHttpStatus();
+			assertEquals(200, status);
+			String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+			System.out.println("Service reply: "+reply);
+			JSONObject replyJ = new JSONObject(reply);
+			assertEquals("OK",replyJ.getString("acl"));
+			assertEquals("OK",replyJ.getString("terminationTime"));
+			assertTrue(replyJ.getString("noSuchProperty").contains("not found"));
+		}
 		JSONObject o = client.getJSON();
 		System.out.println(o.toString(2));
 		assertEquals(aclE,o.getJSONArray("acl").get(0));
@@ -211,12 +211,12 @@ public class TestRestServiceWithHome {
 		setP = new JSONObject();
 		aclE = "garble:DN:CN=Demo";
 		setP.put("acl", aclE);
-		response=client.put(setP);
-		status=client.getLastHttpStatus();
-		assertEquals(200, status);
-		reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-		replyJ = new JSONObject(reply);
-		assertTrue(replyJ.getString("acl").contains("Error setting property"));
+		try(ClassicHttpResponse response = client.put(setP)){
+			assertEquals(200, client.getLastHttpStatus());
+			String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+			JSONObject replyJ = new JSONObject(reply);
+			assertTrue(replyJ.getString("acl").contains("Error setting property"));
+		}
 		client.delete();
 	}
 

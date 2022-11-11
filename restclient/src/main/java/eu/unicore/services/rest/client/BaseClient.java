@@ -12,21 +12,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpMessage;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpMessage;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.InputStreamEntity;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.StatusLine;
+
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -180,12 +183,12 @@ public class BaseClient {
 	 * @throws Exception
 	 */
 	public JSONObject getJSON(ContentType accept) throws Exception {
-		HttpResponse response = get(accept==null ? ContentType.APPLICATION_JSON : accept);
+		ClassicHttpResponse response = get(accept==null ? ContentType.APPLICATION_JSON : accept);
 		checkError(response);
 		return asJSON(response);
 	}
 	
-	public HttpResponse get(ContentType accept) throws Exception {
+	public ClassicHttpResponse get(ContentType accept) throws Exception {
 		return get(accept, null);
 	}
 
@@ -194,7 +197,7 @@ public class BaseClient {
 	 * @param accept
 	 * @param headers - custom headers (can be null)
 	 */
-	public HttpResponse get(ContentType accept, Map<String,String>headers) throws Exception {
+	public ClassicHttpResponse get(ContentType accept, Map<String,String>headers) throws Exception {
 		HttpGet get=new HttpGet(url);
 		if(accept!=null)get.setHeader("Accept", accept.getMimeType());
 		if(headers!=null){
@@ -214,11 +217,10 @@ public class BaseClient {
 	 * @return HttpResponse
 	 * @throws Exception
 	 */
-	public HttpResponse put(InputStream content, ContentType type) throws Exception {
+	public ClassicHttpResponse put(InputStream content, ContentType type) throws Exception {
 		HttpPut put=new HttpPut(url);
-		if(type!=null)put.setHeader("Content-Type", type.toString());
-		put.setEntity(new InputStreamEntity(content,-1));
-		HttpResponse response = execute(put);
+		put.setEntity(new InputStreamEntity(content, type));
+		ClassicHttpResponse response = execute(put);
 		checkError(response);
 		return response;
 	}
@@ -228,12 +230,11 @@ public class BaseClient {
 	 */
 	public void putQuietly(InputStream content, ContentType type) throws Exception {
 		HttpPut put=new HttpPut(url);
-		if(type!=null)put.setHeader("Content-Type", type.toString());
-		put.setEntity(new InputStreamEntity(content,-1));
-		HttpResponse response = execute(put);
-		checkError(response);
-		EntityUtils.consumeQuietly(response.getEntity());
-		close(response);
+		put.setEntity(new InputStreamEntity(content, type));
+		try(ClassicHttpResponse response = execute(put)){
+			checkError(response);
+			EntityUtils.consumeQuietly(response.getEntity());
+		}
 	}
 
 	/**
@@ -242,11 +243,11 @@ public class BaseClient {
 	 * @return {@link JSONObject}
 	 * @throws Exception
 	 */
-	public HttpResponse put(JSONObject content) throws Exception {
+	public ClassicHttpResponse put(JSONObject content) throws Exception {
 		HttpPut put=new HttpPut(url);
 		put.setHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
 		put.setEntity(new StringEntity(content.toString(), ContentType.APPLICATION_JSON));
-		HttpResponse response = execute(put);
+		ClassicHttpResponse response = execute(put);
 		checkError(response);
 		return response;
 	}
@@ -255,10 +256,10 @@ public class BaseClient {
 	 * PUT the JSON to this resource, discard the response
 	 */
 	public void putQuietly(JSONObject content) throws Exception {
-		HttpResponse response = put(content);
-		checkError(response);
-		EntityUtils.consumeQuietly(response.getEntity());
-		close(response);
+		try(ClassicHttpResponse response = put(content)){
+			checkError(response);
+			EntityUtils.consumeQuietly(response.getEntity());
+		}
 	}
 
 	/**
@@ -271,13 +272,9 @@ public class BaseClient {
 		HttpPost post=new HttpPost(url);
 		post.setHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
 		if(content!=null)post.setEntity(new StringEntity(content.toString(), ContentType.APPLICATION_JSON));
-		HttpResponse response = execute(post);
-		try{
+		try(ClassicHttpResponse response = execute(post)){
 			return response.getFirstHeader("Location").getValue();
 		}catch(Exception ex){}
-		finally{
-			close(response);
-		}
 		return null;
 	}
 	
@@ -285,22 +282,21 @@ public class BaseClient {
 	 * post the JSON to this resource and return the response. 
 	 * NOTE: the caller is responsible for reading content and closing the response!
 	 */
-	public HttpResponse post(JSONObject content) throws Exception {
+	public ClassicHttpResponse post(JSONObject content) throws Exception {
 		HttpPost post=new HttpPost(url);
 		post.setHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
 		if(content!=null)post.setEntity(new StringEntity(content.toString(), ContentType.APPLICATION_JSON));
-		HttpResponse response = execute(post);
-		return response;
+		return execute(post);
 	}
 
 	/**
 	 * post content to this resource, discarding the response
 	 */
 	public void postQuietly(JSONObject content) throws Exception {
-		HttpResponse response = post(content);
-		checkError(response);
-		EntityUtils.consume(response.getEntity());
-		close(response);
+		try(ClassicHttpResponse response = post(content)){
+			checkError(response);
+			EntityUtils.consume(response.getEntity());
+		}
 	}
 
 	/**
@@ -308,10 +304,10 @@ public class BaseClient {
 	 */
 	public void delete() throws Exception {
 		HttpDelete d=new HttpDelete(url);
-		HttpResponse response = execute(d);
-		EntityUtils.consume(response.getEntity());
-		checkError(response);
-		close(response);
+		try(ClassicHttpResponse response = execute(d)){
+			checkError(response);
+			EntityUtils.consume(response.getEntity());
+		}
 	}
 
 	/**
@@ -351,10 +347,9 @@ public class BaseClient {
 		return status!=null? status.getStatusCode() : -1;
 	}
 
-	public JSONObject asJSON(HttpResponse response) throws IOException, JSONException {
+	public JSONObject asJSON(ClassicHttpResponse response) throws IOException, JSONException {
 		try{
-			String reply = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-			return new JSONObject(reply);
+			return new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
 		}
 		finally{
 			close(response);
@@ -370,8 +365,8 @@ public class BaseClient {
 		return key;
 	}
 	
-	protected HttpResponse execute(HttpRequestBase method) throws Exception {
-		HttpResponse response = null;
+	protected ClassicHttpResponse execute(HttpUriRequestBase method) throws Exception {
+		ClassicHttpResponse response = null;
 		boolean execWithAuth = !useSessions;
 		String sessionKey = null;
 		
@@ -381,8 +376,8 @@ public class BaseClient {
 			String sessionId = sessionIDProvider.getSessionID(url, sessionKey);
 			if(sessionId!=null){
 				method.setHeader(SecuritySessionUtils.SESSION_ID_HEADER, sessionId);
-				response = client.execute(method);
-				status = response.getStatusLine();
+				response = client.executeOpen(null, method, HttpClientContext.create());
+				status = new StatusLine(response);
 				if(432==status.getStatusCode()){
 					// session is no longer valid
 					execWithAuth = true;
@@ -407,7 +402,7 @@ public class BaseClient {
 					if(lt!=null){
 						lifetime = Long.valueOf(lt.getValue());
 					}
-					sessionIDProvider.registerSession(h.getValue(), method.getURI().toString(), 
+					sessionIDProvider.registerSession(h.getValue(), method.getUri().toString(), 
 							lifetime, sessionKey);
 				}
 			}catch(Exception ex){/*ignored*/}
@@ -415,11 +410,11 @@ public class BaseClient {
 		return response;
 	}
 
-	protected HttpResponse executeWithAuth(HttpRequestBase method) throws Exception {
+	protected ClassicHttpResponse executeWithAuth(HttpUriRequestBase method) throws Exception {
 		addAuth(method);
 		addUserPreferences(method);
-		HttpResponse response = client.execute(method);
-		status = response.getStatusLine();
+		ClassicHttpResponse response = client.executeOpen(null, method, HttpClientContext.create());
+		status = new StatusLine(response);
 		return response;
 	}
 
@@ -437,15 +432,15 @@ public class BaseClient {
 	 * @param response - HTTP response
 	 * @throws RESTException - in case the response represents an error
 	 */
-	public void checkError(HttpResponse response) throws RESTException {
-		if(response.getStatusLine().getStatusCode()>399){
+	public void checkError(ClassicHttpResponse response) throws RESTException {
+		if(response.getCode()>399){
 			String message = extractErrorMessage(response);
 			close(response);			
-			throw new RESTException(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase(), message);
+			throw new RESTException(response.getCode(), response.getReasonPhrase(), message);
 		}
 	}
 
-	protected String extractErrorMessage(HttpResponse response) {
+	protected String extractErrorMessage(ClassicHttpResponse response) {
 		String errMsg = null;
 		try{
 			String content = EntityUtils.toString(response.getEntity());

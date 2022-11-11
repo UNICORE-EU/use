@@ -1,10 +1,10 @@
 package eu.unicore.services.server;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +13,15 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.impl.X500NameUtils;
@@ -226,7 +228,7 @@ public class GatewayHandler implements ExternalSystemConnector{
 		public void run(){
 			HttpPost post = new HttpPost(gwAddress);
 			try{
-		        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+		        List<NameValuePair> nvps = new ArrayList<>();
 		        String vsiteName=containerConfiguration.getValue(ContainerProperties.VSITE_NAME_PROPERTY);
 		        nvps.add(new BasicNameValuePair("name", vsiteName));
 				String physAddr = Utilities.getPhysicalServerAddress(containerConfiguration, 
@@ -234,20 +236,16 @@ public class GatewayHandler implements ExternalSystemConnector{
 		        nvps.add(new BasicNameValuePair("address", physAddr));
 		        String secret = secConfiguration.getGatewayRegistrationSecret();
 		        nvps.add(new BasicNameValuePair("secret", secret));
-		        post.setEntity(new UrlEncodedFormEntity(nvps, "UTF-8"));
-				HttpResponse response = client.execute(post);
-				if(response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED){
-					logger.warn("Could not register with gateway at {}, will try again!",gwAddress);
-				}
-				//read response in any case
-				InputStream is=response.getEntity().getContent();
-				while(is.read()!=-1);
+		        post.setEntity(new UrlEncodedFormEntity(nvps, Charset.forName("UTF-8")));
+		        try(ClassicHttpResponse response = client.executeOpen(null, post, HttpClientContext.create())){
+		        	if(response.getCode() != HttpStatus.SC_CREATED){
+		        		logger.warn("Could not register with gateway at {}, will try again!",gwAddress);
+		        	}
+		        	EntityUtils.consumeQuietly(response.getEntity());
+		        }
 				logger.debug("(Re-)registered with gateway at {}", gwAddress);
 			}catch(Exception e){
 				Log.logException("Could not contact gateway at "+gwAddress,e,logger);
-			}
-			finally{
-				post.releaseConnection();
 			}
 		}
 
