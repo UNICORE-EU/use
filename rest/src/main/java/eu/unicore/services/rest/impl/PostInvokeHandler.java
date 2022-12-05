@@ -13,7 +13,7 @@ import eu.unicore.services.security.util.AuthZAttributeStore;
 
 public class PostInvokeHandler extends AbstractPhaseInterceptor<Message> {
 
-	private static final ThreadLocal<SecuritySession>threadSession=new ThreadLocal<SecuritySession>();
+	private static final ThreadLocal<SecuritySession>threadSession = new ThreadLocal<>();
 
 	public PostInvokeHandler() {
 		super(org.apache.cxf.phase.Phase.PRE_STREAM);
@@ -33,7 +33,7 @@ public class PostInvokeHandler extends AbstractPhaseInterceptor<Message> {
 
 	// check if we have a proper response
 	// and set session ID info if possible
-	private static void handleSession(Message message){
+	private void handleSession(Message message){
 		try{
 			HttpServletResponse response = (HttpServletResponse)message.get("HTTP.RESPONSE");
 			if(response != null){
@@ -44,12 +44,10 @@ public class PostInvokeHandler extends AbstractPhaseInterceptor<Message> {
 					clearSession();
 				}
 			}
-		}catch(Exception ex){
-			
-		}
+		}catch(Exception ex){}
 	}
 
-	public static void cleanup(Message message, boolean storeChanges){
+	private void cleanup(Message message, boolean storeChanges){
 		AuthZAttributeStore.clear();
 
 		Resource res = (Resource)message.getExchange().get(USERestInvoker.LOCKEDKEY);

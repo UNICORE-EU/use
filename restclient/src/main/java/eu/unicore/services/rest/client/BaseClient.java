@@ -50,7 +50,7 @@ import eu.unicore.util.httpclient.SessionIDProviderImpl;
  */
 public class BaseClient {
 
-	protected Logger logger = Log.getLogger(Log.CLIENT, BaseClient.class);
+	protected static final Logger logger = Log.getLogger(Log.CLIENT, BaseClient.class);
 	
 	protected final HttpClient client;
 
