@@ -14,10 +14,10 @@ import org.eclipse.jetty.server.HttpChannel;
 import org.eclipse.jetty.server.HttpTransport;
 import org.eclipse.jetty.server.Request;
 
-import eu.unicore.services.rest.forwarding.Forwarder;
-import eu.unicore.services.rest.forwarding.ForwardingConnection;
-import eu.unicore.services.rest.forwarding.UpgradeHttpServletRequest;
-import eu.unicore.services.rest.forwarding.UpgradeHttpServletResponse;
+import eu.unicore.util.jetty.forwarding.Forwarder;
+import eu.unicore.util.jetty.forwarding.ForwardingConnection;
+import eu.unicore.util.jetty.forwarding.UpgradeHttpServletRequest;
+import eu.unicore.util.jetty.forwarding.UpgradeHttpServletResponse;
 import eu.unicore.util.Log;
 
 public class RestServlet extends CXFNonSpringServlet {
@@ -58,7 +58,7 @@ public class RestServlet extends CXFNonSpringServlet {
 		// Save state from request/response and remove reference to the base request/response.
 		new UpgradeHttpServletRequest(request).upgrade();
 		new UpgradeHttpServletResponse(response).upgrade();
-		Forwarder.get().attach(backend, toClient);
+		Forwarder.get().attach(toClient);
 		
 		logger.info("Forwarding from backend {}, client={}", backend, toClient.getEndPoint().getRemoteSocketAddress());
 	}
