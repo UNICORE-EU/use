@@ -78,7 +78,7 @@
     <saaj.version>1.5.1</saaj.version>
     <cxf.version>3.5.4</cxf.version>
     <jetty.version>10.0.12</jetty.version>
-    <httpclient.version>5.2</httpclient.version>
+    <httpclient.version>5.2.1</httpclient.version>
     <metrics.version>4.2.12</metrics.version>
     <jwt.version>9.24.4</jwt.version>
     <tink.version>1.7.0</tink.version>
