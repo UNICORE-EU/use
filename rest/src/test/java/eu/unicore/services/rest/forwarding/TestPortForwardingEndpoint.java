@@ -5,10 +5,11 @@ import static org.junit.Assert.assertEquals;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.channels.SocketChannel;
 import java.util.HashSet;
 import java.util.Properties;
@@ -37,6 +38,7 @@ import eu.unicore.services.rest.client.ForwardingHelper;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.server.JettyServer;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
+import eu.unicore.util.ChannelUtils;
 
 public class TestPortForwardingEndpoint {
 
@@ -76,15 +78,15 @@ public class TestPortForwardingEndpoint {
 		String _url = server.getUrls()[0].toExternalForm()+"/rest/test/ports/test";
 		BaseClient baseClient = new BaseClient(_url, kernel.getClientConfiguration());
 		ForwardingHelper fh = new ForwardingHelper(baseClient);
-		Socket s = fh.connect(_url);
-		PrintWriter out = new PrintWriter(s.getOutputStream());
-		BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+		SocketChannel s = fh.connect(_url);
+		PrintWriter w = new PrintWriter(new OutputStreamWriter(ChannelUtils.newOutputStream(s, 65536)), true);
+		Reader r = new InputStreamReader(ChannelUtils.newInputStream(s, 65536));
+		BufferedReader br = new BufferedReader(r);
 		System.out.println("Forwarding established");
 		String line = "this is a test";
 		System.out.println("--> "+line);
-		out.write(line+"\n");
-		out.flush();
-		String reply = in.readLine();
+		w.println(line);
+		String reply = br.readLine();
 		System.out.println("<-- "+reply);
 		assertEquals(line, reply);
 	}
