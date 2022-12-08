@@ -8,18 +8,26 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.core5.http.Header;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.util.ChannelUtils;
 import eu.unicore.util.Log;
+import eu.unicore.util.Pair;
 import eu.unicore.util.SSLSocketChannel;
 import eu.unicore.util.httpclient.HttpUtils;
 
@@ -63,14 +71,14 @@ public class ForwardingHelper {
 		}
 		else if("https".equalsIgnoreCase(u.getScheme())) {
 			SSLContext sslc = HttpUtils.createSSLContext(baseClient.getSecurityConfiguration());
-    		SSLEngine sslEngine = sslc.createSSLEngine(u.getHost(), u.getPort());
+			SSLEngine sslEngine = sslc.createSSLEngine(u.getHost(), u.getPort());
 			sslEngine.setUseClientMode(true);
 			return new SSLSocketChannel(s, sslEngine, null);
 		}
 		else throw new IOException();
 	}
 
-    @SuppressWarnings("resource")
+	@SuppressWarnings("resource")
 	public void doHandshake(SocketChannel s, URI u, Header[] headers) throws Exception {
 		OutputStream os = ChannelUtils.newOutputStream(s, 65536);
 		PrintWriter pw = new PrintWriter(os, true, Charset.forName("UTF-8"));
@@ -101,5 +109,83 @@ public class ForwardingHelper {
 			first = false;
 		}
 	}
-        
+
+	/**
+	 * Start bi-directional data forwarding between the channels
+	 *
+	 * @param channel1
+	 * @param channel2
+	 */
+	public void startForwarding(SocketChannel channel1, SocketChannel channel2) throws IOException {
+		selector = Selector.open();
+		attach(channel1, channel2);
+		attach(channel2, channel1);
+		run();
+	}
+
+
+	private Selector selector;
+
+	private final List<SelectionKey> keys = new ArrayList<>();
+
+	protected void attach(final SocketChannel source, final SocketChannel target)
+			throws IOException {
+		source.configureBlocking(false);
+		target.configureBlocking(false);
+		SocketChannel selectableSource = source instanceof SSLSocketChannel ?
+				((SSLSocketChannel)source).getWrappedSocketChannel():
+					source;
+				Pair<Pair<SocketChannel,SocketChannel>, ByteBuffer> attachment = new Pair<>();
+				attachment.setM1(new Pair<>(source, target));
+				attachment.setM2(ByteBuffer.allocate(65536));
+				SelectionKey key  = selectableSource.register(selector,
+						SelectionKey.OP_READ,
+						attachment);
+				keys.add(key);
+	}
+
+	public void run() {
+		try{
+			while(true) {
+				selector.select(50);
+				Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
+				while(iter.hasNext()) {
+					SelectionKey key = iter.next();
+					iter.remove();
+					if(key.isValid())dataAvailable(key);
+				}
+			}
+		}catch(Exception ex) {
+			logger.error(ex);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void dataAvailable(SelectionKey key) {
+		Pair<Pair<SocketChannel,SocketChannel>, ByteBuffer> attachment =
+				(Pair<Pair<SocketChannel,SocketChannel>, ByteBuffer>)key.attachment();
+
+		ByteBuffer buffer = attachment.getM2();
+		Pair<SocketChannel,SocketChannel> channels = attachment.getM1();
+		SocketChannel source = channels.getM1();
+		SocketChannel target = channels.getM2();
+		try{
+			buffer.clear();
+			int n = source.read(buffer);
+			if(n>0) {
+				buffer.flip();
+				ChannelUtils.writeFully(target, buffer);
+				logger.debug("{} bytes {} --> {}", n, source.getRemoteAddress(), target.getRemoteAddress());
+			}
+			else if(n==-1) {
+				logger.debug("Source shutdown, closing.");
+				IOUtils.closeQuietly(source);
+				IOUtils.closeQuietly(target);
+			}
+		}catch(IOException ioe) {
+			Log.logException("Error handling data move - closing.", ioe);
+			IOUtils.closeQuietly(source);
+			IOUtils.closeQuietly(target);
+		}
+	}
 }
