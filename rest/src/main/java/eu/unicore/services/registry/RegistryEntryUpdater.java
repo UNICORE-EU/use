@@ -37,6 +37,7 @@ import org.apache.logging.log4j.Logger;
 
 import eu.unicore.services.Home;
 import eu.unicore.services.Kernel;
+import eu.unicore.services.exceptions.ResourceUnknownException;
 import eu.unicore.services.impl.InstanceChecker;
 import eu.unicore.util.Log;
 
@@ -99,7 +100,10 @@ public class RegistryEntryUpdater implements InstanceChecker {
 				Log.logException("Error refreshing service entry for: "+memberAddress,e,logger);
 			}		
 		}
-
+		catch(ResourceUnknownException rue) {
+			// entry is gone
+			return false;
+		}
 		catch(Exception e){
 			Log.logException("Could not update registry entry "+serviceName+"/"+id,e,logger);
 		}
