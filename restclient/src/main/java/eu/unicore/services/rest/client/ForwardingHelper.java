@@ -31,6 +31,12 @@ import eu.unicore.util.Pair;
 import eu.unicore.util.SSLSocketChannel;
 import eu.unicore.util.httpclient.HttpUtils;
 
+/**
+ * Client-side helper class to establish port forwarding and handle
+ * the subsequent traffic.
+ *
+ * @author schuller
+ */
 public class ForwardingHelper {
 
 	protected static final Logger logger = Log.getLogger(Log.CLIENT, ForwardingHelper.class);
@@ -39,15 +45,27 @@ public class ForwardingHelper {
 
 	private final BaseClient baseClient;
 
+	/**
+	 * create a new ForwardingHelper, taking security settings
+	 * (authentication and user preferences)from the supplied BaseClient.
+	 *
+	 * @param baseClient - it is only used for handling authentication
+	 *        and user preferences, not for the actual HTTP communication
+	 */
 	public ForwardingHelper(BaseClient baseClient) {
 		this.baseClient = baseClient;
 	}
 
 	/**
-	 * 
-	 * @param endpoint
-	 * @param serviceHost - the backend service to connect to
-	 * @param servicePort - the backend service port to connect to
+	 * Open a port forwarding connection to the given endpoint
+	 * and return the client-side SocketChannel for exchanging
+	 * data with the backend service.
+	 *
+	 * The host/port of the backend service is either implicit
+	 * (the endpoint knows what to do) or encoded into the endpoint
+	 * using query parameters "?host=...&port=..."
+	 *
+	 * @param endpoint the URL to connect to.
 	 * @return SocketChannel
 	 * @throws Exception
 	 */
@@ -63,7 +81,7 @@ public class ForwardingHelper {
 		return s;
 	}
 
-	public SocketChannel openSocketChannel(URI u) throws Exception {
+	protected SocketChannel openSocketChannel(URI u) throws IOException {
 		SocketChannel s = SocketChannel.open(new InetSocketAddress(u.getHost(), u.getPort()));
 		s.configureBlocking(false);
 		if("http".equalsIgnoreCase(u.getScheme())){
@@ -78,8 +96,8 @@ public class ForwardingHelper {
 		else throw new IOException();
 	}
 
-	@SuppressWarnings("resource")
-	public void doHandshake(SocketChannel s, URI u, Header[] headers) throws Exception {
+	@SuppressWarnings("resource") // we do not want to close the channel of course
+	protected void doHandshake(SocketChannel s, URI u, Header[] headers) throws Exception {
 		OutputStream os = ChannelUtils.newOutputStream(s, 65536);
 		PrintWriter pw = new PrintWriter(os, true, Charset.forName("UTF-8"));
 		String path = u.getPath();
@@ -104,25 +122,26 @@ public class ForwardingHelper {
 			logger.debug("<-- {}", line);
 			if(line.length()==0)break;
 			if(first && line!=null && !line.startsWith("HTTP/1.1 101")) {
-				throw new IOException("Backend site cannot handle UNICORE-Socket-Forwarding");
+				throw new IOException("Endpoint <" + u.toString() +
+						"> cannot handle UNICORE-Socket-Forwarding");
 			}
 			first = false;
 		}
 	}
 
 	/**
-	 * Start bi-directional data forwarding between the channels
+	 * Start bi-directional data forwarding between the given two channels.
+	 * (You can add more than one pair of channels)
 	 *
-	 * @param channel1
-	 * @param channel2
+	 * @param alice - one channel
+	 * @param bob - the other channel
 	 */
-	public void startForwarding(SocketChannel channel1, SocketChannel channel2) throws IOException {
+	public void startForwarding(SocketChannel alice, SocketChannel bob) throws IOException {
 		selector = Selector.open();
-		attach(channel1, channel2);
-		attach(channel2, channel1);
+		attach(alice, bob);
+		attach(bob, alice);
 		run();
 	}
-
 
 	private Selector selector;
 
@@ -146,7 +165,7 @@ public class ForwardingHelper {
 
 	public void run() {
 		try{
-			while(true) {
+			while(selector.keys().size()>0) {
 				selector.select(50);
 				Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
 				while(iter.hasNext()) {
@@ -186,6 +205,7 @@ public class ForwardingHelper {
 			Log.logException("Error handling data move - closing.", ioe);
 			IOUtils.closeQuietly(source);
 			IOUtils.closeQuietly(target);
+			key.cancel();
 		}
 	}
 }
