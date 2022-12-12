@@ -151,8 +151,8 @@ public abstract class ServicesBase extends BaseRESTController {
 	public Response handleAction(@PathParam("action") String action, String json) throws Exception {
 		try {
 			JSONObject param = (json!=null && json.length()>0) ? new JSONObject(json) : new JSONObject();
-			doHandleAction(action, param);
-			ResponseBuilder rb = Response.noContent();
+			JSONObject reply = doHandleAction(action, param);
+			ResponseBuilder rb = reply==null ? Response.noContent() : Response.ok(reply.toString());
 			rb.type("application/json");
 			return rb.build();
 		} catch (Exception ex) {
@@ -162,8 +162,9 @@ public abstract class ServicesBase extends BaseRESTController {
 
 	/**
 	 * handle the named action
+	 * @return a reply (can be null) to return to the client
 	 */
-	protected void doHandleAction(String name, JSONObject o) throws Exception {
+	protected JSONObject doHandleAction(String name, JSONObject o) throws Exception {
 		throw new IllegalArgumentException("Undefined!");
 	}
 }
