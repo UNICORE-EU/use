@@ -355,12 +355,12 @@ public class BaseClient {
 		}
 		return key;
 	}
-	
+
 	protected ClassicHttpResponse execute(HttpUriRequestBase method) throws Exception {
 		ClassicHttpResponse response = null;
 		boolean execWithAuth = !useSessions;
 		String sessionKey = null;
-		
+
 		if(useSessions){
 			method.removeHeaders(SecuritySessionUtils.SESSION_ID_HEADER);
 			sessionKey = getSessionKey();
@@ -370,7 +370,7 @@ public class BaseClient {
 				response = client.executeOpen(null, method, HttpClientContext.create());
 				status = new StatusLine(response);
 				if(432==status.getStatusCode()){
-					// session is no longer valid
+					IOUtils.closeQuietly(response);
 					execWithAuth = true;
 				}
 			}

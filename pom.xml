@@ -70,7 +70,7 @@
     <compiler.fork>false</compiler.fork>
     <persistence.version>0.402</persistence.version>
     <secutils.version>3.4.0</secutils.version>
-    <seclib.version>6.0.3</seclib.version>
+    <seclib.version>6.0.4</seclib.version>
     <jaxb.version>2.3.3</jaxb.version>
     <json.version>20220924</json.version>
     <gson.version>2.9.1</gson.version>
