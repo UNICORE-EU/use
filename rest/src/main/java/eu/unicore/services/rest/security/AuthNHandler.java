@@ -102,7 +102,9 @@ public class AuthNHandler implements ContainerRequestFilter {
 			return doHandle(message);
 		}
 		catch(eu.unicore.security.SecurityException ex){
-			Log.logException("User authentication/authorisation failed", ex, logger);
+			if(logger.isDebugEnabled()) {
+				logger.debug(Log.createFaultMessage("User authentication failed", ex));
+			}
 			throw new WebApplicationException(ex, HttpStatus.SC_FORBIDDEN);
 		}
 	}
@@ -162,7 +164,6 @@ public class AuthNHandler implements ContainerRequestFilter {
 			try{
 				validateJWT(bearer, tokens);
 			}catch(Exception ex){
-				Log.logException("JWT trust delegation not accepted", ex, logger);
 				throw new WebApplicationException(ex, 403);
 			}
 		}

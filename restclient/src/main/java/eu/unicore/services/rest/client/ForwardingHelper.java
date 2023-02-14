@@ -11,11 +11,11 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+import java.util.function.Consumer;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -37,7 +37,7 @@ import eu.unicore.util.httpclient.HttpUtils;
  *
  * @author schuller
  */
-public class ForwardingHelper {
+public class ForwardingHelper implements Runnable {
 
 	protected static final Logger logger = Log.getLogger(Log.CLIENT, ForwardingHelper.class);
 
@@ -51,9 +51,11 @@ public class ForwardingHelper {
 	 *
 	 * @param baseClient - it is only used for handling authentication
 	 *        and user preferences, not for the actual HTTP communication
+	 * @throws IOException if the selector cannot be openend
 	 */
-	public ForwardingHelper(BaseClient baseClient) {
+	public ForwardingHelper(BaseClient baseClient) throws IOException {
 		this.baseClient = baseClient;
+		this.selector = Selector.open();
 	}
 
 	/**
@@ -137,32 +139,30 @@ public class ForwardingHelper {
 	 * @param bob - the other channel
 	 */
 	public void startForwarding(SocketChannel alice, SocketChannel bob) throws IOException {
-		selector = Selector.open();
 		attach(alice, bob);
 		attach(bob, alice);
-		run();
 	}
 
-	private Selector selector;
+	private final Selector selector;
 
-	private final List<SelectionKey> keys = new ArrayList<>();
+	public void accept(final ServerSocketChannel server, final Consumer<SocketChannel> acceptHandler) throws IOException {
+		server.register(selector, SelectionKey.OP_ACCEPT, acceptHandler);
+	}
 
-	protected void attach(final SocketChannel source, final SocketChannel target)
+	public void attach(final SocketChannel source, final SocketChannel target)
 			throws IOException {
 		source.configureBlocking(false);
 		target.configureBlocking(false);
 		SocketChannel selectableSource = source instanceof SSLSocketChannel ?
 				((SSLSocketChannel)source).getWrappedSocketChannel():
 					source;
-				Pair<Pair<SocketChannel,SocketChannel>, ByteBuffer> attachment = new Pair<>();
-				attachment.setM1(new Pair<>(source, target));
-				attachment.setM2(ByteBuffer.allocate(65536));
-				SelectionKey key  = selectableSource.register(selector,
-						SelectionKey.OP_READ,
-						attachment);
-				keys.add(key);
+		Pair<Pair<SocketChannel,SocketChannel>, ByteBuffer> attachment = new Pair<>();
+		attachment.setM1(new Pair<>(source, target));
+		attachment.setM2(ByteBuffer.allocate(65536));
+		selectableSource.register(selector, SelectionKey.OP_READ, attachment);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void run() {
 		try{
 			while(selector.keys().size()>0) {
@@ -171,7 +171,21 @@ public class ForwardingHelper {
 				while(iter.hasNext()) {
 					SelectionKey key = iter.next();
 					iter.remove();
-					if(key.isValid())dataAvailable(key);
+					if(key.isValid() && key.isReadable()) {
+						dataAvailable(key);
+					}
+					else if(key.isValid() && key.isAcceptable()) {
+						try {
+							Consumer<SocketChannel> handler =
+									(Consumer<SocketChannel>)key.attachment();
+							ServerSocketChannel ssc = (ServerSocketChannel)key.channel();
+							SocketChannel client = ssc.accept();
+							handler.accept(client);
+						}catch(Exception ex) {
+							logger.error(ex);
+							key.cancel();
+						}
+					}
 				}
 			}
 		}catch(Exception ex) {
@@ -208,4 +222,9 @@ public class ForwardingHelper {
 			key.cancel();
 		}
 	}
+
+	public Selector getSelector() {
+		return selector;
+	}
+
 }
