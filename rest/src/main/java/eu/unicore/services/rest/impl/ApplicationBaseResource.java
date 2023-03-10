@@ -11,6 +11,7 @@ import eu.unicore.security.Queue;
 import eu.unicore.security.Role;
 import eu.unicore.security.Xlogin;
 import eu.unicore.services.ExternalSystemConnector;
+import eu.unicore.services.rest.security.AuthNHandler;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 
 /**
@@ -59,6 +60,13 @@ public class ApplicationBaseResource extends RESTRendererBase {
 			rProps.put("availableQueues",q.getValidQueues());
 			props.put("queues",rProps);
 		}
+		try {
+			String method = (String)AuthZAttributeStore.getTokens().getContext()
+					.get(AuthNHandler.USER_AUTHN_METHOD);
+			if(method!=null) {
+				props.put("authenticationMethod", method);
+			}
+		}catch(Exception e) {}
 		return props;
 	}
 	

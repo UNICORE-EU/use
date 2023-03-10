@@ -63,6 +63,7 @@ public class PAMAuthenticator implements IAuthenticator {
 			tokens.setUserName(dn);
 			tokens.setConsignorTrusted(true);
 			storePAMInfo(unixUser, tokens);
+			tokens.getContext().put(AuthNHandler.USER_AUTHN_METHOD, "PAM");
 			logger.debug("Successfully authenticated (cached: {}) via {}: <{}>", cacheHit, this, dn);
 		}catch(Exception ex){
 			Log.logException("Error authenticating using PAM", ex, logger);

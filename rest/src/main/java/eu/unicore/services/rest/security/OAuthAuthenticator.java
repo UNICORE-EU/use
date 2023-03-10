@@ -122,6 +122,7 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 			if(!dnTemplate.equals(expanded)){
 				tokens.setUserName(expanded);
 				tokens.setConsignorTrusted(true);
+				tokens.getContext().put(AuthNHandler.USER_AUTHN_METHOD, "OAUTH");
 			}
 		}
 	}

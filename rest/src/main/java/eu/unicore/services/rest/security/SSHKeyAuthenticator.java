@@ -49,6 +49,7 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 	private long updateInterval = 600;
 	private boolean useAuthorizedKeys = true;
 	private String userInfo;
+	private String serverDN;
 
 	private final static Collection<String> s = new ArrayList<>(); 
 	static{
@@ -74,6 +75,9 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 				throw new ConfigurationException("Could not load user info class <"+userInfo+">", ex);
 			}
 		}
+		try {
+			serverDN = kernel.getContainerSecurityConfiguration().getCredential().getSubjectName();
+		}catch(Exception ex) {}
 	}
 
 	@Override
@@ -105,6 +109,7 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 			logger.info("{} --> <{}> {}", requestedUserName, dn, jwtMode? "(JWT)": "(proprietary token)");
 			tokens.setUserName(dn);
 			tokens.setConsignorTrusted(true);
+			tokens.getContext().put(AuthNHandler.USER_AUTHN_METHOD, "SSHKEY");
 			storeAttributes(requestedUserName, tokens);
 		}
 		return haveCredentials;
@@ -189,7 +194,7 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 					logger.error("Server config error: No public key stored for {}", username);
 					continue;
 				}
-				JWTUtils.verifyJWTToken(jwtToken, SSHUtils.readPubkey(af.sshkey));
+				JWTUtils.verifyJWTToken(jwtToken, SSHUtils.readPubkey(af.sshkey), serverDN);
 				return af.dn;
 			}
 		}

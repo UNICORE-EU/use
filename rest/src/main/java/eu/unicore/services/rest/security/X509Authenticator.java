@@ -75,6 +75,7 @@ public class X509Authenticator implements IAuthenticator, KernelInjectable  {
 		tokens.setUserName(dn);
 		tokens.setConsignor(certs);
 		tokens.setConsignorTrusted(true);
+		tokens.getContext().put(AuthNHandler.USER_AUTHN_METHOD, "X509");
 		logger.debug("Authenticated X.509 certificate (TLS): <{}>", dn);
 		return true;
 	}

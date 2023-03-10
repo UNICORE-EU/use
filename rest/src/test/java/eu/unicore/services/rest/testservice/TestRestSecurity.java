@@ -38,6 +38,7 @@ import eu.unicore.services.rest.client.IAuthCallback;
 import eu.unicore.services.rest.client.UsernamePassword;
 import eu.unicore.services.rest.jwt.JWTDelegation;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
+import eu.unicore.services.rest.security.AuthNHandler;
 import eu.unicore.services.rest.security.sshkey.PasswordSupplierImpl;
 import eu.unicore.services.rest.security.sshkey.SSHKey;
 import eu.unicore.services.rest.security.sshkey.SSHKeyUC;
@@ -135,6 +136,7 @@ public class TestRestSecurity {
 			Assert.assertEquals(dn, reply.getString("dn"));
 			Assert.assertEquals(issuer, reply.getString("td_consignor"));
 			Assert.assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
+			Assert.assertEquals("ETD", reply.getString("auth_method"));
 		}
 	}
 	
@@ -164,6 +166,7 @@ public class TestRestSecurity {
 			}
 			Assert.assertEquals(dn, reply.getString("dn"));
 			Assert.assertEquals(issuer, reply.getString("td_consignor"));
+			Assert.assertEquals("ETD", reply.getString("auth_method"));
 			Assert.assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
 		}
 		
@@ -188,12 +191,13 @@ public class TestRestSecurity {
 		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
 		JSONObject reply = bc.getJSON();
 		System.out.println("Service reply: "+reply.toString(2));
+		Assert.assertEquals("SSHKEY", reply.getString("auth_method"));
 	}
 
 	public static class MyApplication extends Application {
 		@Override
 		public Set<Class<?>> getClasses() {
-			Set<Class<?>>classes=new HashSet<Class<?>>();
+			Set<Class<?>>classes=new HashSet<>();
 			classes.add(MockResource.class);
 			return classes;
 		}
@@ -218,6 +222,8 @@ public class TestRestSecurity {
 				res.put("role", AuthZAttributeStore.getClient().getRole().getName());
 				res.put("td_status", AuthZAttributeStore.getTokens().isConsignorTrusted());
 				res.put("td_consignor", String.valueOf(AuthZAttributeStore.getTokens().getConsignorName()));
+				res.put("auth_method", String.valueOf(AuthZAttributeStore.getTokens().getContext().
+						get(AuthNHandler.USER_AUTHN_METHOD)));
 			}catch(Exception ex){
 				ex.printStackTrace();
 				res.put("error", Log.createFaultMessage("", ex));

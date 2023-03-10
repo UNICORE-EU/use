@@ -152,11 +152,11 @@ public class JWTUtils {
 		verifier.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
 		return verifier;
 	}
-	
-	public static void verifyJWTToken(String token, PublicKey pk) throws AuthenticationException {
+
+	public static void verifyJWTToken(String token, PublicKey pk, String allowedAudience) throws AuthenticationException {
 		try{
 			SignedJWT sig = SignedJWT.parse(token);
-			verifyClaims(sig.getJWTClaimsSet());
+			verifyClaims(sig.getJWTClaimsSet(), allowedAudience);
 			if(!sig.verify(getVerifier(pk))){
 				throw new BadJWTException("Signature verification failed!");
 			}
@@ -178,10 +178,10 @@ public class JWTUtils {
 		return sig.serialize();
 	}
 	
-	public static void verifyJWTToken(String token, String hmacSecret) throws AuthenticationException {
+	public static void verifyJWTToken(String token, String hmacSecret, String allowedAudience) throws AuthenticationException {
 		try{
 			SignedJWT sig = SignedJWT.parse(token);
-			verifyClaims(sig.getJWTClaimsSet());
+			verifyClaims(sig.getJWTClaimsSet(), allowedAudience);
 			if(!sig.verify(new MACVerifier(hmacSecret))){
 				throw new BadJWTException("Signature verification failed!");
 			}
@@ -199,10 +199,16 @@ public class JWTUtils {
 		}
 	}
 	
-	static void verifyClaims(JWTClaimsSet claims) throws BadJWTException {
+	static void verifyClaims(JWTClaimsSet claims, String serverDN) throws BadJWTException {
 		Set<String>requiredClaims = new HashSet<>();
 		requiredClaims.add("exp");
-		new DefaultJWTClaimsVerifier<SecurityContext>(null, requiredClaims).verify(claims, null);
+		// only check audience if it is in the JWT
+		String requiredAudience = null;
+		if(!claims.getAudience().isEmpty()) {
+			requiredAudience = serverDN;
+		}
+		new DefaultJWTClaimsVerifier<SecurityContext>(requiredAudience, null, requiredClaims)
+			.verify(claims, null);
 	}
 	
 }

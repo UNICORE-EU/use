@@ -63,23 +63,30 @@ public class AuthNHandler implements ContainerRequestFilter {
 	// special header used by the client for sending preferred xlogin, primary group and role
 	public final static String USER_PREFERENCES_HEADER = "X-UNICORE-User-Preferences";
 
+	// key for storing the authentication method in the security tokens
+	public final static String USER_AUTHN_METHOD = "User-Authentication-Method";
+	// key for storing the "renewable" property of a ETD token in the security tokens
+	public final static String ETD_RENEWABLE = "ETD-Token-Renewable";
+
 	private final SecuritySessionStore sessionStore;
 
 	private final boolean useSessions;
 
 	private final JWTHelper jwt;
 	
+	private String serverDN;
+
 	public AuthNHandler(Kernel kernel, SecuritySessionStore sessionStore){
+		IContainerSecurityConfiguration secConfig = kernel.getContainerSecurityConfiguration();
 		this.kernel = kernel;
-		this.useSessions = kernel.getContainerSecurityConfiguration().isSessionsEnabled();
+		this.useSessions = secConfig.isSessionsEnabled();
 		this.sessionStore = sessionStore;
 
 		JWTServerProperties p = new JWTServerProperties(kernel.getContainerProperties().getRawProperties());
 		PubkeyCache cache = PubkeyCache.get(kernel);
-		IContainerSecurityConfiguration secConfig = kernel.getContainerSecurityConfiguration();
 		try{
-			cache.update(secConfig.getCredential().getSubjectName(), 
-					secConfig.getCredential().getCertificate().getPublicKey());
+			this.serverDN = secConfig.getCredential().getSubjectName();
+			cache.update(this.serverDN,	secConfig.getCredential().getCertificate().getPublicKey());
 		}catch(Exception ex){}
 		this.jwt = new JWTHelper(p, kernel.getContainerSecurityConfiguration(), cache);
 	}
@@ -189,10 +196,13 @@ public class AuthNHandler implements ContainerRequestFilter {
 		boolean isDelegationToken = etd && 
 				subject!=null && issuer!=null && subject!=issuer;
 		if(isDelegationToken){
-			jwt.verifyJWTToken(bearerToken);
+			jwt.verifyJWTToken(bearerToken, serverDN);
 			tokens.setUserName(subject);
 			tokens.setConsignorTrusted(true);
 			tokens.setConsignorName(issuer);
+			tokens.getContext().put(USER_AUTHN_METHOD, "ETD");
+			Boolean renewable = Boolean.parseBoolean(payload.optString("renewable", "false"));
+			tokens.getContext().put(ETD_RENEWABLE, renewable);
 			logger.debug("Trust delegated authentication as <{}> via JWT issued by <{}>", subject, issuer);
 		}
 	}

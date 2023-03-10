@@ -68,6 +68,7 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 			if(dn != null){
 				tokens.setUserName(dn);
 				tokens.setConsignorTrusted(true);
+				tokens.getContext().put(AuthNHandler.USER_AUTHN_METHOD, "UNITY-SAML");
 			}	
 		}
 		else{

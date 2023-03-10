@@ -25,14 +25,14 @@ public class JWTHelper {
 	
 	private final IContainerSecurityConfiguration securityProperties;
 	
-	private final String issuer;
+	private final String serverDN;
 	
 	private final PubkeyCache keyCache;
 	
 	public JWTHelper(JWTServerProperties preferences, IContainerSecurityConfiguration securityProperties, PubkeyCache keyCache){
 		this.preferences = preferences;
 		this.securityProperties = securityProperties;
-		this.issuer = securityProperties.getCredential()!=null?
+		this.serverDN = securityProperties.getCredential()!=null?
 				securityProperties.getCredential().getSubjectName() : Client.ANONYMOUS_CLIENT_DN;
 		this.keyCache = keyCache;
 		loadLocalTrustedIssuers();
@@ -44,26 +44,26 @@ public class JWTHelper {
 	
 	public String createETDToken(String user, long lifetime) throws Exception {
 		if(preferences.getHMACSecret()!=null){
-			return JWTUtils.createETDToken(user, lifetime, issuer, 
+			return JWTUtils.createETDToken(user, lifetime, serverDN, 
 					preferences.getHMACSecret());
 		}
 		else {
-			return JWTUtils.createETDToken(user, lifetime, issuer, 
+			return JWTUtils.createETDToken(user, lifetime, serverDN, 
 					securityProperties.getCredential().getKey());
 		}
 	}
 
-	public void verifyJWTToken(String token) throws Exception {
+	public void verifyJWTToken(String token, String requiredAudience) throws Exception {
 		if(preferences.getHMACSecret()!=null && JWTUtils.isHMAC(token)) {
 			try{
-				JWTUtils.verifyJWTToken(token, preferences.getHMACSecret());
+				JWTUtils.verifyJWTToken(token, preferences.getHMACSecret(), requiredAudience);
 				return;
 			}catch(Exception ex) {}
 		}
 		String issuer = JWTUtils.getIssuer(token);
 		PublicKey pk = keyCache.getPublicKey(issuer);
 		if(pk==null) throw new AuthenticationException("No public key is available for <"+issuer+">");
-		JWTUtils.verifyJWTToken(token, pk);
+		JWTUtils.verifyJWTToken(token, pk, requiredAudience);
 	}
 	
 	private void loadLocalTrustedIssuers() {

@@ -38,7 +38,7 @@ public class TestJWTUtils {
 		System.out.println("Token: "+token);
 		System.out.println("Payload: "+JWTUtils.getPayload(token));
 		System.out.println("Headers: "+JWTUtils.getHeaders(token));
-		jwt.verifyJWTToken(token);
+		jwt.verifyJWTToken(token, null);
 	}
 
 	@Test
@@ -51,7 +51,7 @@ public class TestJWTUtils {
 		System.out.println("Token: "+token);
 		System.out.println("Payload: "+JWTUtils.getPayload(token));
 		System.out.println("Headers: "+JWTUtils.getHeaders(token));
-		jwt.verifyJWTToken(token);
+		jwt.verifyJWTToken(token, null);
 	}
 	
 	@Test(expected=AuthenticationException.class)
@@ -68,7 +68,7 @@ public class TestJWTUtils {
 		System.out.println("Token: "+token);
 		System.out.println("Payload: "+JWTUtils.getPayload(token));
 		System.out.println("Headers: "+JWTUtils.getHeaders(token));
-		jwt.verifyJWTToken(token);
+		jwt.verifyJWTToken(token, null);
 	}
 
 	private PubkeyCache getKeyCache(ContainerSecurityProperties cp){

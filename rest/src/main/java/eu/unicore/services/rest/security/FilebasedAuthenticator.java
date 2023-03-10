@@ -72,6 +72,7 @@ public class FilebasedAuthenticator implements IAuthenticator {
 		if(dn != null){
 			tokens.setUserName(dn);
 			tokens.setConsignorTrusted(true);
+			tokens.getContext().put(AuthNHandler.USER_AUTHN_METHOD, "PASSWORD_FILE");
 			logger.debug("Authenticated via local username/password: <{}>", dn);
 		}
 		return true;
