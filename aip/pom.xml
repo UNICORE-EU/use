@@ -27,7 +27,7 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>de.fzj.unicore.xuudb</groupId>
+      <groupId>eu.unicore.xuudb</groupId>
       <artifactId>xuudb-common</artifactId>
     </dependency>
   </dependencies>
