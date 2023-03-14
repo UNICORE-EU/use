@@ -78,7 +78,8 @@ public abstract class ServicesBase extends BaseRESTController {
 			) throws Exception {
 		try{
 			List<String>uids = getAccessibleResources(tags);
-			PagingHelper ph = new PagingHelper(getBaseURL(), getBaseURL()+"/"+getPathComponent(), getResourcesName());
+			String base = getBaseURL()+"/"+getPathComponent();
+			PagingHelper ph = new PagingHelper(base, base, getResourcesName());
 			JSONObject o = ph.renderJson(offset, num, uids);
 			customizeBaseProperties(o);
 

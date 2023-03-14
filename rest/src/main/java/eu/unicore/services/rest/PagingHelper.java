@@ -74,7 +74,7 @@ public class PagingHelper {
 	 * @param max
 	 */
 	public Collection<Link> getLinks(int offset, int num, int max){
-		Collection<Link> links = new ArrayList<Link>();
+		Collection<Link> links = new ArrayList<>();
 		
 		if(offset+num<max){
 			int batch = Math.min(num, max-num);
