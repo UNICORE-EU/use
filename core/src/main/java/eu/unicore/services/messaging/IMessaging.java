@@ -34,7 +34,7 @@
 package eu.unicore.services.messaging;
 
 /**
- * Provides access to the messaging system of WSRFlite
+ * Provides access to the messaging system of USE
  * 
  * @author schuller
  */

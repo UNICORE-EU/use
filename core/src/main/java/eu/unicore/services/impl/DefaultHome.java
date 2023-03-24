@@ -385,7 +385,7 @@ public abstract class DefaultHome implements Home {
 		}
 
 		private String buildFullServiceID(String resourceID){
-			return kernel.getContainerProperties().getBaseUrl()+"/"+serviceName+"?res="+resourceID;
+			return serviceName+":"+resourceID;
 		}
 
 		@Override

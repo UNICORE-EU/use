@@ -25,7 +25,7 @@ public class PostInvokeHandler extends AbstractPhaseInterceptor<Message> {
 		cleanup(message, false);
 	}
 
-
+	@Override
 	public void handleMessage(Message message) {
 		handleSession(message);
 		cleanup(message, true);
@@ -49,7 +49,6 @@ public class PostInvokeHandler extends AbstractPhaseInterceptor<Message> {
 
 	private void cleanup(Message message, boolean storeChanges){
 		AuthZAttributeStore.clear();
-
 		Resource res = (Resource)message.getExchange().get(USERestInvoker.LOCKEDKEY);
 		if(res != null){
 			Home home = (Home)message.getExchange().get(USERestInvoker.HOME);

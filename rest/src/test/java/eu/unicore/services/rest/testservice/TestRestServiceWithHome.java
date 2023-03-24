@@ -42,6 +42,7 @@ import eu.unicore.services.InitParameters;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Resource;
 import eu.unicore.services.impl.DefaultHome;
+import eu.unicore.services.messaging.IMessagingChannel;
 import eu.unicore.services.messaging.Message;
 import eu.unicore.services.rest.Link;
 import eu.unicore.services.rest.RestService;
@@ -147,8 +148,10 @@ public class TestRestServiceWithHome {
 		// check messages to resources are processed properly when using the
 		// REST interface
 		CounterResource.processedMessages=0;
-		k.getMessaging().getChannel("my_counter").publish(new Message());
-		k.getMessaging().getChannel("my_counter").publish(new Message());
+		IMessagingChannel ch = k.getMessaging().getChannel("my_counter");
+		ch.publish(new Message());
+		ch.publish(new Message());
+		ch.flush();
 		client.getJSON();
 		assertEquals(2, CounterResource.processedMessages);
 		CounterResource.processedMessages=0;
@@ -342,6 +345,11 @@ public class TestRestServiceWithHome {
 		protected Map<String, Object> getProperties() throws Exception {
 			if(fail_on_getproperties)throw new Exception("Failure for testing");
 			return super.getProperties();
+		}
+
+		@Override
+		public boolean usesKernelMessaging() {
+			return true;
 		}
 
 	}

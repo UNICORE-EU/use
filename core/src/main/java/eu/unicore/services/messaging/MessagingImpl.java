@@ -37,8 +37,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.util.BlockingArrayQueue;
 
 import de.fzj.unicore.persist.Persist;
 import de.fzj.unicore.persist.PersistenceException;
@@ -62,10 +65,17 @@ public class MessagingImpl implements IMessaging{
 
 	private final PersistenceProperties persistenceProperties;
 
+	private final Thread messagingWriteThread;
+	
+	final BlockingQueue<MessageBean> queue;
+	
 	public MessagingImpl(PersistenceProperties kernelCfg)throws MessagingException{
 		this.persistenceProperties=kernelCfg;
 		try{
 			store=createStore();
+			this.queue = new BlockingArrayQueue<MessageBean>(256, 16, 1024);
+			messagingWriteThread = new MessageWriteThread(queue,store);
+			messagingWriteThread.start();
 		}catch(PersistenceException pe){
 			throw new MessagingException(pe);
 		}
@@ -73,8 +83,7 @@ public class MessagingImpl implements IMessaging{
 	}
 
 	protected Persist<MessageBean>createStore()throws PersistenceException{
-		Persist<MessageBean>res=PersistenceFactory.get(persistenceProperties).getPersist(MessageBean.class);
-		return res;
+		return PersistenceFactory.get(persistenceProperties).getPersist(MessageBean.class);
 	} 
 	
 	public int getStoredMessages()throws Exception{
@@ -106,7 +115,7 @@ public class MessagingImpl implements IMessaging{
 	 * or call
 	 */
 	public PullPoint getPullPoint(final String destination) throws MessagingException {
-		final List<Message>messages=new ArrayList<Message>();
+		final List<Message>messages = new ArrayList<>();
 		synchronized(store){
 			try{
 				for(String messageID: store.getIDs("destination",destination)){
@@ -158,9 +167,17 @@ public class MessagingImpl implements IMessaging{
 		return new IMessagingChannel(){
 			public void publish(Message message) throws MessagingException{
 				try{
-					store.write(new MessageBean(message.getMessageId(),name,message));
+					queue.offer(new MessageBean(message.getMessageId(),name,message));
 				}catch(Exception ex){
 					throw new MessagingException(ex);
+				}
+			}
+			
+			public void flush() throws MessagingException {
+				while(queue.size()>0) {
+					try{
+						Thread.sleep(1000);
+					}catch(InterruptedException te) {}
 				}
 			}
 		};
@@ -179,5 +196,30 @@ public class MessagingImpl implements IMessaging{
 		}
 	}
 
+	public static class MessageWriteThread extends Thread {
+		
+		private final BlockingQueue<MessageBean> queue;
+
+		private final Persist<MessageBean> store;
+
+		public MessageWriteThread(BlockingQueue<MessageBean> queue, Persist<MessageBean> store) {
+			this.setName("use-messaging-writer");
+			this.queue = queue;
+			this.store = store;
+		}
+
+		public void run() {
+			while(true) {
+				try{
+					MessageBean msg = queue.poll(60, TimeUnit.SECONDS);
+					if(msg!=null)store.write(msg);
+				}catch(InterruptedException te) {
+					// ignored
+				}catch(Exception ex) {
+					logger.error(ex);
+				}
+			}	
+		}
+	}
 
 }

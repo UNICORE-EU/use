@@ -7,7 +7,6 @@ import java.util.Map;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.services.Kernel;
-import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.util.configuration.ConfigurationException;
 
 /**

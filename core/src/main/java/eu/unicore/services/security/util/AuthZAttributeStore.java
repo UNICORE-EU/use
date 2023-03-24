@@ -35,6 +35,7 @@ package eu.unicore.services.security.util;
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.services.security.SecurityManager;
+import eu.unicore.services.utils.TimeProfile;
 
 /**
  * Helper class for storing authorization information 
@@ -51,7 +52,9 @@ public class AuthZAttributeStore {
 
 	private AuthZAttributeStore (){}
 	
-	private static ThreadLocal<Client> client=new ThreadLocal<Client>();
+	private static ThreadLocal<Client> client=new ThreadLocal<>();
+
+	private static ThreadLocal<TimeProfile> timeProfile = new ThreadLocal<>();
 	
 	public static Client getClient(){
 		Client ret = client.get();
@@ -74,8 +77,18 @@ public class AuthZAttributeStore {
 	public static SecurityTokens getTokens(){
 		return getClient().getSecurityTokens();
 	}
-	
+
+	public static TimeProfile getTimeProfile(){
+		TimeProfile ret = timeProfile.get();
+		if(ret==null) {
+			ret = new TimeProfile(Thread.currentThread().getName());
+			timeProfile.set(ret);
+		}
+		return ret;
+	}
+
 	public static void clear(){
 		client.remove();
+		timeProfile.remove();
 	}
 }

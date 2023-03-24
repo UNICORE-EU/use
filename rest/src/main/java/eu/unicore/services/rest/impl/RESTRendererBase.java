@@ -65,6 +65,10 @@ public abstract class RESTRendererBase implements KernelInjectable {
 		this.kernel = kernel;
 	}
 
+	public boolean usesKernelMessaging() {
+		return false;
+	}
+
 	/**
 	 * Update/create the links for the current state of the resource.
 	 * (Invoked when the resource's representation is retrieved)

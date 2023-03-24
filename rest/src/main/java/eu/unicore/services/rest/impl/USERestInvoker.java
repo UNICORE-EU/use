@@ -39,6 +39,7 @@ import eu.unicore.services.security.SecurityManager;
 import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.services.security.util.ResourceDescriptor;
+import eu.unicore.services.utils.TimeProfile;
 import eu.unicore.util.Log;
 
 public class USERestInvoker extends JAXRSInvoker {
@@ -84,7 +85,13 @@ public class USERestInvoker extends JAXRSInvoker {
 		if(!kernel.isAvailable()){
 			throw new ResourceUnavailableException("Service container is <" + kernel.getState() + ">, not (yet) operational.");
 		}
-		return super.invoke(exchange, request);
+		TimeProfile tp = AuthZAttributeStore.getTimeProfile();
+		Object res = super.invoke(exchange, request);
+		if(tp.isEnabled()) {
+			tp.time("exit");
+			tp.log();
+		}
+		return res;
 	}
 	
 	@Override
@@ -109,7 +116,7 @@ public class USERestInvoker extends JAXRSInvoker {
 		final OperationResourceInfo ori = exchange.get(OperationResourceInfo.class);
 		String action = ori.getHttpMethod();
 		Method method = ori.getMethodToInvoke();
-		
+
 		// is this a sub-resource resolution? 
 		// TODO is there a safer way in CXF to decide this?
 		boolean isSubresource = action == null;
@@ -139,7 +146,8 @@ public class USERestInvoker extends JAXRSInvoker {
 			BaseRESTController br = (BaseRESTController)o;
 			br.setHome(home);
 			try{
-				hasMessages = resourceID!=null && kernel.getMessaging().hasMessages(resourceID);
+				hasMessages = resourceID!=null && br.usesKernelMessaging()
+						&& kernel.getMessaging().hasMessages(resourceID);
 				if(hasMessages)exchange.put(HAVEMESSAGESKEY, Boolean.TRUE);
 			}catch(MessagingException e){
 				Log.logException("Error getting messages for "+resourceID,e,logger);
@@ -174,14 +182,10 @@ public class USERestInvoker extends JAXRSInvoker {
 		if(!isSubresource){
 			accessControl(serviceName, home, resourceID, action, opType, r, exchange);
 		}
-		
 		if(r!=null){
 			r.activate();
 		}
-		
-		synchronized (callFrequency) {
-			callFrequency.mark();
-		}
+		callFrequency.mark();
 	}
 	
 	protected void accessControl(String serviceName, Home home, String resourceID, String action, OperationType opType, Resource r, Exchange exchange)

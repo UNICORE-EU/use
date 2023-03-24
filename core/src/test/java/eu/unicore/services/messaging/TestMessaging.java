@@ -80,7 +80,7 @@ public class TestMessaging extends TestCase {
 		
 		p.publish(m1);
 		p.publish(m2);
-		
+		p.flush();
 		assertEquals(2, sm.getStoredMessages());
 		
 		PullPoint pull=sm.getPullPoint("test123");
@@ -97,7 +97,8 @@ public class TestMessaging extends TestCase {
 		
 		p.publish(m1);
 		p.publish(m2);
-		
+		p.flush();
+
 		IMessagingChannel p2=sm.getChannel("test123");
 		
 		m1=new Message("message3");
@@ -105,7 +106,8 @@ public class TestMessaging extends TestCase {
 		
 		p2.publish(m1);
 		p2.publish(m2);
-		
+		p2.flush();
+
 		assertEquals(sm.getStoredMessages(),4);
 		
 		
@@ -132,7 +134,7 @@ public class TestMessaging extends TestCase {
 		p.publish(new Message("message1"));
 		p.publish(new Message("message2"));
 		p.publish(new Message("message3"));
-		
+		p.flush();
 		assertTrue(sm.hasMessages("test123"));
 		PullPoint pp=sm.getPullPoint("test123");
 		assertFalse(sm.hasMessages("test123"));

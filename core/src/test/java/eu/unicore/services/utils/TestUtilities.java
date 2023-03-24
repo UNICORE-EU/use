@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.security.util.AuthZAttributeStore;
 
 public class TestUtilities {
 	
@@ -82,6 +83,15 @@ public class TestUtilities {
 		assertEquals(true,cb.isOK());
 		assertFalse(cb.getValue().contains("some error"));
 		assertTrue(cb.getName().contains("test"));
+	}
+	
+	@Test
+	public void testTimeProfile()throws Exception {
+		TimeProfile tp = AuthZAttributeStore.getTimeProfile();
+		tp.time("something");
+		Thread.sleep(100);
+		tp.time("some_other_thing");
+		System.out.println(tp.toString());
 	}
 
 }
