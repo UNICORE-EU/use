@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.persist.Persist;
+import eu.unicore.persist.Persist;
 import eu.unicore.util.ConcurrentAccess;
 import eu.unicore.util.Log;
 

@@ -8,11 +8,11 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
-import de.fzj.unicore.persist.annotations.Column;
-import de.fzj.unicore.persist.annotations.ID;
-import de.fzj.unicore.persist.annotations.Table;
-import de.fzj.unicore.persist.util.GSONConverter;
-import de.fzj.unicore.persist.util.JSON;
+import eu.unicore.persist.annotations.Column;
+import eu.unicore.persist.annotations.ID;
+import eu.unicore.persist.annotations.Table;
+import eu.unicore.persist.util.GSONConverter;
+import eu.unicore.persist.util.JSON;
 import eu.unicore.services.messaging.Message;
 
 @Table(name="MessageQueueStorage")

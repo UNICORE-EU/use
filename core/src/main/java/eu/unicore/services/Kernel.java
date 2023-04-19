@@ -50,8 +50,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.codahale.metrics.MetricRegistry;
 
-import de.fzj.unicore.persist.PersistenceFactory;
-import de.fzj.unicore.persist.PersistenceProperties;
+import eu.unicore.persist.PersistenceFactory;
+import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.security.wsutil.SecuritySessionStore;
 import eu.unicore.services.admin.AdminAction;
 import eu.unicore.services.admin.AdminActionLoader;

@@ -36,9 +36,9 @@ package eu.unicore.services.persistence;
 import java.io.Serializable;
 import java.util.Calendar;
 
-import de.fzj.unicore.persist.annotations.Column;
-import de.fzj.unicore.persist.annotations.ID;
-import de.fzj.unicore.persist.annotations.Table;
+import eu.unicore.persist.annotations.Column;
+import eu.unicore.persist.annotations.ID;
+import eu.unicore.persist.annotations.Table;
 
 /**
  * for persisting per-instance information relevant to the container, such as 

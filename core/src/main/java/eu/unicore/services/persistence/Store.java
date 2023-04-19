@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import de.fzj.unicore.persist.PersistenceException;
+import eu.unicore.persist.PersistenceException;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Resource;
 
@@ -62,11 +62,6 @@ public interface Store {
 	 * shutdown the store
 	 */
 	public void shutdown();
-	
-	/**
-	 * force any outstanding writes (usually only necessary for testing)
-	 */
-	public void flush() throws Exception;
 	
 	/**
 	 * persist the given Resource

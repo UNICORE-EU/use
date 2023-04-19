@@ -4,7 +4,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
-import de.fzj.unicore.persist.PersistenceException;
+import eu.unicore.persist.PersistenceException;
 import eu.unicore.security.Client;
 import eu.unicore.services.exceptions.ResourceNotCreatedException;
 import eu.unicore.services.exceptions.ResourceUnavailableException;

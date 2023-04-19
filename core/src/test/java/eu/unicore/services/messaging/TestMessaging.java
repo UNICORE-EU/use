@@ -41,7 +41,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.fzj.unicore.persist.PersistenceProperties;
+import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.TestConfigUtil;
 import junit.framework.TestCase;

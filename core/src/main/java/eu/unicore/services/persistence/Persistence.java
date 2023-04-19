@@ -8,11 +8,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.persist.Persist;
-import de.fzj.unicore.persist.PersistenceFactory;
-import de.fzj.unicore.persist.PersistenceProperties;
-import de.fzj.unicore.persist.impl.PersistImpl;
-import de.fzj.unicore.persist.impl.PersistenceDescriptor;
+import eu.unicore.persist.Persist;
+import eu.unicore.persist.PersistenceFactory;
+import eu.unicore.persist.PersistenceProperties;
+import eu.unicore.persist.impl.PersistImpl;
+import eu.unicore.persist.impl.PersistenceDescriptor;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.exceptions.UnableToSetTerminationTimeException;
 import eu.unicore.util.Log;
@@ -171,7 +171,4 @@ public class Persistence extends AbstractStore{
 		return ((PersistImpl<ResourceBean>)p).getCacheHits();
 	}
 
-	public void flush(){
-		p.flush();
-	}
 }

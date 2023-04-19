@@ -1,7 +1,7 @@
 package eu.unicore.services.persistence;
 
-import de.fzj.unicore.persist.impl.InMemory;
-import de.fzj.unicore.persist.impl.LockSupport;
+import eu.unicore.persist.impl.InMemory;
+import eu.unicore.persist.impl.LockSupport;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.impl.ResourceImpl;
 import eu.unicore.services.security.TestConfigUtil;

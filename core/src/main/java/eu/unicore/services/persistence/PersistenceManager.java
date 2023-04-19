@@ -39,7 +39,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.persist.impl.LockSupport;
+import eu.unicore.persist.impl.LockSupport;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Resource;

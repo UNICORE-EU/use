@@ -40,7 +40,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 
-import de.fzj.unicore.persist.PersistenceProperties;
+import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.persistence.Persistence;
 import eu.unicore.services.persistence.Store;

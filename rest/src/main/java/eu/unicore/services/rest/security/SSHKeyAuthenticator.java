@@ -106,7 +106,7 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		if(authInfo!=null){
 			String requestedUserName = authInfo.getM1();
 			String dn = authInfo.getM2();			
-			logger.info("{} --> <{}> {}", requestedUserName, dn, jwtMode? "(JWT)": "(proprietary token)");
+			logger.debug("{} --> <{}> {}", requestedUserName, dn, jwtMode? "(JWT)": "(proprietary token)");
 			tokens.setUserName(dn);
 			tokens.setConsignorTrusted(true);
 			tokens.getContext().put(AuthNHandler.USER_AUTHN_METHOD, "SSHKEY");

@@ -36,9 +36,9 @@ package eu.unicore.services.persistence;
 import java.io.Serializable;
 import java.util.Set;
 
-import de.fzj.unicore.persist.annotations.Column;
-import de.fzj.unicore.persist.annotations.ID;
-import de.fzj.unicore.persist.util.JSON;
+import eu.unicore.persist.annotations.Column;
+import eu.unicore.persist.annotations.ID;
+import eu.unicore.persist.util.JSON;
 import eu.unicore.services.Model;
 
 /**

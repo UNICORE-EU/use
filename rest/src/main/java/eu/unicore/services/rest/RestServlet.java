@@ -14,11 +14,11 @@ import org.eclipse.jetty.server.HttpChannel;
 import org.eclipse.jetty.server.HttpTransport;
 import org.eclipse.jetty.server.Request;
 
+import eu.unicore.util.Log;
 import eu.unicore.util.jetty.forwarding.Forwarder;
 import eu.unicore.util.jetty.forwarding.ForwardingConnection;
 import eu.unicore.util.jetty.forwarding.UpgradeHttpServletRequest;
 import eu.unicore.util.jetty.forwarding.UpgradeHttpServletResponse;
-import eu.unicore.util.Log;
 
 public class RestServlet extends CXFNonSpringServlet {
 	

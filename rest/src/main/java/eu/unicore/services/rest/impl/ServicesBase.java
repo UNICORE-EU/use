@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.fzj.unicore.persist.PersistenceException;
+import eu.unicore.persist.PersistenceException;
 import eu.unicore.services.rest.Link;
 import eu.unicore.services.rest.PagingHelper;
 import eu.unicore.services.rest.RESTUtils;

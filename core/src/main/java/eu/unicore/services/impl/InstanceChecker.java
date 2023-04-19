@@ -33,7 +33,7 @@
 
 package eu.unicore.services.impl;
 
-import de.fzj.unicore.persist.PersistenceException;
+import eu.unicore.persist.PersistenceException;
 import eu.unicore.services.Home;
 import eu.unicore.services.exceptions.ResourceUnknownException;
 

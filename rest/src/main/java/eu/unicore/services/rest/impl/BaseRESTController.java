@@ -28,7 +28,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.fzj.unicore.persist.PersistenceException;
+import eu.unicore.persist.PersistenceException;
 import eu.unicore.security.Client;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExtendedResourceStatus;

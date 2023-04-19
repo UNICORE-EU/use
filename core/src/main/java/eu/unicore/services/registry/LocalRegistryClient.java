@@ -5,7 +5,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-import de.fzj.unicore.persist.PersistenceException;
+import eu.unicore.persist.PersistenceException;
 import eu.unicore.services.Home;
 import eu.unicore.services.Kernel;
 

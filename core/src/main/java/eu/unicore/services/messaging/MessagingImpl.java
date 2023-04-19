@@ -43,10 +43,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.util.BlockingArrayQueue;
 
-import de.fzj.unicore.persist.Persist;
-import de.fzj.unicore.persist.PersistenceException;
-import de.fzj.unicore.persist.PersistenceFactory;
-import de.fzj.unicore.persist.PersistenceProperties;
+import eu.unicore.persist.Persist;
+import eu.unicore.persist.PersistenceException;
+import eu.unicore.persist.PersistenceFactory;
+import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.services.messaging.impl.MessageBean;
 import eu.unicore.util.Log;
 

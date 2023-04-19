@@ -19,7 +19,7 @@ import org.apache.hc.core5.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.fzj.unicore.persist.PersistenceException;
+import eu.unicore.persist.PersistenceException;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.registry.RegistryImpl;
 import eu.unicore.services.rest.USEResource;

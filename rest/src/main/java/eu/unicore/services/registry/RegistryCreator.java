@@ -8,8 +8,8 @@ import java.util.concurrent.locks.Lock;
 
 import org.apache.logging.log4j.Logger;
 
-import de.fzj.unicore.persist.PersistenceException;
-import de.fzj.unicore.persist.impl.LockSupport;
+import eu.unicore.persist.PersistenceException;
+import eu.unicore.persist.impl.LockSupport;
 import eu.unicore.services.Home;
 import eu.unicore.services.InitParameters;
 import eu.unicore.services.InitParameters.TerminationMode;

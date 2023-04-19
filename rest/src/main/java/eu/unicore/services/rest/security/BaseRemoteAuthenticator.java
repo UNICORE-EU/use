@@ -111,7 +111,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 				logger.debug("Successfully authenticated (cached: {}) via {}: <{}>", cacheHit, this, dn);
 			}
 		}catch(Exception ex){
-			Log.logException("Error authenticating using "+address, ex, logger);
+			logger.debug("Error authenticating at {}: {}", address, ex.getMessage());
 		}
 		return true;
 	}
