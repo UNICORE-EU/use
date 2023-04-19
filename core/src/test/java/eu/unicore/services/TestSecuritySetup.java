@@ -24,7 +24,8 @@ public class TestSecuritySetup extends TestCase
 			"container.security.credential.password=the!njs\n" +
 			"container.security.credential.keyAlias=unicorex\n" +
 			"container.security.accesscontrol=false\n" +
-			"container.security.gateway.enable=false";
+			"container.security.gateway.enable=false\n" +
+		    "persistence.directory=/tmp";
 
 	private String p2 = "container.security.truststore.keystorePath=src/test/resources/conf/truststore.jks\n" +
 			"container.security.truststore.keystorePassword=\n" +
@@ -34,7 +35,8 @@ public class TestSecuritySetup extends TestCase
 			"container.security.credential.password=the!njs\n" +
 			"container.security.credential.keyAlias=unicorex\n" +
 			"container.security.accesscontrol=false\n" +
-			"container.security.gateway.enable=false";
+			"container.security.gateway.enable=false\n" +
+			"persistence.directory=/tmp";
 
 	private String p3 = "container.security.truststore.keystorePath=src/test/resources/conf/truststore.jks\n" +
 			"container.security.truststore.keystorePassword=unicore\n" +
@@ -44,7 +46,8 @@ public class TestSecuritySetup extends TestCase
 			"container.security.credential.password=\n" +
 			"container.security.credential.keyAlias=unicorex\n" +
 			"container.security.accesscontrol=false\n" +
-			"container.security.gateway.enable=false";
+			"container.security.gateway.enable=false\n" +
+			"persistence.directory=/tmp";
 
 	public void testInvalidSettings()
 	{
