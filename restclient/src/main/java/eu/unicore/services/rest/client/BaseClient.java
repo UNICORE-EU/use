@@ -266,9 +266,9 @@ public class BaseClient {
 		post.setHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
 		if(content!=null)post.setEntity(new StringEntity(content.toString(), ContentType.APPLICATION_JSON));
 		try(ClassicHttpResponse response = execute(post)){
-			return response.getFirstHeader("Location").getValue();
-		}catch(Exception ex){}
-		return null;
+			Header l = response.getFirstHeader("Location");
+			return l!=null? l.getValue():null;
+		}
 	}
 	
 	/**
