@@ -11,6 +11,10 @@
   <name>UNICORE Services Environment PDP</name>
   <description>UNICORE Services Environment Policy Decision Point implementations</description>
 
+  <properties>
+     <automatic.module.name>${groupId}.use.pdp</automatic.module.name>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

@@ -7,6 +7,10 @@
   <inceptionYear>2008</inceptionYear>
   <name>UNICORE Services Environment attribute sources</name>
 
+  <properties>
+     <automatic.module.name>${groupId}.use.aip</automatic.module.name>
+  </properties>
+
   <parent>
     <groupId>eu.unicore.services</groupId>
     <artifactId>use</artifactId>

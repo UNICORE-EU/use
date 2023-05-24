@@ -10,6 +10,10 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>UNICORE Services Environment REST client</name>
+
+  <properties>
+     <automatic.module.name>${groupId}.use.restclient</automatic.module.name>
+  </properties>
  
   <build>
     <plugins>
@@ -36,7 +40,7 @@
     </dependency>
     <dependency>
       <groupId>eu.unicore.security</groupId>
-      <artifactId>securityLibrary</artifactId>
+      <artifactId>secutils-cxf</artifactId>
       <exclusions>
 	<exclusion>
           <groupId>com.fasterxml.woodstox</groupId>

@@ -9,6 +9,10 @@
   </parent>
   <name>UNICORE Services Environment Core</name>
 
+  <properties>
+     <automatic.module.name>${groupId}.use.core</automatic.module.name>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
@@ -57,7 +61,7 @@
     </dependency>
     <dependency>
       <groupId>eu.unicore.security</groupId>
-      <artifactId>securityLibrary</artifactId>
+      <artifactId>secutils-cxf</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents.client5</groupId>
