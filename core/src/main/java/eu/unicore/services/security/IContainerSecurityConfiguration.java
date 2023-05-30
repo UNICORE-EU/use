@@ -136,6 +136,11 @@ public interface IContainerSecurityConfiguration extends IAuthnAndTrustConfigura
 	public int getGatewayWaitTime();
 	
 	/**
+	 * @return true if gateway cert is hardcoded via a file
+	 */
+	public boolean haveFixedGatewayCertificate();
+
+	/**
 	 * @return whether to autoregister with gateway
 	 */
 	public boolean isGatewayRegistrationEnabled();

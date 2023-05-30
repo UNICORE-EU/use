@@ -697,6 +697,8 @@ public class Kernel {
 		gwHandler.waitForGateway();
 		// if appropriate, dynamically register with gateway
 		gwHandler.enableGatewayRegistration();
+		// if appropriate, check & update GW certificate periodically
+		gwHandler.enableGatewayCertificateRefresh();
 	}
 
 	/**

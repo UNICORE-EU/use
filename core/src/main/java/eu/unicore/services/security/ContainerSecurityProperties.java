@@ -313,30 +313,11 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 			setGatewayWaitingEnabled(properties.getBooleanValue(PROP_GATEWAY_WAIT));
 			if (isGatewayWaitingEnabled())
 				setGatewayWaitTime(properties.getIntValue(PROP_GATEWAY_WAITTIME));
-			
-			setGatewaySignatureCheckingEnabled(properties.getBooleanValue(
-					PROP_CHECK_CONSIGNOR_SIGNATURE));
-			
-			if (isGatewaySignatureCheckingEnabled()) {
-				String certFile = properties.getValue(PROP_GATEWAY_CERT);
-				if (certFile == null) {
-					if (isGatewayWaitingEnabled())
-						logger.info("Gateway's assertion checking is enabled but " +
-							"gateway's certificate is not configured. " +
-							"Will try to discover it later by connecting to gateway.");
-					else
-						throw new ConfigurationException("Gateway's assertion " +
-								"checking is enabled but neither the gateway's certificate " +
-								"is configured nor its autodetection is turned on.");
-				} else {
-					setGatewayCertificate(loadGatewayCertificate(certFile));
-				}
-			} else {
-				logger.info("IMPORTANT! Gateway assertions verification is turned OFF." +
-						" This is OK only if your UNICORE/X installation is protected " +
-						"by a firewall, and the only physical way of accessing it is through the gateway." +
-						" If this is not true then you SHOULD turn on the gateway assertion " +
-						"verification to prevent unauthorized access.");
+
+			String certFile = properties.getValue(PROP_GATEWAY_CERT);
+			if (certFile != null) {
+				setGatewayCertificate(loadGatewayCertificate(certFile));
+				setHaveFixedGatewayCertificate(true);
 			}
 		} else {
 			logger.info("Gateway support is turned OFF globally, none of gateway settings will be used.");
@@ -381,23 +362,12 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	}
 	
 	private X509Certificate loadGatewayCertificate(String certFile) {
-		Encoding encoding;
-		if (certFile.endsWith(".der"))
-			encoding = Encoding.DER;
-		else
-			encoding = Encoding.PEM;
-		InputStream is = null;
-		try {
-			is = new BufferedInputStream(new FileInputStream(certFile));
+		Encoding encoding = certFile.endsWith(".der") ? Encoding.DER : Encoding.PEM;
+		try (InputStream is = new BufferedInputStream(new FileInputStream(certFile))){
 			return CertificateUtils.loadCertificate(is, encoding);
 		} catch (IOException e) {
 			throw new ConfigurationException("Can not load the gateway's certificate '" + 
 					certFile +"'", e);
-		} finally {
-			if (is != null)
-				try {
-					is.close();
-				} catch (IOException e) { /*ignored*/ }
 		}
 	}
 	
@@ -409,8 +379,6 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 					"users won't have any authorisation attributes assigned");
 			return new NullAttributeSource();
 		}
-		
-		logger.debug("Creating main attribute sources chain");
 		AttributeSourcesChain ret = new AttributeSourcesChain();
 		ret.setCombiningPolicy(properties.getValue(PROP_AIP_COMBINING_POLICY));
 		ret.setOrder(order);

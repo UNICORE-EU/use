@@ -82,8 +82,7 @@ public class GatewayHandler implements ExternalSystemConnector{
 				X509Certificate[] cert = ConnectionUtil.getPeerCertificate(clientConfiguration, gwUrl, 
 						(int)(timeout-(System.currentTimeMillis()-start)), logger);
 				logger.info("Successfully connected to gateway at {}", gwUrl);
-				if (secConfiguration.isGatewaySignatureCheckingEnabled() && 
-						secConfiguration.getGatewayCertificate() == null) {
+				if (!secConfiguration.haveFixedGatewayCertificate()) {
 					secConfiguration.setGatewayCertificate(cert[0]);
 					logger.info("Gateway's DN was autodetected and will be used for signature checking: {}",
 							X500NameUtils.getReadableForm(secConfiguration.
@@ -127,16 +126,18 @@ public class GatewayHandler implements ExternalSystemConnector{
 		String url = containerConfiguration.getValue(ContainerProperties.EXTERNAL_URL);
 		String myHost = containerConfiguration.getValue(ContainerProperties.SERVER_HOST) + ":"
 				+containerConfiguration.getValue(ContainerProperties.SERVER_PORT);
-		boolean secure = clientConfiguration.isSslEnabled();
 		if(url.contains(myHost)){
 			status=Status.NOT_APPLICABLE;
 			statusMessage="N/A (no gateway used)";
 		}
 		else{
-			Boolean result = TimeoutRunner.compute(getCheckConnectionTask(url, secure), threadingSrv, 2000);
-			if(result!=null && result){
+			X509Certificate gwCert = TimeoutRunner.compute(getCheckConnectionTask(url), threadingSrv, 2000);
+			if(gwCert!=null){
 				status=Status.OK;
 				statusMessage="OK [connected to "+url+"]";
+				if(!secConfiguration.haveFixedGatewayCertificate()) {
+					secConfiguration.setGatewayCertificate(gwCert);
+				}
 			}
 			else {
 				status=Status.DOWN;
@@ -156,39 +157,39 @@ public class GatewayHandler implements ExternalSystemConnector{
 	 * @throws Exception
 	 */
 	public void enableGatewayRegistration()throws Exception{
-		if(!secConfiguration.isGatewayRegistrationEnabled()){
-			return;
+		if(secConfiguration.isGatewayRegistrationEnabled()){
+			Integer update=secConfiguration.getGatewayRegistrationUpdateInterval();
+			logger.info("Enabling dynamic registration at the Gateway at {} updated every {} seconds",
+					Utilities.getGatewayAddress(containerConfiguration), update);
+			new GatewayRegistration(containerConfiguration, update);
 		}
-		Integer update=secConfiguration.getGatewayRegistrationUpdateInterval();
-		logger.info("Enabling dynamic registration at the Gateway at {} updated every {} seconds",
-				Utilities.getGatewayAddress(containerConfiguration), update);
-		new GatewayRegistration(containerConfiguration, update);
-		return;
 	}
 
 
-	private Callable<Boolean> getCheckConnectionTask(final String url, final boolean secure) {
-		Callable<Boolean> getCert=new Callable<Boolean>(){
-			public Boolean call() {
+	private Callable<X509Certificate> getCheckConnectionTask(final String url) {
+		Callable<X509Certificate> getCert = new Callable<>(){
+			public X509Certificate call() {
 				try {
-					if (secure)
-						ConnectionUtil.getPeerCertificate(clientConfiguration,  
+					X509Certificate[] cert = ConnectionUtil.getPeerCertificate(clientConfiguration,
 								url, 2000, logger);
-					else {
-						throw new RuntimeException("Insecure Gw " +
-								"communication is not yet implemented");
-					}
-					return true;
+					return cert[0];
 				} catch (UnknownHostException e) {
 					logger.warn("Gateway host is unknown: " + e);
-					return false;
+					return null;
 				} catch (IOException e) {
 					logger.warn("Can't contact gateway: " + e);
-					return false;
+					return null;
 				}
 			}
 		};
 		return getCert;
+	}
+
+	public void enableGatewayCertificateRefresh() throws Exception {
+		if(!secConfiguration.haveFixedGatewayCertificate()){
+			threadingSrv.getScheduledExecutorService().scheduleWithFixedDelay(
+					()->checkConnection(), 60, 60, TimeUnit.SECONDS);
+		}
 	}
 
 	/**
