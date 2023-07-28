@@ -6,7 +6,7 @@
   <packaging>pom</packaging>
   <description>UNICORE service container</description>
   <inceptionYear>2010</inceptionYear>
-  <version>4.5.3</version>
+  <version>4.6.0</version>
   <name>UNICORE Services Environment</name>
  
   <parent>
@@ -59,13 +59,13 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>0.500</persistence.version>
+    <persistence.version>0.600</persistence.version>
     <secutils.version>3.4.2</secutils.version>
     <seclib.version>6.0.8</seclib.version>
     <jaxb.version>2.3.3</jaxb.version>
     <json.version>20230227</json.version>
     <gson.version>2.10.1</gson.version>
-    <xuudb.version>2.8.1</xuudb.version>
+    <xuudb.version>2.8.2</xuudb.version>
     <saaj.version>1.5.1</saaj.version>
     <cxf.version>3.5.5</cxf.version>
     <jetty.version>10.0.15</jetty.version>
