@@ -1,6 +1,7 @@
 package eu.unicore.services.rest.security;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.concurrent.Callable;
@@ -218,8 +219,18 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 		Callable<Boolean> getCert=new Callable<Boolean>(){
 			public Boolean call() {
 				try {
-					ConnectionUtil.getPeerCertificate(kernel.getClientConfiguration(),  
-								url, 2000, logger);
+					DefaultClientConfiguration clientCfg = kernel.getClientConfiguration();
+					if(!url.toLowerCase().startsWith("https")) {
+						clientCfg.setSslEnabled(false);
+						URL u = new URL(url);
+						String host = u.getHost();
+						int port = u.getPort();
+						if(port==-1)port = u.getDefaultPort();
+						try(Socket s = new Socket(host,port)){}
+					}
+					else {
+						ConnectionUtil.getPeerCertificate(clientCfg, url, 2000, logger);
+					}
 					return true;
 				} catch (UnknownHostException e) {
 					logger.warn("Host is unknown: " + e);
