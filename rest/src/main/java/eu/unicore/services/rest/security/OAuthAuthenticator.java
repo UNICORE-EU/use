@@ -75,7 +75,9 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 		clientCfg.setHttpPassword("n/a");
 		clientCfg.setHttpUser("n/a");
 		clientCfg.getExtraSecurityTokens().put(OAuthBearerTokenOutInterceptor.TOKEN_KEY, bearerToken);
-
+		if(!address.toLowerCase().startsWith("https")) {
+			clientCfg.setSslEnabled(false);
+		}
 		// store token for later use
 		tokens.getUserPreferences().put("UC_OAUTH_BEARER_TOKEN", new String[]{bearerToken});
 
