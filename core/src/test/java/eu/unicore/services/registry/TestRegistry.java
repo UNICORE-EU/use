@@ -46,14 +46,14 @@ public class TestRegistry {
 		Map<String, String> content2 = entry.getModel().getContent();
 		assertEquals("bar", content2.get("foo"));
 		System.out.println("Entry for <"+entry.getModel().getEndpoint()+"> : "+content2);
-		
+
 		// update entry
 		content.put("foo", "spam");
 		String uid2 = update(endpoint, content);
 		assertEquals(uid, uid2);
 		entry = (RegistryEntryImpl)entryHome.get(uid);
 		assertEquals(endpoint, entry.getModel().getEndpoint());
-		
+
 		content2 = entry.getModel().getContent();
 		assertEquals("spam", content2.get("foo"));
 		System.out.println("Entry for <"+entry.getModel().getEndpoint()+"> : "+content2);

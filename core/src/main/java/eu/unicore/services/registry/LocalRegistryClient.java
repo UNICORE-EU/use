@@ -79,27 +79,26 @@ public class LocalRegistryClient implements IRegistry {
 	private RegistryEntryImpl getEntry(String entryID) throws PersistenceException {
 		return (RegistryEntryImpl)(kernel.getHome(RegistryEntryImpl.SERVICENAME).get(entryID));
 	}
-	
+
 	private Home getHome(){
 		Home home = kernel.getHome(serviceName);
 		if(home==null)throw new IllegalStateException("No Registry service deployed");
 		return home;
 	}
 
-
 	private synchronized List<Map<String,String>> getCached(){
 		Long upd = updated.get(resID);
 		if(upd!=null && System.currentTimeMillis()<upd+cacheTime) {
-			return cache.get(resID); 
+			return cache.get(resID);
 		}
 		return null;
 	}
-	
+
 	private synchronized void cache(List<Map<String,String>> entries) {
 		cache.put(resID, entries);
 		updated.put(resID, System.currentTimeMillis());
 	}
-	
+
 	private synchronized void invalidateCache() {
 		cache.remove(resID);
 		updated.remove(resID);

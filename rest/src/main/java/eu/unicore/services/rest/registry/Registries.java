@@ -105,7 +105,6 @@ public class Registries extends ServicesBase {
 			map.put("href",href);
 			map.put("wsrf",endpoint);
 		}
-		
 		map.putAll(value);
 		String interfaceName = value.get(RegistryClient.INTERFACE_NAME);
 		if(interfaceName!=null) {

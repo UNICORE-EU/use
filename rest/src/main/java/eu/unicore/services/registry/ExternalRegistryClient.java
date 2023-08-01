@@ -36,7 +36,6 @@ public class ExternalRegistryClient implements IRegistry {
 	public ExternalRegistryClient(){
 		super();
 	}
-	
 
 	public Calendar addRegistryEntry(Map<String,String> content){
 		long refreshIn = doAddRegistryEntry(content);
