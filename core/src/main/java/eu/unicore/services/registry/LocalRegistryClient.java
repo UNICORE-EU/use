@@ -39,9 +39,9 @@ public class LocalRegistryClient implements IRegistry {
 		}
 	}
 	
-	public void refresh(String endpoint) throws Exception {
+	public void refresh(String endpoint, Map<String,String>content) throws Exception {
 		try (RegistryImpl reg = (RegistryImpl)getHome().getForUpdate(resID)){
-			reg.refresh(endpoint);
+			reg.refresh(endpoint, content);
 		}
 	}
 	
@@ -54,12 +54,18 @@ public class LocalRegistryClient implements IRegistry {
 		else{
 			reg = get();
 		}
-		res.addAll(reg.getModel().getContents().values());
+		for(String entryID: reg.getModel().getEntryIDs()){
+			res.add(getEntry(entryID).getModel().getContent());
+		}
 		return res;
 	}
 
 	private RegistryImpl get() throws PersistenceException {
 		return (RegistryImpl)(getHome().get(resID));
+	}
+	
+	private RegistryEntryImpl getEntry(String entryID) throws PersistenceException {
+		return (RegistryEntryImpl)(kernel.getHome(RegistryEntryImpl.SERVICENAME).get(entryID));
 	}
 	
 	private Home getHome(){

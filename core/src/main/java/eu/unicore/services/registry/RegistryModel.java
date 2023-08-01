@@ -1,5 +1,6 @@
 package eu.unicore.services.registry;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,29 +14,20 @@ public class RegistryModel extends BaseModel {
 	// maps endpoints to ServiceRegistryEntry UUIDs
 	private final Map<String, String> entries = new HashMap<>();
 	
-	// maps endpoints to content
-	private final Map<String, Map<String,String>> contents = new HashMap<>();
-		
-	public void put(String endpoint, String uuid, Map<String,String>content){
+	public void put(String endpoint, String uuid){
 		entries.put(endpoint, uuid);
-		contents.put(endpoint, content);
 	}
 	
 	public String getEntryID(String endpoint){
 		return entries.get(endpoint);
 	}
-	
-	public Map<String,String>getContent(String endpoint){
-		return contents.get(endpoint);
-	}
-	
+
 	public void removeEntry(String endpoint){
 		entries.remove(endpoint);
-		contents.remove(endpoint);
 	}
-	
-	public Map<String,Map<String,String>>getContents(){
-		return Collections.unmodifiableMap(contents);
+
+	public Collection<String> getEntryIDs(){
+		return Collections.unmodifiableCollection(entries.values());
 	}
 
 	@Override

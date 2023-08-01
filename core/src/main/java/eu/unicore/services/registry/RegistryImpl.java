@@ -35,7 +35,7 @@ public class RegistryImpl extends ResourceImpl {
 		{
 			try {
 				createNew = false;
-				refresh(endpoint);
+				refresh(endpoint, content);
 				logger.debug("Refreshed registry entry for <{}>", endpoint);
 			} catch (ResourceUnknownException e) {
 				// sgEntry has been destroyed in between, so remove it from Entry RP
@@ -48,18 +48,18 @@ public class RegistryImpl extends ResourceImpl {
 		}
 		if(createNew){
 			logger.info("Creating new registry entry for <{}>",endpoint);
-			tt = pushToExternalRegistries(endpoint, content, tt);
-			entryID = createSREntry(tt, endpoint);
+			tt = pushToExternalRegistries(content, tt);
+			entryID = createSREntry(tt, content);
 		}
-		getModel().put(endpoint, entryID, content);
+		getModel().put(endpoint, entryID);
 		return entryID;
 	}
 	
-	protected String createSREntry(Calendar tt, String endpoint) throws ResourceNotCreatedException {
+	protected String createSREntry(Calendar tt, Map<String,String> content) throws ResourceNotCreatedException {
 		RegistryEntryInitParameters sgInit = new RegistryEntryInitParameters(tt);
 		sgInit.parentUUID = this.getUniqueID();
 		sgInit.parentServiceName = this.getServiceName();
-		sgInit.endpoint = endpoint;
+		sgInit.content = content;
 		Home sreHome=getKernel().getHome(RegistryEntryImpl.SERVICENAME);
 		return sreHome.createResource(sgInit);
 	}
@@ -69,7 +69,7 @@ public class RegistryImpl extends ResourceImpl {
 	 * By default, this does nothing.
 	 * @return requested refresh time from external registry (if applicable)
 	 */
-	protected Calendar pushToExternalRegistries(String endpoint, Map<String,String>content, Calendar requestedTT){
+	protected Calendar pushToExternalRegistries(Map<String,String>content, Calendar requestedTT){
 		return requestedTT;
 	}
 	
@@ -108,21 +108,16 @@ public class RegistryImpl extends ResourceImpl {
 		return tt;
 	}
 	
-	public void refresh(String endpoint)throws Exception{
+	public void refresh(String endpoint, Map<String,String> content)throws Exception{
 		logger.debug("Updating information for <{}>", endpoint);
 		Home sreHome=getKernel().getHome(RegistryEntryImpl.SERVICENAME);
 		String entryUID = getModel().getEntryID(endpoint);
-		Map<String,String> content = getModel().getContent(endpoint);
-		RegistryEntryImpl wsr=(RegistryEntryImpl)sreHome.getForUpdate(entryUID);
-		try{
+		try(RegistryEntryImpl wsr=(RegistryEntryImpl)sreHome.getForUpdate(entryUID)){
 			RegistryEntryModel model = wsr.getModel();
-			model.setEndpoint(endpoint);
-			Calendar tt = pushToExternalRegistries(endpoint, content, null);
+			model.setContent(content);
+			Calendar tt = pushToExternalRegistries(content, null);
 			if(tt==null)tt=getDefaultEntryLifetime();
 			wsr.setTerminationTime(tt);
-		}
-		finally{
-			getKernel().getPersistenceManager().persist(wsr);
 		}
 	}
 

@@ -21,6 +21,7 @@ import org.json.JSONObject;
 
 import eu.unicore.persist.PersistenceException;
 import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.registry.LocalRegistryClient;
 import eu.unicore.services.registry.RegistryImpl;
 import eu.unicore.services.rest.USEResource;
 import eu.unicore.services.rest.client.BaseClient;
@@ -66,6 +67,7 @@ public class Registries extends ServicesBase {
 				throw new WebApplicationException("Registry entry must specify an 'Endpoint'",
 						HttpStatus.SC_BAD_REQUEST);
 			}
+			j.remove(RegistryClient.ENDPOINT);
 			ContainerProperties cfg = kernel.getContainerProperties(); 
 			long refreshIn = cfg.getLongValue(ContainerProperties.WSRF_SGENTRY_TERMINATION_TIME);
 			String entryID = sg.addEntry(endpoint, content, null);
@@ -84,18 +86,19 @@ public class Registries extends ServicesBase {
 	@Override
 	protected Map<String,Object>getProperties() throws Exception {
 		Map<String,Object> status = super.getProperties();
-		RegistryImpl sg = (RegistryImpl)resource;
+		LocalRegistryClient lrc = new LocalRegistryClient(home.getServiceName(), resource.getUniqueID(), kernel);
 		List<Object>entries = new ArrayList<>();
-		for(Map.Entry<String,Map<String,String>> e: sg.getModel().getContents().entrySet()){
-			Map<String,Object> restEntry = renderEntry(e.getKey(),e.getValue());
+		for(Map<String,String> e: lrc.listEntries()){
+			Map<String,Object> restEntry = renderEntry(e);
 			if(restEntry!=null)entries.add(restEntry);
 		}
 		status.put("entries", entries);
 		return status;
 	}
 
-	protected Map<String,Object>renderEntry(String endpoint, Map<String,String> value){
+	protected Map<String,Object>renderEntry(Map<String,String> value){
 		Map<String,Object> map = new HashMap<>();
+		String endpoint = value.get(RegistryClient.ENDPOINT);
 		String href = convertToREST(endpoint);
 		if(href!=null){
 			map.put("wsrf",endpoint);
