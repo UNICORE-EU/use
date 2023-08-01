@@ -67,7 +67,6 @@ public class Registries extends ServicesBase {
 				throw new WebApplicationException("Registry entry must specify an 'Endpoint'",
 						HttpStatus.SC_BAD_REQUEST);
 			}
-			j.remove(RegistryClient.ENDPOINT);
 			ContainerProperties cfg = kernel.getContainerProperties(); 
 			long refreshIn = cfg.getLongValue(ContainerProperties.WSRF_SGENTRY_TERMINATION_TIME);
 			String entryID = sg.addEntry(endpoint, content, null);
@@ -96,27 +95,24 @@ public class Registries extends ServicesBase {
 		return status;
 	}
 
-	protected Map<String,Object>renderEntry(Map<String,String> value){
+	protected Map<String,Object>renderEntry(final Map<String,String> value){
 		Map<String,Object> map = new HashMap<>();
 		String endpoint = value.get(RegistryClient.ENDPOINT);
+		map.put("href",endpoint);
 		String href = convertToREST(endpoint);
 		if(href!=null){
-			map.put("wsrf",endpoint);
+			// old wsrf link
 			map.put("href",href);
+			map.put("wsrf",endpoint);
 		}
-		else{
-			// non wsrf link
-			map.put("href",endpoint);	
-		}
-		value.remove(RegistryClient.ENDPOINT);
-		String interfaceName = value.remove(RegistryClient.INTERFACE_NAME);
-		if(interfaceName!=null)map.put("type",interfaceName);
-		String dn = value.remove(RegistryClient.SERVER_IDENTITY);
-		if(dn!=null)map.put(RegistryClient.SERVER_IDENTITY,dn);
-		String pubkey = value.remove(RegistryClient.SERVER_PUBKEY);
-		if(pubkey!=null)map.put(RegistryClient.SERVER_PUBKEY,pubkey);
-		// copy the rest
+		
 		map.putAll(value);
+		String interfaceName = value.get(RegistryClient.INTERFACE_NAME);
+		if(interfaceName!=null) {
+			map.put("type",interfaceName);
+			map.remove(RegistryClient.INTERFACE_NAME);
+		}
+		map.remove(RegistryClient.ENDPOINT);
 		return map;
 	}
 	
