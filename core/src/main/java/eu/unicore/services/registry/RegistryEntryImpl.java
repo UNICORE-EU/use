@@ -30,8 +30,7 @@ public class RegistryEntryImpl extends ResourceImpl {
 		}
 		super.initialise(initParams);
 		RegistryEntryInitParameters init = (RegistryEntryInitParameters)initParams;
-		RegistryEntryModel m = getModel();
-		m.setEndpoint(init.endpoint);
+		getModel().setContent(init.content);
 	}
 
 	@Override

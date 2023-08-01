@@ -31,10 +31,18 @@ public class ExternalRegistryClient implements IRegistry {
 
 	protected static final long readd_offset = 60; 
 
-	private final List<eu.unicore.services.rest.client.RegistryClient> restClients = new ArrayList<>();
+	private final List<RegistryClient> clients = new ArrayList<>();
 
 	public ExternalRegistryClient(){
 		super();
+	}
+	
+
+	public Calendar addRegistryEntry(Map<String,String> content){
+		long refreshIn = doAddRegistryEntry(content);
+		Calendar c = Calendar.getInstance();
+		c.setTimeInMillis(System.currentTimeMillis() + 1000*refreshIn);
+		return c;
 	}
 
 	/**
@@ -45,10 +53,10 @@ public class ExternalRegistryClient implements IRegistry {
 	 * 
 	 * @return refresh time in seconds
 	 */
-	private long doAddRegistryEntryREST(String endpoint, Map<String,String> content){
+	private long doAddRegistryEntry(Map<String,String> content){
 		long refreshIn = 300;
 		boolean haveExternalTT = false;
-		for(eu.unicore.services.rest.client.RegistryClient reg: restClients){
+		for(RegistryClient reg: clients){
 			String address = reg.getURL();
 			try{
 				logger.debug("Calling external registry: {}", address);
@@ -70,14 +78,6 @@ public class ExternalRegistryClient implements IRegistry {
 		return refreshIn;
 	}
 
-	public Calendar addRegistryEntry(String endpoint, Map<String,String> content){
-		long refreshIn = doAddRegistryEntryREST(endpoint, content);
-		logger.debug("Will try to refresh external registry entry {} in {} secs", endpoint, refreshIn);
-		Calendar c = Calendar.getInstance();
-		c.setTimeInMillis(System.currentTimeMillis() + 1000*refreshIn);
-		return c;
-	}
-
 	/**
 	 * List all the entries in all the registries. No duplicate filtering
 	 * is applied
@@ -85,7 +85,7 @@ public class ExternalRegistryClient implements IRegistry {
 	public List<Map<String,String>> listEntries() throws IOException {
 		List<Map<String,String>> result = new ArrayList<>();
 		StringBuilder errors = new StringBuilder();
-		for(eu.unicore.services.rest.client.RegistryClient c: restClients){
+		for(RegistryClient c: clients){
 			try{
 				for(JSONObject o: c.listEntries()) {
 					result.add(RegistryClient.asMap(o));
@@ -126,8 +126,8 @@ public class ExternalRegistryClient implements IRegistry {
 		
 		final StringBuffer status = new StringBuffer();
 		boolean result = false;
-		for(final eu.unicore.services.rest.client.RegistryClient c: restClients){
-			Callable<String>task=new Callable<String>(){
+		for(final RegistryClient c: clients){
+			Callable<String>task=new Callable<>(){
 				public String call()throws Exception{
 					try {
 						c.getJSON();
@@ -178,7 +178,7 @@ public class ExternalRegistryClient implements IRegistry {
 					if(!url.contains("/rest/registries/")) {
 						url = Registries.convertToREST(url);
 					}
-					reg.restClients.add(new eu.unicore.services.rest.client.RegistryClient(url, sec));
+					reg.clients.add(new RegistryClient(url, sec));
 				}catch(Exception e){
 					logger.error("Could not create client for external registry at <"+url+">",e);
 				}

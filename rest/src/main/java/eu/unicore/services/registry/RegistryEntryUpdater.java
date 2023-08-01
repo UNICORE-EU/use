@@ -32,6 +32,7 @@
 package eu.unicore.services.registry;
 
 import java.util.Calendar;
+import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
@@ -92,7 +93,7 @@ public class RegistryEntryUpdater implements InstanceChecker {
 			}
 			try
 			{
-				reAdd(home.getKernel(),memberAddress);
+				reAdd(home.getKernel(),memberAddress,entry.getModel().getContent());
 				logger.debug("Refreshed registry entry for: {}", memberAddress);
 			}
 			catch(Exception e)
@@ -122,10 +123,10 @@ public class RegistryEntryUpdater implements InstanceChecker {
 		return url!=null && url.startsWith(baseURL);
 	}
 
-	protected void reAdd(Kernel kernel, String endpoint) throws Exception
+	protected void reAdd(Kernel kernel, String endpoint, Map<String,String>content) throws Exception
 	{
 		RegistryHandler handler = kernel.getAttribute(RegistryHandler.class);
-		handler.getRegistryClient().refresh(endpoint);
+		handler.getRegistryClient().refresh(endpoint, content);
 	}
 
 }

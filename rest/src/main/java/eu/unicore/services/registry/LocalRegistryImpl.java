@@ -35,14 +35,17 @@ public class LocalRegistryImpl extends RegistryImpl {
 	 * in the content map)
 	 */
 	@Override
-	protected Calendar pushToExternalRegistries(String endpoint, Map<String,String>content, Calendar requestedTT) {
+	protected Calendar pushToExternalRegistries(Map<String,String>content, Calendar requestedTT) {
 		try {
 			RegistryHandler rh = kernel.getAttribute(RegistryHandler.class);
 			if(rh!=null && rh.usesExternalRegistry()
 					&& !Boolean.parseBoolean(content.get(MARK_ENTRY_AS_INTERNAL))){
 				ExternalRegistryClient externalRegistryClient = rh.getExternalRegistryClient();
-				requestedTT = externalRegistryClient.addRegistryEntry(endpoint, content);
-				logger.debug("Will try to re-add entry for <{}> at: ", endpoint, requestedTT.getTime());
+				requestedTT = externalRegistryClient.addRegistryEntry(content);
+				if(logger.isDebugEnabled()) {
+					String endpoint = content.get(RegistryImpl.ENDPOINT);
+					logger.debug("Will try to re-add entry for <{}> at: ", endpoint, requestedTT.getTime());
+				}
 			}
 		} catch (Exception e) {
 			Log.logException("Could not connect to external Registry!",e,logger);

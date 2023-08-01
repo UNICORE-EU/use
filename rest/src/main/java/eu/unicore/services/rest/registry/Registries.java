@@ -21,6 +21,7 @@ import org.json.JSONObject;
 
 import eu.unicore.persist.PersistenceException;
 import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.registry.LocalRegistryClient;
 import eu.unicore.services.registry.RegistryImpl;
 import eu.unicore.services.rest.USEResource;
 import eu.unicore.services.rest.client.BaseClient;
@@ -84,36 +85,34 @@ public class Registries extends ServicesBase {
 	@Override
 	protected Map<String,Object>getProperties() throws Exception {
 		Map<String,Object> status = super.getProperties();
-		RegistryImpl sg = (RegistryImpl)resource;
+		LocalRegistryClient lrc = new LocalRegistryClient(home.getServiceName(), resource.getUniqueID(), kernel);
 		List<Object>entries = new ArrayList<>();
-		for(Map.Entry<String,Map<String,String>> e: sg.getModel().getContents().entrySet()){
-			Map<String,Object> restEntry = renderEntry(e.getKey(),e.getValue());
+		for(Map<String,String> e: lrc.listEntries()){
+			Map<String,Object> restEntry = renderEntry(e);
 			if(restEntry!=null)entries.add(restEntry);
 		}
 		status.put("entries", entries);
 		return status;
 	}
 
-	protected Map<String,Object>renderEntry(String endpoint, Map<String,String> value){
+	protected Map<String,Object>renderEntry(final Map<String,String> value){
 		Map<String,Object> map = new HashMap<>();
+		String endpoint = value.get(RegistryClient.ENDPOINT);
+		map.put("href",endpoint);
 		String href = convertToREST(endpoint);
 		if(href!=null){
-			map.put("wsrf",endpoint);
+			// old wsrf link
 			map.put("href",href);
+			map.put("wsrf",endpoint);
 		}
-		else{
-			// non wsrf link
-			map.put("href",endpoint);	
-		}
-		value.remove(RegistryClient.ENDPOINT);
-		String interfaceName = value.remove(RegistryClient.INTERFACE_NAME);
-		if(interfaceName!=null)map.put("type",interfaceName);
-		String dn = value.remove(RegistryClient.SERVER_IDENTITY);
-		if(dn!=null)map.put(RegistryClient.SERVER_IDENTITY,dn);
-		String pubkey = value.remove(RegistryClient.SERVER_PUBKEY);
-		if(pubkey!=null)map.put(RegistryClient.SERVER_PUBKEY,pubkey);
-		// copy the rest
+		
 		map.putAll(value);
+		String interfaceName = value.get(RegistryClient.INTERFACE_NAME);
+		if(interfaceName!=null) {
+			map.put("type",interfaceName);
+			map.remove(RegistryClient.INTERFACE_NAME);
+		}
+		map.remove(RegistryClient.ENDPOINT);
 		return map;
 	}
 	
