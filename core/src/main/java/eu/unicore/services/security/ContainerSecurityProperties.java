@@ -9,6 +9,7 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
@@ -18,22 +19,23 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 
+import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.canl.AuthnAndTrustProperties;
 import eu.unicore.security.canl.CredentialProperties;
-import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
 import eu.unicore.security.canl.LoggingStoreUpdateListener;
 import eu.unicore.security.canl.TruststoreProperties;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.security.pdp.AcceptingPdp;
 import eu.unicore.services.security.pdp.UnicoreXPDP;
 import eu.unicore.services.security.util.AttributeSourcesChain;
-import eu.unicore.services.security.util.DynamicAttributeSourcesChain;
 import eu.unicore.services.security.util.BaseAttributeSourcesChain.MergeLastOverrides;
+import eu.unicore.services.security.util.DynamicAttributeSourcesChain;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.DocumentationReferenceMeta;
@@ -253,34 +255,27 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	}
 	
 	private PropertiesHelper properties;
-	private AuthnAndTrustProperties authAndTrustProperties = null;
-	
-	public ContainerSecurityProperties(Properties p) throws ConfigurationException {
-		this(p, null);
-	}
+	private final AuthnAndTrustProperties authAndTrustProperties;
 
-	public ContainerSecurityProperties(Properties source, IAuthnAndTrustConfiguration authAndTrust) 
-			throws ConfigurationException {
+
+	public ContainerSecurityProperties(Properties source) throws ConfigurationException {
 		backwardsCompat(source);
 		properties = new PropertiesHelper(PREFIX, source, META, propsLogger);
 		setSslEnabled(properties.getBooleanValue(PROP_SSL_ENABLED));
 		setAccessControlEnabled(properties.getBooleanValue(PROP_CHECKACCESS));
-		setSigningRequired(properties.getBooleanValue(PROP_REQUIRE_SIGNATURES));
+		setSigningRequired(false);
 		setGatewayAuthnEnabled(properties.getBooleanValue(PROP_GATEWAY_AUTHN));
-
 		boolean credNeeded = isSslEnabled();
 		boolean trustNeeded = isSslEnabled() || isSigningRequired() || isGatewayAuthnEnabled();
-		
-		if (authAndTrust == null) {
-			authAndTrustProperties = new AuthnAndTrustProperties(source, PREFIX+TruststoreProperties.DEFAULT_PREFIX, 
-					PREFIX + CredentialProperties.DEFAULT_PREFIX, 
-					!trustNeeded, !credNeeded);
-			authAndTrust = authAndTrustProperties;
+		authAndTrustProperties = new AuthnAndTrustProperties(source,
+				PREFIX + TruststoreProperties.DEFAULT_PREFIX,
+				PREFIX + CredentialProperties.DEFAULT_PREFIX,
+				!trustNeeded, !credNeeded);
+		setValidator(authAndTrustProperties.getValidator());
+		setCredential(authAndTrustProperties.getCredential());
+		if(getCredentialProperties()!=null) {
+			setDynamicCredentialReloadEnabled(getCredentialProperties().isDynamicalReloadEnabled());
 		}
-		setValidator(authAndTrust.getValidator());
-		setCredential(authAndTrust.getCredential());
-
-		setETDValidator(getValidator());
 
 		try
 		{
@@ -333,7 +328,22 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		setDap(createDynamicAttributeSource(source));
 		setPdp(createPDP(properties));
 	}
-	
+
+	@Override
+	public X509Credential getCredential() {
+		return authAndTrustProperties.getCredential();
+	}
+
+	public CredentialProperties getCredentialProperties() {
+		return authAndTrustProperties.getCredentialProperties();
+	}
+
+	public void reloadCredential() {
+		authAndTrustProperties.reloadCredential();
+		pem=null;
+		getServerCertificateAsPEM();
+	}
+
 	// backwards compatibility fixes
 	protected void backwardsCompat(Properties properties) throws ConfigurationException {
 		String old = "de.fzj.unicore.wsrflite";
@@ -344,21 +354,6 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 			properties.put(key, newValue);
 			logger.warn("Old property value <{}> is DEPRECATED, superseded by <{}>", val, newValue);
 		}
-	}
-
-	public void updateProperties(Properties newProperties) {
-		properties.setProperties(newProperties);
-		if (authAndTrustProperties != null && authAndTrustProperties.getTruststoreProperties() != null)
-			authAndTrustProperties.getTruststoreProperties().setProperties(newProperties);
-		if (getValidator() == null && isAccessControlEnabled()) {
-			logger.warn("Can't enable access control without truststore settings.");
-			setAccessControlEnabled(false);
-		}
-			
-		//TODO - with this only few truststore settings and accessControl enabled/disabled are 
-		//updateable at runtime. Implement more (but be careful to check overall consistency!
-		//Note: if PDP configuration updates will be done here remember to also update the code in UAS
-		// which will need to reinit them.
 	}
 	
 	private X509Certificate loadGatewayCertificate(String certFile) {
@@ -427,7 +422,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		}
 		try {
 			Constructor<? extends UnicoreXPDP> constructor = pdpClazz.getConstructor();
-			logger.info("Using PDP class <"+pdpClazz.getName()+">");
+			logger.info("Using PDP class <{}>", pdpClazz.getName());
 			UnicoreXPDP pdp = constructor.newInstance();
 			return pdp;
 		}catch(Exception e) {
@@ -442,6 +437,20 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	
 	public List<String>getAdditionalSAMLIds(){
 		return properties.getListOfValues(PROP_ADDITIONAL_ACCEPTED_SAML_IDS);
+	}
+
+	private String pem;
+
+	public synchronized String getServerCertificateAsPEM() {
+		if(pem==null) {
+			StringWriter out = new StringWriter();
+			try(JcaPEMWriter writer = new JcaPEMWriter(out)){
+				writer.writeObject(getCredential().getCertificate());
+			}catch(Exception ex){
+				Log.logException("Cannot convert public key to PEM", ex, logger);
+			}
+		}
+		return pem;
 	}
 
 }

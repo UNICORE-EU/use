@@ -23,7 +23,7 @@ public class USEClientProperties extends ClientProperties {
 	@DocumentationReferencePrefix
 	public static final String PREFIX = ContainerProperties.PREFIX+ClientProperties.DEFAULT_PREFIX;
 	
-	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
+	public final static Map<String, PropertyMD> META = new HashMap<>();
 	static 
 	{
 		META.putAll(ClientProperties.META);

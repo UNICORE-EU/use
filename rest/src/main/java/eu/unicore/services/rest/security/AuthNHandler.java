@@ -86,7 +86,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 		PubkeyCache cache = PubkeyCache.get(kernel);
 		try{
 			this.serverDN = secConfig.getCredential().getSubjectName();
-			cache.update(this.serverDN,	secConfig.getCredential().getCertificate().getPublicKey());
+			cache.update(this.serverDN, secConfig.getCredential().getCertificate().getPublicKey());
 		}catch(Exception ex){}
 		this.jwt = new JWTHelper(p, kernel.getContainerSecurityConfiguration(), cache);
 	}

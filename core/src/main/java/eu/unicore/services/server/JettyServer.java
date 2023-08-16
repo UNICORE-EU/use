@@ -32,9 +32,12 @@
 
 package eu.unicore.services.server;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.Servlet;
 
@@ -45,10 +48,14 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.Decorator;
 
+import eu.unicore.security.canl.CredentialProperties;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.KernelInjectable;
 import eu.unicore.services.ServiceFactory;
+import eu.unicore.services.ThreadingServices;
+import eu.unicore.services.security.ContainerSecurityProperties;
+import eu.unicore.services.utils.FileWatcher;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.jetty.HttpServerProperties;
@@ -64,7 +71,7 @@ public class JettyServer extends JettyServerBase {
 
 	private final Kernel kernel;
 	
-	protected static final HashMap<String, Integer> defaults = new HashMap<String, Integer>();
+	protected static final HashMap<String, Integer> defaults = new HashMap<>();
 
 	/**
 	 * create a jetty server using settings from the supplied Kernel 
@@ -184,4 +191,29 @@ public class JettyServer extends JettyServerBase {
 		return (ServletContextHandler)super.getRootHandler();
 	}
 
+	@Override
+	protected void initServer() throws ConfigurationException{
+		super.initServer();
+		final ContainerSecurityProperties secProps = kernel.getContainerSecurityConfiguration();
+		if(secProps.isDynamicCredentialReloadEnabled()) {
+			final CredentialProperties cProps = secProps.getCredentialProperties();
+			String path = cProps.getValue(CredentialProperties.PROP_LOCATION);
+			try{
+				FileWatcher fw = new FileWatcher(new File(path), () -> {
+					secProps.reloadCredential();
+					reloadCredential();
+				});
+				ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
+				ts.getScheduledExecutorService().scheduleWithFixedDelay(fw, 10, 10, TimeUnit.SECONDS);
+			}catch(FileNotFoundException fe) {
+				throw new ConfigurationException("", fe);
+			}
+		}
+	}
+
+	@Override
+	public void reloadCredential() {
+		super.reloadCredential();
+		kernel.credentialReloaded();
+	}
 }

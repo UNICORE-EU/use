@@ -32,12 +32,12 @@ public class DefaultContainerSecurityConfiguration extends DefaultAuthnAndTrustC
 	private boolean gatewayRegistrationEnabled;
 	private String gatewayRegistrationSecret;
 	private int gatewayRegistrationUpdateInterval;
-	private X509CertChainValidator etdValidator;
 	private X509CertChainValidator trustedAssertionIssuers;
 	private boolean sessionsEnabled;
 	private long sessionLifetime;
 	private int maxSessionsPerUser;
-	
+	private boolean isDynamicCredentialReloadEnabled;
+
 	@Override
 	public boolean isSslEnabled() {
 		return sslEnabled;
@@ -185,15 +185,6 @@ public class DefaultContainerSecurityConfiguration extends DefaultAuthnAndTrustC
 		return isAccessControlEnabled();
 	}
 
-	public void setETDValidator(X509CertChainValidator etdValidator) {
-		this.etdValidator = etdValidator;
-	}
-	
-	@Override
-	public X509CertChainValidator getETDValidator() {
-		return etdValidator;
-	}
-
 	public void setDap(IDynamicAttributeSource dap) {
 		this.dap = dap;
 	}
@@ -239,5 +230,14 @@ public class DefaultContainerSecurityConfiguration extends DefaultAuthnAndTrustC
 	public void setTrustedAssertionIssuers(X509CertChainValidator trustedAssertionIssuers)
 	{
 		this.trustedAssertionIssuers = trustedAssertionIssuers;
-	}	
+	}
+
+	@Override
+	public boolean isDynamicCredentialReloadEnabled() {
+		return isDynamicCredentialReloadEnabled;
+	}
+
+	public void setDynamicCredentialReloadEnabled(boolean value) {
+		this.isDynamicCredentialReloadEnabled = value;
+	}
 }

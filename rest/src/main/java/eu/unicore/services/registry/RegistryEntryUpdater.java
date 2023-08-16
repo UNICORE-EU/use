@@ -40,6 +40,7 @@ import eu.unicore.services.Home;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.exceptions.ResourceUnknownException;
 import eu.unicore.services.impl.InstanceChecker;
+import eu.unicore.services.rest.client.RegistryClient;
 import eu.unicore.util.Log;
 
 /**
@@ -77,13 +78,13 @@ public class RegistryEntryUpdater implements InstanceChecker {
 	@Override
 	public boolean process(Home home, String id) {
 		if(home.isShuttingDown())return true;
-		Kernel kernel=home.getKernel();
+		Kernel kernel = home.getKernel();
 		String serviceName = home.getServiceName();
 		try{
 			RegistryEntryImpl entry=(RegistryEntryImpl)home.get(id);
 			String memberAddress = entry.getModel().getEndpoint();
 			
-			//check that URL is still basically correct (e.g. hostname, port) 
+			// check that URL is still basically correct (e.g. hostname, port) 
 			if(!checkBasicCorrectness(memberAddress, kernel)){
 				logger.info("Member address <{}> is no longer valid, destroying registry entry.", memberAddress);
 				entry.destroy();
@@ -91,9 +92,12 @@ public class RegistryEntryUpdater implements InstanceChecker {
 				//instance is invalid and should be removed from all checks
 				return false;
 			}
+			Map<String,String>content = entry.getModel().getContent();
+			// if server key is present in content, check that it is still up to date
+			checkAndUpdateServerPublicKey(kernel, content);
 			try
 			{
-				reAdd(home.getKernel(),memberAddress,entry.getModel().getContent());
+				reAdd(kernel, memberAddress, content);
 				logger.debug("Refreshed registry entry for: {}", memberAddress);
 			}
 			catch(Exception e)
@@ -123,6 +127,17 @@ public class RegistryEntryUpdater implements InstanceChecker {
 		return url!=null && url.startsWith(baseURL);
 	}
 
+	protected void checkAndUpdateServerPublicKey(Kernel k, Map<String,String>content) {
+		String dn = content.get(RegistryClient.SERVER_IDENTITY);
+		String pem = content.get(RegistryClient.SERVER_PUBKEY);
+		if(dn!=null && pem!=null) {
+			String dn1 = k.getContainerSecurityConfiguration().getCredential().getSubjectName();
+			String pem1 = k.getContainerSecurityConfiguration().getServerCertificateAsPEM();
+			content.put(RegistryClient.SERVER_IDENTITY, dn1);
+			content.put(RegistryClient.SERVER_PUBKEY, pem1);
+		}
+	}
+	
 	protected void reAdd(Kernel kernel, String endpoint, Map<String,String>content) throws Exception
 	{
 		RegistryHandler handler = kernel.getAttribute(RegistryHandler.class);

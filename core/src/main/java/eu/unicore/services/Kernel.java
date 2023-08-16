@@ -62,9 +62,9 @@ import eu.unicore.services.persistence.PersistenceManager;
 import eu.unicore.services.security.CertificateInfoMetric;
 import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.IAttributeSource;
-import eu.unicore.services.security.IContainerSecurityConfiguration;
 import eu.unicore.services.security.IDynamicAttributeSource;
 import eu.unicore.services.security.SecurityManager;
+import eu.unicore.services.security.util.PubkeyCache;
 import eu.unicore.services.server.ContainerHttpServerProperties;
 import eu.unicore.services.server.GatewayHandler;
 import eu.unicore.services.server.JettyServer;
@@ -398,7 +398,7 @@ public class Kernel {
 	/**
 	 * Retrieve the container security configuration
 	 */
-	public IContainerSecurityConfiguration getContainerSecurityConfiguration() {
+	public ContainerSecurityProperties getContainerSecurityConfiguration() {
 		return containerSecurityConfiguration;
 	}
 
@@ -493,7 +493,15 @@ public class Kernel {
 		}
 		return result;
 	}
-	
+
+	/**
+	 * update things after containerSecurityConfiguration has reloaded the main credential
+	 */
+	public void credentialReloaded() {
+		clientConfiguration.setCredential(containerSecurityConfiguration.getCredential());
+		PubkeyCache.get(this).update(containerSecurityConfiguration.getCredential());
+	}
+
 	/**
 	 * Initializes configuration objects from the data stored in Kernel's properties. Called only once
 	 * indirectly from constructor.

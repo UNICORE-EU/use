@@ -17,7 +17,6 @@ import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.Xlogin;
-import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.util.AttributeSourcesChain;
 import eu.unicore.util.configuration.ConfigurationException;
@@ -76,10 +75,9 @@ public class TestSecurityManager extends TestCase {
 		p.setProperty(PREFIX+PROP_DAP_PREFIX+"."+"A1.stringProperty", "test");
 		p.setProperty(PREFIX+PROP_DAP_PREFIX+"."+"A2.stringProperty", "test");
 		p.setProperty(PREFIX+PROP_DAP_ORDER, "A1 A2");
+		addDefaultConfig(p);
 		
-		
-		ContainerSecurityProperties secProps = new ContainerSecurityProperties(p,
-				new DefaultAuthnAndTrustConfiguration());
+		ContainerSecurityProperties secProps = new ContainerSecurityProperties(p);
 		Kernel k = new Kernel(TestConfigUtil.getInsecureProperties());
 		secProps.getAip().start(k);
 		secProps.getDap().start(k);
@@ -134,8 +132,8 @@ public class TestSecurityManager extends TestCase {
 		p.setProperty(PREFIX+PROP_AIP_ORDER, "A1 A2");
 		p.setProperty(PREFIX+PROP_AIP_COMBINING_POLICY, 
 				AttributeSourcesChain.FirstAccessible.NAME);
-		ContainerSecurityProperties secProps = new ContainerSecurityProperties(p,
-				new DefaultAuthnAndTrustConfiguration());
+		addDefaultConfig(p);
+		ContainerSecurityProperties secProps = new ContainerSecurityProperties(p);
 		secProps.getAip().start(new Kernel(TestConfigUtil.getInsecureProperties()));
 		SecurityManager secMan = new SecurityManager(secProps);
 		SubjectAttributesHolder res = secMan.establishAttributes(new SecurityTokens());
@@ -148,6 +146,10 @@ public class TestSecurityManager extends TestCase {
 		
 	}
 
+	private void addDefaultConfig(Properties props) {
+		props.put("container.security.sslEnabled", "false");
+		props.put("container.security.gateway.enable", "false");
+	}
 
 	public static class SimpleAIP implements IAttributeSource {
 		@Override

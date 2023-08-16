@@ -146,18 +146,14 @@ public interface IContainerSecurityConfiguration extends IAuthnAndTrustConfigura
 	public boolean isGatewayRegistrationEnabled();
 	
 	/**
-	 * @return gateway autoregistration update interval
+	 * @return gateway auto registration update interval
 	 */
 	public int getGatewayRegistrationUpdateInterval();
-	
-	/**
-	 * (XSEDE integration requirment)
-	 * @return Object used to verify certificate chains of ETD assertions
-	 */
-	public X509CertChainValidator getETDValidator();
 
 	/**
-	 * Since U7: returns validator used as truststore with certificates of trusted issuers of bootstrap ETD.
+	 * returns validator used as to (optionally) validate SAML assertions
+	 * received from authentication providers
+	 *
 	 * @return truststore 
 	 */
 	public X509CertChainValidator getTrustedAssertionIssuers();
@@ -177,4 +173,6 @@ public interface IContainerSecurityConfiguration extends IAuthnAndTrustConfigura
 	 * will be performed.
 	 */
 	public int getMaxSessionsPerUser();
+
+	public boolean isDynamicCredentialReloadEnabled();
 }
