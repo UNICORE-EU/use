@@ -28,9 +28,9 @@ import eu.unicore.util.configuration.ConfigurationException;
  * 
  * @author schuller
  */
-public class ServiceConfigReader implements IServiceConfigurator {
+public class ServiceConfigurator implements IServiceConfigurator {
 
-	private static final Logger logger=Log.getLogger(Log.UNICORE,ServiceConfigReader.class);
+	private static final Logger logger=Log.getLogger(Log.UNICORE,ServiceConfigurator.class);
 	
 	private Properties properties;
 	
@@ -41,16 +41,14 @@ public class ServiceConfigReader implements IServiceConfigurator {
 	private final List<Runnable> startupTasks = new ArrayList<>();
 	
 	/**
-	 * Configure from the given file. This file will be watched for changes using 
-	 * the given period (use a negative number to disable the watch), after the startConfigMonitoring()
-	 * method is invoked.
-	 * 
+	 * Configure from the given file
+	 *
 	 * @param kernel
 	 * @param config - the config file
 	 * 
 	 * @throws FileNotFoundException
 	 */
-	public ServiceConfigReader(Kernel kernel, File config) throws FileNotFoundException {
+	public ServiceConfigurator(Kernel kernel, File config) throws FileNotFoundException {
 		this.kernel=kernel;
 		this.configFile=config;
 	}

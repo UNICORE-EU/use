@@ -31,33 +31,18 @@ public class RegistryStartupTask implements Runnable {
 	
 	public void run() {
 		try {
-			RegistryCreator registryCreator = new RegistryCreator(kernel);
-			kernel.setAttribute(RegistryCreator.class, registryCreator);
+			RegistryCreator registryCreator = RegistryCreator.get(kernel);
 			registryCreator.createRegistry();
-			RegistryHandler registryHandler = new RegistryHandler(kernel);
-			kernel.setAttribute(RegistryHandler.class, registryHandler);
-			kernel.register(registryHandler);
+			RegistryHandler registryHandler = RegistryHandler.get(kernel);
 			if (!registryCreator.isGlobalRegistry()) {
-				forceRefreshRegistryEntries();
+				registryCreator.refreshRegistryEntries();
 			}
 			setupRegistryCrawler();
 		}catch(Exception ex) {
 			throw new RuntimeException(ex);
 		}
 	}
-	
 
-	private void forceRefreshRegistryEntries() {
-		try {
-			Home home = kernel.getHome("ServiceGroupEntry");
-			if (home != null && home instanceof DefaultHome) {
-				((DefaultHome) home).runExpiryCheckNow();
-			}
-		} catch (Exception ex) {
-			Log.logException("Error running expiry checks for <ServiceGroupEntry>", ex, logger);
-		}
-	}
-	
 	private void setupRegistryCrawler(){
 		Runnable command = new Runnable(){
 			public void run(){

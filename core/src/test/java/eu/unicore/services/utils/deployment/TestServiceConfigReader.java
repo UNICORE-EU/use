@@ -24,7 +24,7 @@ public class TestServiceConfigReader extends TestCase {
 	public void testStartupTasks()throws Exception{
 		String config = "src/test/resources/conf/use-2.properties";
 		Kernel k=new Kernel(config);
-		ServiceConfigReader r=new ServiceConfigReader(k, new File(config));
+		ServiceConfigurator r=new ServiceConfigurator(k, new File(config));
 		r.loadProperties();
 		r.configureServices();
 		List<Runnable>tasks=r.getInitTasks();

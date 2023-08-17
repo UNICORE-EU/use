@@ -104,7 +104,7 @@ public class RegistryHandler implements ExternalSystemConnector {
 			}
 		});
 		
-		Home regHome=kernel.getHome("Registry");
+		Home regHome=kernel.getHome(RegistryCreator.SERVICE_NAME);
 		if (regHome !=null && regHome instanceof RegistryHomeImpl){
 			isGlobalRegistry = true;
 		}
@@ -114,10 +114,19 @@ public class RegistryHandler implements ExternalSystemConnector {
 		if(regHome==null)
 			return;
 		
-		registryClient = new LocalRegistryClient("Registry",RegistryCreator.DEFAULT_REGISTRY_ID, kernel);	
+		registryClient = new LocalRegistryClient(kernel);	
 		
 	}
 
+	public static synchronized RegistryHandler get(Kernel kernel) throws Exception {
+		RegistryHandler rh = kernel.getAttribute(RegistryHandler.class);
+		if(rh==null) {
+			rh = new RegistryHandler(kernel);
+			kernel.setAttribute(RegistryHandler.class, rh);
+			kernel.register(rh);
+		}
+		return rh;
+	}
 
 	/**
 	 * this is only used internally

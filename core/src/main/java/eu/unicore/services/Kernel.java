@@ -59,6 +59,7 @@ import eu.unicore.services.messaging.IMessaging;
 import eu.unicore.services.messaging.MessagingException;
 import eu.unicore.services.messaging.MessagingImpl;
 import eu.unicore.services.persistence.PersistenceManager;
+import eu.unicore.services.registry.RegistryCreator;
 import eu.unicore.services.security.CertificateInfoMetric;
 import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.IAttributeSource;
@@ -73,7 +74,7 @@ import eu.unicore.services.utils.CapabilitiesLoader;
 import eu.unicore.services.utils.deployment.IServiceConfigurator;
 import eu.unicore.services.utils.deployment.NullServiceConfigurator;
 import eu.unicore.services.utils.deployment.PropertyChecker;
-import eu.unicore.services.utils.deployment.ServiceConfigReader;
+import eu.unicore.services.utils.deployment.ServiceConfigurator;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.UpdateableConfiguration;
@@ -151,8 +152,7 @@ public class Kernel {
 	}
 
 	/**
-	 * Creates Kernel using a main configuration file path. This file might be a Java properties file
-	 * referencing a USE XML configuration file, or might be a USE XML configuration file itself.
+	 * Creates Kernel using a main configuration file path.
 	 * Kernel is initialized (co-working objects, configuration). 
 	 * @param configurationFile see description
 	 * @throws Exception 
@@ -500,6 +500,10 @@ public class Kernel {
 	public void credentialReloaded() {
 		clientConfiguration.setCredential(containerSecurityConfiguration.getCredential());
 		PubkeyCache.get(this).update(containerSecurityConfiguration.getCredential());
+		RegistryCreator rc = RegistryCreator.get(this);
+		if(rc.haveRegistry() && !rc.isGlobalRegistry()) {
+			rc.refreshRegistryEntries();
+		}
 	}
 
 	/**
@@ -571,7 +575,7 @@ public class Kernel {
 	protected void prepare(String conf, Properties extraSettings) throws Exception {
 		if (conf != null) {
 			File file = new File(conf);
-			serviceConfigurator = new ServiceConfigReader(this, file);
+			serviceConfigurator = new ServiceConfigurator(this, file);
 		} else {
 			serviceConfigurator = new NullServiceConfigurator();
 		}

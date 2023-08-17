@@ -448,7 +448,9 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 				writer.writeObject(getCredential().getCertificate());
 			}catch(Exception ex){
 				Log.logException("Cannot convert public key to PEM", ex, logger);
+				pem = "n/a";
 			}
+			pem = out.toString();
 		}
 		return pem;
 	}
