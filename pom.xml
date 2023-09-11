@@ -65,7 +65,7 @@
     <jaxb.version>2.3.3</jaxb.version>
     <json.version>20230618</json.version>
     <gson.version>2.10.1</gson.version>
-    <xuudb.version>2.8.2</xuudb.version>
+    <xuudb.version>2.8.3</xuudb.version>
     <saaj.version>1.5.1</saaj.version>
     <cxf.version>3.6.1</cxf.version>
     <jetty.version>10.0.15</jetty.version>
