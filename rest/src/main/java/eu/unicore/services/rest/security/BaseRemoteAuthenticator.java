@@ -22,6 +22,7 @@ import eu.unicore.services.KernelInjectable;
 import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.services.utils.TimeoutRunner;
 import eu.unicore.util.Log;
+import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.httpclient.ConnectionUtil;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 
@@ -63,6 +64,13 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 		this.kernel = kernel;
 		kernel.getMetricRegistry().register(cb.getName(),cb);
 		createCache();
+		selfCheck();
+	}
+
+	protected void selfCheck() throws ConfigurationException {
+		if(address==null) {
+			throw new ConfigurationException(getClass().getName()+": Parameter 'address' is required");
+		}
 	}
 
 	public void setAddress(String address) {

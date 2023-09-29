@@ -25,6 +25,7 @@ import eu.unicore.services.rest.RESTUtils;
 import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.services.rest.client.IAuthCallback;
 import eu.unicore.util.Log;
+import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import eu.unicore.util.httpclient.HttpUtils;
 
@@ -64,6 +65,15 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 	@Override
 	public final Collection<String>getAuthSchemes(){
 		return s;
+	}
+	
+	@Override
+	protected void selfCheck() throws ConfigurationException{
+		super.selfCheck();
+		if(validate && (clientID==null || clientSecret==null)) {
+			throw new ConfigurationException(getClass().getName()+": 'validate=true' requires parameters "
+					+ "'clientID' and 'clientSecret'");
+		}
 	}
 
 	protected Object extractCredentials(DefaultClientConfiguration clientCfg, 
