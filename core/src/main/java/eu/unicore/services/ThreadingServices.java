@@ -1,5 +1,6 @@
 package eu.unicore.services;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -99,7 +100,7 @@ public class ThreadingServices {
 		
 		executor=new ThreadPoolExecutor(min, max,
 				idle,TimeUnit.MILLISECONDS,
-				new LinkedBlockingQueue<>(1),
+				new ArrayBlockingQueue<>(max),
 				new ThreadFactory(){
         			final AtomicInteger threadNumber = new AtomicInteger(1);
 		        	public Thread newThread(Runnable r) {
