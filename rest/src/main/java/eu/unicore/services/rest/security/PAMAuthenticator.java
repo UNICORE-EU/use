@@ -15,7 +15,7 @@ import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.CXFUtils;
 import eu.unicore.services.rest.security.BaseRemoteAuthenticator.CacheEntry;
 import eu.unicore.services.security.AuthAttributesCollector;
-import eu.unicore.services.security.AuthAttributesCollector.PAMAttributes;
+import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.util.Log;
 
 /**
@@ -73,7 +73,7 @@ public class PAMAuthenticator implements IAuthenticator {
 	
 	// store PAM attributes for PAMAttributeSource to pick up
 	private void storePAMInfo(UnixUser unixUser, SecurityTokens tokens){
-		PAMAttributes attr = new PAMAttributes();
+		BasicAttributeHolder attr = new BasicAttributeHolder();
 		attr.uid = unixUser.getUserName();
 		attr.groups = unixUser.getGroups().toArray(new String[unixUser.getGroups().size()]);
 		tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, attr);

@@ -19,6 +19,8 @@ import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.KernelInjectable;
+import eu.unicore.services.security.AuthAttributesCollector;
+import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.services.utils.TimeoutRunner;
 import eu.unicore.util.Log;
@@ -118,6 +120,11 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 			String dn = tokens.getUserName();
 			if(dn!=null){
 				logger.debug("Successfully authenticated (cached: {}) via {}: <{}>", cacheHit, this, dn);
+				BasicAttributeHolder attr = extractBasicAttributes(auth);
+				if(attr!=null) {
+					tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, attr);
+					logger.debug("Extracted attributes: {}", attr);
+				}
 			}
 		}catch(Exception ex){
 			logger.debug("Error authenticating at {}: {}", address, ex.getMessage());
@@ -156,6 +163,11 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	 */
 	protected abstract void extractAuthInfo(T auth, SecurityTokens tokens);
 	
+	// extract basic attributes from the auth reply
+	protected BasicAttributeHolder extractBasicAttributes(T auth) {
+		return null;
+	}
+
 	protected long getExpiryTime(T authObject){
 		return System.currentTimeMillis() + defaultCacheTime;
 	}

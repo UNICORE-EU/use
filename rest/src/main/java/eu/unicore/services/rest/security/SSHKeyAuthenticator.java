@@ -24,7 +24,7 @@ import eu.unicore.services.rest.security.jwt.JWTUtils;
 import eu.unicore.services.rest.security.sshkey.SSHKeyUC;
 import eu.unicore.services.rest.security.sshkey.SSHUtils;
 import eu.unicore.services.security.AuthAttributesCollector;
-import eu.unicore.services.security.AuthAttributesCollector.PAMAttributes;
+import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.utils.Pair;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
@@ -230,7 +230,7 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 
 	// store attributes for AuthAttributesCollector to pick up
 	private void storeAttributes(String requestedUser, SecurityTokens tokens){
-		PAMAttributes attr = new PAMAttributes();
+		BasicAttributeHolder attr = new BasicAttributeHolder();
 		attr.uid = requestedUser;
 		tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, attr);
 	}

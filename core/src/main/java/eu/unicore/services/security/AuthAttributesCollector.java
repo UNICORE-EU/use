@@ -41,22 +41,27 @@ public class AuthAttributesCollector implements IAttributeSource {
 	@Override
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens, SubjectAttributesHolder otherAuthoriserInfo)
 			throws IOException {
-		PAMAttributes attrs = (PAMAttributes)tokens.getContext().get(ATTRIBUTES);
+		BasicAttributeHolder attrs = (BasicAttributeHolder)tokens.getContext().get(ATTRIBUTES);
 		Map<String, String[]> ret = new HashMap<>();
 		if (attrs != null)putAttributes(attrs, ret);
 		return new SubjectAttributesHolder(null, ret, ret);
 	}
 
-	private void putAttributes(PAMAttributes attrs, Map<String, String[]> ret)
+	private void putAttributes(BasicAttributeHolder attrs, Map<String, String[]> ret)
 	{
-		ret.put(IAttributeSource.ATTRIBUTE_ROLE, new String[]{"user"});
-		ret.put(IAttributeSource.ATTRIBUTE_XLOGIN, new String[]{attrs.uid});
+		if(attrs.role!=null) {
+			ret.put(IAttributeSource.ATTRIBUTE_ROLE, new String[]{attrs.role});
+		}
+		if(attrs.uid!=null) {
+			ret.put(IAttributeSource.ATTRIBUTE_XLOGIN, new String[]{attrs.uid});
+		}
 		if(attrs.groups!=null){
 			ret.put(IAttributeSource.ATTRIBUTE_GROUP, attrs.groups);
 		}
 	}
 
-	public static class PAMAttributes {
+	public static class BasicAttributeHolder {
+		public String role = "user";
 		public String uid;
 		public String[] groups;
 	}

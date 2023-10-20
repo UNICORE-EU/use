@@ -146,7 +146,7 @@ public final class SecurityManager {
 		if (defaultSupGroups == null)
 			defaultSupGroups = new String[0];
 		
-		Set<String> validGroups = new HashSet<String>();
+		Set<String> validGroups = new HashSet<>();
 		Collections.addAll(validGroups, validPGroups);
 		Collections.addAll(validGroups, validSupGroups);
 		String[] pAddDefaultGids = defaultAttributes.get(IAttributeSource.ATTRIBUTE_ADD_DEFAULT_GROUPS);		

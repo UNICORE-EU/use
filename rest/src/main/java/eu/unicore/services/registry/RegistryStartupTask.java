@@ -6,11 +6,7 @@ package eu.unicore.services.registry;
 
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.Logger;
-
-import eu.unicore.services.Home;
 import eu.unicore.services.Kernel;
-import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.util.Log;
 
 
@@ -20,9 +16,7 @@ import eu.unicore.util.Log;
  * @author K. Benedyczak
  */
 public class RegistryStartupTask implements Runnable {
-	
-	private static final Logger logger=Log.getLogger(Log.UNICORE, RegistryStartupTask.class);
-	
+
 	private final Kernel kernel;
 	
 	public RegistryStartupTask(Kernel kernel) {
@@ -33,7 +27,7 @@ public class RegistryStartupTask implements Runnable {
 		try {
 			RegistryCreator registryCreator = RegistryCreator.get(kernel);
 			registryCreator.createRegistry();
-			RegistryHandler registryHandler = RegistryHandler.get(kernel);
+			RegistryHandler.get(kernel);
 			if (!registryCreator.isGlobalRegistry()) {
 				registryCreator.refreshRegistryEntries();
 			}

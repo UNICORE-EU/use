@@ -31,7 +31,7 @@ public class FilebasedAuthenticator implements IAuthenticator {
 
 	private static final Logger logger =  Log.getLogger(Log.SECURITY,FilebasedAuthenticator.class);
 	
-	private final Map<String,AttributesHolder>db = new HashMap<String,AttributesHolder>();
+	private final Map<String,AttributesHolder>db = new HashMap<>();
 	
 	private File dbFile;
 	private long lastUpdated;
@@ -147,8 +147,7 @@ public class FilebasedAuthenticator implements IAuthenticator {
 		SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
 		byte[] salt = new byte[16];
 		sr.nextBytes(salt);
-		String saltString = convertBytesToString(salt).replaceAll(":", "|");
-		return saltString;
+		return convertBytesToString(salt).replaceAll(":", "|");
 	}
 
 	private static String convertBytesToString(byte[] bytes) {
