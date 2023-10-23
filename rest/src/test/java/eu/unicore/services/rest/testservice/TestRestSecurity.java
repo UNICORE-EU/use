@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.security.cert.X509Certificate;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -23,6 +24,7 @@ import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.AfterClass;
@@ -30,15 +32,19 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.nimbusds.jose.util.X509CertUtils;
+
 import eu.unicore.security.wsutil.SecuritySessionUtils;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.RestService;
 import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.services.rest.client.IAuthCallback;
 import eu.unicore.services.rest.client.UsernamePassword;
+import eu.unicore.services.rest.impl.ApplicationBaseResource;
 import eu.unicore.services.rest.jwt.JWTDelegation;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.AuthNHandler;
+import eu.unicore.services.rest.security.jwt.JWTUtils;
 import eu.unicore.services.rest.security.sshkey.PasswordSupplierImpl;
 import eu.unicore.services.rest.security.sshkey.SSHKey;
 import eu.unicore.services.rest.security.sshkey.SSHKeyUC;
@@ -193,6 +199,36 @@ public class TestRestSecurity {
 		System.out.println("Service reply: "+reply.toString(2));
 		Assert.assertEquals("SSHKEY", reply.getString("auth_method"));
 	}
+	
+	@Test
+	public void testIssueToken() throws Exception {
+		String resource = url+"/"+sName+"/token";
+		IAuthCallback auth = new SSHKey("demouser", new File("src/test/resources/id_ed25519"),
+				new PasswordSupplierImpl("test123".toCharArray()));
+		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
+		try(ClassicHttpResponse response=bc.get(ContentType.TEXT_PLAIN)){
+			assertEquals(200, response.getCode());
+			String token = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+			JSONObject t = JWTUtils.getPayload(token);
+			System.out.println(t.toString(2));
+			Assert.assertEquals("CN=Demo User, O=UNICORE, C=EU", t.get("sub"));
+		}
+	}
+
+	@Test
+	public void testGetCert() throws Exception {
+		String resource = url+"/"+sName+"/certificate";
+		IAuthCallback auth = new SSHKey("demouser", new File("src/test/resources/id_ed25519"),
+				new PasswordSupplierImpl("test123".toCharArray()));
+		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
+		try(ClassicHttpResponse response=bc.get(ContentType.TEXT_PLAIN)){
+			assertEquals(200, response.getCode());
+			String pem = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+			X509Certificate cert = X509CertUtils.parse(pem);
+			Assert.assertEquals("CN=UNICOREX,O=UNICORE,C=EU", 
+					cert.getSubjectX500Principal().getName());
+		}
+	}
 
 	public static class MyApplication extends Application {
 		@Override
@@ -205,7 +241,7 @@ public class TestRestSecurity {
 
 
 	@Path("/")
-	public static class MockResource {
+	public static class MockResource extends ApplicationBaseResource {
 
 		static final AtomicInteger invocationCounter=new AtomicInteger(0);
 
