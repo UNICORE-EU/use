@@ -3,7 +3,7 @@ package eu.unicore.services.rest.registry;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.core.Application;
 
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.USERestApplication;

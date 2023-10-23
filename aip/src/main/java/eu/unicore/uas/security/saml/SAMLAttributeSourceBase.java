@@ -10,7 +10,6 @@ import java.util.List;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
-import eu.unicore.samly2.attrprofile.UVOSAttributeProfile;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.XACMLAttribute;
 import eu.unicore.services.Kernel;
@@ -64,14 +63,13 @@ public abstract class SAMLAttributeSourceBase implements IAttributeSource
 		SubjectAttributesHolder ret = new SubjectAttributesHolder(otherAuthoriserInfo.getPreferredVos());
 		String preferredScope = Utils.handlePreferredVo(otherAuthoriserInfo.getPreferredVos(), 
 				conf.getScope(), otherAuthoriserInfo.getSelectedVo());
-		List<ParsedAttribute> convertedAttributes = UVOSAttributeProfile.splitByScopes(serviceAttributes);
 		UnicoreIncarnationAttributes uia = specialAttrsHandler.extractUnicoreAttributes(
-				convertedAttributes, preferredScope, true);
+				serviceAttributes, preferredScope, true);
 		
 		if (addGeneric)
 		{		
 			List<XACMLAttribute> xacmlAttributes = XACMLAttributesExtractor.getSubjectAttributes(
-					convertedAttributes, conf.getScope());
+					serviceAttributes, conf.getScope());
 			if (xacmlAttributes != null)
 				ret.setXacmlAttributes(xacmlAttributes);
 		}

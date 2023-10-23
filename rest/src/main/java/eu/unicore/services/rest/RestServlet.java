@@ -3,10 +3,6 @@ package eu.unicore.services.rest;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Connector;
@@ -19,6 +15,9 @@ import eu.unicore.util.jetty.forwarding.Forwarder;
 import eu.unicore.util.jetty.forwarding.ForwardingConnection;
 import eu.unicore.util.jetty.forwarding.UpgradeHttpServletRequest;
 import eu.unicore.util.jetty.forwarding.UpgradeHttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class RestServlet extends CXFNonSpringServlet {
 	

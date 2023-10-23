@@ -1,6 +1,5 @@
 package eu.unicore.services.rest;
 
-import javax.ws.rs.core.Application;
 import javax.xml.namespace.QName;
 
 import org.apache.cxf.endpoint.Server;
@@ -16,6 +15,7 @@ import eu.unicore.services.rest.impl.PostInvokeHandler;
 import eu.unicore.services.rest.impl.USERestInvoker;
 import eu.unicore.services.rest.security.AuthNHandler;
 import eu.unicore.services.rest.security.RESTSecurityProperties;
+import jakarta.ws.rs.core.Application;
 
 /**
  * a UNICORE REST service corresponds to a JAX-RS {@link Application}

@@ -8,8 +8,6 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.transport.http.AbstractHTTPDestination;
@@ -23,6 +21,7 @@ import eu.unicore.security.wsutil.CXFUtils;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.KernelInjectable;
 import eu.unicore.util.Log;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Authenticate the user via her X.509 credential, if present.

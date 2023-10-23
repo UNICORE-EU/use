@@ -8,8 +8,8 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Application;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;

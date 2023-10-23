@@ -1,7 +1,5 @@
 package eu.unicore.services.rest.impl;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 
@@ -10,6 +8,7 @@ import eu.unicore.security.wsutil.SecuritySessionUtils;
 import eu.unicore.services.Home;
 import eu.unicore.services.Resource;
 import eu.unicore.services.security.util.AuthZAttributeStore;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class PostInvokeHandler extends AbstractPhaseInterceptor<Message> {
 

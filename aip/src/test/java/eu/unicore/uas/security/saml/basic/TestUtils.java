@@ -4,18 +4,12 @@
  */
 package eu.unicore.uas.security.saml.basic;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
-import eu.unicore.samly2.SAMLConstants;
-import eu.unicore.samly2.attrprofile.ParsedAttribute;
-import eu.unicore.samly2.attrprofile.UVOSAttributeProfile;
-import eu.unicore.samly2.attrprofile.UVOSAttributeProfile.ScopedStringValue;
 import eu.unicore.uas.security.saml.Utils;
-
-import static org.junit.Assert.*;
 
 /**
  * @author K. Benedyczak
@@ -47,30 +41,4 @@ public class TestUtils
 		assertNull(res);
 	}
 	
-	@Test
-	public void testSplitByScope()
-	{
-		List<ParsedAttribute> attrs = new ArrayList<ParsedAttribute>();
-		attrs.add(createScopedAttr("saml:Normal", "/a", "val1", "/b", "val2", "/c", "val3"));
-		attrs.add(createScopedAttr("saml:Normal2", "/bb", "val1", "/aa", "val1", "/aa", "val2", "/bb", "val2"));
-		
-		List<ParsedAttribute> attrs2 = UVOSAttributeProfile.splitByScopes(attrs);
-		assertEquals(5, attrs2.size());
-	}
-	
-	public static ParsedAttribute createScopedAttr(String name, String... valsAndScopes)
-	{
-		ParsedAttribute ret = new ParsedAttribute(name);
-		List<ScopedStringValue> scopedVals = new ArrayList<ScopedStringValue>(valsAndScopes.length/2);
-		List<String> strVals = new ArrayList<String>(valsAndScopes.length/2);
-		for (int i=0; i<valsAndScopes.length-1; i+=2)
-		{
-			scopedVals.add(new ScopedStringValue(valsAndScopes[i], 
-					SAMLConstants.XACMLDT_STRING, valsAndScopes[i+1]));
-			strVals.add(valsAndScopes[i+1]);
-		}
-		ret.setDataType(ScopedStringValue.class);
-		ret.setValues(strVals, scopedVals);
-		return ret;
-	}
 }

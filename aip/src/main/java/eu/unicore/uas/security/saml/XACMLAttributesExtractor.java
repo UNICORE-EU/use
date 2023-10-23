@@ -13,9 +13,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 
-import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
-import eu.unicore.samly2.attrprofile.UVOSAttributeProfile.ScopedStringValue;
 import eu.unicore.security.XACMLAttribute;
 import eu.unicore.uas.security.saml.conf.IBaseConfiguration;
 import eu.unicore.util.Log;
@@ -39,8 +37,7 @@ public class XACMLAttributesExtractor
 		try
 		{
 			for (ParsedAttribute voAttr: authzAttribs)
-				if (hasProperScope(voAttr, scope))
-					map2XACMLAttr(ret, voAttr);
+				map2XACMLAttr(ret, voAttr);
 		} catch (URISyntaxException e)
 		{
 			logger.warn("Name or value of attribute received was not a URI" +
@@ -48,20 +45,6 @@ public class XACMLAttributesExtractor
 			return null;
 		}
 		return ret;
-	}
-	
-	protected static boolean hasProperScope(ParsedAttribute a, String scope)
-	{
-		if (a.getObjectValues().size() == 0)
-			return true;
-		if (!a.getDataType().isAssignableFrom(ScopedStringValue.class))
-			return true;
-		ScopedStringValue scopedValue = (ScopedStringValue) a.getObjectValues().get(0);
-		String s = scopedValue.getScope();
-		if (s == null || scope == null || s.equals(scope.toString()))
-			return true;
-		logger.debug("Ignoring attribute {} as it has unwanted scope: {}", a.getName(), s);
-		return false;
 	}
 	
 	//TODO currently only string and URI attribute values are supported
@@ -85,55 +68,6 @@ public class XACMLAttributesExtractor
 						voAttr.getName(), value);
 				toFill.add(new XACMLAttribute(voAttr.getName(), value, XACMLAttribute.Type.STRING));
 			}
-		}
-		
-		if (!voAttr.getDataType().isAssignableFrom(ScopedStringValue.class))
-		{
-			logger.debug("Got SAML attribute with unknown type of object value, not using as a generic XACML attribute, it's name is: {} and value class {}",
-					voAttr.getName(), voAttr.getDataType());
-			return;
-		}
-		
-		ScopedStringValue scopedValue = (ScopedStringValue) voAttr.getObjectValues().get(0);
-		String xacmlDT = scopedValue.getXacmlType();
-		if (xacmlDT == null)
-		{
-			logger.debug("Got SAML attribute without XACML DT set - ignoring, it's name is: {}", voAttr.getName());
-			return;
-		}
-		if (xacmlDT.equals(SAMLConstants.XACMLDT_STRING))
-		{
-			for (String value: voAttr.getStringValues())
-			{
-				logger.debug("Adding XACML string attribute {} with value {}", 
-						voAttr.getName(), value);
-				toFill.add(new XACMLAttribute(voAttr.getName(), value, XACMLAttribute.Type.STRING));
-			}
-		} else if (xacmlDT.equals("http://www.w3.org/2001/XMLSchema#anyURI"))
-		{
-			for (String value: voAttr.getStringValues())
-			{
-				logger.debug("Adding XACML anyURI attribute {} with value {}", voAttr.getName(), value);
-				toFill.add(new XACMLAttribute(
-					voAttr.getName(), value, XACMLAttribute.Type.ANYURI));
-			}
-		} else if (xacmlDT.equals(SAMLConstants.XACMLDT_SCOPED_STRING))
-		{
-			for (String value: voAttr.getStringValues())
-			{
-				String val = value;
-				if (scopedValue.getScope() != null && !scopedValue.getScope().equals("/"))
-					val = val + "@" + scopedValue.getScope();
-				logger.debug("Adding XACML scoped string attribute {} with value {} as a normal string attribute",
-						voAttr.getName(), val);
-				toFill.add(new XACMLAttribute(
-					voAttr.getName(), val, XACMLAttribute.Type.STRING));
-			}
-		} else
-		{
-			logger.warn("Got SAML attribute with unsupported XACML DataType: {}. Attribute name is: {}",
-					xacmlDT, voAttr.getName());
-			return;
 		}
 	}
 }

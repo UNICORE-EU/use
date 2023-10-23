@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.cxf.message.Message;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -28,6 +26,7 @@ import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder
 import eu.unicore.services.utils.Pair;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Authenticate by checking tokens using the SSH public key(s) 

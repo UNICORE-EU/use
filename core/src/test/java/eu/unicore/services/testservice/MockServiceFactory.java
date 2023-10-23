@@ -1,6 +1,6 @@
 package eu.unicore.services.testservice;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import eu.unicore.services.DeploymentDescriptor;
 import eu.unicore.services.Service;

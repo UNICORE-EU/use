@@ -39,8 +39,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.Servlet;
-
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -60,6 +58,7 @@ import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.jetty.HttpServerProperties;
 import eu.unicore.util.jetty.JettyServerBase;
+import jakarta.servlet.Servlet;
 
 /**
  * Jetty server for USE

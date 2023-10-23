@@ -6,10 +6,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.apache.cxf.jaxrs.impl.ResponseBuilderImpl;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
@@ -21,6 +17,9 @@ import eu.unicore.services.rest.Link;
 import eu.unicore.services.rest.RESTUtils.HtmlBuilder;
 import eu.unicore.services.utils.Utilities;
 import eu.unicore.util.Log;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Helper class providing help for the basic rendering of REST resources in

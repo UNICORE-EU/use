@@ -24,9 +24,7 @@ import com.google.common.cache.CacheBuilder;
 
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.samly2.SAMLConstants;
-import eu.unicore.samly2.assertion.AttributeAssertionParser;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
-import eu.unicore.samly2.attrprofile.UVOSAttributeProfile;
 import eu.unicore.samly2.elements.NameID;
 import eu.unicore.samly2.exceptions.SAMLServerException;
 import eu.unicore.samly2.exceptions.SAMLValidationException;
@@ -207,9 +205,7 @@ public class SAMLAttributeFetcher
 		else
 			myID = new NameID(clientConfiguration.getCredential().getSubjectName(), 
 					SAMLConstants.NFORMAT_DN);
-		AttributeAssertionParser attributeAssertionParser = client.getAssertion(subject, myID);
-		attributeAssertionParser.addProfile(new UVOSAttributeProfile());
-		return attributeAssertionParser.getAttributes();
+		return client.getAssertion(subject, myID).getAttributes();
 	}
 }
 

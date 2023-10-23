@@ -17,8 +17,6 @@ import java.util.Map;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
-import eu.unicore.samly2.attrprofile.UVOSAttributeProfile;
-import eu.unicore.samly2.attrprofile.UVOSAttributeProfile.ScopedStringValue;
 import eu.unicore.uas.security.saml.conf.IBaseConfiguration;
 import eu.unicore.util.Log;
 
@@ -109,20 +107,12 @@ public class UnicoreAttributesHandler
 					mapping.getUnicoreName()
 					+ ") received with multiple values (it should have one, will use a random one!).");
 
-
-			if (a.getDataType().isAssignableFrom(UVOSAttributeProfile.ScopedStringValue.class)) 
+			if (mapping.getSamlName() != null && mapping.getSamlName().equals(a.getName())) 
 			{
-				handleLegacyscopedAttribute(a, selectedVo, mapping, retValid, 
-						retDefault, retVoValid, retVoDefault);
-			} else
+				addValid(a, mapping, retValid, false);
+			} else if (mapping.getDefSamlName() != null && mapping.getDefSamlName().equals(a.getName()))
 			{
-				if (mapping.getSamlName() != null && mapping.getSamlName().equals(a.getName())) 
-				{
-					addValid(a, mapping, retValid, false);
-				} else if (mapping.getDefSamlName() != null && mapping.getDefSamlName().equals(a.getName()))
-				{
-					addDefault(a, mapping, retDefault, false);
-				}
+				addDefault(a, mapping, retDefault, false);
 			}
 		}
 
@@ -136,68 +126,6 @@ public class UnicoreAttributesHandler
 	}
 
 
-	/**
-	 * UVOS attributes contain scope. We handle them here.
-	 * @param scopedAttribute
-	 * @param selectedVo
-	 * @param mapping
-	 * @param retValid
-	 * @param retDefault
-	 * @param retVoValid
-	 * @param retVoDefault
-	 */
-	private void handleLegacyscopedAttribute(ParsedAttribute scopedAttribute, String selectedVo, 
-			UnicoreAttributeMappingDef mapping, Map<String, List<String>> retValid,
-			Map<String, List<String>> retDefault, Map<String, List<String>> retVoValid,
-			Map<String, List<String>> retVoDefault)
-	{
-		if (scopedAttribute.getObjectValues().size() == 0)
-			return;
-		ScopedStringValue value = (ScopedStringValue) scopedAttribute.getObjectValues().get(0);
-		String scope = value.getScope();
-		if (!scopesEqual(scope, uudbScope) && (selectedVo == null || !scopesEqual(scope, selectedVo))) {
-			if (log.isDebugEnabled())
-				log.debug(scopedAttribute.getName() +	" attribute (used for UNICORE " + 
-						mapping.getUnicoreName() + ") received with value in " +
-						"unwanted scope, ignoring. The scope is: " +
-						scope + " and value is: " + 
-						value.getValue());
-			return;
-		}
-
-		boolean isVo = (selectedVo != null && scopesEqual(scope, selectedVo));
-
-		if (mapping.getSamlName() != null && mapping.getSamlName().equals(scopedAttribute.getName())) 
-		{
-			if (scope == null || scopesEqual(scope, uudbScope))
-				addValid(scopedAttribute, mapping, retValid, false);
-			if (isVo) 
-				addValid(scopedAttribute, mapping, retVoValid, true);
-		} else if (mapping.getDefSamlName() != null && mapping.getDefSamlName().equals(scopedAttribute.getName()))
-		{
-			if (scope == null || scopesEqual(scope, uudbScope))
-				addDefault(scopedAttribute, mapping, retDefault, false);
-			if (isVo)
-				addDefault(scopedAttribute, mapping, retVoDefault, true);
-		}
-	}
-
-	
-	/**
-	 * Compares two scopes.
-	 * @param scopeA
-	 * @param scopeB
-	 * @return true iff are the same.
-	 */
-	private static boolean scopesEqual(String scopeA, String scopeB)
-	{
-		if (scopeA == null && scopeB == null)
-			return true;
-		if (scopeA == null || scopeB == null)
-			return false;
-		return scopeA.equals(scopeB);
-	}
-	
 	private void addValid(ParsedAttribute a, UnicoreAttributeMappingDef mapping, Map<String, List<String>> ret, 
 			boolean isVo)
 	{

@@ -1,6 +1,6 @@
 package eu.unicore.services;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 /**
  * Service factories are used to build services of a certain types.
