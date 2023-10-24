@@ -32,12 +32,11 @@ import org.herasaf.xacml.core.simplePDP.SimplePDPFactory;
 
 import eu.unicore.security.Client;
 import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.security.IContainerSecurityConfiguration;
 import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.pdp.PDPResult;
 import eu.unicore.services.security.pdp.UnicoreXPDP;
-import eu.unicore.services.security.IContainerSecurityConfiguration;
 import eu.unicore.services.security.util.ResourceDescriptor;
-import eu.unicore.uas.pdp.argus.ArgusPAP;
 import eu.unicore.uas.pdp.request.creator.HerasafXacml2RequestCreator;
 import eu.unicore.uas.pdp.request.profile.UnicoreInternalProfile;
 import eu.unicore.util.Log;
