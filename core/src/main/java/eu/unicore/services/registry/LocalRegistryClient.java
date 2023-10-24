@@ -99,12 +99,12 @@ public class LocalRegistryClient implements IRegistry {
 		updated.put(resID, System.currentTimeMillis());
 	}
 
-	private synchronized void invalidateCache() {
+	public synchronized void invalidateCache() {
 		cache.remove(resID);
 		updated.remove(resID);
 	}
 
-	private static final long cacheTime = 3600 * 1000;
+	private static final long cacheTime = 5 * 60 * 1000;
 	private static final Map<String,List<Map<String,String>>>cache = new HashMap<>();
 	private static final Map<String,Long>updated= new HashMap<>();
 

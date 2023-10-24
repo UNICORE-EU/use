@@ -71,6 +71,8 @@ public class Registries extends ServicesBase {
 			long refreshIn = cfg.getLongValue(ContainerProperties.WSRF_SGENTRY_TERMINATION_TIME);
 			String entryID = sg.addEntry(endpoint, content, null);
 			String location = "/"+entryID;
+			LocalRegistryClient lrc = new LocalRegistryClient(home.getServiceName(), resource.getUniqueID(), kernel);
+			lrc.invalidateCache();
 			return Response.created(new URI(location))
 					.header("X-UNICORE-Lifetime", String.valueOf(refreshIn))
 					.build();			
