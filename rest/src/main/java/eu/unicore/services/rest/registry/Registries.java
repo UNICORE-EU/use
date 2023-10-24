@@ -8,13 +8,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
 import org.apache.hc.core5.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,6 +20,12 @@ import eu.unicore.services.rest.USEResource;
 import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.services.rest.client.RegistryClient;
 import eu.unicore.services.rest.impl.ServicesBase;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * @author schuller
@@ -71,6 +70,8 @@ public class Registries extends ServicesBase {
 			long refreshIn = cfg.getLongValue(ContainerProperties.WSRF_SGENTRY_TERMINATION_TIME);
 			String entryID = sg.addEntry(endpoint, content, null);
 			String location = "/"+entryID;
+			LocalRegistryClient lrc = new LocalRegistryClient(home.getServiceName(), resource.getUniqueID(), kernel);
+			lrc.invalidateCache();
 			return Response.created(new URI(location))
 					.header("X-UNICORE-Lifetime", String.valueOf(refreshIn))
 					.build();			

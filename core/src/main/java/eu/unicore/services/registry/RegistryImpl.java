@@ -38,7 +38,7 @@ public class RegistryImpl extends ResourceImpl {
 				refresh(endpoint, content);
 				logger.debug("Refreshed registry entry for <{}>", endpoint);
 			} catch (ResourceUnknownException e) {
-				// sgEntry has been destroyed in between, so remove it from Entry RP
+				// sgEntry has been destroyed in between, so remove it from the model
 				getModel().removeEntry(endpoint);
 				createNew = true;
 			} catch (Exception e){

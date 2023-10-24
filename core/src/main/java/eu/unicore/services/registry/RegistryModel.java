@@ -12,7 +12,7 @@ public class RegistryModel extends BaseModel {
 	private static final long serialVersionUID = 1L;
 
 	// maps endpoints to ServiceRegistryEntry UUIDs
-	private final Map<String, String> entries = new HashMap<>();
+	private Map<String, String> entries = new HashMap<>();
 	
 	public void put(String endpoint, String uuid){
 		entries.put(endpoint, uuid);

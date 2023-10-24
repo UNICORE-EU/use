@@ -20,14 +20,14 @@ public class SecuredResourceModel implements Model {
 	
 	private String ownerDN;
 	
-	private List<ACLEntry> acl = new ArrayList<ACLEntry>();
+	private List<ACLEntry> acl = new ArrayList<>();
 	
 	private Boolean publishServerCert = Boolean.FALSE;
 			
 	protected transient boolean dirty=false;
 	
 	// this map holds children keyed by service name
-	private Map<String, List<String>> children = new HashMap<String, List<String>>();
+	private Map<String, List<String>> children = new HashMap<>();
 	
 	private String parentServiceName;
 	
