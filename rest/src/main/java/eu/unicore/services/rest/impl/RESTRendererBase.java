@@ -40,7 +40,7 @@ public abstract class RESTRendererBase implements KernelInjectable {
 	 */
 	protected Kernel kernel;
 
-	protected Collection<Link> links = new ArrayList<Link>();
+	protected Collection<Link> links = new ArrayList<>();
 
 	protected String resourceID;
 	

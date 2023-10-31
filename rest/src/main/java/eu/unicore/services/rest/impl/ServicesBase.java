@@ -2,6 +2,7 @@ package eu.unicore.services.rest.impl;
 
 import java.net.URI;
 import java.util.List;
+import java.util.function.Predicate;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
@@ -74,10 +75,13 @@ public abstract class ServicesBase extends BaseRESTController {
 	public Response listAll(
 			@QueryParam("offset") @DefaultValue(value="0") int offset, 
 			@QueryParam("num") @DefaultValue(value="200") int num,
-			@QueryParam("tags") String tags
+			@QueryParam("tags") String tags,
+			@QueryParam("filter") String filter
 			) throws Exception {
 		try{
 			List<String>uids = getAccessibleResources(tags);
+			Predicate<String> f = createFilter(filter);
+			if(f!=null)uids.removeIf(f);
 			String base = getBaseURL()+"/"+getPathComponent();
 			PagingHelper ph = new PagingHelper(base, base, getResourcesName());
 			JSONObject o = ph.renderJson(offset, num, uids);
@@ -88,6 +92,17 @@ public abstract class ServicesBase extends BaseRESTController {
 		}catch(Exception ex){
 			return handleError("Error", ex, logger);
 		}
+	}
+
+	/**
+	 * allows subclasses to create a filter to remove certain
+	 * elements from the list of all accessible resources returned
+	 * by the listAll() function
+	 *
+	 * @param filterSpec (can be null)
+	 */
+	protected Predicate<String> createFilter(String filterSpec){
+		return null;
 	}
 
 	/**
@@ -110,6 +125,9 @@ public abstract class ServicesBase extends BaseRESTController {
 	@ConcurrentAccess(allow=true)
 	public String listAllHtml() throws Exception {
 		RESTUtils.HtmlBuilder b = new RESTUtils.HtmlBuilder();
+		List<String> uids = getAccessibleResources(null);
+		Predicate<String> f = createFilter(null);
+		if(f!=null)uids.removeIf(f);
 		for (String id : getAccessibleResources(null)) {
 			String url = getBaseURL() + "/" + getPathComponent() + id;
 			b.href(url, id);
