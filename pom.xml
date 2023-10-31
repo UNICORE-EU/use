@@ -60,7 +60,7 @@
   <properties>
     <compiler.fork>false</compiler.fork>
     <persistence.version>0.600</persistence.version>
-    <secutils.version>4.0.0</secutils.version>
+    <secutils.version>4.0.1</secutils.version>
     <seclib.version>7.0.0</seclib.version>
     <herasaf.version>3.0.2</herasaf.version>
     <json.version>20231013</json.version>
@@ -139,10 +139,6 @@
 	<exclusion>
           <groupId>xalan</groupId>
           <artifactId>xalan</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.wss4j</groupId>
-          <artifactId>wss4j-ws-security-dom</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
