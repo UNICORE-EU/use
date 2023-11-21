@@ -34,7 +34,7 @@ import eu.unicore.util.httpclient.IClientConfiguration;
  * @author schuller
  * @author golbi
  */
-public class XUUDBAttributeSource extends XUUDBAuthoriserBase implements
+public class XUUDBAttributeSource extends XUUDBBase implements
 		IAttributeSource {
 
 	private static final Logger logger = Log.getLogger(Log.SECURITY,
@@ -167,11 +167,9 @@ public class XUUDBAttributeSource extends XUUDBAuthoriserBase implements
 			String reply = "[xlogin=" + login.getXlogin() + ", role="
 					+ login.getRole() + ", projects=" + login.getProjects()
 					+ "]";
-			logger.debug(name + " reply: " + reply);
+			logger.debug("{} reply: {}", name, reply);
 		}
-		SubjectAttributesHolder map = makeAuthInfo(res.getCheckDNResponse());
-
-		return map;
+		return makeAuthInfo(res.getCheckDNResponse());
 	}
 
 	/**
@@ -181,8 +179,8 @@ public class XUUDBAttributeSource extends XUUDBAuthoriserBase implements
 		String role = login.getRole();
 		String xlogin = login.getXlogin();
 		String groups = login.getProjects();
-		Map<String, String[]> map = new HashMap<String, String[]>();
-		Map<String, String[]> mapDef = new HashMap<String, String[]>();
+		Map<String, String[]> map = new HashMap<>();
+		Map<String, String[]> mapDef = new HashMap<>();
 		if (isNotEmpty(xlogin)) {
 			String[] xlogins = decode(xlogin);
 			map.put(IAttributeSource.ATTRIBUTE_XLOGIN, xlogins);
@@ -207,7 +205,7 @@ public class XUUDBAttributeSource extends XUUDBAuthoriserBase implements
 	}
 
 	protected String[] decode(String in) {
-		List<String> res = new ArrayList<String>();
+		List<String> res = new ArrayList<>();
 		for (String s : in.split(":")) {
 			String v = s.trim();
 			if (v.length() != 0)

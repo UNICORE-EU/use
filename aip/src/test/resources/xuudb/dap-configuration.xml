@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dynamicAttributes xmlns="http://unicore.eu/xuudb/dynamicAttributesRules"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <poolMonitoringDelay>1</poolMonitoringDelay>
+  <rules/>
+  <pools/>
+</dynamicAttributes>

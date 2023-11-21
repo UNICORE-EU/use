@@ -164,6 +164,18 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>eu.unicore.xuudb</groupId>
+      <artifactId>xuudb-server</artifactId>
+      <version>${xuudb.version}</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.xmlbeans</groupId>
+         <artifactId>xmlbeans</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency> 
+    <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
       <version>${jetty.version}</version>

@@ -17,16 +17,15 @@ import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.ConnectionUtil;
 
 /**
- * get authorisation attributes for users by asking an XUUDB
- * 
+ * get user attributes from an XUUDB's REST/JSON interface
+ *
  * @author schuller
- * @author golbi
- * @author piernikp
  */
-public abstract class XUUDBAuthoriserBase implements IAttributeSourceBase, ExternalSystemConnector {
+public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemConnector {
 
 	private static final Logger logger = Log.getLogger(Log.SECURITY,
-			XUUDBAuthoriserBase.class);
+			XUUDBBase.class);
+
 	public static final int DEFAULT_PORT = 34463;
 	public static final String DEFAULT_HOST = "https://localhost";
 
@@ -104,7 +103,7 @@ public abstract class XUUDBAuthoriserBase implements IAttributeSourceBase, Exter
 
 	// monitoring information and query hooks
 
-	private Set<String> accessorNames = new HashSet<String>();
+	private Set<String> accessorNames = new HashSet<>();
 
 	public String[] getRequestorNames() {
 		return accessorNames.toArray(new String[accessorNames.size()]);
@@ -117,7 +116,7 @@ public abstract class XUUDBAuthoriserBase implements IAttributeSourceBase, Exter
 	public void addAccessorName(String name) {
 		boolean newEntry = accessorNames.add(name);
 		if (newEntry) {
-			logger.info("New client: " + name);
+			logger.info("New client: {}", name);
 		}
 	}
 

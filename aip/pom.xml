@@ -34,6 +34,10 @@
       <groupId>eu.unicore.xuudb</groupId>
       <artifactId>xuudb-common</artifactId>
     </dependency>
+    <dependency>
+      <groupId>eu.unicore.xuudb</groupId>
+      <artifactId>xuudb-server</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

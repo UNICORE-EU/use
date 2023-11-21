@@ -25,7 +25,7 @@ import eu.unicore.services.security.IDynamicAttributeSource;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.IClientConfiguration;
 
-public class XUUDBDynamicAttributeSource extends XUUDBAuthoriserBase implements
+public class XUUDBDynamicAttributeSource extends XUUDBBase implements
 		IDynamicAttributeSource {
 	private static final Logger logger = Log.getLogger(Log.SECURITY,
 			XUUDBDynamicAttributeSource.class);
@@ -127,7 +127,7 @@ public class XUUDBDynamicAttributeSource extends XUUDBAuthoriserBase implements
 				}
 			}
 		}
-return map;
+		return map;
 	}
 
 	private SubjectAttributesHolder getDAPAttributes(Client client,
@@ -222,10 +222,7 @@ return map;
 			logger.debug(name + " reply: " + reply);
 		}
 
-		SubjectAttributesHolder map = makeAuthInfo(resp
-				.getGetAttributesResponse());
-		return map;
-
+		return makeAuthInfo(resp.getGetAttributesResponse());
 	}
 
 	private SubjectAttributesHolder makeAuthInfo(GetAttributesResponseType data) {
@@ -233,8 +230,8 @@ return map;
 		String xlogin = data.getXlogin();
 		String[] supGids = data.getSupplementaryGidsArray();
 
-		Map<String, String[]> map = new HashMap<String, String[]>();
-		Map<String, String[]> mapDef = new HashMap<String, String[]>();
+		Map<String, String[]> map = new HashMap<>();
+		Map<String, String[]> mapDef = new HashMap<>();
 		if (isNotEmpty(xlogin)) {
 			String[] xlogins = new String[] { xlogin };
 			map.put(IAttributeSource.ATTRIBUTE_XLOGIN, xlogins);
