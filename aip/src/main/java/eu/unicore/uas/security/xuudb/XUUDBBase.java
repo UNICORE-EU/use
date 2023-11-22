@@ -1,10 +1,16 @@
 package eu.unicore.uas.security.xuudb;
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.services.ExternalSystemConnector;
@@ -15,16 +21,17 @@ import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.services.utils.TimeoutRunner;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.ConnectionUtil;
+import eu.unicore.util.httpclient.HttpUtils;
 
 /**
- * get user attributes from an XUUDB's REST/JSON interface
+ * Base for XUUDB attribute sources
  *
  * @author schuller
+ * @author golbi
  */
 public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemConnector {
 
-	private static final Logger logger = Log.getLogger(Log.SECURITY,
-			XUUDBBase.class);
+	protected static final Logger logger = Log.getLogger(Log.SECURITY, XUUDBBase.class);
 
 	public static final int DEFAULT_PORT = 34463;
 	public static final String DEFAULT_HOST = "https://localhost";
@@ -59,17 +66,19 @@ public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemC
 	
 	public void configure(String name) {
 		this.name = name;
-		cb = new CircuitBreaker(name);
+		cb = new CircuitBreaker("AttributeSource_"+name);
 		if (port == null)
 			port = DEFAULT_PORT;
 		if (host == null)
 			host = DEFAULT_HOST;
-
-		xuudbURL = host + ":" + port + "/";
-		logger.info("Attribute source '" + name
-				+ "': connecting to <" + xuudbURL
-				+ ">");
+		setupURL();
+		logger.info("Attribute source '{}': connecting to <{}>",
+				name, getXUUDBUrl());
 		initCache();
+	}
+
+	protected void setupURL() {
+		xuudbURL = host + ":" + port + "/";
 	}
 
 	public void setXuudbPort(int port) {
@@ -142,19 +151,10 @@ public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemC
 			status = Status.NOT_APPLICABLE;
 			return;
 		}
-		
-		// TODO - insecure mode won't work here
-		Callable<X509Certificate[]> getCert = new Callable<X509Certificate[]>() {
-			public X509Certificate[] call() throws Exception {
-				return ConnectionUtil.getPeerCertificate(kernel.getClientConfiguration(), 
-						getXUUDBUrl(), 5000, logger);
-			}
-		};
-		ThreadingServices ts = kernel.getContainerProperties()
-				.getThreadingServices();
-		if (TimeoutRunner.compute(getCert, ts, 2000) != null) {
+		String msg = checkXUUDBAlive();
+		if (msg!= null) {
 			statusMessage = "OK [" + name
-					+ " connected to " + getXUUDBUrl() + "]";
+					+ " "+msg + "]";
 			status = Status.OK;
 			cb.OK();
 		}
@@ -162,6 +162,23 @@ public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemC
 			statusMessage = "CAN'T CONNECT TO XUUDB";
 			status = Status.DOWN;
 			cb.notOK(statusMessage);
+		}
+	}
+	
+	protected String checkXUUDBAlive() {
+		Callable<X509Certificate[]> getCert = new Callable<>() {
+			public X509Certificate[] call() throws Exception {
+				return ConnectionUtil.getPeerCertificate(kernel.getClientConfiguration(), 
+						getXUUDBUrl(), 5000, logger);
+			}
+		};
+		ThreadingServices ts = kernel.getContainerProperties()
+				.getThreadingServices();
+		try{
+			return TimeoutRunner.compute(getCert, ts, 2000) != null ? 
+				"connected to " + getXUUDBUrl() : null;
+		}catch(Exception ex) {
+			return null;
 		}
 	}
 
@@ -186,4 +203,13 @@ public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemC
 		return name +" attribute source";
 	}
 	
+	protected String doGet(String url) throws IOException {
+		HttpClient hc = HttpUtils.createClient(url, kernel.getClientConfiguration());
+		HttpGet get = new HttpGet(url);
+		get.setHeader("Accept", "application/json");
+		try(ClassicHttpResponse response = hc.executeOpen(null, get, HttpClientContext.create())){
+			if(response.getCode()!=200)throw new IOException("HTTP error "+response.getCode());
+			return IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+		}
+	}
 }

@@ -6,13 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.hc.client5.http.classic.HttpClient;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.protocol.HttpClientContext;
-import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.net.URIBuilder;
-import org.apache.logging.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import eu.unicore.security.SecurityTokens;
@@ -22,7 +17,6 @@ import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.util.Log;
-import eu.unicore.util.httpclient.HttpUtils;
 
 /**
  * get user attributes from an XUUDB's REST/JSON interface
@@ -33,8 +27,7 @@ import eu.unicore.util.httpclient.HttpUtils;
 public class XUUDBJSONAttributeSource extends XUUDBBase implements
 		IAttributeSource {
 
-	private static final Logger logger = Log.getLogger(Log.SECURITY,
-			XUUDBJSONAttributeSource.class);
+	private String infoURL;
 
 	@Override
 	public void start(Kernel kernel) throws Exception {
@@ -42,6 +35,12 @@ public class XUUDBJSONAttributeSource extends XUUDBBase implements
 		cb = new CircuitBreaker("Attribute_Source_"+name);
 		kernel.getMetricRegistry().register(cb.getName(), cb);
 		isEnabled = true;
+	}
+
+	@Override
+	protected void setupURL() {
+		xuudbURL = host + ":" + port + "/rest/xuudb/query/"+gcID;
+		infoURL = host + ":" + port + "/rest/xuudb/info";
 	}
 
 	@Override
@@ -74,24 +73,16 @@ public class XUUDBJSONAttributeSource extends XUUDBBase implements
 			throws IOException {
 		String dn = tokens.getEffectiveUserName();
 		addAccessorName(dn);
-		JSONObject res = null;
 		try {
-			URIBuilder ub = new URIBuilder(getXUUDBUrl()+"rest/xuudb/query/"+gcID);
+			URIBuilder ub = new URIBuilder(getXUUDBUrl());
 			ub.addParameter("dn", dn);
 			String url = ub.build().toString();
-			HttpClient hc = HttpUtils.createClient(url, kernel.getClientConfiguration());
-			HttpGet get = new HttpGet(url);
-			get.setHeader("Accept", "application/json");
-			try(ClassicHttpResponse response = hc.executeOpen(null, get, HttpClientContext.create())){
-				if(response.getCode()!=200)throw new IOException("HTTP error "+response.getCode());
-				res = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
-			}
+			return makeAuthInfo(new JSONObject(doGet(url)));
 		} catch (Exception e) {
 			cb.notOK(Log.createFaultMessage("Error contacting " + name, e));
 			Log.logException("Error contacting " + name,e, logger);
 			throw new IOException("Error contacting "+name, e);
 		}
-		return makeAuthInfo(res);
 	}
 
 	/**
@@ -136,4 +127,17 @@ public class XUUDBJSONAttributeSource extends XUUDBBase implements
 		return res.toArray(new String[res.size()]);
 	}
 
+	@Override
+	protected String checkXUUDBAlive() {
+		try {
+			JSONObject info = new JSONObject(doGet(infoURL));
+			return "connected to XUUDB v"+info.optString("version", "")+
+					" "+xuudbURL;
+		}catch(IOException e) {
+			return null;
+		}
+		catch(JSONException je) {
+			return "connected to "+xuudbURL;
+		}
+	}
 }

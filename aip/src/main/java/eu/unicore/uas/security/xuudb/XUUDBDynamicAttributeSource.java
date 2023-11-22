@@ -6,8 +6,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.Logger;
-
 import de.fzJuelich.unicore.xuudb.GetAttributesRequestDocument;
 import de.fzJuelich.unicore.xuudb.GetAttributesRequestType;
 import de.fzJuelich.unicore.xuudb.GetAttributesResponseDocument;
@@ -27,8 +25,6 @@ import eu.unicore.util.httpclient.IClientConfiguration;
 
 public class XUUDBDynamicAttributeSource extends XUUDBBase implements
 		IDynamicAttributeSource {
-	private static final Logger logger = Log.getLogger(Log.SECURITY,
-			XUUDBDynamicAttributeSource.class);
 
 	private IDynamicAttributesPublic xuudb;
 
@@ -39,8 +35,7 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase implements
 	public void start(Kernel kernel) throws Exception {
 		this.kernel = kernel;
 		xuudb = makeDAPEndpoint();
-		if (xuudb != null)
-			isEnabled = true;
+		isEnabled = xuudb != null;
 	}
 
 	private synchronized IDynamicAttributesPublic makeDAPEndpoint() {
@@ -135,7 +130,6 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase implements
 
 		GetAttributesResponseDocument resp;
 		try {
-
 			GetAttributesRequestType req = GetAttributesRequestType.Factory
 					.newInstance();
 			if (isNotEmpty(client.getDistinguishedName())) {
@@ -173,7 +167,7 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase implements
 			}
 			
 			// Extra Attr
-			ArrayList<SimplifiedAttributeType> al = new ArrayList<SimplifiedAttributeType>();
+			ArrayList<SimplifiedAttributeType> al = new ArrayList<>();
 			for (XACMLAttribute a : client.getSubjectAttributes()
 					.getXacmlAttributes()) {
 				SimplifiedAttributeType ex = SimplifiedAttributeType.Factory
@@ -184,8 +178,7 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase implements
 
 			}
 			if (al.size() > 0) {
-				SimplifiedAttributeType[] ar = new SimplifiedAttributeType[al
-						.size()];
+				SimplifiedAttributeType[] ar = new SimplifiedAttributeType[al.size()];
 				al.toArray(ar);
 				req.setExtraAttributesArray(ar);
 			}
@@ -210,8 +203,7 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase implements
 			GetAttributesResponseType data = resp.getGetAttributesResponse();
 			String reply = "[xlogin=" + data.getXlogin() + ", gid="
 					+ data.getGid() + ", SupplementaryGids=";
-
-			Boolean sgt = false;
+			boolean sgt = false;
 			for (String sg : data.getSupplementaryGidsArray()) {
 				reply = reply + sg + ":";
 				sgt = true;
@@ -221,7 +213,6 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase implements
 			reply = reply + "]";
 			logger.debug(name + " reply: " + reply);
 		}
-
 		return makeAuthInfo(resp.getGetAttributesResponse());
 	}
 

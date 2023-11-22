@@ -14,7 +14,7 @@ import eu.unicore.security.SubjectAttributesHolder;
  */
 public class CredentialCache {
 
-	private Cache<Object, SubjectAttributesHolder> cache;
+	private final Cache<Object, SubjectAttributesHolder> cache;
 	
 	/**
 	 * create credential cache

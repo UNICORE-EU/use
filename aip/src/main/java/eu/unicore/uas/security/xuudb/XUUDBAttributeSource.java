@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.Logger;
-
 import de.fzJuelich.unicore.xuudb.CheckCertificateDocument;
 import de.fzJuelich.unicore.xuudb.CheckCertificateResponseDocument;
 import de.fzJuelich.unicore.xuudb.CheckDNDataType;
@@ -24,32 +22,26 @@ import eu.unicore.security.wsutil.client.WSClientFactory;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
-import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.IClientConfiguration;
 
 /**
- * get authorisation attributes for users by asking an XUUDB
- * 
+ * get user attributes from an XUUDB
+ *
  * @author schuller
  * @author golbi
  */
 public class XUUDBAttributeSource extends XUUDBBase implements
 		IAttributeSource {
 
-	private static final Logger logger = Log.getLogger(Log.SECURITY,
-			XUUDBAttributeSource.class);
-
 	private IPublic xuudb;
 
 	@Override
 	public void start(Kernel kernel) throws Exception {
 		this.kernel = kernel;
-		cb = new CircuitBreaker("Attribute_Source_"+name);
 		kernel.getMetricRegistry().register(cb.getName(), cb);
 		xuudb = makeEndpoint();
-		if (xuudb != null)
-			isEnabled = true;
+		isEnabled = xuudb!=null;
 	}
 
 	public void setEndpoint(IPublic xuudb) {
