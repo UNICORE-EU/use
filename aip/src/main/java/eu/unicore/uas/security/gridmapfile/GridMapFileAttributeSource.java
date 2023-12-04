@@ -129,5 +129,9 @@ public class GridMapFileAttributeSource implements IAttributeSource
 		this.mapFile = new File(mapFile);
 	}
 
+	public String toString() {
+		return getName()+" ["+mapFile.getPath()+"]";
+	}
+
 }
 

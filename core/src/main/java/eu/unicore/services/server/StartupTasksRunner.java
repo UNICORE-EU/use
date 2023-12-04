@@ -19,20 +19,20 @@ import eu.unicore.util.Log;
  * @author K. Benedyczak
  */
 public class StartupTasksRunner {
+
 	private static final Logger logger = Log.getLogger(Log.UNICORE, StartupTasksRunner.class);
-	
-	
-	
-	public void runStartupTasks(Kernel kernel, Iterable<StartupTask> sl) throws Exception {
-		Map<String, StartupTask> done = new HashMap<String, StartupTask>();
-		Map<String, StartupTask> todo = new HashMap<String, StartupTask>();
+
+	private StartupTasksRunner() {}
+
+	public static void runStartupTasks(Kernel kernel, Iterable<StartupTask> sl) throws Exception {
+		Map<String, StartupTask> done = new HashMap<>();
+		Map<String, StartupTask> todo = new HashMap<>();
 		for (StartupTask task: sl) {
 			if (todo.containsKey(task.getName()))
 				throw new IllegalStateException("Problem with starting init tasks. " +
 						"The task with name " + task.getName() + " is configured twice.");
 			todo.put(task.getName(), task);
 		}
-		
 		int doneNum = 0;
 		while (todo.size() > 0) {
 			for (StartupTask candidate: todo.values()) {
@@ -54,10 +54,9 @@ public class StartupTasksRunner {
 						" and the following were run: " + done.keySet());
 			doneNum++;
 		}
-		
 	}
 	
-	private boolean isEligibleToRun(StartupTask candidate, Map<String, StartupTask> done, 
+	private static boolean isEligibleToRun(StartupTask candidate, Map<String, StartupTask> done, 
 			Map<String, StartupTask> todo) {
 		//1: all from getAfter are done
 		for (String after: candidate.getAfter())

@@ -111,7 +111,7 @@ public class Kernel {
 
 	private GatewayHandler gwHandler;
 
-	private List<PropertyChecker> propertyCheckers = new ArrayList<>();
+	private final List<PropertyChecker> propertyCheckers = new ArrayList<>();
 	private ContainerProperties containerConfiguration;
 	private ContainerSecurityProperties containerSecurityConfiguration;
 	private USEClientProperties clientConfiguration;
@@ -124,9 +124,8 @@ public class Kernel {
 
 	private Map<String,Capability> capabilities;
 
-	private List<Runnable> startupTasks;
-
-	private Collection<UpdateableConfiguration> configurations;
+	private final Collection<UpdateableConfiguration> configurations
+		= new HashSet<>();
 
 	private DeploymentManager deploymentManager;
 
@@ -134,15 +133,16 @@ public class Kernel {
 
 	private Calendar upSince;
 
-	private final Map<Class<?>,Object>attributes=new HashMap<>();
+	private final Map<Class<?>,Object>attributes = new HashMap<>();
 
-	private final Collection<ExternalSystemConnector> externalSystemConnectors;
+	private final Collection<ExternalSystemConnector> externalSystemConnectors
+			 = new HashSet<>();
 
-	private final Collection<ISubSystem> subSystems;
+	private final Collection<ISubSystem> subSystems = new HashSet<>();
 
 	/**
-	 * Creates Kernel instance using only a loaded Properties as configuration and initializes its 
-	 * internal state (co-working objects, configuration). 
+	 * Creates Kernel instance using only a loaded Properties as configuration
+	 * and initializes its internal state (co-working objects, configuration). 
 	 * For instance useful for unit testing.
 	 * @param extraProperties see description
 	 * @throws Exception 
@@ -173,9 +173,6 @@ public class Kernel {
 	public Kernel(String configurationFile, Properties extraProperties) throws Exception {
 		super();
 		logger.info(getHeader());
-		configurations = new HashSet<>();
-		externalSystemConnectors = new HashSet<>();
-		subSystems = new HashSet<>();
 		upSince=Calendar.getInstance();
 		registerDefaultFactories();
 		prepare(configurationFile, extraProperties);
@@ -547,7 +544,7 @@ public class Kernel {
 		jetty = new JettyServer(this, jettyConfiguration);
 		securityManager = new SecurityManager(getContainerSecurityConfiguration());
 		metricRegistry.register("use.security.ServerIdentity",new CertificateInfoMetric(securityManager));
-		adminActions=AdminActionLoader.load();
+		adminActions = AdminActionLoader.load();
 		gwHandler = new GatewayHandler(getContainerProperties(), getClientConfiguration(), 
 				containerSecurityConfiguration);
 		externalSystemConnectors.add(gwHandler);
@@ -601,31 +598,19 @@ public class Kernel {
 	 * @throws Exception
 	 */
 	public void start()throws Exception{
-		isShutdown=false;
-		
+		isShutdown = false;
 		state = State.initializing;
-		
 		jetty.start();
-
-		startupTasks = deployServices();
-	
-		ServiceLoader<StartupTask> sl = ServiceLoader.load(StartupTask.class);
-		new StartupTasksRunner().runStartupTasks(this, sl);
-
-		for(Home h: homes.values()){
-			h.run();
-		}
-		
+		var startupTasks = deployServices();
+		var sl = ServiceLoader.load(StartupTask.class);
+		StartupTasksRunner.runStartupTasks(this, sl);
+		homes.values().forEach( h -> h.run() );
 		state = State.running;
-	
-		//run remaining init tasks after basic setup is complete
-		if(startupTasks!=null){
-			for (Runnable r : startupTasks) {
-				logger.info("Running startup task <{}>", r.getClass().getName());
-				r.run();
-			}
-		}
-
+		// run remaining startup tasks after basic setup is complete
+		startupTasks.forEach( task -> {
+			logger.info("Running startup task <{}>", task.getClass().getName());
+			task.run();
+		});
 		addShutDownHook();
 	}
 
@@ -636,16 +621,14 @@ public class Kernel {
 	 * @see #startSynchronous()
 	 */
 	public void startAsync() throws Exception {
-		Thread t = new Thread(new Runnable() {
-			public void run() {
-				try {
-					startSynchronous();
-				} catch (Throwable e) {
-					Log.logException("Error during server start.", e, logger);
-					System.err.println("ERROR DURING SERVER STARTUP!");
-					e.printStackTrace();
-					System.exit(1);
-				}
+		Thread t = new Thread( ()-> {
+			try {
+				startSynchronous();
+			} catch (Throwable e) {
+				Log.logException("Error during server start.", e, logger);
+				System.err.println("ERROR DURING SERVER STARTUP!");
+				e.printStackTrace();
+				System.exit(1);
 			}
 		});
 		t.setName("UNICORE-Startup");
@@ -675,23 +658,21 @@ public class Kernel {
 
 	// lookup and register service factories from classpath
 	private void registerDefaultFactories() {
-		ServiceLoader<ServiceFactory> sl=ServiceLoader.load(ServiceFactory.class);
-		for (ServiceFactory factory: sl) {
+		var sl = ServiceLoader.load(ServiceFactory.class);
+		sl.forEach( factory -> {
 			serviceFactories.put(factory.getType(), factory);
 			logger.info("Registered '{}' for service type '{}'", factory.getClass().getName(), factory.getType());
-		}
+		});
 	}
 
 	private void addShutDownHook() {
-		Runtime.getRuntime().addShutdownHook(new Thread("UNICORE-Shutdown") {
-			public void run() {
-				try {
-					shutdown();
-				} catch (Exception e) {
-					Log.logException("Error during shutdown", e, logger);
-				}
+		Runtime.getRuntime().addShutdownHook(new Thread( ()-> {
+			try {
+				shutdown();
+			} catch (Exception e) {
+				Log.logException("Error during shutdown", e, logger);
 			}
-		});
+		}, "UNICORE-Shutdown"));
 	}
 
 	/**

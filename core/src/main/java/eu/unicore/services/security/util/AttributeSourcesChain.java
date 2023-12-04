@@ -136,7 +136,9 @@ public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeS
 			if(as instanceof AuthAttributesCollector)return;
 		}
 		if (MergeLastOverrides.NAME.equalsIgnoreCase(combinerName)){
-			chain.add(0, new AuthAttributesCollector());
+			AuthAttributesCollector aac = new AuthAttributesCollector();
+			aac.setAutoConfigured();
+			chain.add(0, aac);
 			names.add(0, "DEFAULT");
 		}else {
 			chain.add(new AuthAttributesCollector());

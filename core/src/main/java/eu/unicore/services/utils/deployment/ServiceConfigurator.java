@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.ServiceLoader;
 
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.services.ContainerProperties;
@@ -53,7 +51,7 @@ public class ServiceConfigurator implements IServiceConfigurator {
 		this.configFile=config;
 	}
 	
-	public Properties loadProperties() throws IOException, XMLStreamException, ConfigurationException {
+	public Properties loadProperties() throws IOException, ConfigurationException {
 		properties=new Properties();
 		try(FileInputStream fis=new FileInputStream(configFile)){
 			properties.load(fis);

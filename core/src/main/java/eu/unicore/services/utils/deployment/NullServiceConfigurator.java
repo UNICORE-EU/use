@@ -9,8 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import javax.xml.stream.XMLStreamException;
-
 /**
  * Dummy implementation used when no real services config is provided (e.g.
  * when all services are deployed via API or during tests)
@@ -19,7 +17,7 @@ import javax.xml.stream.XMLStreamException;
 public class NullServiceConfigurator implements IServiceConfigurator {
 
 	@Override
-	public Properties loadProperties() throws IOException, XMLStreamException {
+	public Properties loadProperties() throws IOException {
 		return new Properties();
 	}
 

@@ -27,17 +27,25 @@ public class AuthAttributesCollector implements IAttributeSource {
 
 	public static final String ATTRIBUTES = "_PAM_ATTRIBUTES";
 	
+	private String name = "PAM";
+	private boolean autoConfigured = false;
+
 	@Override
-	public void configure(String name) throws ConfigurationException {}
+	public void configure(String name) throws ConfigurationException {
+		this.name = name;
+	}
 
 	@Override
 	public void start(Kernel kernel) throws Exception {}
 
 	@Override
 	public String getName() {
-		return "PAM";
+		return name;
 	}
 
+	public void setAutoConfigured() {
+		this.autoConfigured = true;
+	}
 	@Override
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens, SubjectAttributesHolder otherAuthoriserInfo)
 			throws IOException {
@@ -58,6 +66,11 @@ public class AuthAttributesCollector implements IAttributeSource {
 		if(attrs.groups!=null){
 			ret.put(IAttributeSource.ATTRIBUTE_GROUP, attrs.groups);
 		}
+	}
+
+	public String toString() {
+		return "AuthAttributesCollector" +
+				(autoConfigured ? " [added by default]" : "");
 	}
 
 	public static class BasicAttributeHolder {

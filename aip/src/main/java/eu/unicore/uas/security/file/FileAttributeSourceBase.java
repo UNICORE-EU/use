@@ -153,4 +153,8 @@ public abstract class FileAttributeSourceBase implements IAttributeSource {
 	}
 
 	protected abstract void installNewMappings(Map<String, List<Attribute>> newData) throws ConfigurationException;
+
+	public String toString() {
+		return getName()+" ["+uudbFile.getPath()+"]";
+	}
 }

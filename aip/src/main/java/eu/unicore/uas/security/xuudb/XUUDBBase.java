@@ -212,4 +212,8 @@ public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemC
 			return IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 		}
 	}
+	
+	public String toString() {
+		return getName()+" "+getXUUDBUrl();
+	}
 }

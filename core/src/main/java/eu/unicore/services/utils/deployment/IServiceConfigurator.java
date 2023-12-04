@@ -57,7 +57,7 @@ public interface IServiceConfigurator {
 	 * @throws IOException
 	 * @throws XMLStreamException
 	 */
-	public Properties loadProperties() throws IOException, XMLStreamException, ConfigurationException;
+	public Properties loadProperties() throws IOException, ConfigurationException;
 	
 	/**
 	 * Performs services configuration

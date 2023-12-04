@@ -127,7 +127,7 @@ public class TestKernel extends TestCase {
 
 	private int lastRun = 0;
 	public void testStartupTasksOrder() throws Exception {
-		Set<StartupTask> toRun = new HashSet<StartupTask>();
+		Set<StartupTask> toRun = new HashSet<>();
 		toRun.add(new AbstractStartupTask() {
 			@Override
 			public void run() {
@@ -167,7 +167,7 @@ public class TestKernel extends TestCase {
 			}
 		});
 		
-		new StartupTasksRunner().runStartupTasks(null, toRun);
+		StartupTasksRunner.runStartupTasks(null, toRun);
 	}
 	
 	private static boolean ranStartupTask1=false;

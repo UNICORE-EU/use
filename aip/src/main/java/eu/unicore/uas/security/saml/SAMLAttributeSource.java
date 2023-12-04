@@ -22,10 +22,12 @@ import eu.unicore.samly2.exceptions.SAMLValidationException;
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
+import eu.unicore.security.XACMLAttribute;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.ThreadingServices;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
+import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.services.utils.TimeoutRunner;
 import eu.unicore.uas.security.saml.conf.IPullConfiguration;
@@ -36,14 +38,21 @@ import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import eu.unicore.util.httpclient.IClientConfiguration;
 
 /**
- * Pull UNICORE/X attributes via SAML
+ * Pull user attributes via SAML
  *  
  * @author K. Benedyczak
  */
-public class SAMLAttributeSource extends SAMLAttributeSourceBase implements ExternalSystemConnector
+public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConnector
 {
 	private static final Logger log = Log.getLogger(IPullConfiguration.LOG_PFX, SAMLAttributeSource.class);
 
+	protected PropertiesBasedConfiguration conf;
+	protected UnicoreAttributesHandler specialAttrsHandler;
+	protected String configFile;
+	protected String name;
+	protected boolean isEnabled = false;
+	protected Kernel kernel;
+	
 	private SAMLAttributeFetcher fetcher;
 
 	protected Status status = Status.UNKNOWN;	
@@ -82,7 +91,7 @@ public class SAMLAttributeSource extends SAMLAttributeSourceBase implements Exte
 			log.error("Error in VO subsystem configuration (PULL mode): {}. PULL MODE WILL BE DISABLED", e.toString());
 		}
 
-		super.initFinal(log, SAMLAttributeFetcher.ALL_PULLED_ATTRS_KEY, false);
+		initFinal(log, SAMLAttributeFetcher.ALL_PULLED_ATTRS_KEY, false);
 	}
 
 	@Override
@@ -172,6 +181,92 @@ public class SAMLAttributeSource extends SAMLAttributeSourceBase implements Exte
 	@Override
 	public String getExternalSystemName(){
 		return name +" Attribute Source " + fetcher.getSimpleAddress();
+	}
+
+	protected void initConfig(Logger log, String name)
+	{
+		this.name = name;
+		try
+		{
+			conf = new PropertiesBasedConfiguration(configFile);
+		} catch (IOException e)
+		{
+			throw new ConfigurationException("Can't read configuration of the SAML subsystem: " +
+					e.getMessage());
+		}
+		isEnabled = true;
+	}
+	
+	protected void initFinal(Logger log, String key, boolean pushMode)
+	{
+		log.info("Adding SAML attributes callbacks");
+		AttributesCallback callback = new AttributesCallback(key, name);
+		kernel.getSecurityManager().addCallback(callback);
+		
+		UnicoreAttributeMappingDef []initializedMappings = Utils.fillMappings(
+				conf.getSourceProperties(), Utils.mappings, log);
+		if (log.isDebugEnabled())
+			log.debug(Utils.createMappingsDesc(initializedMappings));
+		specialAttrsHandler = new UnicoreAttributesHandler(conf, initializedMappings, pushMode);
+	}
+	
+	protected SubjectAttributesHolder assembleAttributesHolder(List<ParsedAttribute> serviceAttributes, 
+			SubjectAttributesHolder otherAuthoriserInfo, boolean addGeneric)
+	{
+		SubjectAttributesHolder ret = new SubjectAttributesHolder(otherAuthoriserInfo.getPreferredVos());
+		String preferredScope = Utils.handlePreferredVo(otherAuthoriserInfo.getPreferredVos(), 
+				conf.getScope(), otherAuthoriserInfo.getSelectedVo());
+		UnicoreIncarnationAttributes uia = specialAttrsHandler.extractUnicoreAttributes(
+				serviceAttributes, preferredScope, true);
+		
+		if (addGeneric)
+		{		
+			List<XACMLAttribute> xacmlAttributes = XACMLAttributesExtractor.getSubjectAttributes(
+					serviceAttributes, conf.getScope());
+			if (xacmlAttributes != null)
+				ret.setXacmlAttributes(xacmlAttributes);
+		}
+		if (uia.getDefaultAttributes() != null && uia.getValidAttributes() != null)
+			ret.setAllIncarnationAttributes(uia.getDefaultAttributes(), uia.getValidAttributes());
+		
+		//preferred scope is for sure subscope of our scope or our scope. But we are not sure if the 
+		// user is really a member of the preferred scope. If not we are not setting the preferred VO at all
+		// even as we are sure that the list of attributes is empty (there should be no selected VO at all).
+		if (uia.getDefaultVoAttributes() != null && preferredScope != null && ret.getValidIncarnationAttributes() != null) 
+		{
+			String []usersVos = ret.getValidIncarnationAttributes().get(IAttributeSource.ATTRIBUTE_VOS);
+			if (usersVos != null)
+			{
+				for (String userVo: usersVos)
+					if (userVo.equals(preferredScope)) 
+					{
+						ret.setPreferredVoIncarnationAttributes(preferredScope, 
+								uia.getDefaultVoAttributes());
+						break;
+					}
+			}
+		}
+		return ret;
+	}
+
+	public void setConfigurationFile(String configFile)
+	{
+		this.configFile = configFile;
+	}
+	
+	public String getConfigurationFile()
+	{
+		return configFile;
+	}
+
+	@Override
+	public String getName()
+	{
+		return name;
+	}
+
+	public String toString() {
+		return getName()+" "+fetcher.getSimpleAddress();
 	}
 
 }

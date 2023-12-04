@@ -119,21 +119,23 @@ public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> 
 	@Override
 	public String getStatusDescription() {
 		assert started : "This object must be started before use.";
-		StringBuilder sb=new StringBuilder();
+		StringBuilder sb = new StringBuilder();
+		String newline = System.getProperty("line.separator");
 		if(chain.size()==0){
 			sb.append("N/A");
 		}
 		else {
 			for(T a: chain){
+				sb.append(newline).append(" * ");
 				if(a instanceof ISubSystem) {
-					sb.append(((ISubSystem) a).getStatusDescription()).append(" ");
+					sb.append(((ISubSystem)a).getStatusDescription());
 				}
 				else{
-					sb.append(a.getClass().getSimpleName()).append(" ");
+					sb.append(a.toString());
 				}
 			}
 			if(chain.size()>1){
-				sb.append(System.getProperty("line.separator"));
+				sb.append(newline);
 				sb.append(" * combining policy: ").append(String.valueOf(combiner));
 			}
 		}

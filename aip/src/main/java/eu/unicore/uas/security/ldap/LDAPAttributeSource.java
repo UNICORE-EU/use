@@ -445,4 +445,7 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 		return ctx.getSocketFactory();
 	}
 
+	public String toString() {
+		return getName()+" ["+ldapURL+"]";
+	}
 }

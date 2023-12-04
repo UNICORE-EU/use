@@ -67,10 +67,10 @@
     <gson.version>2.10.1</gson.version>
     <xuudb.version>2.9.0</xuudb.version>
     <cxf.version>4.0.3</cxf.version>
-    <jetty.version>11.0.16</jetty.version>
+    <jetty.version>11.0.18</jetty.version>
     <httpclient.version>5.2.1</httpclient.version>
-    <metrics.version>4.2.21</metrics.version>
-    <jwt.version>9.37</jwt.version>
+    <metrics.version>4.2.22</metrics.version>
+    <jwt.version>9.37.2</jwt.version>
     <tink.version>1.11.0</tink.version>
     <sshj.version>0.37.0</sshj.version>
     <jna.version>5.13.0</jna.version>
