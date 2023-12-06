@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.ServiceLoader;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Logger;
 
@@ -18,6 +19,7 @@ import eu.unicore.services.Kernel;
 import eu.unicore.services.Service;
 import eu.unicore.services.ServiceFactory;
 import eu.unicore.services.exceptions.ServiceDeploymentException;
+import eu.unicore.services.utils.FileWatcher;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 
@@ -37,6 +39,8 @@ public class ServiceConfigurator implements IServiceConfigurator {
 	private final Kernel kernel;
 	
 	private final List<Runnable> startupTasks = new ArrayList<>();
+	
+	private FileWatcher configFileWatcher;
 	
 	/**
 	 * Configure from the given file
@@ -160,13 +164,21 @@ public class ServiceConfigurator implements IServiceConfigurator {
 		return startupTasks;
 	}
 
-	/**
-	 * return the time the config file was last modified
-	 * @return the config file's {@link File#lastModified()} or -1 if no config file was defined
-	 */
-	public long getLastConfigFileUpdateTime(){
-		return configFile!=null? configFile.lastModified() : -1; 
+	public void startConfigWatcher() {
+		try {
+			configFileWatcher = new FileWatcher(configFile, ()->{
+				try {
+					kernel.refreshConfig();
+				}catch(Exception ex) {
+					logger.error("Error refreshing configuration.", ex);
+				}
+			});
+		}catch(FileNotFoundException ex) {
+			throw new ConfigurationException("Error setting up config file watcher", ex);
+		}
+		kernel.getContainerProperties().getThreadingServices().getScheduledExecutorService()
+			.scheduleWithFixedDelay(configFileWatcher, 10, 10, TimeUnit.SECONDS);
+		logger.info("Started monitoring of {} with interval {}s", configFile, 10);
 	}
-	
 }
 

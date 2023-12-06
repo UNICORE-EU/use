@@ -19,8 +19,9 @@ import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder
 import eu.unicore.util.Log;
 
 /**
- * authenticates using username+password via the local PAM
- * 
+ * Authenticates using username+password via the local PAM.
+ * Attributes are assigned automatically by {@link AuthAttributesCollector}
+ *
  * @author schuller
  */
 public class PAMAuthenticator implements IAuthenticator {
@@ -71,7 +72,7 @@ public class PAMAuthenticator implements IAuthenticator {
 		return true;
 	}
 	
-	// store PAM attributes for PAMAttributeSource to pick up
+	// store PAM attributes for AuthAttributesCollector to pick up
 	private void storePAMInfo(UnixUser unixUser, SecurityTokens tokens){
 		BasicAttributeHolder attr = new BasicAttributeHolder();
 		attr.uid = unixUser.getUserName();

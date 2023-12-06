@@ -15,6 +15,7 @@ import org.apache.cxf.message.Message;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.security.SecurityTokens;
+import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.ISubSystem;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.KernelInjectable;
@@ -27,23 +28,54 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 	
 	private static final Logger logger=Log.getLogger(Log.SECURITY, AuthenticatorChain.class);
 
-	private final List<IAuthenticator>chain = new ArrayList<>();
-	
-	private final Kernel kernel;
-	
+	private List<IAuthenticator>chain = new ArrayList<>();
+
+	private final Collection<ExternalSystemConnector> connectors = new ArrayList<>();
+
+	public static synchronized IAuthenticator get(Kernel k) {
+		IAuthenticator auth = k.getAttribute(IAuthenticator.class);
+		if(auth==null){
+			auth = new AuthenticatorChain(k);
+			k.setAttribute(IAuthenticator.class, auth);
+			k.register(auth);
+		}
+		return auth;
+	}
+
 	public AuthenticatorChain(Kernel k){
-		this.kernel = k;
 		registerConfigDefaults();
-		k.setAttribute(AuthenticatorChain.class, this);
+		reloadConfig(k);
+	}
+
+	@Override
+	public void reloadConfig(Kernel k){
+		List<IAuthenticator>newChain = new ArrayList<>();
+		connectors.clear();
+		RESTSecurityProperties sp = new RESTSecurityProperties(k.getContainerProperties().getRawProperties());
+		String order = sp.getValue(RESTSecurityProperties.PROP_ORDER);
+		if(order==null) {
+			newChain.add(new RESTSecurityProperties.NullAuthenticator());
+		}
+		else {
+			String[] authNames=order.split(" +");
+			for(String authName : authNames){
+				IAuthenticator auth = configure(authName, sp, k);
+				newChain.add(auth);
+				authSchemes.addAll(auth.getAuthSchemes());
+				if(auth instanceof ExternalSystemConnector) {
+					connectors.add((ExternalSystemConnector)auth);
+				}
+				logger.info("Enabled REST authentication: "+auth);
+			}
+		}
+		chain = newChain;
 	}
 	
-	public void init(Kernel k){}
-	
-	private final static Collection<String> s = new HashSet<>();
+	private final static Collection<String> authSchemes = new HashSet<>();
 	
 	@Override
 	public final Collection<String>getAuthSchemes(){
-		return s;
+		return authSchemes;
 	}
 	
 	@Override
@@ -70,7 +102,7 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 					SSHKeyAuthenticator.class.getName());
 	}
 
-	public void configure(String name, RESTSecurityProperties properties) throws ConfigurationException {
+	private IAuthenticator configure(String name, RESTSecurityProperties properties, Kernel kernel) throws ConfigurationException {
 		String dotName = RESTSecurityProperties.PROP_AUTHN_PREFIX + "." + name + ".";
 		String clazz = properties.getValue(dotName + "class");
 		if (clazz==null) {
@@ -82,18 +114,15 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 		clazz = aliases.getOrDefault(clazz, clazz);
 		try{
 			IAuthenticator auth = (IAuthenticator)(Class.forName(clazz).getConstructor().newInstance());
-			configureAuth(RESTSecurityProperties.PREFIX+dotName, properties.rawProperties, auth);
-			chain.add(auth);
-			s.addAll(auth.getAuthSchemes());
-			kernel.register(auth);
-			logger.info("Enabled REST authentication: "+auth);
+			configureAuth(RESTSecurityProperties.PREFIX+dotName, properties.rawProperties, auth, kernel);
+			return auth;
 		}
 		catch(Exception e){
 			throw new ConfigurationException("Cannot create IAuthenticator instance  <"+clazz+">",e);
 		}
 	}
 	
-	private void configureAuth(String dotName, Properties properties, IAuthenticator auth) {
+	private void configureAuth(String dotName, Properties properties, IAuthenticator auth, Kernel kernel) {
 		//find parameters for this attribute source
 		Map<String,String>params=new PropertyGroupHelper(properties, 
 			new String[]{dotName}).getFilteredMap();
@@ -118,7 +147,7 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 		}
 	}
 	
-	private final List<AuthenticatorDefaults>defaults = new ArrayList<>();
+	private final HashSet<AuthenticatorDefaults>defaults = new HashSet<>();
 	
 	// lookup and register service factories from classpath
 	private void registerConfigDefaults() {

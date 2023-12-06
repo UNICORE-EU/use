@@ -32,6 +32,8 @@
 
 package eu.unicore.services.security.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,7 @@ import java.util.Properties;
 import org.apache.logging.log4j.ThreadContext;
 
 import eu.unicore.security.SubjectAttributesHolder;
+import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.ISubSystem;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.IAttributeSourceBase;
@@ -69,7 +72,8 @@ import eu.unicore.util.configuration.ConfigurationException;
  * @author schuller
  * @author golbi
  */
-public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> implements IAttributeSourceBase, ISubSystem {
+public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> 
+implements IAttributeSourceBase, ISubSystem {
 
 	protected List<T> chain;
 	protected List<String> names;
@@ -80,6 +84,8 @@ public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> 
 	protected Properties properties = null;
 	protected boolean started = false;
 	
+	protected final List<ExternalSystemConnector>externalConnections = new ArrayList<>();
+
 	/**
 	 * will configure all the aips in the chain
 	 */
@@ -90,7 +96,11 @@ public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> 
 		for(int i=0; i<chain.size(); i++){
 			ThreadContext.push(names.get(i));
 			try {
-				chain.get(i).configure(names.get(i));
+				var aip = chain.get(i);
+				aip.configure(names.get(i));
+				if(aip instanceof ExternalSystemConnector) {
+					externalConnections.add((ExternalSystemConnector)aip);
+				}
 			} finally {
 				ThreadContext.pop();
 			}
@@ -117,6 +127,11 @@ public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> 
 	}
 	
 	@Override
+	public void reloadConfig(Kernel kernel) {
+		// TODO
+	}
+	
+	@Override
 	public String getStatusDescription() {
 		assert started : "This object must be started before use.";
 		StringBuilder sb = new StringBuilder();
@@ -140,6 +155,11 @@ public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase> 
 			}
 		}
 		return sb.toString();
+	}
+	
+	@Override
+	public Collection<ExternalSystemConnector>getExternalConnections(){
+		return externalConnections;
 	}
 	
 	public List<T> getChain(){

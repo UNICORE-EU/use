@@ -12,7 +12,6 @@ import eu.unicore.services.rest.security.AuthenticatorChain;
 import eu.unicore.services.rest.security.FilebasedAuthenticator;
 import eu.unicore.services.rest.security.FilebasedAuthenticator.AttributesHolder;
 import eu.unicore.services.rest.security.IAuthenticator;
-import eu.unicore.services.rest.security.RESTSecurityProperties;
 import eu.unicore.services.security.TestConfigUtil;
 
 public class TestConfig {
@@ -21,13 +20,13 @@ public class TestConfig {
 	
 	@Test
 	public void testAuthNConfig() throws Exception {
-		Properties p = new Properties();
+		Properties p = TestConfigUtil.getInsecureProperties();
 		String file = "src/test/resources/users.txt";
 		p.setProperty("container.security.rest.authentication.order", "FILE");
 		p.setProperty("container.security.rest.authentication.FILE.class", FilebasedAuthenticator.class.getName());
 		p.setProperty("container.security.rest.authentication.FILE.file", file);
-		RESTSecurityProperties props = new RESTSecurityProperties(new Kernel(TestConfigUtil.getInsecureProperties()),p);
-		IAuthenticator auth = props.getAuthenticator();
+		Kernel k = new Kernel(p);
+		IAuthenticator auth = AuthenticatorChain.get(k);
 		Assert.assertNotNull(auth);
 		Assert.assertEquals(AuthenticatorChain.class, auth.getClass());
 		AuthenticatorChain chain = (AuthenticatorChain)auth;

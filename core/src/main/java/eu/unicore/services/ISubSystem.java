@@ -1,5 +1,8 @@
 package eu.unicore.services;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * used to show the status of some subsystem
  * 
@@ -20,8 +23,22 @@ public interface ISubSystem {
 	public String getName();
 	
 	/**
-	 * (re)start this subsystem
+	 * start this subsystem
 	 */
 	default public void start(Kernel kernel) throws Exception {}
+	
+	/**
+	 * reload configuration
+	 */
+	default public void reloadConfig(Kernel kernel) throws Exception {}
+	
+	/**
+	 * shutdown - will be called on kernel shutdown
+	 */
+	default public void shutdown(Kernel kernel) throws Exception {}
+	
+	default public Collection<ExternalSystemConnector> getExternalConnections(){
+		return Collections.emptyList();
+	}
 
 }

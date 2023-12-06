@@ -43,7 +43,7 @@ public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemC
 	protected Boolean cacheCredentials = Boolean.TRUE;
 	protected Kernel kernel;
 
-	protected CircuitBreaker cb;
+	protected final CircuitBreaker cb = new CircuitBreaker();
 
 	public Integer getPort() {
 		return port;
@@ -66,7 +66,6 @@ public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemC
 	
 	public void configure(String name) {
 		this.name = name;
-		cb = new CircuitBreaker("AttributeSource_"+name);
 		if (port == null)
 			port = DEFAULT_PORT;
 		if (host == null)
@@ -161,7 +160,7 @@ public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemC
 		else{
 			statusMessage = "CAN'T CONNECT TO XUUDB";
 			status = Status.DOWN;
-			cb.notOK(statusMessage);
+			cb.notOK();
 		}
 	}
 	
@@ -214,6 +213,6 @@ public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemC
 	}
 	
 	public String toString() {
-		return getName()+" "+getXUUDBUrl();
+		return getName()+" ["+getXUUDBUrl()+"]";
 	}
 }

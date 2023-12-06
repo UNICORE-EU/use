@@ -1,7 +1,5 @@
 package eu.unicore.services.utils;
 
-import com.codahale.metrics.Gauge;
-
 /**
  * The "circuit breaker" is described in the book "Release it!" by Michael Nygard.
  * It is used to avoid making repeated calls to an external service that is 
@@ -19,12 +17,10 @@ import com.codahale.metrics.Gauge;
  * 
  * After the configured waiting period, the circuit breaker will reset itself, and the call
  * can be attempted again.
- * 
- * The current state of the circuit breaker is available via the metrics system of the Kernel.
- * 
+ *
  * @author schuller
  */
-public class CircuitBreaker implements Gauge<String> {
+public class CircuitBreaker {
 
 	private boolean ok = true;
 
@@ -33,26 +29,19 @@ public class CircuitBreaker implements Gauge<String> {
 	// waiting period in milliseconds
 	private long waitingPeriod;
 
-	// the name of this CB - should correlate to the external service being used
-	private String name;
-	
-	private String errorMessage;
-	
 	/**
 	 * create a new CircuitBreaker with the default waiting period of 60 seconds
-	 * @param name
 	 */
-	public CircuitBreaker(String name){
-		this(name, 60*1000);
+	public CircuitBreaker(){
+		this(	60*1000);
 	}
 
 	/**
 	 * create a new CircuitBreaker with the specified waitingPeriod
 	 * @param waitingPeriod - time interval in milliseconds that the CB stays in "not OK" mode
 	 */
-	public CircuitBreaker(String name, long waitingPeriod){
+	public CircuitBreaker(long waitingPeriod){
 		this.waitingPeriod = waitingPeriod;
-		this.name = name;
 	}
 
 	/**
@@ -76,14 +65,9 @@ public class CircuitBreaker implements Gauge<String> {
 	 * set the circuit breaker to "not OK" mode. This mode will
 	 * be active at least for the waiting period, or until manually reset.
 	 */
-	public void notOK(){
-		notOK(null);
-	}
-	
-	public synchronized void notOK(String errorMessage){
+	public synchronized void notOK(){
 		ok = false;
 		disabledAt = System.currentTimeMillis();
-		this.errorMessage = errorMessage;
 	}
 
 	/**
@@ -93,16 +77,4 @@ public class CircuitBreaker implements Gauge<String> {
 		ok = true;
 	}
 
-	public String getName() {
-		return "use.externalConnectionStatus."+name;
-	}
-
-	@Override
-	public String getValue() {
-		return doGetValue();
-	}
-
-	private String doGetValue(){
-		return isOK() ? "OK": ("not OK"+(errorMessage!=null?": "+errorMessage : ""));
-	}
 }

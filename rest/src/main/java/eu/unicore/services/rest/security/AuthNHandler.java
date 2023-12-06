@@ -208,7 +208,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 	}
 	
 	protected Response processNoDelegation(Message message, SecurityTokens token){
-		IAuthenticator auth = kernel.getAttribute(RESTSecurityProperties.class).getAuthenticator();
+		IAuthenticator auth = kernel.getAttribute(IAuthenticator.class);
 		boolean haveCredentials  = auth.authenticate(message, token);
 		if(!haveCredentials
 				&& kernel.getAttribute(RESTSecurityProperties.class).forbidNoCreds()

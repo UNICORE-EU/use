@@ -6,7 +6,6 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.cxf.message.Message;
 import org.apache.logging.log4j.Logger;
@@ -52,10 +51,8 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	// usually, we do not want to use the server's certificate for authn calls,
 	// since it might cause to wrongly authenticate the user as the server
 	protected boolean doTLSAuthN = false;
-	
-	private static final AtomicInteger count = new AtomicInteger();
-	
-	protected final CircuitBreaker cb = new CircuitBreaker("REST_"+getClass().getSimpleName()+"_"+count.incrementAndGet());
+
+	protected final CircuitBreaker cb = new CircuitBreaker();
 
 	protected Cache<Object,CacheEntry<T>> cache;
 	
@@ -64,7 +61,6 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 
 	public void setKernel(Kernel kernel){
 		this.kernel = kernel;
-		kernel.getMetricRegistry().register(cb.getName(),cb);
 		createCache();
 		selfCheck();
 	}

@@ -25,6 +25,7 @@ import eu.unicore.security.Queue;
 import eu.unicore.security.Role;
 import eu.unicore.security.Xlogin;
 import eu.unicore.services.ExternalSystemConnector;
+import eu.unicore.services.ISubSystem;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.AuthNHandler;
 import eu.unicore.services.rest.security.jwt.JWTUtils;
@@ -180,8 +181,10 @@ public class ApplicationBaseResource extends RESTRendererBase {
 		props.put("trustedSAMLIssuers",trustedSAML);
 		
 		Map<String,Object>connectors = new HashMap<String, Object>();  
-		for(ExternalSystemConnector ec: kernel.getExternalSystemConnectors()){
-			connectors.put(ec.getExternalSystemName(), ec.getConnectionStatus());
+		for(ISubSystem sub: kernel.getSubSystems()){
+			for(ExternalSystemConnector ec: sub.getExternalConnections()){
+				connectors.put(ec.getExternalSystemName(), ec.getConnectionStatus());
+			}
 		}
 		props.put("externalConnections", connectors);
 		try {

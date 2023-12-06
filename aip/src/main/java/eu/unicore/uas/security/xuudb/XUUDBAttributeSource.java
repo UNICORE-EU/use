@@ -39,7 +39,6 @@ public class XUUDBAttributeSource extends XUUDBBase implements
 	@Override
 	public void start(Kernel kernel) throws Exception {
 		this.kernel = kernel;
-		kernel.getMetricRegistry().register(cb.getName(), cb);
 		xuudb = makeEndpoint();
 		isEnabled = xuudb!=null;
 	}
@@ -110,7 +109,7 @@ public class XUUDBAttributeSource extends XUUDBBase implements
 				res = xuudb.checkCertificate(in);
 			}
 		} catch (Exception e) {
-			cb.notOK(Log.createFaultMessage("Error contacting " + name, e));
+			cb.notOK();
 			throw new IOException("Error contacting "+ name, e);
 		}
 		if (logger.isDebugEnabled()) {
@@ -147,11 +146,8 @@ public class XUUDBAttributeSource extends XUUDBBase implements
 			try {
 				res = xuudb.checkDN(in);
 			} catch (Exception e) {
-				cb.notOK(Log.createFaultMessage("Error contacting " + name, e));
-				Log.logException("Error contacting " + name,e, logger);
-				IOException ioe = new IOException("Error contacting "+name);
-				ioe.initCause(e);
-				throw ioe;
+				cb.notOK();
+				throw new IOException("Error contacting "+name, e);
 			}
 		}
 		if (logger.isDebugEnabled()) {

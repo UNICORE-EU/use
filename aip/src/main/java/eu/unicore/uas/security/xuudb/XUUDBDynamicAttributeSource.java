@@ -194,7 +194,7 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase implements
 				resp = xuudb.getAttributes(outXml);
 			}
 		} catch (Exception e) {
-			cb.notOK(Log.createFaultMessage("Error contacting " + name, e));
+			cb.notOK();
 			throw new IOException("Error contacting "
 					+name + ": " + e.getMessage(),e);
 		}

@@ -247,7 +247,7 @@ public class ContainerProperties extends PropertiesHelper {
 				setDescription("Append service name and set to 'true' to enable message logging for that service."));
 	}
 
-	protected ThreadingServices threadingServices;
+	protected static ThreadingServices threadingServices;
 
 	private final boolean sslMode;
 
@@ -255,7 +255,9 @@ public class ContainerProperties extends PropertiesHelper {
 		super(PREFIX, properties, META, log);
 		this.sslMode = sslMode;
 		updatePropertiesInternal(sslMode);
-		threadingServices = new ThreadingServices(this);
+		if(threadingServices==null) {
+			threadingServices = new ThreadingServices(this);
+		}
 	}
 
 	public ThreadingServices getThreadingServices() {

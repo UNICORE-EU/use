@@ -10,7 +10,6 @@ import org.apache.cxf.message.Message;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.security.SecurityTokens;
-import eu.unicore.services.Kernel;
 import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
@@ -59,46 +58,22 @@ public class RESTSecurityProperties extends PropertiesHelper {
 				setDescription("Enable the Apache CXF logging feature on services."));
 	}
 	
-	private IAuthenticator auth;
-
 	Properties rawProperties;
-	
-	private final Kernel kernel;
 	
 	/**
 	 * @param kernel
 	 * @param p
 	 * @throws ConfigurationException
 	 */
-	public RESTSecurityProperties(Kernel kernel, Properties p) throws ConfigurationException {
+	public RESTSecurityProperties(Properties p) throws ConfigurationException {
 		super(PREFIX, p, META, propsLogger);
 		this.rawProperties = p;
-		this.kernel = kernel;
-		createAuth();
 	}
-	
-	protected void createAuth(){
-		auth = new NullAuthenticator();
-		String order = getValue(PROP_ORDER);
-		if(order!=null){
-			AuthenticatorChain chain = new AuthenticatorChain(kernel);
-			String[] authNames=order.split(" +");
-			for(String authName : authNames){
-				chain.configure(authName, this);
-			}
-			auth = chain;
-			kernel.register(auth);
-		}
-	}
-	
+		
 	public boolean forbidNoCreds(){
 		return getBooleanValue(PROP_FORBID_NO_CREDS);
 	}
 
-	public IAuthenticator getAuthenticator(){
-		return auth;
-	}
-	
 	public static class NullAuthenticator implements IAuthenticator{
 		@Override
 		public boolean authenticate(Message message, SecurityTokens tokens) {

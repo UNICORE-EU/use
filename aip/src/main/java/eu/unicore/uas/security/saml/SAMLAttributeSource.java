@@ -59,7 +59,7 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 
 	protected String statusMessage = "N/A";
 
-	protected CircuitBreaker cb;
+	protected final CircuitBreaker cb = new CircuitBreaker();
 
 	@Override
 	public void configure(String name) throws ConfigurationException {
@@ -69,10 +69,6 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 	@Override
 	public void start(Kernel kernel) throws Exception {
 		this.kernel=kernel;
-
-		cb = new CircuitBreaker("Attribute_Source_"+name);
-		kernel.getMetricRegistry().register(cb.getName(), cb);
-		
 		try
 		{
 			IClientConfiguration cc = kernel.getClientConfiguration();
@@ -161,7 +157,7 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 			else{
 				statusMessage = "CAN'T CONNECT" + " ["+(result!=null ? result : "")+"]";
 				status = Status.DOWN;
-				cb.notOK(statusMessage);
+				cb.notOK();
 			}
 		}
 	}

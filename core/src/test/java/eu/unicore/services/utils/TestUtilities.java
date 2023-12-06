@@ -72,17 +72,13 @@ public class TestUtilities {
 	
 	@Test
 	public void testCircuitBreaker() throws Exception {
-		CircuitBreaker cb = new CircuitBreaker("test",200);
-		cb.notOK("some error occured");
+		CircuitBreaker cb = new CircuitBreaker(200);
+		cb.notOK();
 		assertEquals(false,cb.isOK());
-		assertTrue(cb.getValue().contains("some error"));
 		Thread.sleep(100);
 		assertEquals(false,cb.isOK());
-		assertTrue(cb.getValue().contains("some error"));
 		Thread.sleep(2000);
 		assertEquals(true,cb.isOK());
-		assertFalse(cb.getValue().contains("some error"));
-		assertTrue(cb.getName().contains("test"));
 	}
 	
 	@Test

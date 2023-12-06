@@ -41,6 +41,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -86,7 +87,7 @@ import eu.unicore.util.jetty.HttpServerProperties;
  * 
  * @author schuller
  */
-public class Kernel {
+public final class Kernel {
 
 	private static final Logger logger = Log.getLogger(Log.UNICORE, Kernel.class);
 
@@ -134,9 +135,6 @@ public class Kernel {
 	private Calendar upSince;
 
 	private final Map<Class<?>,Object>attributes = new HashMap<>();
-
-	private final Collection<ExternalSystemConnector> externalSystemConnectors
-			 = new HashSet<>();
 
 	private final Collection<ISubSystem> subSystems = new HashSet<>();
 
@@ -205,17 +203,7 @@ public class Kernel {
 	public String getConnectionStatus(){
 		StringBuilder report = new StringBuilder();
 		String newline = System.getProperty("line.separator");
-		report.append("External connections");
-		report.append(newline);
-		report.append("********************");
-		report.append(newline);
-		for(ExternalSystemConnector esc: getExternalSystemConnectors()){
-			report.append(esc.getExternalSystemName());
-			report.append(": ");
-			report.append(esc.getConnectionStatusMessage());
-			report.append(newline);
-		}
-		report.append(newline);
+		List<ExternalSystemConnector> ext = new ArrayList<>();
 		report.append("Subsystems");
 		report.append(newline);
 		report.append("***********");
@@ -224,6 +212,7 @@ public class Kernel {
 			report.append("N/A").append(newline);
 		}
 		for(ISubSystem s: getSubSystems()) {
+			ext.addAll(s.getExternalConnections());
 			try{
 				report.append(s.getName())
 				.append(": ")
@@ -232,6 +221,17 @@ public class Kernel {
 			}catch(Exception ex){
 				return "ERROR: " + ex.toString();
 			}
+		}
+		report.append(newline);
+		report.append("External connections");
+		report.append(newline);
+		report.append("********************");
+		report.append(newline);
+		for(ExternalSystemConnector esc: ext){
+			report.append(esc.getExternalSystemName());
+			report.append(": ");
+			report.append(esc.getConnectionStatusMessage());
+			report.append(newline);
 		}
 		report.append(newline);
 		return report.toString();
@@ -271,6 +271,13 @@ public class Kernel {
 				logger.error("Error during shutdown of resource <{}>", h.getServiceName(), t);
 			}
 		}
+		for (ISubSystem sub : subSystems) {
+			try {
+				sub.shutdown(this);
+			} catch (Throwable t) {
+				logger.error("Error during shutdown of resource <{}>", sub.getName(), t);
+			}
+		}
 	}
 
 	public JettyServer getServer() {
@@ -278,9 +285,7 @@ public class Kernel {
 	}
 
 	public void addPropertyChecker(PropertyChecker checker){
-		synchronized (propertyCheckers)	{
-			this.propertyCheckers.add(checker);
-		}
+		this.propertyCheckers.add(checker);
 	}
 
 	/**
@@ -322,27 +327,30 @@ public class Kernel {
 	}
 
 	public void register(Object candidate) {
-		if(candidate!=null && candidate instanceof ExternalSystemConnector) {
-			if(!externalSystemConnectors.contains(candidate)) {
-				externalSystemConnectors.add((ExternalSystemConnector)candidate);
-			}
-		}
 		if(candidate!=null && candidate instanceof ISubSystem) {
 			if(!subSystems.contains(candidate)) {
 				subSystems.add((ISubSystem)candidate);
 			}
 		}
 	}
+	
+	public void unregister(Class<?> type) {
+		Iterator<ISubSystem> i = subSystems.iterator();
+		while(i.hasNext()) {
+			ISubSystem sub = i.next();
+			if(sub.getClass().isAssignableFrom(type)) {
+				i.remove();
+			}
+		}
+	}
 
 	/**
-	 * store a configuration object which will be available via {@link #getAttribute(Class)} and will receive
+	 * store a configuration object which will receive
 	 * updates when change of the Kernel's configuration file is detected.
-	 * @param key - the value's class as key
-	 * @param value - the value
+	 * @param config
 	 */
-	public <T extends UpdateableConfiguration> void addConfigurationHandler(Class<T> key, T value){
-		setAttribute(key, value);
-		configurations.add(value);
+	public void addConfigurationHandler(UpdateableConfiguration config){
+		configurations.add(config);
 	}
 
 	/**
@@ -472,10 +480,6 @@ public class Kernel {
 		return adminActions;
 	}
 
-	public Collection<ExternalSystemConnector>getExternalSystemConnectors(){
-		return externalSystemConnectors;
-	}
-	
 	public Collection<ISubSystem>getSubSystems(){
 		return subSystems;
 	}
@@ -507,29 +511,29 @@ public class Kernel {
 	 * Initializes configuration objects from the data stored in Kernel's properties. Called only once
 	 * indirectly from constructor.
 	 */
-	protected void initializeConfiguration(Properties properties) throws ConfigurationException {
-
+	private void initializeConfiguration(Properties properties) throws ConfigurationException {
 		for (PropertyChecker checker: propertyCheckers) {
 			checker.checkProperties(properties, logger);
 		}
-
 		containerSecurityConfiguration = new ContainerSecurityProperties(properties);
 		containerConfiguration = new ContainerProperties(properties, 
 				containerSecurityConfiguration.isSslEnabled());
-		jettyConfiguration = new ContainerHttpServerProperties(properties);
 		clientConfiguration = new USEClientProperties(properties, containerSecurityConfiguration);
-		
-		PersistenceFactory pf = PersistenceFactory.get(new PersistenceProperties(properties));
-		persistenceProperties = pf.getConfig();
-		
-		try {
-			String pdpConfig = containerSecurityConfiguration.getPdpConfigurationFile();
-			if (pdpConfig != null)
-				logger.info("Using PDP configuration file <{}>", pdpConfig);
-			containerSecurityConfiguration.getPdp().initialize(pdpConfig, containerConfiguration, 
-					containerSecurityConfiguration, clientConfiguration);
-		} catch (Exception e) {
-			throw new ConfigurationException(e.getMessage(), e);
+
+		if(state==State.configuring) {
+			// these are done only at server startup
+			jettyConfiguration = new ContainerHttpServerProperties(properties);
+			PersistenceFactory pf = PersistenceFactory.get(new PersistenceProperties(properties));
+			persistenceProperties = pf.getConfig();
+			try {
+				String pdpConfig = containerSecurityConfiguration.getPdpConfigurationFile();
+				if (pdpConfig != null)
+					logger.info("Using PDP configuration file <{}>", pdpConfig);
+				containerSecurityConfiguration.getPdp().initialize(pdpConfig, containerConfiguration, 
+						containerSecurityConfiguration, clientConfiguration);
+			} catch (Exception e) {
+				throw new ConfigurationException(e.getMessage(), e);
+			}
 		}
 	}
 
@@ -542,23 +546,32 @@ public class Kernel {
 		persistenceManager=new PersistenceManager(this);
 		deploymentManager=new DeploymentManager(this);
 		jetty = new JettyServer(this, jettyConfiguration);
-		securityManager = new SecurityManager(getContainerSecurityConfiguration());
+		securityManager = new SecurityManager(containerSecurityConfiguration);
 		metricRegistry.register("use.security.ServerIdentity",new CertificateInfoMetric(securityManager));
 		adminActions = AdminActionLoader.load();
 		gwHandler = new GatewayHandler(getContainerProperties(), getClientConfiguration(), 
 				containerSecurityConfiguration);
-		externalSystemConnectors.add(gwHandler);
-		try {
-			IAttributeSource aip = containerSecurityConfiguration.getAip();
-			aip.start(this);
-			register(aip);
-			IDynamicAttributeSource dap = containerSecurityConfiguration.getDap();
-			dap.start(this);
-			register(dap);
-		} catch (Exception e) {
-			throw new ConfigurationException(e.getMessage(), e);
+		subSystems.add(gwHandler);
+		capabilities = CapabilitiesLoader.load(this);
+		IAttributeSource aip = containerSecurityConfiguration.getAip();
+		aip.start(this);
+		register(aip);
+		IDynamicAttributeSource dap = containerSecurityConfiguration.getDap();
+		dap.start(this);
+		register(dap);
+	}
+
+	public void refreshConfig() throws Exception {
+		logger.info("Reloading configuration");
+		Properties newProperties = serviceConfigurator.loadProperties();
+		initializeConfiguration(newProperties);
+		for(UpdateableConfiguration uc: configurations) {
+			uc.setProperties(newProperties);
 		}
-		capabilities=CapabilitiesLoader.load(this);
+		for(ISubSystem sub: subSystems) {
+			sub.reloadConfig(this);
+		}
+		logger.info(getConnectionStatus());
 	}
 
 	/**
@@ -569,10 +582,11 @@ public class Kernel {
 	 * @param conf -config file path or null if not available
 	 * @throws Exception
 	 */
-	protected void prepare(String conf, Properties extraSettings) throws Exception {
+	private void prepare(String conf, Properties extraSettings) throws Exception {
 		if (conf != null) {
 			File file = new File(conf);
 			serviceConfigurator = new ServiceConfigurator(this, file);
+			
 		} else {
 			serviceConfigurator = new NullServiceConfigurator();
 		}
@@ -612,6 +626,7 @@ public class Kernel {
 			task.run();
 		});
 		addShutDownHook();
+		serviceConfigurator.startConfigWatcher();
 	}
 
 	/**

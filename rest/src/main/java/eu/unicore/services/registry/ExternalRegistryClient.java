@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
+import eu.unicore.services.ExternalSystemConnector.Status;
 import eu.unicore.services.rest.client.RESTException;
 import eu.unicore.services.rest.client.RegistryClient;
 import eu.unicore.services.rest.client.Resources;
@@ -101,29 +102,19 @@ public class ExternalRegistryClient implements IRegistry {
 		return result;
 	}
 
-	/**
-	 * check the connection to the services (using the default timeout of 2 seconds). 
-	 * If the service does not reply within the timeout, returns <code>false</code>
-	 */
-	public boolean checkConnection(){
-		return checkConnection(2000);
-	}
-
-	private String connectionStatus=null;
-
+	private String statusMessage = "N/A";
+	private Status status = Status.DOWN;
 	private long lastChecked = 0;
 
 	/**
 	 * check the connection to the services. If no service 
 	 * replies within the given timeout, returns <code>false</code>
-	 * 
-	 * @param timeout - connection timeout in milliseconds
 	 */
-	public boolean checkConnection(int timeout){
-		if (!"OK".equals(connectionStatus) && (lastChecked+60000>System.currentTimeMillis()))
-			return false;
-		
-		final StringBuffer status = new StringBuffer();
+	private void checkConnection(){
+		if(lastChecked+60000>System.currentTimeMillis())
+			return;
+
+		final StringBuffer sb = new StringBuffer();
 		boolean result = false;
 		for(final RegistryClient c: clients){
 			Callable<String>task=new Callable<>(){
@@ -138,22 +129,33 @@ public class ExternalRegistryClient implements IRegistry {
 					}
 				}
 			};
-			String res = compute(task, timeout);
+			String res = compute(task, 5000);
 			boolean currentOK = res!=null && "OK".equals(res);
 			if(!currentOK){
-				status.append("[").append(c.getURL()+": "+res);
-				status.append("] ");
+				sb.append("[").append(c.getURL()+": "+res);
+				sb.append("] ");
 			}
 			result=result || currentOK;
 		}
-		connectionStatus = result? "OK" : status.toString();
+		if(result) {
+			status = Status.OK;
+			statusMessage = "OK";
+		}
+		else {
+			status = Status.DOWN;
+			statusMessage = sb.toString();
+		}
 		lastChecked = System.currentTimeMillis();
-		return result;
 	}
 
-	public String getConnectionStatus(){
+	public Status getConnectionStatus(){
 		checkConnection();
-		return connectionStatus;		
+		return status;		
+	}
+
+	public String getConnectionStatusMessage(){
+		checkConnection();
+		return statusMessage;	
 	}
 
 	private String compute(Callable<String>task, int timeout){

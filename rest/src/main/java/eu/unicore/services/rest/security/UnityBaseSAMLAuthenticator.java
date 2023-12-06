@@ -114,13 +114,11 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 			DefaultClientConfiguration clientCfg) throws MalformedURLException, SAMLValidationException
 	{
 		SAMLAuthnClient client = new SAMLAuthnClient(address, clientCfg);
-
 		NameID requester = new NameID(targetUrl, SAMLConstants.NFORMAT_ENTITY);
-		try{
+		try {
 			return client.authenticate(SAMLConstants.NFORMAT_DN, requester, targetUrl);
 		}catch(RuntimeException e){
-			String reason = Log.createFaultMessage("Error for "+address, e);
-			cb.notOK(reason);
+			cb.notOK();
 			throw e;
 		}
 	}

@@ -14,18 +14,18 @@ import java.util.Set;
  */
 public class FileWatcher implements Runnable{
 
-	private final Set<File> targets=new HashSet<File>();
+	private final Set<File> targets = new HashSet<>();
 	
 	private final Runnable action;
 	
-	private long lastAccessed=System.currentTimeMillis();
+	private long lastAccessed = System.currentTimeMillis();
 		
 	public FileWatcher(File target, Runnable action)throws FileNotFoundException{
 		if(!target.exists() || !target.canRead()){
 			throw new FileNotFoundException("File "+target.getAbsolutePath()+
 					" does not exist or is not readable.");
 		}
-		this.action=action;
+		this.action = action;
 		addTarget(target);
 	}
 	

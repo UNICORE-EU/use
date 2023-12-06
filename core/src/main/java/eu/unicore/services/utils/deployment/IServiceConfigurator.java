@@ -33,7 +33,6 @@
 
 package eu.unicore.services.utils.deployment;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
@@ -70,10 +69,6 @@ public interface IServiceConfigurator {
 	 */
 	public List<Runnable>getInitTasks();
 
-	/**
-	 * return the time the config file was last modified
-	 * @return the config file's {@link File#lastModified()} or -1 if no config file was defined
-	 */
-	public long getLastConfigFileUpdateTime();
+	public default void startConfigWatcher() {}
 }
 

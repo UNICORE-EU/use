@@ -59,7 +59,7 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>0.600</persistence.version>
+    <persistence.version>0.601</persistence.version>
     <secutils.version>4.0.1</secutils.version>
     <seclib.version>7.0.0</seclib.version>
     <herasaf.version>3.0.2</herasaf.version>
@@ -68,7 +68,6 @@
     <xuudb.version>2.9.0</xuudb.version>
     <cxf.version>4.0.3</cxf.version>
     <jetty.version>11.0.18</jetty.version>
-    <httpclient.version>5.2.1</httpclient.version>
     <metrics.version>4.2.22</metrics.version>
     <jwt.version>9.37.2</jwt.version>
     <tink.version>1.11.0</tink.version>
@@ -141,11 +140,6 @@
           <artifactId>xalan</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents.client5</groupId>
-      <artifactId>httpclient5</artifactId>
-      <version>${httpclient.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.xmlbeans</groupId>

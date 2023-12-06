@@ -30,8 +30,4 @@ public class NullServiceConfigurator implements IServiceConfigurator {
 		return Collections.emptyList();
 	}
 
-	@Override
-	public long getLastConfigFileUpdateTime() {
-		return 0;
-	}
 }

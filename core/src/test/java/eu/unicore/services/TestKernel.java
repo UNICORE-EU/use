@@ -89,6 +89,8 @@ public class TestKernel extends TestCase {
 			System.out.println(ext);
 			assertEquals(base,ext+"/services");
 
+			k.refreshConfig();
+
 		} finally {
 			if (k != null)
 				k.shutdown();

@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -24,12 +25,16 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
 
+import com.google.common.collect.Lists;
+
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExternalSystemConnector;
+import eu.unicore.services.ISubSystem;
 import eu.unicore.services.ThreadingServices;
 import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.DefaultContainerSecurityConfiguration;
+import eu.unicore.services.utils.Pair;
 import eu.unicore.services.utils.TimeoutRunner;
 import eu.unicore.services.utils.Utilities;
 import eu.unicore.util.Log;
@@ -44,7 +49,7 @@ import eu.unicore.util.httpclient.IClientConfiguration;
  * development on Gw side as well.
  * @author schuller
  */
-public class GatewayHandler implements ExternalSystemConnector{
+public class GatewayHandler implements ISubSystem, ExternalSystemConnector {
 
 	private static final Logger logger=Log.getLogger(Log.UNICORE, GatewayHandler.class);
 
@@ -56,7 +61,9 @@ public class GatewayHandler implements ExternalSystemConnector{
 	private Status status=Status.UNKNOWN;
 	private String statusMessage;
 	private long lastChecked;
-
+	private String gwURL;
+	private String myHost;
+	
 	public GatewayHandler(ContainerProperties containerConfiguration, 
 			IClientConfiguration clientConfiguration,
 			DefaultContainerSecurityConfiguration secConfiguration){
@@ -64,8 +71,14 @@ public class GatewayHandler implements ExternalSystemConnector{
 		this.clientConfiguration = clientConfiguration;
 		this.secConfiguration = secConfiguration;
 		this.threadingSrv = containerConfiguration.getThreadingServices();
+		setup();
 	}
 
+	private void setup() {
+		gwURL = containerConfiguration.getValue(ContainerProperties.EXTERNAL_URL);
+		myHost = containerConfiguration.getValue(ContainerProperties.SERVER_HOST) + ":"
+				+containerConfiguration.getValue(ContainerProperties.SERVER_PORT);
+	}
 	/**
 	 * wait until a connection to the Gateway has been established
 	 */
@@ -106,13 +119,24 @@ public class GatewayHandler implements ExternalSystemConnector{
 				ContainerSecurityProperties.PREFIX+ContainerSecurityProperties.PROP_GATEWAY_WAIT + "')");
 	}
 
-	public String getExternalSystemName(){
+	@Override
+	public String getName(){
 		return "Gateway";
 	}
 
-	public String getConnectionStatusMessage(){
-		checkConnection();	
-		return statusMessage;
+	@Override
+	public String getExternalSystemName(){
+		return getName();
+	}
+
+	@Override
+	public String getStatusDescription(){
+		if(gwURL.contains(myHost)) {
+			return "N/A (no gateway used)";
+		}
+		else {
+			return "["+gwURL+"]";
+		}
 	}
 
 	public Status getConnectionStatus(){
@@ -120,31 +144,41 @@ public class GatewayHandler implements ExternalSystemConnector{
 		return status;
 	}
 
+	public String getConnectionStatusMessage(){
+		checkConnection();
+		return statusMessage;
+	}
+
 	private void checkConnection(){
 		if (lastChecked+2000>System.currentTimeMillis())
 			return;
-		String url = containerConfiguration.getValue(ContainerProperties.EXTERNAL_URL);
-		String myHost = containerConfiguration.getValue(ContainerProperties.SERVER_HOST) + ":"
-				+containerConfiguration.getValue(ContainerProperties.SERVER_PORT);
-		if(url.contains(myHost)){
+		if(gwURL.contains(myHost)){
 			status=Status.NOT_APPLICABLE;
 			statusMessage="N/A (no gateway used)";
 		}
 		else{
-			X509Certificate gwCert = TimeoutRunner.compute(getCheckConnectionTask(url), threadingSrv, 2000);
+			Pair<X509Certificate, String> res = TimeoutRunner.compute(
+					getCheckConnectionTask(gwURL), threadingSrv, 2000);
+			X509Certificate gwCert = res.getM1();
 			if(gwCert!=null){
 				status=Status.OK;
-				statusMessage="OK [connected to "+url+"]";
+				statusMessage = "OK";
 				if(!secConfiguration.haveFixedGatewayCertificate()) {
 					secConfiguration.setGatewayCertificate(gwCert);
 				}
 			}
 			else {
 				status=Status.DOWN;
-				statusMessage="CAN'T CONNECT TO GATEWAY "+url;
+				statusMessage = res.getM2();
 			}
 		}
 		lastChecked=System.currentTimeMillis();
+	}
+	
+	private final Collection<ExternalSystemConnector> l = Lists.newArrayList(this);
+	@Override
+	public Collection<ExternalSystemConnector> getExternalConnections(){
+		return l;
 	}
 
 	/**
@@ -166,24 +200,27 @@ public class GatewayHandler implements ExternalSystemConnector{
 	}
 
 
-	private Callable<X509Certificate> getCheckConnectionTask(final String url) {
-		Callable<X509Certificate> getCert = new Callable<>(){
-			public X509Certificate call() {
+	private Callable<Pair<X509Certificate,String>> getCheckConnectionTask(final String url) {
+		Callable<Pair<X509Certificate,String>> getCert = new Callable<>(){
+			public  Pair<X509Certificate,String> call() {
+				String msg = "OK";
+				X509Certificate cert = null;
 				try {
-					X509Certificate[] cert = ConnectionUtil.getPeerCertificate(clientConfiguration,
+					X509Certificate[] certs = ConnectionUtil.getPeerCertificate(clientConfiguration,
 								url, 2000, logger);
-					return cert[0];
+					cert = certs[0];
 				} catch (UnknownHostException e) {
-					logger.warn("Gateway host is unknown: " + e);
-					return null;
+					msg = "Gateway host is unknown: " + e;
 				} catch (IOException e) {
-					logger.warn("Can't contact gateway: " + e);
-					return null;
+					msg = "Can't contact gateway: " + e;
 				}
+				return new Pair<>(cert,msg);
 			}
 		};
 		return getCert;
 	}
+	
+	
 
 	public void enableGatewayCertificateRefresh() throws Exception {
 		if(!secConfiguration.haveFixedGatewayCertificate()){

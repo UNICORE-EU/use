@@ -34,11 +34,16 @@ package eu.unicore.services.registry;
 
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
@@ -47,13 +52,16 @@ import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExternalSystemConnector;
+import eu.unicore.services.ExternalSystemConnector.Status;
 import eu.unicore.services.Home;
+import eu.unicore.services.ISubSystem;
 import eu.unicore.services.Kernel;
+import eu.unicore.services.rest.client.RESTException;
 import eu.unicore.services.rest.client.RegistryClient;
+import eu.unicore.services.rest.client.Resources;
 import eu.unicore.services.rest.registry.Registries;
 import eu.unicore.services.security.util.PubkeyCache;
 import eu.unicore.util.Log;
-import eu.unicore.util.configuration.PropertyChangeListener;
 
 /**
  * It is used to obtain a client for both internal and external <b>default</b> registries, which are
@@ -62,7 +70,7 @@ import eu.unicore.util.configuration.PropertyChangeListener;
  * @author demuth
  * @author schuller
  */
-public class RegistryHandler implements ExternalSystemConnector {
+public class RegistryHandler implements ISubSystem {
 
 	private static final Logger logger = Log.getLogger(Log.SERVICES+".registry", RegistryHandler.class);
 
@@ -76,46 +84,28 @@ public class RegistryHandler implements ExternalSystemConnector {
 	private final Kernel kernel;
 	private boolean isGlobalRegistry = false; 
 	private ContainerProperties config;
+	private String statusMessage = "";
+	private Status status = Status.UNKNOWN;
 
-	private Status status=Status.NOT_APPLICABLE;
-	private String statusMessage;
-	private long lastChecked;
+	private final Collection<ExternalSystemConnector> connectors = new ArrayList<>();
 
 	public RegistryHandler(Kernel kernel)throws Exception{
 		this.kernel=kernel;
-		this.config = kernel.getContainerProperties();
-		
-		config.addPropertyChangeListener(new PropertyChangeListener() {
-			private final String[] PROPS = new String[] {ContainerProperties.EXTERNAL_REGISTRY_USE,
-					ContainerProperties.EXTERNAL_REGISTRY_KEY};
-			
-			@Override
-			public void propertyChanged(String propertyKey)	{
-				logger.info("Registry settings update detected: updating external registry settings.");
-				synchronized(this){
-					externalRegistryURLs.clear();
-					updateExternalRegistryURLs();
-				}
-			}
-			
-			@Override
-			public String[] getInterestingProperties() {
-				return PROPS;
-			}
-		});
-		
 		Home regHome=kernel.getHome(RegistryCreator.SERVICE_NAME);
 		if (regHome !=null && regHome instanceof RegistryHomeImpl){
 			isGlobalRegistry = true;
 		}
-		
-		updateExternalRegistryURLs();
-
+		reloadConfig(kernel);
 		if(regHome==null)
 			return;
-		
-		registryClient = new LocalRegistryClient(kernel);	
-		
+		registryClient = new LocalRegistryClient(kernel);
+		updateStatusMessage();
+	}
+	
+	@Override
+	public void reloadConfig(Kernel kernel) {
+		this.config = kernel.getContainerProperties();
+		updateExternalRegistryURLs();
 	}
 
 	public static synchronized RegistryHandler get(Kernel kernel) throws Exception {
@@ -149,25 +139,24 @@ public class RegistryHandler implements ExternalSystemConnector {
 		if(!isGlobalRegistry && usesExternal) {
 			logger.debug("Determining external registry address(es) ...");
 			synchronized (externalRegistryURLs) {
-				if(externalRegistryURLs.size() == 0) {
-					List<String> registryUrls = config.getListOfValues(
-							ContainerProperties.EXTERNAL_REGISTRY_KEY);
-					for(String registryURL: registryUrls){
-						if(registryURL!=null && registryURL.length()>0){
-							String u = registryURL.trim();
-							if(!u.contains("/rest/registries/")) {
-								u = Registries.convertToREST(u);
-							}
-							externalRegistryURLs.add(u);
-							logger.info("Using registry: {}", u);
+				connectors.clear();
+				List<String> registryUrls = config.getListOfValues(
+						ContainerProperties.EXTERNAL_REGISTRY_KEY);
+				for(String registryURL: registryUrls){
+					if(registryURL!=null && registryURL.length()>0){
+						String u = registryURL.trim();
+						if(!u.contains("/rest/registries/")) {
+							u = Registries.convertToREST(u);
 						}
+						externalRegistryURLs.add(u);
+						RConnector rc = new RConnector(u);
+						connectors.add(rc);
+						logger.info("Using registry: {}", u);
 					}
 				}
 			}
-			if (externalRegistryURLs.size()==0){
-				logger.warn("No external registry URLs are defined!");
-			}
 		}
+		updateStatusMessage();
 	}
 
 	/**
@@ -207,79 +196,56 @@ public class RegistryHandler implements ExternalSystemConnector {
 	}
 
 	@Override
-	public String getExternalSystemName() {
+	public String getName() {
 		return "Registry";
 	}
 	
 	@Override
-	public String getConnectionStatusMessage(){
-		checkConnection();	
+	public String getStatusDescription(){
 		return statusMessage;
 	}
-	
+
 	@Override
-	public Status getConnectionStatus(){
-		checkConnection();
-		return status;
+	public Collection<ExternalSystemConnector>getExternalConnections(){
+		return connectors;
 	}
 
-	private void checkConnection(){
-		if (lastChecked+2000>System.currentTimeMillis())
-			return;
-		
-		try{
-			if(isSharedRegistry()){
-				status = Status.NOT_APPLICABLE;
-				statusMessage = "N/A (this is a shared Registry)";
-			}
-			else if(!usesExternalRegistry()){
-				status = Status.NOT_APPLICABLE;
-				statusMessage = "N/A (no external Registry used)";
+	private void updateStatusMessage() {
+		if(isGlobalRegistry) {
+			statusMessage = "Shared";
+		}
+		else {
+			if (externalRegistryURLs.size()==0){
+				statusMessage = "N/A";
 			}
 			else {
-				String[]urls=getExternalRegistryURLs();
-				ExternalRegistryClient erc=getExternalRegistryClient();
-				if(erc.checkConnection()){
-					String allurls="";
-					for(String u: urls){
-						allurls+=u+" ";
-					}
-					status = Status.OK;
-					statusMessage = "OK [connected to "+allurls+"]";
-				}
-				else{
-					status=Status.DOWN;
-					statusMessage = "CAN'T CONNECT ["+erc.getConnectionStatus()+"]";
-				}
+				statusMessage="Ext URLs: " + externalRegistryURLs.toString();
 			}
-		}catch(Exception ex){
-			status=Status.DOWN;
-			statusMessage = Log.createFaultMessage("Error! ",ex);
 		}
-		
-		lastChecked=System.currentTimeMillis();
 	}
 	
 	public void updatePublicKeys(){
+		Status oldStatus = status;
 		try{
-			checkConnection();
-			if(Status.OK.equals(status)){
-				ExternalRegistryClient erc = getExternalRegistryClient();
-				PubkeyCache keyCache = PubkeyCache.get(kernel);
-				if(erc==null)return;
-				for(Map<String,String>entry: erc.listEntries()){
-					try{
-						String pem = entry.get(RegistryClient.SERVER_PUBKEY);
-						if(pem!=null){
-							String serverDN = entry.get(RegistryClient.SERVER_IDENTITY);
-							keyCache.update(serverDN, parsePEM(pem));
-							logger.debug("Read public key for <{}>", serverDN);
-						}
-					}catch(Exception ex){}
-				}
+			ExternalRegistryClient erc = getExternalRegistryClient();
+			if(erc==null)return;
+			PubkeyCache keyCache = PubkeyCache.get(kernel);
+			for(Map<String,String>entry: erc.listEntries()){
+				try{
+					String pem = entry.get(RegistryClient.SERVER_PUBKEY);
+					if(pem!=null){
+						String serverDN = entry.get(RegistryClient.SERVER_IDENTITY);
+						keyCache.update(serverDN, parsePEM(pem));
+						logger.debug("Read public key for <{}>", serverDN);
+					}
+				}catch(Exception ex){}
 			}
+			status = Status.OK;
 		}catch(Exception ex){
-			Log.logException("Error updating public keys from external registry", ex, logger);
+			status = Status.DOWN;
+			if(status!=oldStatus) {
+				Log.logException("Error updating public keys from external registry", ex, logger);
+			}
 		}
 	}
 	
@@ -289,4 +255,72 @@ public class RegistryHandler implements ExternalSystemConnector {
 		return cert.getPublicKey();
 	}
 	
+	private class RConnector implements ExternalSystemConnector {
+		private Status status = Status.NOT_APPLICABLE;
+		private String statusMessage = "N/A";
+		private long lastChecked;
+		private final String url;
+		
+		public RConnector(String url) {
+			this.url = url;
+		}
+		
+		@Override
+		public String getConnectionStatusMessage() {
+			checkConnection();
+			return statusMessage;
+		}
+
+		@Override
+		public Status getConnectionStatus() {
+			checkConnection();
+			return status;
+		}
+
+		@Override
+		public String getExternalSystemName() {
+			return "Registry ["+url+"]";
+		}
+
+		private void checkConnection() {
+			switch(status) {
+			case NOT_APPLICABLE:
+			case OK:
+				if (lastChecked+60000<System.currentTimeMillis()) {
+					lastChecked = System.currentTimeMillis();
+					final RegistryClient rc = new RegistryClient(url, kernel.getClientConfiguration());
+					Callable<String>task = () -> {
+						try {
+							rc.getJSON();
+							return "OK";
+						}catch(RESTException re) {
+							return re.getErrorMessage();
+						}catch(Exception e) {
+							return Log.createFaultMessage("Error ", e);
+						}
+					};
+					String res = compute(task, 5000);
+					if(!"OK".equals(res)){
+						statusMessage=res;
+						status = Status.DOWN;
+					}
+					else {
+						status = Status.OK;
+					}
+				}
+				break;
+			default:
+				break;
+			}
+		}
+
+		private String compute(Callable<String>task, int timeout){
+			try{
+				Future<String> f = Resources.getExecutorService().submit(task);
+				return f.get(timeout, TimeUnit.MILLISECONDS);
+			}catch(Exception ex){
+				return "ERROR";
+			}
+		}
+	}
 }

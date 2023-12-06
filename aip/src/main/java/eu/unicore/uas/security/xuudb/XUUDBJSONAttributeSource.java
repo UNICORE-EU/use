@@ -15,7 +15,6 @@ import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
-import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.util.Log;
 
 /**
@@ -32,8 +31,6 @@ public class XUUDBJSONAttributeSource extends XUUDBBase implements
 	@Override
 	public void start(Kernel kernel) throws Exception {
 		this.kernel = kernel;
-		cb = new CircuitBreaker("Attribute_Source_"+name);
-		kernel.getMetricRegistry().register(cb.getName(), cb);
 		isEnabled = true;
 	}
 
@@ -79,7 +76,7 @@ public class XUUDBJSONAttributeSource extends XUUDBBase implements
 			String url = ub.build().toString();
 			return makeAuthInfo(new JSONObject(doGet(url)));
 		} catch (Exception e) {
-			cb.notOK(Log.createFaultMessage("Error contacting " + name, e));
+			cb.notOK();
 			Log.logException("Error contacting " + name,e, logger);
 			throw new IOException("Error contacting "+name, e);
 		}

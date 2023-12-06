@@ -58,8 +58,8 @@ import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.pdp.PDPResult;
 import eu.unicore.services.security.pdp.PDPResult.Decision;
 import eu.unicore.services.security.util.AttributeHandlingCallback;
-import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.services.security.util.BaseAttributeSourcesChain.MergeLastOverrides;
+import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.util.Log;
 
 /**
@@ -83,9 +83,9 @@ public final class SecurityManager {
 	
 	private static final ThreadLocal<Boolean> localCalls = new ThreadLocal<>();
 	
-	private Set<AttributeHandlingCallback> attribHandlingCallbacks=new HashSet<>();
+	private final Set<AttributeHandlingCallback> attribHandlingCallbacks=new HashSet<>();
 	
-	private OperationTypesUtil operationTypesUtil;
+	private final OperationTypesUtil operationTypesUtil;
 
 	public SecurityManager(IContainerSecurityConfiguration securityConfig) {
 		this.securityConfig = securityConfig;

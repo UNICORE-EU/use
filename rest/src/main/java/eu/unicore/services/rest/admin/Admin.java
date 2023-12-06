@@ -23,6 +23,7 @@ import org.json.JSONObject;
 
 import eu.unicore.security.Client;
 import eu.unicore.services.ExternalSystemConnector;
+import eu.unicore.services.ISubSystem;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.admin.AdminAction;
 import eu.unicore.services.admin.AdminActionResult;
@@ -80,8 +81,10 @@ public class Admin extends BaseRESTController {
 	
 	protected Map<String,String> getConnectionStatus(){
 		Map<String,String> connectionStatus = new HashMap<>();
-		for(ExternalSystemConnector conn: kernel.getExternalSystemConnectors()){
-			connectionStatus.put(conn.getExternalSystemName(), conn.getConnectionStatusMessage());
+		for(ISubSystem sub: kernel.getSubSystems()){
+			for(ExternalSystemConnector conn: sub.getExternalConnections()) {
+				connectionStatus.put(conn.getExternalSystemName(), conn.getConnectionStatusMessage());
+			}
 		}
 		return connectionStatus;
 	}

@@ -14,7 +14,8 @@ import eu.unicore.services.Service;
 import eu.unicore.services.rest.impl.PostInvokeHandler;
 import eu.unicore.services.rest.impl.USERestInvoker;
 import eu.unicore.services.rest.security.AuthNHandler;
-import eu.unicore.services.rest.security.RESTSecurityProperties;
+import eu.unicore.services.rest.security.AuthenticatorChain;
+import eu.unicore.services.rest.security.IAuthenticator;
 import jakarta.ws.rs.core.Application;
 
 /**
@@ -76,13 +77,10 @@ public class RestService implements Service {
 		}
 	}
 
-	protected synchronized void initSecurity(){
-		if(kernel.getAttribute(RESTSecurityProperties.class)==null){
-			RESTSecurityProperties sp = new RESTSecurityProperties(kernel, kernel.getContainerProperties().getRawProperties());
-			kernel.setAttribute(RESTSecurityProperties.class, sp);
-		}
+	protected void initSecurity(){
+		AuthenticatorChain.get(kernel);
 	}
-	
+
 	public void stop()throws Exception{
 		if(!stopped){
 			stopped=true;
