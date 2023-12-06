@@ -41,7 +41,6 @@ public class RESTSecurityProperties extends PropertiesHelper {
 
 	public static final String PROP_MSG_LOGGING = "enableMessageLogging";
 
-	
 	@DocumentationReferenceMeta
 	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
 	static

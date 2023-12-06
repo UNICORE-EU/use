@@ -35,4 +35,8 @@ public interface IAuthenticator {
 	 */
 	public Collection<String> getAuthSchemes();
 	
+	public default RESTSecurityProperties getSecurityProperties() { 
+		return null;
+	}
+	
 }

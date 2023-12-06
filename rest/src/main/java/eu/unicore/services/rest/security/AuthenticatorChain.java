@@ -32,6 +32,8 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 
 	private final Collection<ExternalSystemConnector> connectors = new ArrayList<>();
 
+	private RESTSecurityProperties sp;
+
 	public static synchronized IAuthenticator get(Kernel k) {
 		IAuthenticator auth = k.getAttribute(IAuthenticator.class);
 		if(auth==null){
@@ -51,7 +53,8 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 	public void reloadConfig(Kernel k){
 		List<IAuthenticator>newChain = new ArrayList<>();
 		connectors.clear();
-		RESTSecurityProperties sp = new RESTSecurityProperties(k.getContainerProperties().getRawProperties());
+		sp = new RESTSecurityProperties(k.getContainerProperties().getRawProperties());
+		k.setAttribute(RESTSecurityProperties.class, sp);
 		String order = sp.getValue(RESTSecurityProperties.PROP_ORDER);
 		if(order==null) {
 			newChain.add(new RESTSecurityProperties.NullAuthenticator());
@@ -189,6 +192,8 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 		return "User authentication";
 	}
 	
-	
+	public RESTSecurityProperties getSecurityProperties() { 
+		return sp;
+	}
 	
 }
