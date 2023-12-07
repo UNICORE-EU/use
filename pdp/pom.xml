@@ -12,7 +12,7 @@
   <description>UNICORE Services Environment Policy Decision Point implementations</description>
 
   <properties>
-     <automatic.module.name>${groupId}.use.pdp</automatic.module.name>
+     <automatic.module.name>${project.groupId}.use.pdp</automatic.module.name>
   </properties>
 
   <dependencies>
@@ -63,26 +63,6 @@
             <xmlConfig implementation="java.io.File">src/main/schema/xmlbeans_config.xsdconfig</xmlConfig>
           </xmlConfigs>
           <noUpa>true</noUpa>
-          <!--outputJar>target/samly2Xbeans-${version}.jar</outputJar>-->
-        </configuration>
-      </plugin>
-
-      <!-- less javadoc -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-     	<artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <excludePackageNames>xmlbeans.*</excludePackageNames>
-        </configuration>
-      </plugin>
-     
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>**/argus/pap/**/*.java</exclude>
-          </excludes>
         </configuration>
       </plugin>
     </plugins>

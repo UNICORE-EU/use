@@ -11,7 +11,7 @@
   </parent>
   <name>UNICORE Services Environment REST support</name>
   <properties>
-     <automatic.module.name>${groupId}.use.rest</automatic.module.name>
+     <automatic.module.name>${project.groupId}.use.rest</automatic.module.name>
   </properties>
  
   <build>

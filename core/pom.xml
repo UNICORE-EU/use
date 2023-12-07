@@ -10,7 +10,7 @@
   <name>UNICORE Services Environment Core</name>
 
   <properties>
-     <automatic.module.name>${groupId}.use.core</automatic.module.name>
+     <automatic.module.name>${project.groupId}.use.core</automatic.module.name>
   </properties>
 
   <build>

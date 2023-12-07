@@ -8,7 +8,7 @@
   <name>UNICORE Services Environment attribute sources</name>
 
   <properties>
-     <automatic.module.name>${groupId}.use.aip</automatic.module.name>
+     <automatic.module.name>${project.groupId}.use.aip</automatic.module.name>
   </properties>
 
   <parent>

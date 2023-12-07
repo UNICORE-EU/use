@@ -12,7 +12,7 @@
   <name>UNICORE Services Environment REST client</name>
 
   <properties>
-     <automatic.module.name>${groupId}.use.restclient</automatic.module.name>
+     <automatic.module.name>${project.groupId}.use.restclient</automatic.module.name>
   </properties>
  
   <build>

@@ -11,9 +11,8 @@ import java.io.Serializable;
  * of fully SAML enabled VO services, the VO service address can be used to obtain SAML metadata and
  * subsequently addresses of all web services.
  * @author K. Benedyczak
- * 
- * @deprecated
  */
+@Deprecated
 public class VODescription implements Serializable
 {
 	private static final long serialVersionUID = 1L;

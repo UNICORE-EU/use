@@ -37,5 +37,6 @@ public interface Model extends Node, Serializable {
 	 * resource class is also to be used as the frontend (for backwards compatibility)
 	 * @deprecated will be replaced by declaring the frontend in the service config
 	 */
+	@Deprecated
 	public String getFrontend(String serviceType);
 }
