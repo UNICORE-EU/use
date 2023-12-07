@@ -76,7 +76,6 @@ public class RESTSecurityProperties extends PropertiesHelper {
 	public static class NullAuthenticator implements IAuthenticator{
 		@Override
 		public boolean authenticate(Message message, SecurityTokens tokens) {
-			//NOP
 			return false;
 		}
 		

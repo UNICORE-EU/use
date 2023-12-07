@@ -211,7 +211,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 		IAuthenticator auth = kernel.getAttribute(IAuthenticator.class);
 		boolean haveCredentials  = auth.authenticate(message, token);
 		if(!haveCredentials
-				&& kernel.getAttribute(RESTSecurityProperties.class).forbidNoCreds()
+				&& auth.getSecurityProperties().forbidNoCreds()
 				&& kernel.getContainerSecurityConfiguration().isAccessControlEnabled()) {
 			throw new AuthenticationException("Authentication failed - no credentials.");
 		}

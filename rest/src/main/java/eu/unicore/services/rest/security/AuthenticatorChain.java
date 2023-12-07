@@ -68,7 +68,7 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 				if(auth instanceof ExternalSystemConnector) {
 					connectors.add((ExternalSystemConnector)auth);
 				}
-				logger.info("Enabled REST authentication: "+auth);
+				logger.info("Enabled REST authentication: {}", auth);
 			}
 		}
 		chain = newChain;

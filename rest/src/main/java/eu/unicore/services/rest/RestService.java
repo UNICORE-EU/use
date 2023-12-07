@@ -15,7 +15,6 @@ import eu.unicore.services.rest.impl.PostInvokeHandler;
 import eu.unicore.services.rest.impl.USERestInvoker;
 import eu.unicore.services.rest.security.AuthNHandler;
 import eu.unicore.services.rest.security.AuthenticatorChain;
-import eu.unicore.services.rest.security.IAuthenticator;
 import jakarta.ws.rs.core.Application;
 
 /**
