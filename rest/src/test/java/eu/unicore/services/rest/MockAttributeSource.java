@@ -14,11 +14,7 @@ import eu.unicore.util.configuration.ConfigurationException;
 public class MockAttributeSource implements IAttributeSource {
 
 	@Override
-	public void configure(String name) throws ConfigurationException {
-	}
-
-	@Override
-	public void start(Kernel kernel) throws Exception {
+	public void configure(String name, Kernel kernel) throws ConfigurationException {
 	}
 
 	@Override

@@ -100,10 +100,6 @@ public class MockAttributeSource implements IAttributeSource{
 	}
 
 	@Override
-	public void configure(String name) throws ConfigurationException {
-	}
+	public void configure(String name, Kernel k) throws ConfigurationException {}
 
-	@Override
-	public void start(Kernel kernel) throws Exception {
-	}
 }

@@ -16,31 +16,20 @@ import eu.unicore.security.Client;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.XACMLAttribute;
 import eu.unicore.security.wsutil.client.WSClientFactory;
-import eu.unicore.services.Kernel;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.IDynamicAttributeSource;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.IClientConfiguration;
 
-public class XUUDBDynamicAttributeSource extends XUUDBBase implements
+public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPublic> implements
 		IDynamicAttributeSource {
 
-	private IDynamicAttributesPublic xuudb;
+	@Override
+	public String getName() { return "Dynamic attributes"; }	
 
 	@Override
-	public String getName() { return "Dynamic attributes"; }
-	
-	@Override
-	public void start(Kernel kernel) throws Exception {
-		this.kernel = kernel;
-		xuudb = makeDAPEndpoint();
-		isEnabled = xuudb != null;
-	}
-
-	private synchronized IDynamicAttributesPublic makeDAPEndpoint() {
-		if (xuudb != null)
-			return xuudb;
+	protected IDynamicAttributesPublic createEndpoint() {
 		try {
 			IClientConfiguration sec = kernel.getClientConfiguration();
 			return new WSClientFactory(sec).createPlainWSProxy(
@@ -240,10 +229,6 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase implements
 							supGids);
 		}
 		return new SubjectAttributesHolder(mapDef, map);
-	}
-
-	public void setDAPEndpoint(IDynamicAttributesPublic dap) {
-		xuudb = dap;
 	}
 
 }

@@ -51,6 +51,7 @@ import eu.unicore.security.Role;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.Xlogin;
+import eu.unicore.services.Kernel;
 import eu.unicore.services.Resource;
 import eu.unicore.services.impl.SecuredResourceImpl;
 import eu.unicore.services.impl.SecuredResourceModel;
@@ -58,9 +59,12 @@ import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.pdp.PDPResult;
 import eu.unicore.services.security.pdp.PDPResult.Decision;
 import eu.unicore.services.security.util.AttributeHandlingCallback;
-import eu.unicore.services.security.util.BaseAttributeSourcesChain.MergeLastOverrides;
+import eu.unicore.services.security.util.AttributeSourcesChain;
+import eu.unicore.services.security.util.BaseAttributeSourcesChain.CombiningPolicy;
+import eu.unicore.services.security.util.DynamicAttributeSourcesChain;
 import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.util.Log;
+import eu.unicore.util.configuration.ConfigurationException;
 
 /**
  * Provides an entry point for security related functionality of USE. In particular:
@@ -79,7 +83,6 @@ public final class SecurityManager {
 	
 	public static final String UNKNOWN_ACTION = "___ANY_ACTION___";
 
-	private final IContainerSecurityConfiguration securityConfig;
 	
 	private static final ThreadLocal<Boolean> localCalls = new ThreadLocal<>();
 	
@@ -87,9 +90,31 @@ public final class SecurityManager {
 	
 	private final OperationTypesUtil operationTypesUtil;
 
-	public SecurityManager(IContainerSecurityConfiguration securityConfig) {
-		this.securityConfig = securityConfig;
+	private final Kernel kernel;
+
+	private ContainerSecurityProperties securityConfig;
+	private IAttributeSource aip;
+	private IDynamicAttributeSource dap;
+	
+	public SecurityManager(Kernel kernel) {
+		this.kernel = kernel;
+		this.securityConfig = kernel.getContainerSecurityConfiguration();
 		this.operationTypesUtil = new OperationTypesUtil();
+	}
+
+	public void start() {
+		this.aip = createAttributeSource(kernel);
+		kernel.register(aip);
+		this.dap = createDynamicAttributeSource(kernel);
+		kernel.register(dap);
+	}
+
+	public IAttributeSource getAip() {
+		return aip;
+	}
+
+	public IDynamicAttributeSource getDap() {
+		return dap;
 	}
 
 	/**
@@ -117,7 +142,7 @@ public final class SecurityManager {
 			preferedVos = securityConfig.getDefaultVOs();
 		}
 		SubjectAttributesHolder initial = new SubjectAttributesHolder(preferedVos);
-		return securityConfig.getAip().getAttributes(tokens, initial);
+		return aip.getAttributes(tokens, initial);
 	}
 
 	/**
@@ -507,7 +532,6 @@ public final class SecurityManager {
 		//setup client with authorisation attributes
 		SubjectAttributesHolder dynamicSubAttributes;
 		SubjectAttributesHolder staticSubAttributes = client.getSubjectAttributes();
-		IDynamicAttributeSource dap = securityConfig.getDap();
 		if (!(dap instanceof NullAttributeSource))
 		{		
 			try {
@@ -516,7 +540,7 @@ public final class SecurityManager {
 				throw new SecurityException("Exception when getting dynamic attributes for the client.", e);
 			}
 			logger.debug("Client's dynamic attributes: {}", dynamicSubAttributes);
-			MergeLastOverrides combiner = new MergeLastOverrides();
+			CombiningPolicy combiner = DynamicAttributeSourcesChain.MERGE_LAST_OVERRIDES;
 			combiner.combineAttributes(staticSubAttributes, dynamicSubAttributes);
 		}
 		//get the list of user preferences from the User assertion
@@ -644,4 +668,32 @@ public final class SecurityManager {
 		return operationTypesUtil;
 	}	
 	
+	public void setConfiguration(ContainerSecurityProperties sp) {
+		this.securityConfig = sp;
+	}
+	
+	private static IAttributeSource createAttributeSource(Kernel kernel) 
+			throws ConfigurationException {
+		ContainerSecurityProperties sp = kernel.getContainerSecurityConfiguration();
+		String order = sp.getAIPOrder(); 
+		if (order == null) {
+			logger.info("No attribute source is defined in the configuration, " +
+					"users won't have any authorisation attributes assigned");
+			return new NullAttributeSource();
+		}
+		return new AttributeSourcesChain(kernel);
+	}
+	
+	private static IDynamicAttributeSource createDynamicAttributeSource(Kernel kernel) 
+			throws ConfigurationException {
+		ContainerSecurityProperties sp = kernel.getContainerSecurityConfiguration();
+		String order = sp.getDAPOrder(); 
+		if (order == null) {
+			logger.info("No dynamic attribute source is defined in the configuration, " +
+					"users won't have any dynamic incarnation attributes assigned");
+			return new NullAttributeSource();
+		}
+		return new DynamicAttributeSourcesChain(kernel);
+	}
+
 }

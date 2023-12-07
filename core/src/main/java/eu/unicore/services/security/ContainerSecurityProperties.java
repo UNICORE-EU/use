@@ -33,9 +33,6 @@ import eu.unicore.security.canl.TruststoreProperties;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.security.pdp.AcceptingPdp;
 import eu.unicore.services.security.pdp.UnicoreXPDP;
-import eu.unicore.services.security.util.AttributeSourcesChain;
-import eu.unicore.services.security.util.BaseAttributeSourcesChain.MergeLastOverrides;
-import eu.unicore.services.security.util.DynamicAttributeSourcesChain;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.DocumentationReferenceMeta;
@@ -145,6 +142,11 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	public static final String PROP_AIP_COMBINING_POLICY = PROP_AIP_PREFIX + ".combiningPolicy";
 	
 	/**
+	 * property for disabling runtime updates of the AIPs
+	 */
+	public static final String PROP_AIP_DISABLE_RUNTIME_UPDATES = PROP_AIP_PREFIX + ".disableRuntimeUpdates";
+
+	/**
 	 * base for DAP property names
 	 */
 	public static final String PROP_DAP_PREFIX = "dynamicAttributes";
@@ -158,6 +160,11 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	 * property for defining the combining policy if multiple DAPs are used
 	 */
 	public static final String PROP_DAP_COMBINING_POLICY = PROP_DAP_PREFIX + ".combiningPolicy";
+
+	/**
+	 * property for disabling runtime updates of the DAPs
+	 */
+	public static final String PROP_DAP_DISABLE_RUNTIME_UPDATES = PROP_DAP_PREFIX + ".disableRuntimeUpdates";
 
 	public static final String PROP_TRUSTED_ASSERTION_ISSUERS_PFX = "trustedAssertionIssuers.";
 	
@@ -222,15 +229,19 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		META.put(PROP_AIP_PREFIX, new PropertyMD().setCanHaveSubkeys().
 				setDescription("Prefix used for configurations of particular attribute sources."));
 		META.put(PROP_AIP_ORDER, new PropertyMD().setDescription("Attribute sources in invocation order."));
-		META.put(PROP_AIP_COMBINING_POLICY, new PropertyMD(MergeLastOverrides.NAME).
+		META.put(PROP_AIP_COMBINING_POLICY, new PropertyMD("MERGE_LAST_OVERRIDES").
 				setDescription("What algorithm should be used for combining the attributes from " +
 						"multiple attribute sources (if more then one is defined)."));
+		META.put(PROP_AIP_DISABLE_RUNTIME_UPDATES, new PropertyMD("false").
+				setBoolean().setDescription("Whether to not allow runtime updates of the attribute sources."));
 		META.put(PROP_DAP_PREFIX, new PropertyMD().setCanHaveSubkeys().
 				setDescription("Prefix used for configurations of particular dynamic attribute sources."));
 		META.put(PROP_DAP_ORDER, new PropertyMD().setDescription("Dynamic attribute sources in invocation order."));
-		META.put(PROP_DAP_COMBINING_POLICY, new PropertyMD(MergeLastOverrides.NAME).
+		META.put(PROP_DAP_COMBINING_POLICY, new PropertyMD("MERGE_LAST_OVERRIDES").
 				setDescription("What algorithm should be used for combining the attributes from " +
 						"multiple dynamic attribute sources (if more then one is defined)."));
+		META.put(PROP_DAP_DISABLE_RUNTIME_UPDATES, new PropertyMD("false").
+				setBoolean().setDescription("Whether to not allow runtime updates of the dynamic attribute sources."));
 		META.put(PROP_TRUSTED_ASSERTION_ISSUERS_PFX, new PropertyMD().setCanHaveSubkeys().
 				setDescription("Allows for configuring a truststore " +
 						"(using normal truststore properties with this prefix) with certificates of trusted services (not CAs!) which are permitted to issue trust delegations and authenticate with SAML. Typically this truststore should contain certificates of all Unity instanes installed."));
@@ -254,12 +265,14 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		
 	}
 	
-	private PropertiesHelper properties;
+	private final PropertiesHelper properties;
+	private final Properties sourceProperties;
 	private final AuthnAndTrustProperties authAndTrustProperties;
 
 
 	public ContainerSecurityProperties(Properties source) throws ConfigurationException {
 		backwardsCompat(source);
+		this.sourceProperties = source;
 		properties = new PropertiesHelper(PREFIX, source, META, propsLogger);
 		setSslEnabled(properties.getBooleanValue(PROP_SSL_ENABLED));
 		setAccessControlEnabled(properties.getBooleanValue(PROP_CHECKACCESS));
@@ -324,8 +337,6 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		setSessionLifetime(properties.getLongValue(PROP_SESSIONS_LIFETIME));
 		setMaxSessionsPerUser(properties.getIntValue(PROP_SESSIONS_PERUSER));
 		
-		setAip(createAttributeSource(source));
-		setDap(createDynamicAttributeSource(source));
 		setPdp(createPDP(properties));
 	}
 
@@ -342,6 +353,10 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		authAndTrustProperties.reloadCredential();
 		pem=null;
 		getServerCertificateAsPEM();
+	}
+	
+	public Properties getRawProperties() {
+		return sourceProperties;
 	}
 
 	// backwards compatibility fixes
@@ -365,42 +380,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 					certFile +"'", e);
 		}
 	}
-	
-	private IAttributeSource createAttributeSource(Properties raw) 
-			throws ConfigurationException {
-		String order = properties.getValue(PROP_AIP_ORDER); 
-		if (order == null) {
-			logger.info("No attribute source is defined in the configuration, " +
-					"users won't have any authorisation attributes assigned");
-			return new NullAttributeSource();
-		}
-		AttributeSourcesChain ret = new AttributeSourcesChain();
-		ret.setCombiningPolicy(properties.getValue(PROP_AIP_COMBINING_POLICY));
-		ret.setOrder(order);
-		ret.setProperties(raw);
-		ret.configure(null);
-		return ret;
-	}
 
-	private IDynamicAttributeSource createDynamicAttributeSource(Properties raw) 
-			throws ConfigurationException {
-		String order = properties.getValue(PROP_DAP_ORDER); 
-		if (order == null) {
-			logger.info("No dynamic attribute source is defined in the configuration, " +
-					"users won't have any dynamic incarnation attributes assigned");
-			return new NullAttributeSource();
-		}
-		
-		logger.debug("Creating the main dynamic attribute sources chain");
-		DynamicAttributeSourcesChain ret = new DynamicAttributeSourcesChain();
-		ret.setCombiningPolicy(properties.getValue(PROP_DAP_COMBINING_POLICY));
-		ret.setOrder(order);
-		ret.setProperties(raw);
-		ret.configure(null);
-		return ret;
-	}
-
-	
 	@SuppressWarnings("unchecked")
 	private UnicoreXPDP createPDP(PropertiesHelper properties) throws ConfigurationException {
 		if (!isAccessControlEnabled())
@@ -437,6 +417,30 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	
 	public List<String>getAdditionalSAMLIds(){
 		return properties.getListOfValues(PROP_ADDITIONAL_ACCEPTED_SAML_IDS);
+	}
+
+	public String getAIPOrder() {
+		return properties.getValue(PROP_AIP_ORDER);
+	}
+
+	public String getAIPCombiningPolicy() {
+		return properties.getValue(PROP_AIP_COMBINING_POLICY);
+	}
+
+	public boolean getAIPDisableRuntimeUpdates() {
+		return properties.getBooleanValue(PROP_AIP_DISABLE_RUNTIME_UPDATES);
+	}
+
+	public String getDAPOrder() {
+		return properties.getValue(PROP_DAP_ORDER);
+	}
+
+	public String getDAPCombiningPolicy() {
+		return properties.getValue(PROP_DAP_COMBINING_POLICY);
+	}
+
+	public boolean getDAPDisableRuntimeUpdates() {
+		return properties.getBooleanValue(PROP_DAP_DISABLE_RUNTIME_UPDATES);
 	}
 
 	private String pem;

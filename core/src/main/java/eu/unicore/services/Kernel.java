@@ -63,8 +63,6 @@ import eu.unicore.services.persistence.PersistenceManager;
 import eu.unicore.services.registry.RegistryCreator;
 import eu.unicore.services.security.CertificateInfoMetric;
 import eu.unicore.services.security.ContainerSecurityProperties;
-import eu.unicore.services.security.IAttributeSource;
-import eu.unicore.services.security.IDynamicAttributeSource;
 import eu.unicore.services.security.SecurityManager;
 import eu.unicore.services.security.util.PubkeyCache;
 import eu.unicore.services.server.ContainerHttpServerProperties;
@@ -522,6 +520,7 @@ public final class Kernel {
 
 		if(state==State.configuring) {
 			// these are done only at server startup
+			securityManager = new SecurityManager(this);
 			jettyConfiguration = new ContainerHttpServerProperties(properties);
 			PersistenceFactory pf = PersistenceFactory.get(new PersistenceProperties(properties));
 			persistenceProperties = pf.getConfig();
@@ -542,29 +541,24 @@ public final class Kernel {
 	 * @throws Exception 
 	 */
 	private void initializeBuddies() throws Exception {
+		securityManager.start();
 		msg = new MessagingImpl(getPersistenceProperties());
 		persistenceManager=new PersistenceManager(this);
 		deploymentManager=new DeploymentManager(this);
 		jetty = new JettyServer(this, jettyConfiguration);
-		securityManager = new SecurityManager(containerSecurityConfiguration);
 		metricRegistry.register("use.security.ServerIdentity",new CertificateInfoMetric(securityManager));
 		adminActions = AdminActionLoader.load();
 		gwHandler = new GatewayHandler(getContainerProperties(), getClientConfiguration(), 
 				containerSecurityConfiguration);
 		subSystems.add(gwHandler);
 		capabilities = CapabilitiesLoader.load(this);
-		IAttributeSource aip = containerSecurityConfiguration.getAip();
-		aip.start(this);
-		register(aip);
-		IDynamicAttributeSource dap = containerSecurityConfiguration.getDap();
-		dap.start(this);
-		register(dap);
 	}
 
 	public void refreshConfig() throws Exception {
 		logger.info("Reloading configuration");
 		Properties newProperties = serviceConfigurator.loadProperties();
 		initializeConfiguration(newProperties);
+		securityManager.setConfiguration(containerSecurityConfiguration);
 		for(UpdateableConfiguration uc: configurations) {
 			uc.setProperties(newProperties);
 		}

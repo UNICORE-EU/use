@@ -46,7 +46,7 @@ public abstract class FileAttributeSourceBase implements IAttributeSource {
 	
 	
 	@Override
-	public void configure(String name) throws ConfigurationException {
+	public void configure(String name, Kernel kernel) throws ConfigurationException {
 		this.name = name;
 		AttributesFileParser parser;
 		try {
@@ -66,11 +66,7 @@ public abstract class FileAttributeSourceBase implements IAttributeSource {
 					name + ": " + e.toString(), e);
 		}
 	}
-	
-	@Override
-	public void start(Kernel kernel) throws Exception {
-	}
-	
+
 	@Override
 	public String getName()
 	{

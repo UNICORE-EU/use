@@ -66,19 +66,14 @@ import eu.unicore.util.configuration.ConfigurationException;
 public interface IAttributeSourceBase {
 
 	/**
-	 * Configures the source. After calling this method it must be ensured that configuration is sane.
+	 * Configures the source. After calling this method it must be ensured that 
+	 * the attribute source is sane and woŕking.
 	 * It is guaranteed that this method is invoked after all setter injections on the AIP.
 	 * 
 	 * @param name - the name of the attribute source
-	 */
-	public void configure(String name) throws ConfigurationException;
-
-	/**
-	 * Makes the AIP ready for work if necessary: starts threads etc. 
-	 * 
 	 * @param kernel - the USE kernel
 	 */
-	public void start(Kernel kernel)throws Exception;
+	public void configure(String name, Kernel kernel) throws ConfigurationException;
 
 	/**
 	 * should return the name this was configured with

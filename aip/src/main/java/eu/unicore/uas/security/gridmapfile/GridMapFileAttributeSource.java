@@ -49,22 +49,21 @@ public class GridMapFileAttributeSource implements IAttributeSource
 	private Map<String,List<String>> map;
 
 	@Override
-	public void configure(String name) throws ConfigurationException
+	public void configure(String name, Kernel kernel) throws ConfigurationException
 	{
 		this.name = name;
 		parse();
-	}
-
-	@Override
-	public void start(Kernel kernel) throws FileNotFoundException
-	{
-		FileWatcher modifiedWatcher = new FileWatcher(mapFile, new Runnable(){
-			@Override
-			public void run() {
-				parse();
-			}});
-		ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
-		ts.getScheduledExecutorService().scheduleWithFixedDelay(modifiedWatcher, 2, 2, TimeUnit.MINUTES);
+		try {
+			FileWatcher modifiedWatcher = new FileWatcher(mapFile, new Runnable(){
+				@Override
+				public void run() {
+					parse();
+				}});
+			ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
+			ts.getScheduledExecutorService().scheduleWithFixedDelay(modifiedWatcher, 2, 2, TimeUnit.MINUTES);
+		}catch(FileNotFoundException ffe) {
+			throw new ConfigurationException("", ffe);
+		}
 	}
 	
 	@Override

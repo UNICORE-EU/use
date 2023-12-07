@@ -33,7 +33,7 @@
 package eu.unicore.services.security.util;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -41,6 +41,7 @@ import org.apache.logging.log4j.ThreadContext;
 import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.Client;
 import eu.unicore.security.SubjectAttributesHolder;
+import eu.unicore.services.Kernel;
 import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.IDynamicAttributeSource;
 import eu.unicore.util.Log;
@@ -55,15 +56,40 @@ import eu.unicore.util.configuration.ConfigurationException;
 public class DynamicAttributeSourcesChain extends BaseAttributeSourcesChain<IDynamicAttributeSource> 
 		implements IDynamicAttributeSource {
 
-	private final static Logger logger=Log.getLogger(Log.SECURITY, DynamicAttributeSourcesChain.class);
+	private final static Logger logger = Log.getLogger(Log.SECURITY, DynamicAttributeSourcesChain.class);
 	
+	public DynamicAttributeSourcesChain() {}
+	
+	public DynamicAttributeSourcesChain(Kernel kernel){
+		setup(kernel);
+	}
+
+	@Override
+	protected void setup(Kernel kernel) {
+		super.setup(kernel);
+		ContainerSecurityProperties csp = kernel.getContainerSecurityConfiguration();
+		setCombiningPolicy(csp.getDAPCombiningPolicy());
+		orderString = csp.getDAPOrder();
+		configure(null, kernel);
+	}
+
+	@Override
+	public void reloadConfig(Kernel kernel) {
+		ContainerSecurityProperties sp = kernel.getContainerSecurityConfiguration();
+		if(sp.getDAPDisableRuntimeUpdates()) {
+			logger.debug("Dynamic update of dynamic attribute sources is disabled, skipping");
+		}
+		else {
+			setup(kernel);
+		}
+	}
+
 	/**
 	 * combines results from all configured attribute sources
 	 */
 	@Override
 	public SubjectAttributesHolder getAttributes(Client client, SubjectAttributesHolder initial)
 			throws IOException, AuthorisationException {
-		assert started : "This object must be started before use.";
 		SubjectAttributesHolder resultMap = new SubjectAttributesHolder(initial.getPreferredVos());
 		for (IDynamicAttributeSource a: chain){
 			ThreadContext.push(a.getName());
@@ -89,24 +115,8 @@ public class DynamicAttributeSourcesChain extends BaseAttributeSourcesChain<IDyn
 		return resultMap;
 	}
 
-	protected void initOrder() throws ConfigurationException {
-		chain = new ArrayList<IDynamicAttributeSource>();
-		names = new ArrayList<String>();
-		if (orderString == null) {			
-			String nn = name == null ? "" : "." + name;
-			throw new ConfigurationException("Configuration inconsistent, " +
-					"need to define <" + ContainerSecurityProperties.PROP_DAP_PREFIX + 
-					nn + ".order>");
-		}
-		String[] authzNames=orderString.split(" +");
-		
-		if (properties == null)
-			throw new IllegalStateException("Properties are null. Please set them using setProperties()");
-		
-		for(String auth: authzNames){
-			chain.add(AttributeSourceConfigurator.configureDynamicAttributeSource(auth, 
-					ContainerSecurityProperties.PROP_DAP_PREFIX, properties));
-			names.add(auth);
-		}
+	protected List<IDynamicAttributeSource> createChain(Kernel k) throws ConfigurationException {
+		return super.createChain(ContainerSecurityProperties.PROP_DAP_PREFIX, k).getM1();
 	}
+
 }

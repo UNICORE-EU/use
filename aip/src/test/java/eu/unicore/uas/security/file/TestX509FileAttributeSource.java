@@ -35,8 +35,7 @@ public class TestX509FileAttributeSource extends TestCase
 		try
 		{
 			Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
-			src.configure(NAME);
-			src.start(k);
+			src.configure(NAME, k);
 		} catch (Exception e)
 		{
 			e.printStackTrace();

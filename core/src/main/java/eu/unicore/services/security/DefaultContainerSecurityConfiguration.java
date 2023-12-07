@@ -19,8 +19,6 @@ public class DefaultContainerSecurityConfiguration extends DefaultAuthnAndTrustC
 	private boolean sslEnabled;
 	private boolean accessControlEnabled;
 	private UnicoreXPDP pdp;
-	private IAttributeSource aip;
-	private IDynamicAttributeSource dap;
 	private String[] defaultVOs;
 	private boolean signingRequired;
 	private boolean gatewayAuthnEnabled;
@@ -63,15 +61,6 @@ public class DefaultContainerSecurityConfiguration extends DefaultAuthnAndTrustC
 	
 	public void setPdp(UnicoreXPDP pdp) {
 		this.pdp = pdp;
-	}
-	
-	@Override
-	public IAttributeSource getAip() {
-		return aip;
-	}
-	
-	public void setAip(IAttributeSource aip) {
-		this.aip = aip;
 	}
 	
 	@Override
@@ -185,15 +174,6 @@ public class DefaultContainerSecurityConfiguration extends DefaultAuthnAndTrustC
 		return isAccessControlEnabled();
 	}
 
-	public void setDap(IDynamicAttributeSource dap) {
-		this.dap = dap;
-	}
-	
-	@Override
-	public IDynamicAttributeSource getDap() {
-		return dap;
-	}
-	
 	@Override
 	public boolean isSessionsEnabled(){
 		return sessionsEnabled;

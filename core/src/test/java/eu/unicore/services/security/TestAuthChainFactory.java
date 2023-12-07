@@ -23,7 +23,6 @@ import eu.unicore.services.Kernel;
 import eu.unicore.services.security.util.AttributeSourceConfigurator;
 import eu.unicore.services.security.util.AttributeSourcesChain;
 import eu.unicore.services.security.util.BaseAttributeSourcesChain.CombiningPolicy;
-import eu.unicore.services.security.util.BaseAttributeSourcesChain.FirstApplicable;
 import eu.unicore.util.configuration.ConfigurationException;
 import junit.framework.TestCase;
 
@@ -32,12 +31,12 @@ public class TestAuthChainFactory extends TestCase{
 	public void testNoConfigCase()throws Exception{
 		Properties props = getDefaultConfig();
 		props.setProperty(PREFIX+PROP_CHECKACCESS, "false");
-		ContainerSecurityProperties k = new ContainerSecurityProperties(props);
-		IAttributeSource a = k.getAip();
+		Kernel k = new Kernel(props);
+		IAttributeSource a = k.getSecurityManager().getAip();
 		assertNotNull(a);
 		assertTrue(a instanceof NullAttributeSource);
 	}
-	
+
 	public void testConfigureAuthoriser()throws Exception{
 		Properties props = new Properties();
 		props.put(PREFIX+PROP_AIP_ORDER,"TEST1");
@@ -45,31 +44,31 @@ public class TestAuthChainFactory extends TestCase{
 		props.put(PREFIX+PROP_AIP_PREFIX+".TEST1.Foo","FooParam");
 		props.put(PREFIX+PROP_AIP_PREFIX+".TEST1.Bar","1234");
 		props.put(PREFIX+PROP_AIP_PREFIX+".TEST1.Flag","true");
-		IAttributeSource a=AttributeSourceConfigurator.configureAttributeSource("TEST1", PROP_AIP_PREFIX, props);
-		assertNotNull(a);
+		IAttributeSourceBase ab=AttributeSourceConfigurator.configureAS("TEST1", PROP_AIP_PREFIX, props);
+		assertNotNull(ab);
+		IAttributeSource a = (IAttributeSource)ab;
 		assertTrue(a instanceof TestAuthZ);
 		TestAuthZ ta=(TestAuthZ)a;
 		assertEquals("FooParam",ta.getFoo());
 		assertEquals(1234,ta.getBar());
 		assertTrue(ta.isFlag());
 	}
-	
+
 	public void testChain()throws Exception{
 		Properties props = getDefaultConfig();
 		props.setProperty(PREFIX+PROP_CHECKACCESS, "false");
 		props.put(PREFIX+PROP_AIP_ORDER,"TEST2 TEST1");
 		props.put(PREFIX+PROP_AIP_PREFIX+".TEST1.class",TestAuthZ.class.getName());
 		props.put(PREFIX+PROP_AIP_PREFIX+".TEST2.class",TestAuthZ2.class.getName());
-
-		ContainerSecurityProperties k = new ContainerSecurityProperties(props);
-		IAttributeSource a=k.getAip();
+		Kernel k = new Kernel(props);
+		IAttributeSource a = k.getSecurityManager().getAip();
 		assertNotNull(a);
 		assertTrue(a instanceof AttributeSourcesChain);
 		AttributeSourcesChain chain=(AttributeSourcesChain)a;
-		a.start(new Kernel(TestConfigUtil.getInsecureProperties()));
 		
 		List<IAttributeSource>authZChain=chain.getChain();
 		assertEquals(3, authZChain.size());
+		System.out.println(authZChain);
 		assertTrue(authZChain.get(1) instanceof TestAuthZ2);
 		assertTrue(authZChain.get(2) instanceof TestAuthZ);
 	}
@@ -80,21 +79,20 @@ public class TestAuthChainFactory extends TestCase{
 		props.put(PREFIX+PROP_AIP_ORDER,"TEST TEST1");
 		props.put(PREFIX+PROP_AIP_PREFIX+".TEST1.class",TestAuthZ.class.getName());
 		props.put(PREFIX+PROP_AIP_PREFIX+".TEST.class",TestAuthZ2.class.getName());
-		props.put(PREFIX+PROP_AIP_COMBINING_POLICY,AttributeSourcesChain.FirstApplicable.NAME);
-		ContainerSecurityProperties k = new ContainerSecurityProperties(props);
-		IAttributeSource a=k.getAip();
+		props.put(PREFIX+PROP_AIP_COMBINING_POLICY, "FIRST_APPLICABLE");
+		Kernel k = new Kernel(props);
+		IAttributeSource a = k.getSecurityManager().getAip();
 		assertNotNull(a);
 		assertTrue(a instanceof AttributeSourcesChain);
-		a.start(new Kernel(TestConfigUtil.getInsecureProperties()));
-		
+
 		AttributeSourcesChain chain=(AttributeSourcesChain)a;
 		List<IAttributeSource>authZChain=chain.getChain();
 		assertEquals(3, authZChain.size());
 		assertTrue(authZChain.get(0) instanceof TestAuthZ2);
 		assertTrue(authZChain.get(1) instanceof TestAuthZ);
-		assertTrue(chain.getCombiningPolicy() instanceof FirstApplicable);
+		assertTrue(chain.getCombiningPolicy() == AttributeSourcesChain.FIRST_APPLICABLE);
 	}
-	
+
 	public void testChainCustomCombiningPolicy()throws Exception{
 		Properties props = getDefaultConfig();
 		props.setProperty(PREFIX+PROP_CHECKACCESS, "false");
@@ -102,11 +100,11 @@ public class TestAuthChainFactory extends TestCase{
 		props.put(PREFIX+PROP_AIP_PREFIX+".TEST1.class",TestAuthZ.class.getName());
 		props.put(PREFIX+PROP_AIP_PREFIX+".TEST2.class",TestAuthZ2.class.getName());
 		props.put(PREFIX+PROP_AIP_COMBINING_POLICY,TestPolicy.class.getName());
-		ContainerSecurityProperties k = new ContainerSecurityProperties(props);
-		IAttributeSource a=k.getAip();
+		Kernel k = new Kernel(props);
+		IAttributeSource a = k.getSecurityManager().getAip();
+		
 		assertNotNull(a);
 		assertTrue(a instanceof AttributeSourcesChain);
-		a.start(new Kernel(TestConfigUtil.getInsecureProperties()));
 
 		AttributeSourcesChain chain=(AttributeSourcesChain)a;
 		List<IAttributeSource>authZChain=chain.getChain();
@@ -115,9 +113,9 @@ public class TestAuthChainFactory extends TestCase{
 		assertTrue(authZChain.get(1) instanceof TestAuthZ);
 		assertTrue(chain.getCombiningPolicy() instanceof TestPolicy);
 	}
-	
+
 	public void testMergePolicy(){
-		CombiningPolicy m=new AttributeSourcesChain.Merge();
+		CombiningPolicy m = AttributeSourcesChain.MERGE;
 		String[] a1=new String[]{"foo","bar"};
 		String[] a2=new String[]{"spam","ham"};
 		Map<String,String[]>master = new HashMap<>();
@@ -136,12 +134,12 @@ public class TestAuthChainFactory extends TestCase{
 		xacmlAttributes2.add(new XACMLAttribute("a1", "http://host2", Type.ANYURI));
 		xacmlAttributes2.add(new XACMLAttribute("a2", "v5", Type.STRING));
 		xacmlAttributes2.add(new XACMLAttribute("a3", "v1", Type.STRING));
-		
+
 		SubjectAttributesHolder masterH = new SubjectAttributesHolder(master, master);
 		masterH.setXacmlAttributes(xacmlAttributes1);
 		SubjectAttributesHolder newH = new SubjectAttributesHolder(newAttributes, newAttributes);
 		newH.setXacmlAttributes(xacmlAttributes2);
-		
+
 		m.combineAttributes(masterH, newH);
 		String[]x=masterH.getValidIncarnationAttributes().get("test");
 		assertEquals(4,x.length);
@@ -156,7 +154,7 @@ public class TestAuthChainFactory extends TestCase{
 		String s2=String.valueOf(Arrays.asList(x2));
 		assertTrue(s2.contains("ham"));
 		assertTrue(s2.contains("spam"));
-		
+
 		List<XACMLAttribute> x3 = masterH.getXacmlAttributes();
 		assertTrue("Size of XACML attribtues is not 7: " + x3.size(), x3.size() == 7);
 		assertTrue(x3.contains(xacmlAttributes1.get(0)));
@@ -167,9 +165,9 @@ public class TestAuthChainFactory extends TestCase{
 		assertTrue(x3.contains(xacmlAttributes2.get(2)));
 		assertTrue(x3.contains(xacmlAttributes2.get(3)));
 	}
-	
+
 	public void testMergeOverridesPolicy(){
-		CombiningPolicy m=new AttributeSourcesChain.MergeLastOverrides();
+		CombiningPolicy m = AttributeSourcesChain.MERGE_LAST_OVERRIDES;
 		String[] a1=new String[]{"foo","bar"};
 		String[] a2=new String[]{"spam","ham"};
 		Map<String,String[]>master = new HashMap<>();
@@ -188,9 +186,9 @@ public class TestAuthChainFactory extends TestCase{
 		assertTrue(s.contains("ham"));
 		assertTrue(s.contains("spam"));
 	}
-	
+
 	public void testFirstApplicablePolicy(){
-		CombiningPolicy m=new AttributeSourcesChain.FirstApplicable();
+		CombiningPolicy m = AttributeSourcesChain.FIRST_APPLICABLE;
 		String[] a1=new String[]{"foo","bar"};
 		String[] a2=new String[]{"spam","ham"};
 		Map<String,String[]>master = new HashMap<>();
@@ -209,7 +207,7 @@ public class TestAuthChainFactory extends TestCase{
 		assertFalse(s.contains("ham"));
 		assertFalse(s.contains("spam"));
 	}
-	
+
 	public void testFirstAccessiblePolicy() throws Exception {
 		Properties props = getDefaultConfig();
 		props.setProperty(PREFIX+PROP_CHECKACCESS, "false");
@@ -217,12 +215,11 @@ public class TestAuthChainFactory extends TestCase{
 		props.put(PREFIX+PROP_AIP_PREFIX+".TEST1.class",TestAuthZError.class.getName());
 		props.put(PREFIX+PROP_AIP_PREFIX+".TEST2.class",TestAuthZSingle1.class.getName());
 		props.put(PREFIX+PROP_AIP_PREFIX+".TEST3.class",TestAuthZSingle2.class.getName());
-		props.put(PREFIX+PROP_AIP_COMBINING_POLICY, AttributeSourcesChain.FirstAccessible.NAME);
-		ContainerSecurityProperties k = new ContainerSecurityProperties(props);
-		IAttributeSource chain = k.getAip();
-		chain.start(new Kernel(TestConfigUtil.getInsecureProperties()));
+		props.put(PREFIX+PROP_AIP_COMBINING_POLICY, "FIRST_ACCESSIBLE");
+		Kernel k = new Kernel(props);
+		IAttributeSource chain = k.getSecurityManager().getAip();
+		
 		SubjectAttributesHolder newAttributes;
-
 		newAttributes = chain.getAttributes(new SecurityTokens(), new SubjectAttributesHolder());
 		String[]x = newAttributes.getValidIncarnationAttributes().get("test");
 		assertEquals(2,x.length);
@@ -234,133 +231,106 @@ public class TestAuthChainFactory extends TestCase{
 	}
 
 	private Properties prepareProperties() {
-		Properties props=new Properties();
+		Properties props = getDefaultConfig();
 		props.setProperty(PREFIX+PROP_CHECKACCESS, "false");
 		props.put(PREFIX+PROP_AIP_ORDER,"CHAIN TEST");
-		props.put(PREFIX+PROP_AIP_COMBINING_POLICY, 
-			AttributeSourcesChain.MergeLastOverrides.NAME);
+		props.put(PREFIX+PROP_AIP_COMBINING_POLICY, "MERGE_LAST_OVERRIDES");
 		props.put(PREFIX+PROP_AIP_PREFIX+".CHAIN.class", 
-			AttributeSourcesChain.class.getName());
-		props.put(PREFIX+PROP_AIP_PREFIX+".CHAIN.combiningPolicy", 
-			AttributeSourcesChain.FirstAccessible.NAME);
+				AttributeSourcesChain.class.getName());
+		props.put(PREFIX+PROP_AIP_PREFIX+".CHAIN.combiningPolicy", "FIRST_ACCESSIBLE");
 		props.put(PREFIX+PROP_AIP_PREFIX+".CHAIN.order", 
-			"SUB-T1 SUB-T2");
+				"SUB-T1 SUB-T2");
 		return props;
 	}
-	
-	public void testChainedPolicy1(){
-		try
-		{
-			Properties props=prepareProperties();
-			addDefaultConfig(props);
-			props.put(PREFIX+PROP_AIP_PREFIX+".SUB-T1.class",
-				TestAuthZError.class.getName());
-			props.put(PREFIX+PROP_AIP_PREFIX+".SUB-T2.class",
-				TestAuthZSingle2.class.getName());
-			props.put(PREFIX+PROP_AIP_PREFIX+".TEST.class", 
-				TestAuthZSingle1.class.getName());
-			ContainerSecurityProperties k = new ContainerSecurityProperties(props);
-			IAttributeSource chain=k.getAip();
-			chain.start(new Kernel(TestConfigUtil.getInsecureProperties()));
-			
-			SubjectAttributesHolder newAttributes;
 
-			newAttributes = chain.getAttributes(new SecurityTokens(), new SubjectAttributesHolder());
-			String[]x=newAttributes.getValidIncarnationAttributes().get("test");
-			assertTrue(x != null);
-			assertEquals(2,x.length);
-			String s=String.valueOf(Arrays.asList(x));
-			assertTrue(s.contains("bar"));
-			assertTrue(s.contains("foo"));
-			assertFalse(s.contains("ham"));
-			assertFalse(s.contains("spam"));
-		} catch (Exception e)
-		{
-			fail("Exception in AttrSourcesChain: " + e);
-		}
-	}
-	
-	public void testChainedPolicy2(){
-		try
-		{
-			Properties props=prepareProperties();
-			addDefaultConfig(props);
-			props.put(PREFIX+PROP_AIP_PREFIX+".SUB-T1.class",
-				TestAuthZSingle1.class.getName());
-			props.put(PREFIX+PROP_AIP_PREFIX+".SUB-T2.class",
-				TestAuthZSingle2.class.getName());
-			props.put(PREFIX+PROP_AIP_PREFIX+".TEST.class", 
+	public void testChainedPolicy1() throws Exception {
+		Properties props=prepareProperties();
+		addDefaultConfig(props);
+		props.put(PREFIX+PROP_AIP_PREFIX+".SUB-T1.class",
 				TestAuthZError.class.getName());
-			ContainerSecurityProperties k = new ContainerSecurityProperties(props);
-			IAttributeSource chain=k.getAip();
-			chain.start(new Kernel(TestConfigUtil.getInsecureProperties()));
-			
-			SubjectAttributesHolder newAttributes;
-
-			newAttributes = chain.getAttributes(new SecurityTokens(), new SubjectAttributesHolder());
-			String[]x=newAttributes.getValidIncarnationAttributes().get("test");
-			assertTrue(x != null);
-			assertEquals(2,x.length);
-			String s=String.valueOf(Arrays.asList(x));
-			assertTrue(s.contains("bar"));
-			assertTrue(s.contains("foo"));
-			assertFalse(s.contains("ham"));
-			assertFalse(s.contains("spam"));
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-			fail("Exception in AttrSourcesChain: " + e);
-		}
+		props.put(PREFIX+PROP_AIP_PREFIX+".SUB-T2.class",
+				TestAuthZSingle2.class.getName());
+		props.put(PREFIX+PROP_AIP_PREFIX+".TEST.class", 
+				TestAuthZSingle1.class.getName());
+		Kernel k = new Kernel(props);
+		IAttributeSource chain = k.getSecurityManager().getAip();
+		
+		SubjectAttributesHolder newAttributes = chain.getAttributes(
+				new SecurityTokens(), new SubjectAttributesHolder());
+		String[]x=newAttributes.getValidIncarnationAttributes().get("test");
+		assertTrue(x != null);
+		assertEquals(2,x.length);
+		String s=String.valueOf(Arrays.asList(x));
+		assertTrue(s.contains("bar"));
+		assertTrue(s.contains("foo"));
+		assertFalse(s.contains("ham"));
+		assertFalse(s.contains("spam"));
 	}
 
-	public void testChainedPolicy3(){
-		try
-		{
-			Properties props=prepareProperties();
-			addDefaultConfig(props);
-			props.put(PREFIX+PROP_AIP_PREFIX+".SUB-T1.class",
+	public void testChainedPolicy2() throws Exception {
+		Properties props=prepareProperties();
+		addDefaultConfig(props);
+		props.put(PREFIX+PROP_AIP_PREFIX+".SUB-T1.class",
 				TestAuthZSingle1.class.getName());
-			props.put(PREFIX+PROP_AIP_PREFIX+".SUB-T2.class",
+		props.put(PREFIX+PROP_AIP_PREFIX+".SUB-T2.class",
 				TestAuthZSingle2.class.getName());
-			props.put(PREFIX+PROP_AIP_PREFIX+".TEST.class", 
+		props.put(PREFIX+PROP_AIP_PREFIX+".TEST.class", 
+				TestAuthZError.class.getName());
+		Kernel k = new Kernel(props);
+		IAttributeSource chain = k.getSecurityManager().getAip();
+		
+		SubjectAttributesHolder newAttributes = chain.getAttributes(
+				new SecurityTokens(), new SubjectAttributesHolder());
+		String[]x=newAttributes.getValidIncarnationAttributes().get("test");
+		assertTrue(x != null);
+		assertEquals(2,x.length);
+		String s=String.valueOf(Arrays.asList(x));
+		assertTrue(s.contains("bar"));
+		assertTrue(s.contains("foo"));
+		assertFalse(s.contains("ham"));
+		assertFalse(s.contains("spam"));
+	}
+
+	public void testChainedPolicy3() throws Exception {
+		Properties props=prepareProperties();
+		addDefaultConfig(props);
+		props.put(PREFIX+PROP_AIP_PREFIX+".SUB-T1.class",
+				TestAuthZSingle1.class.getName());
+		props.put(PREFIX+PROP_AIP_PREFIX+".SUB-T2.class",
+				TestAuthZSingle2.class.getName());
+		props.put(PREFIX+PROP_AIP_PREFIX+".TEST.class", 
 				TestAuthZSingle3.class.getName());
 
-			ContainerSecurityProperties k = new ContainerSecurityProperties(props);
-			IAttributeSource chain=k.getAip();
-			chain.start(new Kernel(TestConfigUtil.getInsecureProperties()));
-			
-			SubjectAttributesHolder newAttributes;
-
-			newAttributes = chain.getAttributes(new SecurityTokens(), new SubjectAttributesHolder());
-			String[]x=newAttributes.getValidIncarnationAttributes().get("test");
-			assertTrue(x != null);
-			assertEquals(2,x.length);
-			String s=String.valueOf(Arrays.asList(x));
-			assertTrue(s.contains("bar"));
-			assertTrue(s.contains("foo"));
-			assertFalse(s.contains("ham"));
-			assertFalse(s.contains("spam"));
-			String[]x2=newAttributes.getValidIncarnationAttributes().get("testA");
-			assertTrue(x2 != null);
-			assertEquals(2,x2.length);
-			String s2=String.valueOf(Arrays.asList(x2));
-			assertTrue(s2.contains("ham"));
-			assertTrue(s2.contains("spam"));
-			assertFalse(s2.contains("foo"));
-			assertFalse(s2.contains("bar"));
-		} catch (Exception e)
-		{
-			fail("Exception in AttrSourcesChain: " + e);
-		}
+		Kernel k = new Kernel(props);
+		IAttributeSource chain=k.getSecurityManager().getAip();
+		
+		SubjectAttributesHolder newAttributes = chain.getAttributes(
+				new SecurityTokens(), new SubjectAttributesHolder());
+		String[]x=newAttributes.getValidIncarnationAttributes().get("test");
+		assertTrue(x != null);
+		assertEquals(2,x.length);
+		String s=String.valueOf(Arrays.asList(x));
+		assertTrue(s.contains("bar"));
+		assertTrue(s.contains("foo"));
+		assertFalse(s.contains("ham"));
+		assertFalse(s.contains("spam"));
+		String[]x2=newAttributes.getValidIncarnationAttributes().get("testA");
+		assertTrue(x2 != null);
+		assertEquals(2,x2.length);
+		String s2=String.valueOf(Arrays.asList(x2));
+		assertTrue(s2.contains("ham"));
+		assertTrue(s2.contains("spam"));
+		assertFalse(s2.contains("foo"));
+		assertFalse(s2.contains("bar"));
 	}
 
-	
+
 	//test class
 	public static class TestAuthZ implements IAttributeSource{
 		private String foo;
 		private int bar;
 		private boolean flag;
-		
+
 		public boolean isFlag() {
 			return flag;
 		}
@@ -384,19 +354,12 @@ public class TestAuthChainFactory extends TestCase{
 		public void setBar(int bar) {
 			this.bar = bar;
 		}
-		
-		@Override
-		public void configure(String name) throws ConfigurationException {}
 
 		@Override
-		public void start(Kernel kernel) throws Exception {}
-		
+		public void configure(String name, Kernel k) throws ConfigurationException {}
+
 		public SubjectAttributesHolder getAttributes(SecurityTokens tokens, SubjectAttributesHolder unused)	throws IOException, AuthorisationException {
 			return new SubjectAttributesHolder();
-		}
-
-		public String getStatusDescription() {
-			return "OK";
 		}
 
 		public String getName()	{
@@ -404,23 +367,16 @@ public class TestAuthChainFactory extends TestCase{
 		}
 
 	}
-	
+
 	//and another one
 	public static class TestAuthZ2 implements IAttributeSource{
 		@Override
-		public void configure(String name) throws ConfigurationException {}
+		public void configure(String name, Kernel k) throws ConfigurationException {}
 
-		@Override
-		public void start(Kernel kernel) throws Exception {}
-		
 		public SubjectAttributesHolder getAttributes(SecurityTokens tokens, SubjectAttributesHolder unused)	throws IOException, AuthorisationException {
 			return new SubjectAttributesHolder();
 		}
 
-		public String getStatusDescription() {
-			return "OK";
-		}
-		
 		public String getName()	{
 			return "TestAuthZ2";
 		}
@@ -428,21 +384,14 @@ public class TestAuthChainFactory extends TestCase{
 	}
 
 	public static class TestAuthZError implements IAttributeSource{
-		
-		@Override
-		public void configure(String name) throws ConfigurationException {}
 
 		@Override
-		public void start(Kernel kernel) throws Exception {}
-		
+		public void configure(String name, Kernel k) throws ConfigurationException {}
+
 		public SubjectAttributesHolder getAttributes(SecurityTokens tokens, SubjectAttributesHolder unused)	throws IOException, AuthorisationException {
 			throw new IOException();
 		}
 
-		public String getStatusDescription() {
-			return "OK";
-		}
-		
 		public String getName()	{
 			return "TestAuthZError";
 		}
@@ -450,23 +399,16 @@ public class TestAuthChainFactory extends TestCase{
 	}
 
 	public static class TestAuthZSingle1 implements IAttributeSource{
-		
-		@Override
-		public void configure(String name) throws ConfigurationException {}
 
 		@Override
-		public void start(Kernel kernel) throws Exception {}
-		
+		public void configure(String name, Kernel k) throws ConfigurationException {}
+
 		public SubjectAttributesHolder getAttributes(SecurityTokens tokens, SubjectAttributesHolder unused)	throws IOException, AuthorisationException {
 			Map<String, String[]> ret = new HashMap<String, String[]>();
 			ret.put("test", new String[] {"foo", "bar"});
 			return new SubjectAttributesHolder(ret, ret);
 		}
 
-		public String getStatusDescription() {
-			return "OK";
-		}
-		
 		public String getName()	{
 			return "TestAuthZSingle1";
 		}
@@ -475,11 +417,8 @@ public class TestAuthChainFactory extends TestCase{
 
 	public static class TestAuthZSingle2 implements IAttributeSource{
 		@Override
-		public void configure(String name) throws ConfigurationException {}
+		public void configure(String name, Kernel k) throws ConfigurationException {}
 
-		@Override
-		public void start(Kernel kernel) throws Exception {}
-		
 		public SubjectAttributesHolder getAttributes(SecurityTokens tokens, SubjectAttributesHolder unused)
 				throws IOException, AuthorisationException {
 			Map<String, String[]> ret = new HashMap<String, String[]>();
@@ -487,39 +426,28 @@ public class TestAuthChainFactory extends TestCase{
 			return new SubjectAttributesHolder(ret, ret);
 		}
 
-		public String getStatusDescription() {
-			return "OK";
-		}
-		
 		public String getName()	{
 			return "TestAuthZSingle2";
 		}
 	}
 
 	public static class TestAuthZSingle3 implements IAttributeSource{
-		
+
 		public SubjectAttributesHolder getAttributes(SecurityTokens tokens,SubjectAttributesHolder unused)
-			throws IOException, AuthorisationException {
+				throws IOException, AuthorisationException {
 			Map<String, String[]> ret = new HashMap<String, String[]>();
 			ret.put("testA", new String[] {"ham", "spam"});
 			return new SubjectAttributesHolder(ret, ret);
 		}
 
-		public String getStatusDescription() {
-			return "OK";
-		}
-		
 		public String getName()	{
 			return "TestAuthZSingle3";
 		}
-		
-		@Override
-		public void configure(String name) throws ConfigurationException {}
 
 		@Override
-		public void start(Kernel kernel) throws Exception {}
+		public void configure(String name, Kernel k) throws ConfigurationException {}
 	}
-	
+
 	//mock policy
 	public static class TestPolicy implements CombiningPolicy{
 		public boolean combineAttributes(SubjectAttributesHolder master, SubjectAttributesHolder newAttributes) {
@@ -529,7 +457,7 @@ public class TestAuthChainFactory extends TestCase{
 	}
 
 	private Properties getDefaultConfig() {
-		Properties props = new Properties();
+		Properties props = TestConfigUtil.getInsecureProperties();
 		addDefaultConfig(props);
 		return props;
 	}

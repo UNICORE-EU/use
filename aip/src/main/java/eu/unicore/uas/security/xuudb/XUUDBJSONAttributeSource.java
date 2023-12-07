@@ -12,7 +12,6 @@ import org.json.JSONObject;
 
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
-import eu.unicore.services.Kernel;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.util.Log;
@@ -23,21 +22,16 @@ import eu.unicore.util.Log;
  * @author schuller
  * @author golbi
  */
-public class XUUDBJSONAttributeSource extends XUUDBBase implements
+public class XUUDBJSONAttributeSource extends XUUDBBase<String> implements
 		IAttributeSource {
 
 	private String infoURL;
 
 	@Override
-	public void start(Kernel kernel) throws Exception {
-		this.kernel = kernel;
-		isEnabled = true;
-	}
-
-	@Override
-	protected void setupURL() {
-		xuudbURL = host + ":" + port + "/rest/xuudb/query/"+gcID;
+	protected String createEndpoint() {
 		infoURL = host + ":" + port + "/rest/xuudb/info";
+		xuudbURL = host + ":" + port + "/rest/xuudb/query/"+gcID;
+		return xuudbURL;
 	}
 
 	@Override

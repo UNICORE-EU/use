@@ -39,13 +39,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.logging.log4j.ThreadContext;
-
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.ISubSystem;
 import eu.unicore.services.Kernel;
+import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.IAttributeSourceBase;
+import eu.unicore.services.utils.Pair;
 import eu.unicore.util.configuration.ConfigurationException;
 
 /**
@@ -76,64 +76,28 @@ public abstract class BaseAttributeSourcesChain<T extends IAttributeSourceBase>
 implements IAttributeSourceBase, ISubSystem {
 
 	protected List<T> chain;
-	protected List<String> names;
 	protected String name;
 	protected String orderString;
-	protected String combinerName;
 	protected CombiningPolicy combiner;
 	protected Properties properties = null;
-	protected boolean started = false;
 	
 	protected final List<ExternalSystemConnector>externalConnections = new ArrayList<>();
 
+	protected void setup(Kernel kernel) {
+		ContainerSecurityProperties csp = kernel.getContainerSecurityConfiguration();
+		this.properties = csp.getRawProperties();
+	}	
 	/**
 	 * will configure all the aips in the chain
 	 */
 	@Override
-	public void configure(String name) throws ConfigurationException {
+	public void configure(String name, Kernel kernel) throws ConfigurationException {
 		this.name = name;
-		initOrder();
-		for(int i=0; i<chain.size(); i++){
-			ThreadContext.push(names.get(i));
-			try {
-				var aip = chain.get(i);
-				aip.configure(names.get(i));
-				if(aip instanceof ExternalSystemConnector) {
-					externalConnections.add((ExternalSystemConnector)aip);
-				}
-			} finally {
-				ThreadContext.pop();
-			}
-		}
-		initCombiningPolicy();
-	}
-	
-	/**
-	 * starts all aips in the chain
-	 */
-	@Override
-	public void start(Kernel kernel) throws Exception {
-		for(int i=0; i<chain.size(); i++){
-			ThreadContext.push(names.get(i));
-			try {
-				T aip = chain.get(i);
-				kernel.register(aip);
-				aip.start(kernel);
-			} finally {
-				ThreadContext.pop();
-			}
-		}
-		started = true;
-	}
-	
-	@Override
-	public void reloadConfig(Kernel kernel) {
-		// TODO
+		chain = createChain(kernel);
 	}
 	
 	@Override
 	public String getStatusDescription() {
-		assert started : "This object must be started before use.";
 		StringBuilder sb = new StringBuilder();
 		String newline = System.getProperty("line.separator");
 		if(chain.size()==0){
@@ -163,12 +127,10 @@ implements IAttributeSourceBase, ISubSystem {
 	}
 	
 	public List<T> getChain(){
-		assert started : "This object must be started before use.";
 		return Collections.unmodifiableList(chain);
 	}
 	
 	public CombiningPolicy getCombiningPolicy(){
-		assert started : "This object must be started before use.";
 		return combiner;
 	}
 	
@@ -189,24 +151,43 @@ implements IAttributeSourceBase, ISubSystem {
 		orderString = order;
 	}
 
-	public void setCombiningPolicy(String name) {
-		combinerName = name;
+	@SuppressWarnings("unchecked")
+	protected Pair<List<T>, List<String>> createChain(String cspPrefix, Kernel kernel) throws ConfigurationException {
+		List<T> newChain = new ArrayList<>();
+		List<String> newNames = new ArrayList<>();
+		if (orderString == null) {			
+			String nn = name == null ? "" : "." + name;
+			throw new ConfigurationException("Configuration inconsistent, " +
+					"need to define <" + cspPrefix + nn + ".order>");
+		}
+		String[] authzNames=orderString.split(" +");
+		for(String auth: authzNames){
+			T aip = (T)AttributeSourceConfigurator.configureAS(auth, 
+					cspPrefix, properties);
+			aip.configure(auth, kernel);
+			if(aip instanceof ExternalSystemConnector) {
+				externalConnections.add((ExternalSystemConnector)aip);
+			}
+			newChain.add(aip);
+			newNames.add(auth);
+		}
+		return new Pair<>(newChain, newNames);
 	}
-	
-	protected abstract void initOrder() throws ConfigurationException;
-	
-	private void initCombiningPolicy() throws ConfigurationException {
-		if(MergeLastOverrides.NAME.equalsIgnoreCase(combinerName)){
-			combiner=new BaseAttributeSourcesChain.MergeLastOverrides();
+
+	protected abstract List<T> createChain(Kernel kernel);
+
+	public void setCombiningPolicy(String combinerName) throws ConfigurationException {
+		if("MERGE_LAST_OVERRIDES".equalsIgnoreCase(combinerName)){
+			combiner = BaseAttributeSourcesChain.MERGE_LAST_OVERRIDES;
 		}
-		else if(Merge.NAME.equalsIgnoreCase(combinerName)){
-			combiner=new BaseAttributeSourcesChain.Merge();
+		else if("MERGE".equalsIgnoreCase(combinerName)){
+			combiner = BaseAttributeSourcesChain.MERGE;
 		}
-		else if(FirstApplicable.NAME.equalsIgnoreCase(combinerName)){
-			combiner=new BaseAttributeSourcesChain.FirstApplicable();
+		else if("FIRST_APPLICABLE".equalsIgnoreCase(combinerName)){
+			combiner = BaseAttributeSourcesChain.FIRST_APPLICABLE;
 		}
-		else if(FirstAccessible.NAME.equalsIgnoreCase(combinerName)){
-			combiner=new BaseAttributeSourcesChain.FirstAccessible();
+		else if("FIRST_ACCESSIBLE".equalsIgnoreCase(combinerName)){
+			combiner = BaseAttributeSourcesChain.FIRST_ACCESSIBLE;
 		}
 		else{
 			try{
@@ -239,8 +220,8 @@ implements IAttributeSourceBase, ISubSystem {
 	/**
 	 * first applicable: only the first not empty map of attributes is used
 	 */
-	public static class FirstApplicable implements CombiningPolicy {
-		public static final String NAME = "FIRST_APPLICABLE";
+	public static final CombiningPolicy FIRST_APPLICABLE = new CombiningPolicy() {
+
 		public boolean combineAttributes(SubjectAttributesHolder master, SubjectAttributesHolder newAttributes){
 			//shouldn't happen but check anyway
 			if (master.isPresent()) {
@@ -252,18 +233,17 @@ implements IAttributeSourceBase, ISubSystem {
 				return false;
 			}
 		}
-		
+
 		public String toString(){
-			return NAME;
+			return "FIRST_APPLICABLE";
 		}
-	}
+	};
 
 	/**
 	 * first accessible: the answer from the first accessible attribute source is used. It is
 	 * assumed that AttributeSource throws an exception when there is communication error.
 	 */
-	public static class FirstAccessible implements CombiningPolicy{
-		public static final String NAME = "FIRST_ACCESSIBLE"; 
+	public static final CombiningPolicy FIRST_ACCESSIBLE = new CombiningPolicy() {
 		public boolean combineAttributes(SubjectAttributesHolder master, SubjectAttributesHolder newAttributes){
 			//shouldn't happen but check anyway
 			if(master.isPresent()) {
@@ -275,25 +255,25 @@ implements IAttributeSourceBase, ISubSystem {
 		}
 		
 		public String toString(){
-			return NAME;
+			return "FIRST_ACCESSIBLE";
 		}
-	}
+	};
 
 	
 	/**
 	 * merge_last_overrides:  new attributes overwrite existing ones
 	 */
-	public static class MergeLastOverrides implements CombiningPolicy{
-		public static final String NAME = "MERGE_LAST_OVERRIDES"; 
+	public static final CombiningPolicy MERGE_LAST_OVERRIDES = new CombiningPolicy() {
+
 		public boolean combineAttributes(SubjectAttributesHolder master, SubjectAttributesHolder newAttributes){
 			master.addAllOverwritting(newAttributes);
 			return true;
 		}
-		
+
 		public String toString(){
-			return NAME;
+			return "MERGE_LAST_OVERRIDES";
 		}
-	}
+	};
 	
 	/**
 	 * Merge:  attributes with the same key are combined (values are added).
@@ -303,18 +283,17 @@ implements IAttributeSourceBase, ISubSystem {
 	 * default values obtained from AS of incarnation attributes the same policy is 
 	 * used as in MERGE_LAST_OVERRIDS. 
 	 */
-	public static class Merge implements CombiningPolicy{
-		public static final String NAME = "MERGE"; 
-			
+	public static final CombiningPolicy MERGE = new CombiningPolicy (){
+
 		public boolean combineAttributes(SubjectAttributesHolder master, SubjectAttributesHolder newAttributes){
 			master.addAllMerging(newAttributes);
 			return true;
 		}
-		
+
 		public String toString(){
-			return NAME;
+			return "MERGE";
 		}
-	}
+	};
 
 	@Override
 	public String getName()

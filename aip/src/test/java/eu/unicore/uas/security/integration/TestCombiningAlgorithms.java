@@ -34,7 +34,7 @@ public class TestCombiningAlgorithms extends TestCase
 	{
 		Properties ret = new Properties();
 		ret.setProperty(PREFIX+ContainerSecurityProperties.PROP_CHECKACCESS_PDP, "eu.unicore.uas.security.integration.MockPDP");
-		
+
 		ret.setProperty(PREFIX+PROP_AIP_ORDER, "LDAP VO-PULL XUUDB FILE");
 		//ret.setProperty(PREFIX+PROP_AIP_ORDER, "FILE");
 		ret.setProperty(PREFIX+PROP_AIP_COMBINING_POLICY, "FIRST_ACCESSIBLE");
@@ -50,7 +50,7 @@ public class TestCombiningAlgorithms extends TestCase
 
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".VO-PULL.class", SAMLAttributeSource.class.getName());
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".VO-PULL.configurationFile", "src/test/resources/vo-pull.config");
-		
+
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".XUUDB.class", XUUDBAttributeSource.class.getName());
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".XUUDB.xuudbHost", "http://localhost");
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".XUUDB.xuudbPort", "62998");
@@ -58,10 +58,10 @@ public class TestCombiningAlgorithms extends TestCase
 
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".FILE.class", FileAttributeSource.class.getName());
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".FILE.file", "src/test/resources/file/testUudb-demouser.xml");
-		
+
 		return ret;
 	}
-	
+
 	protected static DefaultClientConfiguration getClientCfg() throws Exception
 	{
 		DefaultClientConfiguration sec = new DefaultClientConfiguration();
@@ -75,37 +75,30 @@ public class TestCombiningAlgorithms extends TestCase
 		sec.getHttpClientProperties().setProperty(HttpClientProperties.CONNECT_TIMEOUT, "5000");
 		return sec;
 	}
-	
+
 	/**
 	 * Tests whether first accessible works in the chain:
 	 * LDAP UVOS-Pull XUUDB File
 	 * where 3 first have inaccessible server configured.
 	 */
 	public void testFirstAccessible() throws Exception {
-		try
-		{
-			kernel= new Kernel("src/test/resources/use.properties", getProperties());
-			kernel.startSynchronous();
-			DefaultClientConfiguration sec = getClientCfg();
-			
-			String userDN = sec.getCredential().getCertificate().getSubjectX500Principal().getName();
-			assertTrue(userDN.contains("Demo User"));
-		
-			IAttributeSource aip = kernel.getContainerSecurityConfiguration().getAip();
-			SecurityTokens st = new SecurityTokens();
-			st.setUserName(userDN);
-			st.setConsignorTrusted(true);
-			SubjectAttributesHolder sah = aip.getAttributes(st, new SubjectAttributesHolder());
-			 
-			String [] rl = sah.getIncarnationAttributes().get("role");
-			assertTrue(rl!=null);
-			assertEquals("user", rl[0]);
-							
-			kernel.shutdown();
-		} catch(Exception e)
-		{
-			e.printStackTrace();
-			fail(e.toString());
-		}
+		kernel= new Kernel("src/test/resources/use.properties", getProperties());
+		kernel.startSynchronous();
+		DefaultClientConfiguration sec = getClientCfg();
+
+		String userDN = sec.getCredential().getCertificate().getSubjectX500Principal().getName();
+		assertTrue(userDN.contains("Demo User"));
+
+		IAttributeSource aip = kernel.getSecurityManager().getAip();
+		SecurityTokens st = new SecurityTokens();
+		st.setUserName(userDN);
+		st.setConsignorTrusted(true);
+		SubjectAttributesHolder sah = aip.getAttributes(st, new SubjectAttributesHolder());
+
+		String [] rl = sah.getIncarnationAttributes().get("role");
+		assertTrue(rl!=null);
+		assertEquals("user", rl[0]);
+
+		kernel.shutdown();
 	}
 }

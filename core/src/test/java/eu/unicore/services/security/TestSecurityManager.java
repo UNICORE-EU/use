@@ -18,7 +18,6 @@ import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.Xlogin;
 import eu.unicore.services.Kernel;
-import eu.unicore.services.security.util.AttributeSourcesChain;
 import eu.unicore.util.configuration.ConfigurationException;
 import junit.framework.TestCase;
 
@@ -50,7 +49,7 @@ public class TestSecurityManager extends TestCase {
 		dbooleanProperty = false;
 		dstringProperty = "";
 		dname = "";
-		Properties p = new Properties();
+		Properties p = TestConfigUtil.getInsecureProperties();
 		p.setProperty(PREFIX+PROP_CHECKACCESS, "false");
 		p.setProperty(PREFIX+PROP_AIP_PREFIX+"."+"A1.class", 
 				SimpleAIP.class.getName());
@@ -76,13 +75,8 @@ public class TestSecurityManager extends TestCase {
 		p.setProperty(PREFIX+PROP_DAP_PREFIX+"."+"A2.stringProperty", "test");
 		p.setProperty(PREFIX+PROP_DAP_ORDER, "A1 A2");
 		addDefaultConfig(p);
-		
-		ContainerSecurityProperties secProps = new ContainerSecurityProperties(p);
-		Kernel k = new Kernel(TestConfigUtil.getInsecureProperties());
-		secProps.getAip().start(k);
-		secProps.getDap().start(k);
-		SecurityManager secMan = new SecurityManager(secProps);
-		
+		Kernel k = new Kernel(p);
+		SecurityManager secMan = k.getSecurityManager();
 		SecurityTokens secTokens = new SecurityTokens();
 		SubjectAttributesHolder res = secMan.establishAttributes(secTokens);
 		Client client = new Client();
@@ -94,15 +88,15 @@ public class TestSecurityManager extends TestCase {
 		assertTrue(aInitCalled);
 		assertTrue(intProperty == 16);
 		assertTrue(booleanProperty);
-		assertTrue(stringProperty.equals("testtest"));
-		assertTrue("A1A2".equals(name));
+		assertEquals("testtest", stringProperty);
+		assertEquals("A1A2", name);
 
 		assertEquals(2, dcalls);
 		assertTrue(daInitCalled);
 		assertTrue(dintProperty == 16);
 		assertTrue(dbooleanProperty);
-		assertTrue(dstringProperty, dstringProperty.equals("testtest"));
-		assertTrue("A1A2".equals(dname));
+		assertEquals("testtest", dstringProperty);
+		assertEquals("A1A2", dname);
 		
 		assertEquals("dynamicUid", client.getSelectedXloginName());
 		assertEquals("dynamicGid", client.getXlogin().getGroup());
@@ -116,7 +110,7 @@ public class TestSecurityManager extends TestCase {
 		booleanProperty = false;
 		stringProperty = "";
 		name = "";
-		Properties p = new Properties();
+		Properties p = TestConfigUtil.getInsecureProperties();
 		p.setProperty(PREFIX+PROP_CHECKACCESS, "false");
 		p.setProperty(PREFIX+PROP_AIP_PREFIX+"."+"A1.class", 
 				SimpleAIP.class.getName());
@@ -130,12 +124,10 @@ public class TestSecurityManager extends TestCase {
 		p.setProperty(PREFIX+PROP_AIP_PREFIX+"."+"A2.stringProperty", "test");
 
 		p.setProperty(PREFIX+PROP_AIP_ORDER, "A1 A2");
-		p.setProperty(PREFIX+PROP_AIP_COMBINING_POLICY, 
-				AttributeSourcesChain.FirstAccessible.NAME);
+		p.setProperty(PREFIX+PROP_AIP_COMBINING_POLICY, "FIRST_ACCESSIBLE");
 		addDefaultConfig(p);
-		ContainerSecurityProperties secProps = new ContainerSecurityProperties(p);
-		secProps.getAip().start(new Kernel(TestConfigUtil.getInsecureProperties()));
-		SecurityManager secMan = new SecurityManager(secProps);
+		Kernel k = new Kernel(p);
+		SecurityManager secMan = k.getSecurityManager();
 		SubjectAttributesHolder res = secMan.establishAttributes(new SecurityTokens());
 		assertNotNull(res);
 		assertTrue(aInitCalled);
@@ -153,19 +145,11 @@ public class TestSecurityManager extends TestCase {
 
 	public static class SimpleAIP implements IAttributeSource {
 		@Override
-		public void configure(String n) throws ConfigurationException {
+		public void configure(String n, Kernel k) throws ConfigurationException {
 			name += n;
-		}
-
-		@Override
-		public void start(Kernel kernel) throws Exception {
 			aInitCalled = true;
 		}
 
-		public String getStatusDescription(){
-			return "OK";
-		}
-		
 		public void setIntProperty(int v) {
 			intProperty += v;
 		}
@@ -191,20 +175,13 @@ public class TestSecurityManager extends TestCase {
 	}
 
 	public static class SimpleDAP implements IDynamicAttributeSource {
-		@Override
-		public void configure(String n) throws ConfigurationException {
-			dname += n;
-		}
 
 		@Override
-		public void start(Kernel kernel) throws Exception {
+		public void configure(String n, Kernel k) throws ConfigurationException {
+			dname += n;
 			daInitCalled = true;
 		}
 
-		public String getStatusDescription(){
-			return "OK";
-		}
-		
 		public void setIntProperty(int v) {
 			dintProperty += v;
 		}
@@ -221,7 +198,7 @@ public class TestSecurityManager extends TestCase {
 		public SubjectAttributesHolder getAttributes(Client client,
 				SubjectAttributesHolder otherAuthoriserInfo)
 				throws IOException {
-			Map<String,String[]>res=new HashMap<String,String[]>();
+			Map<String,String[]>res = new HashMap<>();
 			if (dcalls == 0)
 			{
 				res.put(IAttributeSource.ATTRIBUTE_GROUP, new String[]{"dynamicGid"});

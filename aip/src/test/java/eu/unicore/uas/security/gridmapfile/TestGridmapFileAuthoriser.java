@@ -30,7 +30,7 @@ public class TestGridmapFileAuthoriser {
 		p.setProperty(PREFIX+PROP_AIP_PREFIX+".GMF.class", GridMapFileAttributeSource.class.getName());
 		p.setProperty(PREFIX+PROP_AIP_PREFIX+".GMF.file", "src/test/resources/gridmapfile/grid-mapfile");
 		Kernel k=new Kernel(p);
-		IAttributeSource attrSource=k.getContainerSecurityConfiguration().getAip();
+		IAttributeSource attrSource=k.getSecurityManager().getAip();
 		assertNotNull(attrSource);
 		AttributeSourcesChain chain=(AttributeSourcesChain)attrSource;
 		GridMapFileAttributeSource gmf=(GridMapFileAttributeSource)chain.getChain().get(1);

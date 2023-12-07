@@ -19,12 +19,10 @@ public class NullAttributeSource implements IAttributeSource, IDynamicAttributeS
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException		{
 		return new SubjectAttributesHolder();
 	}
+
 	@Override
-	public void configure(String name) throws ConfigurationException {
-	}
-	@Override
-	public void start(Kernel kernel) throws Exception {
-	}
+	public void configure(String name, Kernel kernel) throws ConfigurationException {}
+
 	@Override
 	public SubjectAttributesHolder getAttributes(Client client,
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException {

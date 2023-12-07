@@ -3,6 +3,7 @@ package eu.unicore.uas.security.xuudb;
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 
+import de.fzj.unicore.xuudb.interfaces.IPublic;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
@@ -26,12 +27,15 @@ public class TestXUUDBAuthoriser extends TestCase{
 	@Override
 	protected void setUp()throws Exception{
 		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
-		xuudb=new XUUDBAttributeSource();
-		xuudb.setXuudbCache(false);
 		mock=new MockXUUDB();
-		xuudb.setEndpoint(mock);
-		xuudb.configure("test");
-		xuudb.start(k);
+		xuudb=new XUUDBAttributeSource() {
+			@Override
+			protected IPublic createEndpoint() {
+				return mock;
+			}
+		};
+		xuudb.setXuudbCache(false);
+		xuudb.configure("test",k);
 	}
 
 	public void testCheckProxyDN()throws Exception{

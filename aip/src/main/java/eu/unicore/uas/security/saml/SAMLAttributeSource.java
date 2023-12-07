@@ -62,12 +62,8 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 	protected final CircuitBreaker cb = new CircuitBreaker();
 
 	@Override
-	public void configure(String name) throws ConfigurationException {
+	public void configure(String name, Kernel kernel) throws ConfigurationException {
 		initConfig(log, name);
-	}
-
-	@Override
-	public void start(Kernel kernel) throws Exception {
 		this.kernel=kernel;
 		try
 		{

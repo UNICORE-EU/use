@@ -16,9 +16,7 @@ import java.util.Properties;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.services.security.ContainerSecurityProperties;
-import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.IAttributeSourceBase;
-import eu.unicore.services.security.IDynamicAttributeSource;
 import eu.unicore.services.utils.Utilities;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
@@ -43,47 +41,24 @@ public class AttributeSourceConfigurator {
 		DEFAULTS.put("GRIDMAP-FILE", "eu.unicore.uas.security.gridmapfile.GridMapFileAttributeSource");
 		DEFAULTS.put("LDAP", "eu.unicore.uas.security.ldap.LDAPAttributeSource");
 	}
-
-	public static IAttributeSource configureAttributeSource(String name, String subPrefix, Properties properties) {
-		String dotName = ContainerSecurityProperties.PREFIX + subPrefix + "." + name + ".";
-		String clazz = properties.getProperty(dotName + "class");
-		clazz = handleOldOrMissingClass(clazz, name);
-		if (clazz==null)
-			throw new IllegalArgumentException("Inconsistent attribute sources chain definition: " +
-					"expected <"+dotName+"class> property with attribute source implementation.");
-		logger.debug("Creating attribute source {} served by class <{}>", name, clazz);
-		IAttributeSource auth;
-		try {
-			auth = (IAttributeSource)(Class.forName(clazz).getConstructor().newInstance());
-		} catch (Exception e) {
-			throw new ConfigurationException("Can't load attribute source implementation, configured as <" +
-					clazz + ">: " + e.toString(), e);
-		}
-		configureCommon(dotName, properties, auth);
-		return auth;
-	}
-
-	public static IDynamicAttributeSource configureDynamicAttributeSource(String name, String subPrefix, 
+	
+	@SuppressWarnings("unchecked")
+	public static <T extends IAttributeSourceBase> T configureAS(String name, String subPrefix, 
 			Properties properties) {
 		String dotName = ContainerSecurityProperties.PREFIX + subPrefix + "." + name + ".";
 		String clazz = properties.getProperty(dotName + "class");
 		if (clazz==null)
-			throw new IllegalArgumentException("Inconsistent dynamic attribute sources chain definition: " +
-					"expected <"+dotName+"class> property with dynamic attribute source implementation.");
-		logger.debug("Creating dynamic attribute source {} served by class <{}>", name, clazz);
-		IDynamicAttributeSource auth;
+			throw new IllegalArgumentException("Inconsistent (dynamic) attribute sources chain definition: " +
+					"expected <"+dotName+"class> property with (dynamic) attribute source implementation.");
+		logger.debug("Creating (dynamic) attribute source {} served by class <{}>", name, clazz);
+		clazz = handleOldOrMissingClass(clazz, name);
+		T auth;
 		try {
-			auth = (IDynamicAttributeSource)(Class.forName(clazz).getConstructor().newInstance());
+			auth = (T)(Class.forName(clazz).getConstructor().newInstance());
 		} catch (Exception e) {
 			throw new ConfigurationException("Can't load dynamic attribute source implementation, configured as <" +
 					clazz + ">: " + e.toString(), e);
 		}
-		configureCommon(dotName, properties, auth);
-		return auth;
-	}
-	
-	private static void configureCommon(String dotName, Properties properties, IAttributeSourceBase auth)
-	{
 		//find parameters for this attribute source
 		Map<String,String>params=new PropertyGroupHelper(properties, 
 			new String[]{dotName}).getFilteredMap();
@@ -100,6 +75,7 @@ public class AttributeSourceConfigurator {
 			} catch (Exception e) {
 				throw new RuntimeException("Bug: can't set properties on chain: " + e.toString(), e);
 			}
+		return auth;
 	}
 	
 	// accept older attribute source class names

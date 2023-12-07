@@ -3,6 +3,7 @@ package eu.unicore.uas.security.xuudb;
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 
+import de.fzj.unicore.xuudb.interfaces.IDynamicAttributesPublic;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.unicore.security.Client;
@@ -21,11 +22,14 @@ public class TestDAPAuthoriser extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		Kernel k = new Kernel(TestConfigUtil.getInsecureProperties());
-		xuudb = new XUUDBDynamicAttributeSource();
 		mock = new MockDAP();
-		xuudb.setDAPEndpoint(mock);
-		xuudb.configure("test");
-		xuudb.start(k);
+		xuudb = new XUUDBDynamicAttributeSource() {
+			@Override
+			protected IDynamicAttributesPublic createEndpoint() {
+				return mock;
+			}
+		};
+		xuudb.configure("test", k);
 	}
 
 	public void testGetAttr() throws Exception {

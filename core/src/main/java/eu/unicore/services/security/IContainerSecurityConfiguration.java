@@ -85,16 +85,6 @@ public interface IContainerSecurityConfiguration extends IAuthnAndTrustConfigura
 	 * @return the PDP configuration file path
 	 */
 	public String getPdpConfigurationFile();
-	
-	/**
-	 * @return the configured attribute source instance
-	 */
-	public IAttributeSource getAip();
-
-	/**
-	 * @return the configured dynamic attribute source instance
-	 */
-	public IDynamicAttributeSource getDap();
 
 	/**
 	 * @return array of default VOs in preference order. Might be empty.

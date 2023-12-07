@@ -31,12 +31,9 @@ public class AuthAttributesCollector implements IAttributeSource {
 	private boolean autoConfigured = false;
 
 	@Override
-	public void configure(String name) throws ConfigurationException {
+	public void configure(String name, Kernel k) throws ConfigurationException {
 		this.name = name;
 	}
-
-	@Override
-	public void start(Kernel kernel) throws Exception {}
 
 	@Override
 	public String getName() {

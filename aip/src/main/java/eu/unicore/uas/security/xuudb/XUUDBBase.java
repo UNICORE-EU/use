@@ -29,7 +29,7 @@ import eu.unicore.util.httpclient.HttpUtils;
  * @author schuller
  * @author golbi
  */
-public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemConnector {
+public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSystemConnector {
 
 	protected static final Logger logger = Log.getLogger(Log.SECURITY, XUUDBBase.class);
 
@@ -42,6 +42,7 @@ public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemC
 	protected String host;
 	protected Boolean cacheCredentials = Boolean.TRUE;
 	protected Kernel kernel;
+	protected T xuudb;
 
 	protected final CircuitBreaker cb = new CircuitBreaker();
 
@@ -64,8 +65,9 @@ public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemC
 	protected Status status = Status.UNKNOWN;
 	protected String statusMessage = "N/A";
 	
-	public void configure(String name) {
+	public void configure(String name, Kernel kernel) {
 		this.name = name;
+		this.kernel = kernel;
 		if (port == null)
 			port = DEFAULT_PORT;
 		if (host == null)
@@ -74,8 +76,12 @@ public abstract class XUUDBBase implements IAttributeSourceBase, ExternalSystemC
 		logger.info("Attribute source '{}': connecting to <{}>",
 				name, getXUUDBUrl());
 		initCache();
+		xuudb = createEndpoint();
+		isEnabled = xuudb!=null;
 	}
 
+	protected abstract T createEndpoint();
+	
 	protected void setupURL() {
 		xuudbURL = host + ":" + port + "/";
 	}

@@ -33,7 +33,7 @@
 package eu.unicore.services.security.util;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -41,10 +41,12 @@ import org.apache.logging.log4j.ThreadContext;
 import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
+import eu.unicore.services.Kernel;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.IAttributeSource;
+import eu.unicore.services.security.IAttributeSourceBase;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 
@@ -74,16 +76,40 @@ import eu.unicore.util.configuration.ConfigurationException;
  */
 public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeSource> implements IAttributeSource{
 
-	private final static Logger logger=Log.getLogger(Log.SECURITY, AttributeSourcesChain.class);
+	private final static Logger logger = Log.getLogger(Log.SECURITY, AttributeSourcesChain.class);
 	
+	public AttributeSourcesChain() {}
+	
+	public AttributeSourcesChain(Kernel kernel){
+		setup(kernel);
+	}
+
+	@Override
+	protected void setup(Kernel kernel) {
+		super.setup(kernel);
+		ContainerSecurityProperties csp = kernel.getContainerSecurityConfiguration();
+		setCombiningPolicy(csp.getAIPCombiningPolicy());
+		orderString = csp.getAIPOrder();
+		configure(null, kernel);
+	}
+
+	@Override
+	public void reloadConfig(Kernel kernel) {
+		ContainerSecurityProperties sp = kernel.getContainerSecurityConfiguration();
+		if(sp.getAIPDisableRuntimeUpdates()) {
+			logger.debug("Dynamic update of attribute sources is disabled, skipping");
+		}
+		else {
+			setup(kernel);
+		}
+	}
+
 	/**
 	 * combines results from all configured attribute sources
 	 */
 	@Override
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens, SubjectAttributesHolder initial)
 			throws IOException, AuthorisationException {
-		if (!started)
-			throw new IllegalStateException("This object must be started prior to be used.");
 		SubjectAttributesHolder resultMap = new SubjectAttributesHolder(initial.getPreferredVos());
 		for (IAttributeSource a: chain){
 			String name = a.getName();
@@ -112,38 +138,31 @@ public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeS
 	}
 
 	@Override
-	protected void initOrder() throws ConfigurationException {
-		chain = new ArrayList<>();
-		names = new ArrayList<>();
-		if (orderString == null) {			
-			String nn = name == null ? "" : "." + name;
-			throw new ConfigurationException("Configuration inconsistent, " +
-					"need to define <" + ContainerSecurityProperties.PROP_AIP_PREFIX + 
-					nn + ".order>");
-		}
-		String[] authzNames=orderString.split(" +");
-		
-		if (properties == null)
-			throw new IllegalStateException("Properties are null. Please set them using setProperties()");
-		
-		for(String auth: authzNames){
-			chain.add(AttributeSourceConfigurator.configureAttributeSource(auth, 
-					ContainerSecurityProperties.PROP_AIP_PREFIX, properties));
-			names.add(auth);
-		}
+	protected List<IAttributeSource> createChain(Kernel kernel) throws ConfigurationException {
+		assert combiner != null;
+		var p = super.createChain(ContainerSecurityProperties.PROP_AIP_PREFIX, kernel);
+		List<IAttributeSource> newChain = p.getM1();
+		List<String> newNames = p.getM2();
+		boolean needAAC = true;
 		// add AuthAttributesCollector if not already defined via config
-		for(IAttributeSource as: chain) {
-			if(as instanceof AuthAttributesCollector)return;
+		for(IAttributeSourceBase as: newChain) {
+			if(as instanceof AuthAttributesCollector) {
+				needAAC = false;
+				break;
+			}
 		}
-		if (MergeLastOverrides.NAME.equalsIgnoreCase(combinerName)){
-			AuthAttributesCollector aac = new AuthAttributesCollector();
-			aac.setAutoConfigured();
-			chain.add(0, aac);
-			names.add(0, "DEFAULT");
-		}else {
-			chain.add(new AuthAttributesCollector());
-			names.add("DEFAULT");
+		if(needAAC) {
+			if (combiner == MERGE_LAST_OVERRIDES){
+				AuthAttributesCollector aac = new AuthAttributesCollector();
+				aac.setAutoConfigured();
+				newChain.add(0, aac);
+				newNames.add(0, "DEFAULT");
+			}else {
+				newChain.add(new AuthAttributesCollector());
+				newNames.add("DEFAULT");
+			}
 		}
+		return newChain;
 	}
-	
+
 }

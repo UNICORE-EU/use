@@ -50,8 +50,7 @@ public class TestXUUDBServer {
 		xuudb.setXuudbGCID("TEST");
 		xuudb.setXuudbHost("http://localhost");
 		xuudb.setXuudbPort(14463);
-		xuudb.configure("test");
-		xuudb.start(k);
+		xuudb.configure("test", k);
 		xuudb.updateXUUDBConnectionStatus();
 		System.out.println("Status: " + xuudb.getConnectionStatusMessage());
 	}

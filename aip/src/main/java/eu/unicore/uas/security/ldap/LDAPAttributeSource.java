@@ -98,14 +98,9 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 	private String statusMessage;
 	
 	@Override
-	public void configure(String name) throws ConfigurationException
+	public void configure(String name, Kernel kernel) throws ConfigurationException
 	{
 		this.name = name;
-	}
-
-	@Override
-	public void start(Kernel kernel)
-	{
 		this.kernel = kernel;
 		ldapURL = host + ":" + port + "/" ;
 		logger.info("LDAP attribute source '{}': connecting to LDAP at <{}", name, ldapURL);

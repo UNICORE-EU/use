@@ -19,7 +19,6 @@ import de.fzj.unicore.xuudb.interfaces.IPublic;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.wsutil.client.WSClientFactory;
-import eu.unicore.services.Kernel;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.util.Log;
@@ -31,21 +30,8 @@ import eu.unicore.util.httpclient.IClientConfiguration;
  * @author schuller
  * @author golbi
  */
-public class XUUDBAttributeSource extends XUUDBBase implements
+public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 		IAttributeSource {
-
-	private IPublic xuudb;
-
-	@Override
-	public void start(Kernel kernel) throws Exception {
-		this.kernel = kernel;
-		xuudb = makeEndpoint();
-		isEnabled = xuudb!=null;
-	}
-
-	public void setEndpoint(IPublic xuudb) {
-		this.xuudb = xuudb;
-	}
 
 	@Override
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens,
@@ -202,9 +188,8 @@ public class XUUDBAttributeSource extends XUUDBBase implements
 		return res.toArray(new String[res.size()]);
 	}
 
-	protected synchronized IPublic makeEndpoint() {
-		if (xuudb != null)
-			return xuudb;
+	@Override
+	protected IPublic createEndpoint() {
 		try {
 			IClientConfiguration sec = kernel.getClientConfiguration();
 			return new WSClientFactory(sec).createPlainWSProxy(
