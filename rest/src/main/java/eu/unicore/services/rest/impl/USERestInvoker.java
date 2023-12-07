@@ -65,8 +65,7 @@ public class USERestInvoker extends JAXRSInvoker {
 
 	private synchronized void setupMetrics(){
 		if(callFrequency == null){
-			callFrequency=new Meter();
-			kernel.getMetricRegistry().register("use.rest.callFrequency",callFrequency);
+			callFrequency = (Meter)kernel.getMetrics().get("use.throughput");
 		}
 	}
 	

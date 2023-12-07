@@ -2,6 +2,9 @@ package eu.unicore.services;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
+
+import com.codahale.metrics.Metric;
 
 /**
  * used to show the status of some subsystem
@@ -37,8 +40,20 @@ public interface ISubSystem {
 	 */
 	default public void shutdown(Kernel kernel) throws Exception {}
 	
+	/**
+	 * get the current list of {@link ExternalSystemConnector} instances
+	 * for this subsystem (empty by default)
+	 */
 	default public Collection<ExternalSystemConnector> getExternalConnections(){
 		return Collections.emptyList();
+	}
+
+	/**
+	 * get the current map of {@link Metric} instances
+	 * for this subsystem (empty by default)
+	 */
+	default public Map<String, Metric> getMetrics(){
+		return Collections.emptyMap();
 	}
 
 }

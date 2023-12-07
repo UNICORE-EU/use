@@ -51,6 +51,7 @@ import eu.unicore.security.Role;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.Xlogin;
+import eu.unicore.services.ISubSystem;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Resource;
 import eu.unicore.services.impl.SecuredResourceImpl;
@@ -104,9 +105,9 @@ public final class SecurityManager {
 
 	public void start() {
 		this.aip = createAttributeSource(kernel);
-		kernel.register(aip);
+		if(aip instanceof ISubSystem)kernel.register((ISubSystem)aip);
 		this.dap = createDynamicAttributeSource(kernel);
-		kernel.register(dap);
+		if(dap instanceof ISubSystem)kernel.register((ISubSystem)dap);
 	}
 
 	public IAttributeSource getAip() {

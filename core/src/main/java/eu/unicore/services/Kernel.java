@@ -49,6 +49,8 @@ import java.util.ServiceLoader;
 
 import org.apache.logging.log4j.Logger;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 
 import eu.unicore.persist.PersistenceFactory;
@@ -324,12 +326,17 @@ public final class Kernel {
 		attributes.put(key, value);
 	}
 
-	public void register(Object candidate) {
-		if(candidate!=null && candidate instanceof ISubSystem) {
-			if(!subSystems.contains(candidate)) {
-				subSystems.add((ISubSystem)candidate);
-			}
+	public void register(ISubSystem sub) {
+		if(!subSystems.contains(sub)) {
+			subSystems.add(sub);
 		}
+		sub.getMetrics().entrySet().forEach(m -> { 
+			try {
+				metricRegistry.register(m.getKey(), m.getValue());
+			}catch(Exception ex) {
+				logger.error(ex);
+			}
+		});
 	}
 	
 	public void unregister(Class<?> type) {
@@ -458,8 +465,8 @@ public final class Kernel {
 		return persistenceManager;
 	}
 
-	public MetricRegistry getMetricRegistry() {
-		return metricRegistry;
+	public Map<String, Metric> getMetrics() {
+		return metricRegistry.getMetrics();
 	}
 
 	public final GatewayHandler getGatewayHandler(){
@@ -547,6 +554,8 @@ public final class Kernel {
 		deploymentManager=new DeploymentManager(this);
 		jetty = new JettyServer(this, jettyConfiguration);
 		metricRegistry.register("use.security.ServerIdentity",new CertificateInfoMetric(securityManager));
+		metricRegistry.register("use.throughput", new Meter());
+		
 		adminActions = AdminActionLoader.load();
 		gwHandler = new GatewayHandler(getContainerProperties(), getClientConfiguration(), 
 				containerSecurityConfiguration);
@@ -560,11 +569,20 @@ public final class Kernel {
 		initializeConfiguration(newProperties);
 		securityManager.setConfiguration(containerSecurityConfiguration);
 		for(UpdateableConfiguration uc: configurations) {
-			uc.setProperties(newProperties);
+			try{
+				uc.setProperties(newProperties);
+			}catch(Exception ex) {
+				logger.error("Error reloading <"+uc+">",ex);
+			}
 		}
 		for(ISubSystem sub: subSystems) {
-			sub.reloadConfig(this);
+			try{
+				sub.reloadConfig(this);
+			}catch(Exception ex) {
+				logger.error("Error reloading <"+sub.getName()+">",ex);
+			}
 		}
+		credentialReloaded();
 		logger.info(getConnectionStatus());
 	}
 

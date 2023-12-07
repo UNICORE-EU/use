@@ -39,7 +39,7 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 		if(auth==null){
 			auth = new AuthenticatorChain(k);
 			k.setAttribute(IAuthenticator.class, auth);
-			k.register(auth);
+			k.register((ISubSystem)auth);
 		}
 		return auth;
 	}

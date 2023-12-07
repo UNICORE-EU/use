@@ -50,7 +50,7 @@ public class Admin extends BaseRESTController {
 		status.put("upSince", String.valueOf(kernel.getUpSince().getTime()));
 		status.put("containerVersion", String.valueOf(Kernel.getVersion()));
 		status.put("connectionStatus", getConnectionStatus());
-		status.put("metrics",MetricUtils.getValues(kernel.getMetricRegistry()));
+		status.put("metrics",MetricUtils.getValues(kernel.getMetrics()));
 		return status;
 	}
 	
