@@ -7,11 +7,8 @@
  */
 package eu.unicore.uas.pdp.local;
 
-import java.util.Properties;
-
 import org.junit.Before;
 
-import eu.unicore.services.ContainerProperties;
 import eu.unicore.uas.pdp.AbstractPerformanceTester;
 
 public class HerasafPerformanceCheck extends AbstractPerformanceTester
@@ -19,9 +16,9 @@ public class HerasafPerformanceCheck extends AbstractPerformanceTester
 	@Before
 	public void setup() throws Exception
 	{
-		ContainerProperties baseProps = new ContainerProperties(new Properties(), false);
 		pdp = new LocalHerasafPDP();
-		pdp.initialize("src/test/resources/local/pdp2.conf", baseProps, null, null);
+		((LocalHerasafPDP)pdp).initialize("src/test/resources/local/pdp2.conf",
+				"http://test123.local");
 		threads = 5;
 		iterationsPerThread = 10000;
 		createStandardSetup();

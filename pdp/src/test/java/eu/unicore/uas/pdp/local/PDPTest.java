@@ -7,11 +7,8 @@
  */
 package eu.unicore.uas.pdp.local;
 
-import java.util.Properties;
-
 import org.junit.Before;
 
-import eu.unicore.services.ContainerProperties;
 import eu.unicore.uas.pdp.AbstractPDPTest;
 
 
@@ -20,9 +17,9 @@ public class PDPTest extends AbstractPDPTest
 	@Before
 	public void setUp() throws Exception
 	{
+		String f = "src/test/resources/local/pdp2.conf";
 		pdp = new LocalHerasafPDP();
-		ContainerProperties cp = new ContainerProperties(new Properties(), false);
-		pdp.initialize("src/test/resources/local/pdp2.conf", 
-			cp, null, null);
+		((LocalHerasafPDP)pdp).initialize(f, "http://test123.local");
+		((LocalHerasafPDP)pdp).lps.reload(f);
 	}
 }

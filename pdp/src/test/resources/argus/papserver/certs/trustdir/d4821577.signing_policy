@@ -1,4 +1,0 @@
-access_id_CA X509 '/C=EU/O=Testing Organization/CN=localhost ca'
-pos_rights globus CA:sign
-cond_subjects globus '"/C=EU/L=Testing City/O=Testing Organization/CN=localhost"'
-

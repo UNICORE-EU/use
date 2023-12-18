@@ -1,5 +1,0 @@
-resource ".*" { 
-   action "PutResourcePropertyDocument" {
-      rule permit { emi-role = "user" }
-   }
-}

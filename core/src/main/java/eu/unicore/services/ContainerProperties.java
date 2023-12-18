@@ -161,6 +161,11 @@ public class ContainerProperties extends PropertiesHelper {
 	public static final String EXTERNAL_REGISTRY_KEY = "externalregistry.url";
 
 	/**
+	 * whether to watch the config file and refresh configuration
+	 */
+	public static final String RUNTIME_CONFIG_REFRESH = "runtimeConfigurationUpdate";
+
+	/**
 	 * prefix for feature configuration
 	 */
 	public static final String FEATURE_KEY = "feature.";
@@ -169,10 +174,10 @@ public class ContainerProperties extends PropertiesHelper {
 
 
 	@DocumentationReferenceMeta
-	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
+	public final static Map<String, PropertyMD> META = new HashMap<>();
 	static
 	{
-		META.put(ON_STARTUP_SELFTEST, new PropertyMD("true").
+		META.put(ON_STARTUP_SELFTEST, new PropertyMD("true").setBoolean().
 				setDescription("Controls whether to run tests of connections to external services on startup."));
 		META.put(VSITE_NAME_PROPERTY, new PropertyMD("DEMO-SITE").setDescription(
 				"Short, human friendly, name of the target system, should be unique in the federation."));
@@ -245,6 +250,8 @@ public class ContainerProperties extends PropertiesHelper {
 
 		META.put(LOGGING_KEY, new PropertyMD("false").setBoolean().setCanHaveSubkeys().
 				setDescription("Append service name and set to 'true' to enable message logging for that service."));
+		META.put(RUNTIME_CONFIG_REFRESH, new PropertyMD("true").setBoolean().
+				setDescription("Whether the server refreshes its configuration at runtime whenever the main config file changes."));
 	}
 
 	protected static ThreadingServices threadingServices;

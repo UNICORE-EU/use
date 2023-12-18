@@ -37,7 +37,6 @@ import java.security.cert.X509Certificate;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
-import eu.unicore.services.security.pdp.UnicoreXPDP;
 
 /**
  * Interface extends {@link IAuthnAndTrustConfiguration} with container security 
@@ -74,12 +73,6 @@ public interface IContainerSecurityConfiguration extends IAuthnAndTrustConfigura
 	 * @return do we check access on the web service level (using PDP) for a particular service? 
 	 */
 	public boolean isAccessControlEnabled(String service);
-	
-	/**
-	 * @return the configured PDP instance, null can be returned only if {@link #isAccessControlEnabled()}
-	 * returns false
-	 */
-	public UnicoreXPDP getPdp();
 
 	/**
 	 * @return the PDP configuration file path

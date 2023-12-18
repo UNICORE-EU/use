@@ -10,7 +10,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.lang.reflect.Constructor;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,7 +30,6 @@ import eu.unicore.security.canl.CredentialProperties;
 import eu.unicore.security.canl.LoggingStoreUpdateListener;
 import eu.unicore.security.canl.TruststoreProperties;
 import eu.unicore.services.ContainerProperties;
-import eu.unicore.services.security.pdp.AcceptingPdp;
 import eu.unicore.services.security.pdp.UnicoreXPDP;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
@@ -65,7 +63,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 
 	/**
 	 * access control PDP class name 
-	 * (implementing <code>de.fzj.uas.security.XacmlPDP</code>)
+	 * (implementing <code>eu.unicore.services.security.pdp.UnicoreXPDP</code>)
 	 */
 	public static final String PROP_CHECKACCESS_PDP = "accesscontrol.pdp";
 	
@@ -276,6 +274,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		properties = new PropertiesHelper(PREFIX, source, META, propsLogger);
 		setSslEnabled(properties.getBooleanValue(PROP_SSL_ENABLED));
 		setAccessControlEnabled(properties.getBooleanValue(PROP_CHECKACCESS));
+		setPdpConfigurationFile(properties.getValue(PROP_CHECKACCESS_PDPCONFIG));
 		setSigningRequired(false);
 		setGatewayAuthnEnabled(properties.getBooleanValue(PROP_GATEWAY_AUTHN));
 		boolean credNeeded = isSslEnabled();
@@ -336,8 +335,6 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		setSessionsEnabled(properties.getBooleanValue(PROP_SESSIONS_ENABLED));
 		setSessionLifetime(properties.getLongValue(PROP_SESSIONS_LIFETIME));
 		setMaxSessionsPerUser(properties.getIntValue(PROP_SESSIONS_PERUSER));
-		
-		setPdp(createPDP(properties));
 	}
 
 	@Override
@@ -381,38 +378,13 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private UnicoreXPDP createPDP(PropertiesHelper properties) throws ConfigurationException {
-		if (!isAccessControlEnabled())
-			return new AcceptingPdp();
-			
-		if (properties.isSet(PROP_CHECKACCESS_PDPCONFIG)) {
-			String conf=properties.getValue(PROP_CHECKACCESS_PDPCONFIG);
-			setPdpConfigurationFile(conf);
-		}
-		
-		Class<? extends UnicoreXPDP> pdpClazz = properties.getClassValue(PROP_CHECKACCESS_PDP, UnicoreXPDP.class);
-		//this is as use-pdp is not available at compile time and still we want to provide a sensible default for admins.
-		if (pdpClazz == null) {
-			try {
-				pdpClazz = (Class<? extends UnicoreXPDP>) Class.forName("eu.unicore.uas.pdp.local.LocalHerasafPDP");
-			} catch (ClassNotFoundException e) {
-				throw new ConfigurationException("The default eu.unicore.uas.pdp.local.LocalHerasafPDP PDP is not available and PDP was not configured.");
-			}
-		}
-		try {
-			Constructor<? extends UnicoreXPDP> constructor = pdpClazz.getConstructor();
-			logger.info("Using PDP class <{}>", pdpClazz.getName());
-			UnicoreXPDP pdp = constructor.newInstance();
-			return pdp;
-		}catch(Exception e) {
-			throw new ConfigurationException("Can't create a PDP.", e);
-		}
-	}
-
 	@Override
 	public boolean isAccessControlEnabled(String service) {
 		return properties.getSubkeyBooleanValue(PROP_CHECKACCESS, service);
+	}
+	
+	public Class<? extends UnicoreXPDP> getPDPClass() {
+		return properties.getClassValue(PROP_CHECKACCESS_PDP, UnicoreXPDP.class);
 	}
 	
 	public List<String>getAdditionalSAMLIds(){

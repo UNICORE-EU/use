@@ -32,7 +32,9 @@ import org.herasaf.xacml.core.simplePDP.SimplePDPFactory;
 
 import eu.unicore.security.Client;
 import eu.unicore.services.ContainerProperties;
-import eu.unicore.services.security.IContainerSecurityConfiguration;
+import eu.unicore.services.ISubSystem;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.pdp.PDPResult;
 import eu.unicore.services.security.pdp.UnicoreXPDP;
@@ -41,7 +43,6 @@ import eu.unicore.uas.pdp.request.creator.HerasafXacml2RequestCreator;
 import eu.unicore.uas.pdp.request.profile.UnicoreInternalProfile;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
-import eu.unicore.util.httpclient.IClientConfiguration;
 
 
 /**
@@ -51,43 +52,36 @@ import eu.unicore.util.httpclient.IClientConfiguration;
  * Otherwise not really needed. 
  * @author golbi
  */
-public class LocalHerasafPDP implements UnicoreXPDP, PolicyListener
+public class LocalHerasafPDP implements UnicoreXPDP, PolicyListener, ISubSystem
 {
 	private static final Logger log = Log.getLogger(Log.SECURITY, LocalHerasafPDP.class);
 	private PDP engine;
 	protected HerasafXacml2RequestCreator requestMaker;
 	private ReadWriteLock lock = new ReentrantReadWriteLock();
+	LocalPolicyStore lps = null;
+	private String msg = "OK";
 
-	
-	
-	/**
-	 * used by USE when module is used directly
-	 */
 	@Override
-	public void initialize(String configuration, ContainerProperties baseSettings,
-			IContainerSecurityConfiguration securityConfiguration,
-			IClientConfiguration clientConfiguration) throws Exception 
-	{
-		if (configuration == null)
-			throw new ConfigurationException("For " + LocalHerasafPDP.class.getName() + 
-					" PDP a configuration file must be defined.");
-
-		String baseUrl = baseSettings.getContainerURL();
+	public void setKernel(Kernel k) {
+		reloadConfig(k);
+	}
+	
+	void initialize(String configuration, String baseUrl) {
 		requestMaker=new HerasafXacml2RequestCreator(new UnicoreInternalProfile(baseUrl));
-		new LocalPolicyStore(this, configuration, baseSettings.getThreadingServices());
+		try{
+			if(lps==null) {
+				lps = new LocalPolicyStore(this, configuration);
+			}
+			else {
+				lps.reload(configuration);
+			}
+		}catch(Exception e) {
+			throw new ConfigurationException("", e);
+		}
+		this.msg = "["+configuration+"]";
 	}
-	
-	
-	/**
-	 * used by {@link ArgusPAP} which is wrapping this module
-	 * @param requestCreator
-	 */
-	public void initialize(HerasafXacml2RequestCreator requestCreator)
-	{
-		requestMaker = requestCreator;
-	}
-	
-	
+
+	@Override
 	public void updateConfiguration(List<Evaluatable> policies, String algorithm)
 	{
 		SimplePDPConfiguration config = new SimplePDPConfiguration();
@@ -192,6 +186,29 @@ public class LocalHerasafPDP implements UnicoreXPDP, PolicyListener
 			}
 		}
 		return msg.toString().trim();
+	}
+
+	@Override
+	public String getStatusDescription() {
+		return msg;
+	}
+
+	@Override
+	public String getName() {
+		return "XACML Policy Decision Point";
+	}
+
+	@Override
+	public void reloadConfig(Kernel k) {
+		ContainerSecurityProperties sec = k.getContainerSecurityConfiguration();
+		String configuration = sec.getPdpConfigurationFile();
+		if (configuration == null) {
+			throw new ConfigurationException("For " + LocalHerasafPDP.class.getName() + 
+					" PDP a configuration file must be defined.");
+		}
+		ContainerProperties baseSettings = k.getContainerProperties();
+		String baseUrl = baseSettings.getContainerURL();
+		initialize(configuration, baseUrl);
 	}
 
 }

@@ -32,6 +32,7 @@
 
 package eu.unicore.services.security;
 
+import java.lang.reflect.Constructor;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.HashSet;
@@ -56,9 +57,11 @@ import eu.unicore.services.Kernel;
 import eu.unicore.services.Resource;
 import eu.unicore.services.impl.SecuredResourceImpl;
 import eu.unicore.services.impl.SecuredResourceModel;
+import eu.unicore.services.security.pdp.AcceptingPdp;
 import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.pdp.PDPResult;
 import eu.unicore.services.security.pdp.PDPResult.Decision;
+import eu.unicore.services.security.pdp.UnicoreXPDP;
 import eu.unicore.services.security.util.AttributeHandlingCallback;
 import eu.unicore.services.security.util.AttributeSourcesChain;
 import eu.unicore.services.security.util.BaseAttributeSourcesChain.CombiningPolicy;
@@ -96,6 +99,7 @@ public final class SecurityManager {
 	private ContainerSecurityProperties securityConfig;
 	private IAttributeSource aip;
 	private IDynamicAttributeSource dap;
+	private UnicoreXPDP pdp;
 	
 	public SecurityManager(Kernel kernel) {
 		this.kernel = kernel;
@@ -108,6 +112,8 @@ public final class SecurityManager {
 		if(aip instanceof ISubSystem)kernel.register((ISubSystem)aip);
 		this.dap = createDynamicAttributeSource(kernel);
 		if(dap instanceof ISubSystem)kernel.register((ISubSystem)dap);
+		this.pdp = createPDP(kernel);
+		if(pdp instanceof ISubSystem)kernel.register((ISubSystem)pdp);
 	}
 
 	public IAttributeSource getAip() {
@@ -116,6 +122,10 @@ public final class SecurityManager {
 
 	public IDynamicAttributeSource getDap() {
 		return dap;
+	}
+
+	public UnicoreXPDP getPdp() {
+		return pdp;
 	}
 
 	/**
@@ -412,7 +422,7 @@ public final class SecurityManager {
 	private Decision checkAuthzInternal(Client c, ActionDescriptor action, ResourceDescriptor d) {
 		PDPResult res;
 		try {
-			res = securityConfig.getPdp().checkAuthorisation(c, action, d);
+			res = pdp.checkAuthorisation(c, action, d);
 		} catch(Exception e) {
 			throw new AuthorisationException("Access denied due to PDP error: " + e, e);
 		}
@@ -697,4 +707,29 @@ public final class SecurityManager {
 		return new DynamicAttributeSourcesChain(kernel);
 	}
 
+	@SuppressWarnings("unchecked")
+	private static UnicoreXPDP createPDP(Kernel kernel) {
+		ContainerSecurityProperties secProps = kernel.getContainerSecurityConfiguration();
+		if (!secProps.isAccessControlEnabled()) {
+			return new AcceptingPdp();
+		}
+		Class<? extends UnicoreXPDP> pdpClazz = secProps.getPDPClass();
+		//this is as use-pdp is not available at compile time and still we want to provide a sensible default for admins.
+		if (pdpClazz == null) {
+			try {
+				pdpClazz = (Class<? extends UnicoreXPDP>) Class.forName("eu.unicore.uas.pdp.local.LocalHerasafPDP");
+			} catch (ClassNotFoundException e) {
+				throw new ConfigurationException("The default eu.unicore.uas.pdp.local.LocalHerasafPDP PDP is not available and PDP was not configured.");
+			}
+		}
+		try {
+			Constructor<? extends UnicoreXPDP> constructor = pdpClazz.getConstructor();
+			logger.info("Using PDP class <{}>", pdpClazz.getName());
+			UnicoreXPDP pdp = constructor.newInstance();
+			pdp.setKernel(kernel);
+			return pdp;
+		}catch(Exception e) {
+			throw new ConfigurationException("Can't create a PDP.", e);
+		}
+	}
 }

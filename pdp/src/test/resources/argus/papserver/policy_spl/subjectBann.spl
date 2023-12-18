@@ -1,5 +1,0 @@
-resource ".*" { 
-   action ".*" {
-      rule deny { subject = "C=EU, L=Testing City, O=Testing Organization, CN=localhost" }
-   }
-}

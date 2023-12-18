@@ -531,15 +531,6 @@ public final class Kernel {
 			jettyConfiguration = new ContainerHttpServerProperties(properties);
 			PersistenceFactory pf = PersistenceFactory.get(new PersistenceProperties(properties));
 			persistenceProperties = pf.getConfig();
-			try {
-				String pdpConfig = containerSecurityConfiguration.getPdpConfigurationFile();
-				if (pdpConfig != null)
-					logger.info("Using PDP configuration file <{}>", pdpConfig);
-				containerSecurityConfiguration.getPdp().initialize(pdpConfig, containerConfiguration, 
-						containerSecurityConfiguration, clientConfiguration);
-			} catch (Exception e) {
-				throw new ConfigurationException(e.getMessage(), e);
-			}
 		}
 	}
 
@@ -638,7 +629,12 @@ public final class Kernel {
 			task.run();
 		});
 		addShutDownHook();
-		serviceConfigurator.startConfigWatcher();
+		if(getContainerProperties().
+				getBooleanValue(ContainerProperties.RUNTIME_CONFIG_REFRESH)) {
+			logger.info("Runtime config update is ENABLED.");
+			serviceConfigurator.startConfigWatcher();
+		}
+		else logger.info("Runtime config update is DISABLED.");
 	}
 
 	/**

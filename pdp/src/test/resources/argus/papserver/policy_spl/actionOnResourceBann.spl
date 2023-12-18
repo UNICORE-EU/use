@@ -1,5 +1,0 @@
-resource ".*BESManagement.*res=any.*" { 
-   action ".*" {
-      rule deny { emi-role = "user" }
-   }
-}

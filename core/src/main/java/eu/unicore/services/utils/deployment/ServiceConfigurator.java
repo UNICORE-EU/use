@@ -178,7 +178,7 @@ public class ServiceConfigurator implements IServiceConfigurator {
 		}
 		kernel.getContainerProperties().getThreadingServices().getScheduledExecutorService()
 			.scheduleWithFixedDelay(configFileWatcher, 10, 10, TimeUnit.SECONDS);
-		logger.info("Started monitoring of {} with interval {}s", configFile, 10);
+		logger.info("Started monitoring of <{}> with interval {}s", configFile, 10);
 	}
 }
 

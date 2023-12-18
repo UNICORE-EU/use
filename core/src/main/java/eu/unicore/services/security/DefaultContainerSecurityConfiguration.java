@@ -8,7 +8,6 @@ import java.security.cert.X509Certificate;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
-import eu.unicore.services.security.pdp.UnicoreXPDP;
 
 /**
  * Simple implementation of {@link IContainerSecurityConfiguration} as java bean.
@@ -18,7 +17,6 @@ public class DefaultContainerSecurityConfiguration extends DefaultAuthnAndTrustC
 						implements IContainerSecurityConfiguration {
 	private boolean sslEnabled;
 	private boolean accessControlEnabled;
-	private UnicoreXPDP pdp;
 	private String[] defaultVOs;
 	private boolean signingRequired;
 	private boolean gatewayAuthnEnabled;
@@ -53,16 +51,7 @@ public class DefaultContainerSecurityConfiguration extends DefaultAuthnAndTrustC
 	public void setAccessControlEnabled(boolean accessControlEnabled) {
 		this.accessControlEnabled = accessControlEnabled;
 	}
-	
-	@Override
-	public UnicoreXPDP getPdp() {
-		return pdp;
-	}
-	
-	public void setPdp(UnicoreXPDP pdp) {
-		this.pdp = pdp;
-	}
-	
+
 	@Override
 	public String[] getDefaultVOs() {
 		return defaultVOs;

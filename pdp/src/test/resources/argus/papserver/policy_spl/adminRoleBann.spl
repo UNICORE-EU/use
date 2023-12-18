@@ -1,5 +1,0 @@
-resource ".*" { 
-   action ".*" {
-      rule deny { emi-role = "admin" }
-   }
-}

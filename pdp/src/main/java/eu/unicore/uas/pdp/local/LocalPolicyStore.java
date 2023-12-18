@@ -8,16 +8,15 @@
 package eu.unicore.uas.pdp.local;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.logging.log4j.Logger;
@@ -28,8 +27,8 @@ import org.herasaf.xacml.core.simplePDP.SimplePDPFactory;
 import org.herasaf.xacml.core.utils.JAXBMarshallerConfiguration;
 import org.xml.sax.SAXException;
 
-import eu.unicore.services.ThreadingServices;
-import eu.unicore.services.utils.FileWatcher;
+import com.google.common.primitives.Longs;
+
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.FilePropertiesHelper;
@@ -40,8 +39,6 @@ import jakarta.xml.bind.JAXBException;
 /**
  * Initially loads policies, also able to reload them.<br>
  * Policies are read from a configurable directory. 
- * Configuration file is monitored for changes,
- * after a change policies from directory are reloaded. <br>
  * Directory contents is set of files, which should be either XACML 2.0 policies
  * or policy sets. Those policies are combined with a configurable combining algorithm.
  * @author golbi
@@ -68,7 +65,7 @@ public class LocalPolicyStore
 	public static final String WILDCARD_KEY = "filesWildcard";
 	private Map<String, String> algKeys2FullNames;
 	
-	public static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
+	public static Map<String, PropertyMD> META = new HashMap<>();
 	static 
 	{
 		META.put(DIR_KEY, new PropertyMD("conf/policies").setPath());
@@ -77,26 +74,14 @@ public class LocalPolicyStore
 	}
 	
 	protected FilePropertiesHelper cfg;
-	protected String configurationFile;
 	private PolicyListener pdp;
-	private ThreadingServices threadingSrv;
-	
-	
-	public LocalPolicyStore(PolicyListener pdp, String configurationFile, ThreadingServices threadingSrv) 
-		throws IOException, SyntaxException, JAXBException, SAXException
-	{
-		this(pdp, configurationFile, 5000, threadingSrv);
-	}
-	
-	public LocalPolicyStore(PolicyListener pdp, String configurationFile, int interval,
-			ThreadingServices threadingSrv) 
+	private String configFile;
+
+	public LocalPolicyStore(PolicyListener pdp, String configurationFile) 
 		throws IOException, SyntaxException, JAXBException, SAXException
 	{
 		//uhhh herasf developers are OO gurus...
 		SimplePDPFactory.getSimplePDP();
-		
-		this.threadingSrv = threadingSrv;
-		this.configurationFile = configurationFile;
 		this.pdp = pdp;
 		JAXBContext policyContext = JAXBContext.newInstance("org.herasaf.xacml.core.policy.impl");
 		PolicyMarshaller.setJAXBContext(policyContext);
@@ -107,15 +92,19 @@ public class LocalPolicyStore
 		jmc.setSchemaByPath("url:" + url.toExternalForm());
 		PolicyMarshaller.setJAXBMarshallerConfiguration(jmc);
 		initPolicyNameMap();
-		this.cfg = new FilePropertiesHelper(PREFIX, configurationFile, META, log);
-		reload();
-		if(interval>=0)
-		     startConfigWatcher(interval);
+		reload(configurationFile);
 	}
 	
-	protected void reload() throws ConfigurationException, IOException, SyntaxException
+	public void reload(String configurationFile) throws ConfigurationException, IOException, SyntaxException
 	{
-		cfg.reload();
+		
+		if(this.configFile==null || !configurationFile.equals(this.configFile)) {
+			this.cfg = new FilePropertiesHelper(PREFIX, configurationFile, META, log);
+			this.configFile = configurationFile;
+		}
+		else{
+			cfg.reload();
+		}
 		File dir = cfg.getFileValue(DIR_KEY, true);
 		String talg = cfg.getValue(COMBINING_ALG_KEY);
 		String alg = algKeys2FullNames.get(talg);
@@ -126,9 +115,17 @@ public class LocalPolicyStore
 		
 		FilenameFilter filter = new WildcardFileFilter(wildcard);
 		String []files = dir.list(filter);
-		if (files.length == 0)
+		if (files.length == 0) {
 			throw new IOException("Configured XACML policies repository " + 
 					dir + " is empty");
+		}
+		
+		byte[]hash = getDirectoryHash(dir, files);
+		if(Arrays.equals(hash, directoryHash)){
+			log.info("Policy files unchanged, skipping reload.");
+			return;
+		}
+		directoryHash = hash;
 
 		if (log.isDebugEnabled())
 		{
@@ -137,9 +134,9 @@ public class LocalPolicyStore
 				" (found " + files.length + " policies)");
 			log.debug("Using policy combining algorithm: " + alg);
 		}
-		
+
 		Arrays.sort(files);
-		List<Evaluatable> policies = new ArrayList<Evaluatable>();
+		List<Evaluatable> policies = new ArrayList<>();
 		for (String policyF: files)
 		{
 			File p = new File(dir.getAbsolutePath() + File.separator + policyF);
@@ -157,43 +154,9 @@ public class LocalPolicyStore
 		pdp.updateConfiguration(policies, alg);
 	}
 	
-
-	private void startConfigWatcher(int interval)
-	{
-		Runnable r = new Runnable()
-		{
-			public void run()
-			{
-				log.info("Local XACML PDP configuration file was modified, re-configuring.");
-				try
-				{
-					reload();
-				} catch (IOException e)
-				{
-					log.error("Error reading XAML PDP configuration (file " + configurationFile + "): "
-							+ e.toString(), e);
-				} catch (SyntaxException e)
-				{
-					log.error("Error parsing XAML policies: "
-							+ e.toString() + " " + e.getCause().toString(), e);				
-				}
-			}
-		};
-		try
-		{
-			File confFile = new File(configurationFile);
-			FileWatcher fw = new FileWatcher(confFile, r);
-			threadingSrv.getScheduledExecutorService().scheduleWithFixedDelay(
-					fw, interval, interval, TimeUnit.MILLISECONDS);
-		}catch(FileNotFoundException fex)
-		{
-			log.error("XAML PDP configuration file <" + configurationFile + "> not found.");
-		}
-	}
-	
 	private void initPolicyNameMap()
 	{
-		algKeys2FullNames = new HashMap<String, String>();
+		algKeys2FullNames = new HashMap<>();
 		algKeys2FullNames.put(POLICY_ALG_DENY_OVERRIDES, POLICY_ALG_DENY_OVERRIDES);
 		algKeys2FullNames.put(POLICY_ALG_FIRST_APPLICABLE, POLICY_ALG_FIRST_APPLICABLE);
 		algKeys2FullNames.put(POLICY_ALG_ONLY_ONE, POLICY_ALG_ONLY_ONE);
@@ -207,4 +170,31 @@ public class LocalPolicyStore
 		algKeys2FullNames.put(SPOLICY_ALG_ORDERED_PERMIT_OVERRIDES, POLICY_ALG_ORDERED_PERMIT_OVERRIDES);
 		algKeys2FullNames.put(SPOLICY_ALG_PERMIT_OVERRIDES, POLICY_ALG_PERMIT_OVERRIDES);
 	}
+	
+	byte[] directoryHash = new byte[0];
+
+	private byte[] getDirectoryHash(File directory, String[] files){
+		try{
+			MessageDigest md=MessageDigest.getInstance("MD5");
+			for(String f: files){
+				computeDirHash(md, new File(directory, f));
+			}
+			return md.digest();
+		}catch(Exception ex){
+			log.warn("Error checking for XACML file(s) modification",ex);
+		}
+		return new byte[0];
+	}
+
+	private void computeDirHash(MessageDigest md, File file){
+		if(file.isDirectory()){
+			for(File f: file.listFiles()){
+				computeDirHash(md, f);
+			}
+		}
+		else{
+			md.update(Longs.toByteArray(file.lastModified()));
+		}
+	}
+
 }

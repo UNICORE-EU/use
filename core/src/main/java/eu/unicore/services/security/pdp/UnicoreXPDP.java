@@ -8,21 +8,20 @@
 package eu.unicore.services.security.pdp;
 
 import eu.unicore.security.Client;
-import eu.unicore.services.ContainerProperties;
-import eu.unicore.services.security.IContainerSecurityConfiguration;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.KernelInjectable;
 import eu.unicore.services.security.util.ResourceDescriptor;
-import eu.unicore.util.httpclient.IClientConfiguration;
 
 /**
  * A generic PDP interface.
  * 
  * @author golbi
  */
-public interface UnicoreXPDP
+public interface UnicoreXPDP extends KernelInjectable
 {
-	public void initialize(String configuration, ContainerProperties baseSettings,
-			IContainerSecurityConfiguration securityConfiguration, 
-			IClientConfiguration clientConfiguration) throws Exception;
+
+	public default void setKernel(Kernel k) {}
+
 	public PDPResult checkAuthorisation(Client c, ActionDescriptor action, ResourceDescriptor d) 
 		throws Exception;
 }
