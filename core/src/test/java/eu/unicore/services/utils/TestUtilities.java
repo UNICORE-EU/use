@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.xmlbeans.XmlObject;
@@ -30,7 +32,13 @@ public class TestUtilities {
 	
 	@Test
 	public void testNewUniqueID() {
-		assertTrue(Utilities.newUniqueID().length()>8);
+		List<String>ids = new ArrayList<>();
+		for(int i=0; i<10000; i++) {
+			String s = Utilities.newUniqueID();
+			assertTrue(s.length()>8);
+			assertFalse(ids.contains(s));
+			ids.add(s);
+		}
 	}
 
 	@Test

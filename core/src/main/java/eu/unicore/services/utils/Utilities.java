@@ -1,6 +1,7 @@
 package eu.unicore.services.utils;
 
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
 import java.text.DateFormat;
@@ -11,10 +12,9 @@ import java.util.UUID;
 import org.apache.logging.log4j.Logger;
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlCursor.TokenType;
+import org.apache.xmlbeans.XmlObject;
 
 import eu.unicore.services.ContainerProperties;
-
-import org.apache.xmlbeans.XmlObject;
 
 /**
  * tools and utilities
@@ -28,10 +28,13 @@ public class Utilities {
 	}
 
 	/**
-	 * returns a new globally unique identifier
+	 * returns a new unique identifier that is
+	 * reasonably short and human-friendly
 	 */
 	public static String newUniqueID(){
-		return UUID.randomUUID().toString();
+		UUID u = UUID.randomUUID();
+		BigInteger l = asUnsigned(u.getMostSignificantBits(), u.getLeastSignificantBits());
+		return Base62.encode(l);
 	}
 
 	public static String extractServiceName(String url){
@@ -88,7 +91,7 @@ public class Utilities {
 		URL u=new URL(cfg.getValue(ContainerProperties.EXTERNAL_URL));
 		return u.toString().split(u.getPath())[0];
 	}
-	
+
 	/**
 	 * extract the text content of an XML element 
 	 * 
@@ -138,7 +141,7 @@ public class Utilities {
 			}
 		}
 	}
-	
+
 	/**
 	 * finds a setter for the given parameter
 	 * @param clazz
@@ -147,11 +150,11 @@ public class Utilities {
 	public static Method findSetter(Class<?> clazz, String paramName){
 		for(Method m: clazz.getMethods()){
 			if(m.getName().equalsIgnoreCase("set"+paramName) &&
-				m.getParameterTypes().length > 0)return m;
+					m.getParameterTypes().length > 0)return m;
 		}
 		return null;
 	}
-	
+
 	private static void setParam(Object obj, Method m, String valueString)throws Exception{
 		Object arg=valueString;
 		if(m.getParameterTypes()[0].isAssignableFrom(int.class)){
@@ -174,8 +177,8 @@ public class Utilities {
 		}
 		m.invoke(obj, new Object[]{arg});
 	}
-	
-	
+
+
 	/**
 	 * gets a DateFormat instance for the ISO8601 "yyyy-MM-dd'T'HH:mm:ssZ" format
 	 */
@@ -189,5 +192,69 @@ public class Utilities {
 	public static DateFormat getSimpleDateFormat(){
 		return new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	}
+	
+	
+	
+	private static final BigInteger HALF = BigInteger.ONE.shiftLeft(64); // 2^64
 
+	private static BigInteger asUnsigned(long hi, long low) {
+		BigInteger l = BigInteger.valueOf(low+(2^64*hi));
+		return l.signum() < 0 ? l.add(HALF) : l;
+	}
+			
+	/**
+	 * Base62 encoder from
+	 * https://github.com/opencoinage/opencoinage/blob/master/src/java/org/opencoinage/util/Base62.java
+	 * @see http://en.wikipedia.org/wiki/Base_62
+	 */
+	public static class Base62 {
+		public static final BigInteger BASE = BigInteger.valueOf(62);
+		public static final String DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		public static final String REGEXP = "^[0-9A-Za-z]+$";
+
+		/**
+		 * Encodes a number using Base62 encoding.
+		 *
+		 * @param  number a positive integer
+		 * @return a Base62 string
+		 * @throws IllegalArgumentException if <code>number</code> is a negative integer
+		 */
+		public static String encode(BigInteger number) {
+			if (number.compareTo(BigInteger.ZERO) == -1) { // number < 0
+				throw new IllegalArgumentException("number must not be negative");
+			}
+			StringBuilder result = new StringBuilder();
+			while (number.compareTo(BigInteger.ZERO) == 1) { // number > 0
+				BigInteger[] divmod = number.divideAndRemainder(BASE);
+				number = divmod[0];
+				int digit = divmod[1].intValue();
+				result.insert(0, DIGITS.charAt(digit));
+			}
+			return (result.length() == 0) ? DIGITS.substring(0, 1) : result.toString();
+		}
+
+		public static String encode(long number) {
+			return encode(BigInteger.valueOf(number));
+		}
+
+		/**
+		 * Decodes a string using Base62 encoding.
+		 *
+		 * @param  string a Base62 string
+		 * @return a positive integer
+		 * @throws IllegalArgumentException if <code>string</code> is empty
+		 */
+		public static BigInteger decode(final String string) {
+			if (string.length() == 0) {
+				throw new IllegalArgumentException("string must not be empty");
+			}
+			BigInteger result = BigInteger.ZERO;
+			int digits = string.length();
+			for (int index = 0; index < digits; index++) {
+				int digit = DIGITS.indexOf(string.charAt(digits - index - 1));
+				result = result.add(BigInteger.valueOf(digit).multiply(BASE.pow(index)));
+			}
+			return result;
+		}
+	}
 }

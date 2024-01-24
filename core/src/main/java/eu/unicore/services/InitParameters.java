@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import eu.unicore.services.ExtendedResourceStatus.ResourceStatus;
 import eu.unicore.services.security.ACLEntry;
+import eu.unicore.services.utils.Utilities;
 
 public class InitParameters {
 
@@ -68,7 +69,7 @@ public class InitParameters {
 	 * @param terminationTime
 	 */
 	protected InitParameters(String uuid, TerminationMode terminationMode, Calendar terminationTime){
-		uniqueID = uuid!=null? uuid : UUID.randomUUID().toString();
+		uniqueID = uuid!=null? uuid : Utilities.newUniqueID();
 		this.terminationMode = terminationMode;
 		this.terminationTime = terminationTime;
 	}
