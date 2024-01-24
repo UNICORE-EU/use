@@ -10,7 +10,7 @@ import eu.unicore.services.Kernel;
 
 public class PubkeyCache {
 
-	final Map<String, PublicKey>map = new ConcurrentHashMap<>();
+	private final Map<String, PublicKey>map = new ConcurrentHashMap<>();
 	
 	public PublicKey getPublicKey(String subject){
 		return map.get(X500NameUtils.getComparableForm(subject));

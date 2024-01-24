@@ -1,6 +1,5 @@
 package eu.unicore.services;
 
-
 /**
  * a generic service hosted in USE
  */

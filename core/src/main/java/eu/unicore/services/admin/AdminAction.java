@@ -8,6 +8,7 @@ import eu.unicore.services.Kernel;
  * An AdministrativeAction that is used to perform some task in the container. 
  * It has a name, since it may be possible to invoke this action via some remote operation.
  * Additionally a human readable description is provided.
+ *
  * @author schuller
  */
 public interface AdminAction {

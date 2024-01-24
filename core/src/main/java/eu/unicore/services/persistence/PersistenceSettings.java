@@ -28,7 +28,7 @@ public class PersistenceSettings {
 	
 	private boolean loadOnce;
 	
-	private List<String>concurrentMethods=new ArrayList<String>();
+	private List<String>concurrentMethods = new ArrayList<>();
 	
 	public PersistenceSettings(){}
 	

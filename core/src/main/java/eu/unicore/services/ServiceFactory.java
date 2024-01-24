@@ -14,7 +14,7 @@ import jakarta.servlet.Servlet;
 public interface ServiceFactory {
 
 	/**
-	 * the type of service handled by this factory
+	 * @return the type of service handled by this factory
 	 */
 	public String getType();
 	
@@ -32,7 +32,7 @@ public interface ServiceFactory {
 		
 
 	/**
-	 * return the servlet class name
+	 * @return the servlet class name
 	 */
 	public String getServletClass();
 	

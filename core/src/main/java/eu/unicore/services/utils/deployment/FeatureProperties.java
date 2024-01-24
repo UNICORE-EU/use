@@ -15,7 +15,6 @@ public class FeatureProperties extends PropertiesHelper {
 	
 	protected static final Logger log = Log.getLogger(Log.CONFIGURATION, FeatureProperties.class);
 
-	
 	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
 	static 
 	{

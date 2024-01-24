@@ -1,11 +1,3 @@
-/*
- * Copyright (c) 2009 ICM Uniwersytet Warszawski All rights reserved.
- * See LICENCE file for licencing information.
- *
- * Created on 2010-04-16
- * Author: K. Benedyczak <golbi@mat.umk.pl>
- */
-
 package eu.unicore.services.security.util;
 
 import java.lang.reflect.Method;
@@ -35,61 +27,69 @@ public class AttributeSourceConfigurator {
 	final static Map<String,String> DEFAULTS = new HashMap<>();
 
 	static {
-		DEFAULTS.put("FILE", "eu.unicore.uas.security.file.FileAttributeSource");
-		DEFAULTS.put("XUUDB", "eu.unicore.uas.security.xuudb.XUUDBAttributeSource");
-		DEFAULTS.put("SAML", "eu.unicore.uas.security.saml.SAMLAttributeSource");
-		DEFAULTS.put("GRIDMAP-FILE", "eu.unicore.uas.security.gridmapfile.GridMapFileAttributeSource");
-		DEFAULTS.put("LDAP", "eu.unicore.uas.security.ldap.LDAPAttributeSource");
+		DEFAULTS.put("FILE", "eu.unicore.services.aip.file.FileAttributeSource");
+		DEFAULTS.put("XUUDB", "eu.unicore.services.aip.xuudb.XUUDBAttributeSource");
+		DEFAULTS.put("SAML", "eu.unicore.services.aip.saml.SAMLAttributeSource");
+		DEFAULTS.put("GRIDMAP-FILE", "eu.unicore.services.aip.gridmapfile.GridMapFileAttributeSource");
+		DEFAULTS.put("LDAP", "eu.unicore.services.aip.ldap.LDAPAttributeSource");
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends IAttributeSourceBase> T configureAS(String name, String subPrefix, 
 			Properties properties) {
 		String dotName = ContainerSecurityProperties.PREFIX + subPrefix + "." + name + ".";
-		String clazz = properties.getProperty(dotName + "class");
+		String clazz = handleOldOrMissingClass(properties.getProperty(dotName + "class"), name);
 		if (clazz==null)
 			throw new IllegalArgumentException("Inconsistent (dynamic) attribute sources chain definition: " +
 					"expected <"+dotName+"class> property with (dynamic) attribute source implementation.");
 		logger.debug("Creating (dynamic) attribute source {} served by class <{}>", name, clazz);
-		clazz = handleOldOrMissingClass(clazz, name);
-		T auth;
 		try {
-			auth = (T)(Class.forName(clazz).getConstructor().newInstance());
+			T auth = (T)(Class.forName(clazz).getConstructor().newInstance());
+			//find parameters for this attribute source
+			Map<String,String>params=new PropertyGroupHelper(properties, 
+					new String[]{dotName}).getFilteredMap();
+			params.remove(dotName+"class");
+			Utilities.mapParams(auth,params,logger);
+
+			//if attribute source provides setProperties method, also pass all properties. Useful 
+			//for attribute chains
+			Method propsSetter = Utilities.findSetter(auth.getClass(), "properties");
+			if (propsSetter != null && propsSetter.getParameterTypes()[0].
+					isAssignableFrom(Properties.class))
+				try {
+					propsSetter.invoke(auth, new Object[]{properties});
+				} catch (Exception e) {
+					throw new RuntimeException("Bug: can't set properties on chain: " + e.toString(), e);
+				}
+			return auth;
 		} catch (Exception e) {
 			throw new ConfigurationException("Can't load dynamic attribute source implementation, configured as <" +
 					clazz + ">: " + e.toString(), e);
 		}
-		//find parameters for this attribute source
-		Map<String,String>params=new PropertyGroupHelper(properties, 
-			new String[]{dotName}).getFilteredMap();
-		params.remove(dotName+"class");
-		Utilities.mapParams(auth,params,logger);
-		
-		//if attribute source provides setProperties method, also pass all properties. Useful 
-		//for attribute chains
-		Method propsSetter = Utilities.findSetter(auth.getClass(), "properties");
-		if (propsSetter != null && propsSetter.getParameterTypes()[0].
-			isAssignableFrom(Properties.class))
-			try {
-				propsSetter.invoke(auth, new Object[]{properties});
-			} catch (Exception e) {
-				throw new RuntimeException("Bug: can't set properties on chain: " + e.toString(), e);
-			}
-		return auth;
 	}
 	
 	// accept older attribute source class names
 	private static String handleOldOrMissingClass(String clazz, String name) {
+		if(clazz==null) {
+			return DEFAULTS.get(name);
+		}
+		boolean updated = false;
 		if("eu.unicore.uas.security.xuudb.XUUDBAuthoriser".equals(clazz)) {
-			logger.warn("DEPRECATION: found old class name for '"+name+"' attribute source");
 			clazz = DEFAULTS.get("XUUDB");
+			updated = true;
 		}
 		if("eu.unicore.uas.security.gridmapfile.GridMapFileAuthoriser".equals(clazz)) {
-			logger.warn("DEPRECATION: found old class name for '"+name+"' attribute source");
 			clazz = DEFAULTS.get("GRIDMAP-FILE");
+			updated = true;
 		}
-		if(clazz==null) {
-			clazz = DEFAULTS.get(name);
+		String oldPrefix = "eu.unicore.uas.security";
+		if(clazz.startsWith(oldPrefix)) {
+			clazz = "eu.unicore.services.pdp" + clazz.substring(oldPrefix.length());
+			updated = true;
+		}
+		if(updated) {
+			logger.warn("DEPRECATION: found old class name for '{}' attribute source, superseded by <{}>",
+					name, clazz);
 		}
 		return clazz;
 	}

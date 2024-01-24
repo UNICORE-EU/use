@@ -7,9 +7,7 @@ import java.util.Map;
 import com.codahale.metrics.Metric;
 
 /**
- * used to show the status of some subsystem
- * 
- * TODO add control, restart etc
+ * Control and check the status of some subsystem
  * 
  * @author schuller
  */

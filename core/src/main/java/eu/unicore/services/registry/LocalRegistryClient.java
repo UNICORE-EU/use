@@ -53,7 +53,7 @@ public class LocalRegistryClient implements IRegistry {
 	}
 	
 	public List<Map<String,String>> listEntries() throws Exception {
-		List<Map<String,String>> res = getCached();
+		var res = getCached();
 		if(res!=null) {
 			return res;
 		}

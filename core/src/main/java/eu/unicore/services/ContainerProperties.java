@@ -1,11 +1,8 @@
-/*
- * Copyright (c) 2012 ICM Uniwersytet Warszawski All rights reserved.
- * See LICENCE file for licensing information.
- */
 package eu.unicore.services;
 
 import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -85,34 +82,34 @@ public class ContainerProperties extends PropertiesHelper {
 	 * property key for setting the core thread pool size for the 
 	 * scheduled execution service
 	 */
-	public static final String CORE_POOL_SIZE="resources.scheduled.size";
+	public static final String CORE_POOL_SIZE="pools.scheduled.size";
 
 	/**
 	 * property key for setting the timeout in millis for removing idle threads
 	 */
-	public static final String POOL_TIMEOUT="resources.scheduled.idletime";
+	public static final String POOL_TIMEOUT="pools.scheduled.idletime";
 
 	/**
 	 * property key for setting the minimum thread pool size for the 
 	 * scheduled execution service
 	 */
-	public static final String EXEC_CORE_POOL_SIZE="resources.executor.minsize";
+	public static final String EXEC_CORE_POOL_SIZE="pools.executor.minsize";
 
 	/**
 	 * property key for setting the maximum thread pool size for the 
 	 * scheduled execution service
 	 */
-	public static final String EXEC_MAX_POOL_SIZE="resources.executor.maxsize";
+	public static final String EXEC_MAX_POOL_SIZE="pools.executor.maxsize";
 
 	/**
 	 * property key for setting the timeout in millis for removing idle threads
 	 */
-	public static final String EXEC_POOL_TIMEOUT="resources.executor.idletime";
+	public static final String EXEC_POOL_TIMEOUT="pools.executor.idletime";
 
 	/**
 	 * property defining which class to use as Persist implementation
 	 */
-	public static final String WSRF_PERSIST_CLASSNAME = "wsrf.persistence.persist";
+	public static final String WSRF_PERSIST_CLASSNAME = "services.persistence.persist";
 
 	/**
 	 * property for limiting the number of service instances per user. Attach the service name.
@@ -121,40 +118,40 @@ public class ContainerProperties extends PropertiesHelper {
 	 * unicore.maxInstancesPerUser.JobManagement=1000
 	 * </code>
 	 */
-	public final static String MAX_INSTANCES="wsrf.maxInstancesPerUser";
+	public final static String MAX_INSTANCES = "services.maxInstancesPerUser";
 
 	/**
-	 * property name for configuring the initial delay for ws-resource expiry checking
+	 * property name for configuring the initial delay for resource expiry checking
 	 * set to an integer value (seconds)
 	 */
-	public static final String EXPIRYCHECK_INITIAL="wsrf.expirycheck.initial";
+	public static final String EXPIRYCHECK_INITIAL = "services.expirycheck.initial";
 
 	/**
-	 * property name for configuring the repeat period for ws-resource expiry checking
+	 * property name for configuring the repeat period for resource expiry checking
 	 * set to an integer value (seconds)
 	 */
-	public static final String EXPIRYCHECK_PERIOD="wsrf.expirycheck.period";
+	public static final String EXPIRYCHECK_PERIOD = "services.expirycheck.period";
 
 	/**
 	 * property name for configuring the default lifetime (in seconds)
 	 * set to an integer value (seconds)
 	 */
-	public static final String DEFAULT_LIFETIME="wsrf.lifetime.default";
+	public static final String DEFAULT_LIFETIME = "services.lifetime.default";
 
 	/**
 	 * property name for configuring the maximum lifetime (in seconds)
 	 * set to an integer value (seconds)
 	 */
-	public static final String MAXIMUM_LIFETIME="wsrf.lifetime.maximum";
+	public static final String MAXIMUM_LIFETIME = "services.lifetime.maximum";
 
 	/**
 	 * property name for configuring the timeout when attempting to lock a resource
 	 * set to an integer value (seconds)
 	 */
-	public static final String INSTANCE_LOCKING_TIMEOUT="wsrf.instanceLockingTimeout";
+	public static final String INSTANCE_LOCKING_TIMEOUT = "services.instanceLockingTimeout";
 
 	/** Property defining the default termination time of service group entries in seconds */
-	public static final String WSRF_SGENTRY_TERMINATION_TIME = "wsrf.sg.defaulttermtime";
+	public static final String WSRF_SGENTRY_TERMINATION_TIME = "services.registryEntryRefreshInterval";
 
 	// registry related
 	public static final String EXTERNAL_REGISTRY_USE = "externalregistry.use";
@@ -362,16 +359,43 @@ public class ContainerProperties extends PropertiesHelper {
 			"container.deployment.dynamic.jarDirectory",
 	};
 
+	// deprecated config keys
+	private static final String[] renamed = new String[] {
+			"container.resources.",
+			"container.wsrf.sg.defaulttermtime",
+			"container.wsrf."
+	};
+
+	private static final String[] newNames = new String[] {
+			"container.pools.",
+			"container."+WSRF_SGENTRY_TERMINATION_TIME,
+			"container.services."
+	};
+	
 	@Override
 	protected void findUnknown(Properties properties)
 			throws ConfigurationException {
-		// backwards compatibility fixes
+		// check for and ignore deprecated stuff 
 		for(int i=0;i<deprecated.length;i++){
 			String name = deprecated[i];
 			String v = properties.getProperty(name);
 			if(v!=null){
 				properties.remove(name);
-				log.warn("Property "+name+" is DEPRECATED, ignoring.");
+				log.warn("Property {} is DEPRECATED, ignoring.", name);
+			}
+		}
+		// backwards compatibility fixes
+		for(int i=0;i<renamed.length;i++){
+			String k = renamed[i];
+			Iterator<Object> iter = properties.keySet().iterator();
+			while(iter.hasNext()) {
+				String name = String.valueOf(iter.next());
+				if(!name.startsWith(k))continue;
+				String v = properties.getProperty(name);
+				String newName = k.equals(name) ? newNames[i] : newNames[i]+name.substring(k.length());
+				properties.remove(name);
+				properties.put(newName, v);
+				log.warn("Property <{}> is DEPRECATED, superseded by <{}>", name, newName);
 			}
 		}
 		super.findUnknown(properties);

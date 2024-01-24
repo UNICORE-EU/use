@@ -5,8 +5,6 @@ package eu.unicore.services.messaging;
  * has been added
  * 
  * @author schuller
- * 
- * @since 2.2.0
  */
 public class ResourceAddedMessage extends Message {
 

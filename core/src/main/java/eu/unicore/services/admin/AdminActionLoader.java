@@ -28,13 +28,13 @@ public class AdminActionLoader {
 	 * @return a unmodifiable map of AdminActions keyed with the name
 	 */
 	public static Map<String, AdminAction>load(){
-		Map<String,AdminAction>result=new HashMap<String,AdminAction>();
+		Map<String,AdminAction>result = new HashMap<>();
 		ServiceLoader<AdminAction> sl=ServiceLoader.load(AdminAction.class);
 		Iterator<AdminAction>iter=sl.iterator();
 		while(iter.hasNext()){
 			AdminAction a=iter.next();
 			result.put(a.getName(),a);
-			logger.debug("Loaded admin action "+a.getName()+" "+a.getClass().getName());
+			logger.debug("Loaded admin action {} {}", a.getName(), a.getClass().getName());
 		}
 		return Collections.unmodifiableMap(result);
 	}

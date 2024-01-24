@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2012 ICM Uniwersytet Warszawski All rights reserved.
- * See LICENCE.ICM file for licensing information.
- */ 
-
 package eu.unicore.services.security;
 
 import java.io.BufferedInputStream;
@@ -275,10 +270,9 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		setSslEnabled(properties.getBooleanValue(PROP_SSL_ENABLED));
 		setAccessControlEnabled(properties.getBooleanValue(PROP_CHECKACCESS));
 		setPdpConfigurationFile(properties.getValue(PROP_CHECKACCESS_PDPCONFIG));
-		setSigningRequired(false);
 		setGatewayAuthnEnabled(properties.getBooleanValue(PROP_GATEWAY_AUTHN));
 		boolean credNeeded = isSslEnabled();
-		boolean trustNeeded = isSslEnabled() || isSigningRequired() || isGatewayAuthnEnabled();
+		boolean trustNeeded = isSslEnabled() || isGatewayAuthnEnabled();
 		authAndTrustProperties = new AuthnAndTrustProperties(source,
 				PREFIX + TruststoreProperties.DEFAULT_PREFIX,
 				PREFIX + CredentialProperties.DEFAULT_PREFIX,
@@ -358,13 +352,23 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 
 	// backwards compatibility fixes
 	protected void backwardsCompat(Properties properties) throws ConfigurationException {
-		String old = "de.fzj.unicore.wsrflite";
-		for(String key: properties.stringPropertyNames()){
-			String val = properties.getProperty(key);
-			if(!val.startsWith(old))continue;
-			String newValue = "eu.unicore.services"+val.substring(old.length());
-			properties.put(key, newValue);
-			logger.warn("Old property value <{}> is DEPRECATED, superseded by <{}>", val, newValue);
+		String[] oldProps = new String[]{
+				"de.fzj.unicore.wsrflite",
+				"eu.unicore.uas.pdp",
+				};
+		String[] newPrefixes = new String[]{
+				"eu.unicore.services",
+				"eu.unicore.services.pdp",
+				};
+		for(int i=0; i<oldProps.length;i++) {
+			String old = oldProps[i];
+			for(String key: properties.stringPropertyNames()){
+				String val = properties.getProperty(key);
+				if(!val.startsWith(old))continue;
+				String newValue = newPrefixes[i]+val.substring(old.length());
+				properties.put(key, newValue);
+				logger.warn("Old property value <{}> is DEPRECATED, superseded by <{}>", val, newValue);
+			}
 		}
 	}
 	

@@ -29,7 +29,7 @@ public class CapabilitiesLoader {
 	 * @return a unmodifiable map of Capability instances keyed with the name
 	 */
 	public static Map<String, Capability>load(Kernel kernel){
-		Map<String,Capability>result=new HashMap<String,Capability>();
+		Map<String,Capability>result = new HashMap<>();
 		ServiceLoader<Capabilities> sl=ServiceLoader.load(Capabilities.class);
 		Iterator<Capabilities>iter=sl.iterator();
 		while(iter.hasNext()){

@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2012 ICM Uniwersytet Warszawski All rights reserved.
- * See LICENCE.txt file for licensing information.
- */
 package eu.unicore.services.security;
 
 import java.security.cert.X509Certificate;
@@ -18,7 +14,6 @@ public class DefaultContainerSecurityConfiguration extends DefaultAuthnAndTrustC
 	private boolean sslEnabled;
 	private boolean accessControlEnabled;
 	private String[] defaultVOs;
-	private boolean signingRequired;
 	private boolean gatewayAuthnEnabled;
 	private boolean haveFixedGatewayCert;
 	private X509Certificate gatewayCertificate;
@@ -60,16 +55,7 @@ public class DefaultContainerSecurityConfiguration extends DefaultAuthnAndTrustC
 	public void setDefaultVOs(String[] defaultVos) {
 		this.defaultVOs = defaultVos;
 	}
-	
-	@Override
-	public boolean isSigningRequired() {
-		return signingRequired;
-	}
-	
-	public void setSigningRequired(boolean signingRequired) {
-		this.signingRequired = signingRequired;
-	}
-	
+
 	@Override
 	public boolean isGatewaySignatureCheckingEnabled() {
 		return true;

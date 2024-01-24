@@ -12,9 +12,9 @@ import java.util.Map;
  */
 public class AdminActionResult {
 
-	private final Map<String,String>results=new HashMap<String,String>();
+	private final Map<String,String>results = new HashMap<>();
 	
-	private final List<Object>resultReferences=new ArrayList<Object>();
+	private final List<Object>resultReferences = new ArrayList<>();
 	
 	private final boolean success;
 	

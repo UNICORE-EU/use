@@ -1,39 +1,5 @@
-/*********************************************************************************
- * Copyright (c) 2006 Forschungszentrum Juelich GmbH 
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * (1) Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the disclaimer at the end. Redistributions in
- * binary form must reproduce the above copyright notice, this list of
- * conditions and the following disclaimer in the documentation and/or other
- * materials provided with the distribution.
- * 
- * (2) Neither the name of Forschungszentrum Juelich GmbH nor the names of its 
- * contributors may be used to endorse or promote products derived from this 
- * software without specific prior written permission.
- * 
- * DISCLAIMER
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- ********************************************************************************/
-
-
 package eu.unicore.services.persistence;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -67,9 +33,9 @@ public abstract class AbstractStore implements Store {
 	protected Kernel kernel;
 
 	public synchronized void init(Kernel kernel, String serviceName) {
-		this.kernel=kernel;
-		this.serviceName=serviceName;
-		instances=new ConcurrentHashMap<String,Resource>();
+		this.kernel = kernel;
+		this.serviceName = serviceName;
+		instances = new ConcurrentHashMap<>();
 	}
 
 	public void persist(Resource inst)throws Exception{
@@ -134,34 +100,9 @@ public abstract class AbstractStore implements Store {
 		return inst;
 	}
 	
-	// TODO remove for U9
-	private final static Map<String,String> _classname_updates = new HashMap<>();
-	static {
-		_classname_updates.put("de.fzj.unicore.wsrflite.xmlbeans.registry.LocalRegistryImpl", 
-				"eu.unicore.services.registry.LocalRegistryImpl");
-		_classname_updates.put("de.fzj.unicore.wsrflite.xmlbeans.registry.RegistryImpl", 
-				"eu.unicore.services.registry.RegistryImpl");
-		_classname_updates.put("de.fzj.unicore.wsrflite.registry.ServiceRegistryEntryImpl", 
-				"eu.unicore.services.registry.RegistryEntryImpl");
-	}
-	
 	protected Resource createResource(ResourceBean bean) throws Exception {
 		Resource inst = null;
-		Class<?> clazz = null;
-		try{
-			clazz = Class.forName(bean.className);
-		}catch(ClassNotFoundException cne) {
-			try{
-				String newName = _classname_updates.get(bean.className);
-				if(newName==null) {
-					newName = bean.className.replace("de.fzj.unicore.wsrflite.registry", "eu.unicore.services.registry");
-				}
-				clazz = Class.forName(newName);
-			}catch(ClassNotFoundException cne1) {
-				throw cne;
-			}
-		}
-		
+		Class<?> clazz = Class.forName(bean.className);
 		inst=(Resource)clazz.getConstructor().newInstance();
 		inst.setKernel(kernel);
 		inst.setHome(kernel.getHome(serviceName));
@@ -173,7 +114,6 @@ public abstract class AbstractStore implements Store {
 	}
 	
 	protected abstract ResourceBean _read(String uniqueID) throws Exception;
-
 
 	public Resource getForUpdate(String uniqueID, long time, TimeUnit timeUnit) throws Exception{
 		Resource inst=null;

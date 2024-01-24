@@ -71,7 +71,6 @@ public class RegistryCreator {
 				//check if default registry already exists
 				try{
 					regHome.get(DEFAULT_REGISTRY_ID);
-					logger.debug("Registry has already been set up.");
 				}catch(ResourceUnknownException e){
 					try {
 						createRegistryInstance(regHome);

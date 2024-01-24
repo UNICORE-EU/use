@@ -1,6 +1,5 @@
 package eu.unicore.services;
 
-
 /**
  * a Capability provides information about a concrete implementation of
  * some abstract interface

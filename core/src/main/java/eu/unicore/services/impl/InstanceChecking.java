@@ -1,36 +1,3 @@
-/*********************************************************************************
- * Copyright (c) 2006 Forschungszentrum Juelich GmbH 
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * (1) Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the disclaimer at the end. Redistributions in
- * binary form must reproduce the above copyright notice, this list of
- * conditions and the following disclaimer in the documentation and/or other
- * materials provided with the distribution.
- * 
- * (2) Neither the name of Forschungszentrum Juelich GmbH nor the names of its 
- * contributors may be used to endorse or promote products derived from this 
- * software without specific prior written permission.
- * 
- * DISCLAIMER
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- ********************************************************************************/
- 
-
 package eu.unicore.services.impl;
 
 import java.util.ArrayList;
@@ -57,9 +24,9 @@ public class InstanceChecking implements Runnable {
 	private final Home home;
 	
 	//list of uniqueIDs
-	protected final List<String> list = Collections.synchronizedList(new ArrayList<String>());
+	protected final List<String> list = Collections.synchronizedList(new ArrayList<>());
 	
-	protected final List<InstanceChecker> checkers = Collections.synchronizedList(new ArrayList<InstanceChecker>());
+	protected final List<InstanceChecker> checkers = Collections.synchronizedList(new ArrayList<>());
 	
 	
 	public InstanceChecking(Home home){
@@ -92,7 +59,7 @@ public class InstanceChecking implements Runnable {
 	 * and removes the instance from the list if it is not valid anymore
 	 */
 	public void run(){
-		if(logger.isTraceEnabled())logger.trace("Instance Checking running...");
+		logger.trace("Instance Checking running...");
 		ArrayList<String> ids = new ArrayList<>();
 		ArrayList<String> toRemove = new ArrayList<>();
 		ids.addAll(list);
@@ -100,18 +67,16 @@ public class InstanceChecking implements Runnable {
 
 		for(Iterator<String> i = ids.iterator() ; i.hasNext() ; ){
 			String uniqueID=i.next();
-			if(logger.isTraceEnabled())logger.trace("Checking instance of type "+serviceName+" and id "+uniqueID);
+			logger.trace("Checking instance {}/{}", serviceName, uniqueID);
 			boolean instanceValid = true;
 			try{
 				for(InstanceChecker ic: checkers){
 					if(home.isShuttingDown()){
 						return;
 					}
-					if(logger.isTraceEnabled())logger.trace("Testing Checker "+ic.getClass().getName());
+					logger.trace("Testing Checker {}", ic.getClass().getName());
 					if(ic.check(home,uniqueID)){
-						if(logger.isTraceEnabled()){
-							logger.trace("Applying Checker "+ic.getClass().getName());
-						}
+						logger.trace("Applying Checker {}", ic.getClass().getName());
 						instanceValid = ic.process(home,uniqueID);
 					}
 				}
@@ -124,7 +89,7 @@ public class InstanceChecking implements Runnable {
 			//catch Throwable here to avoid the checker going down in case
 			//of an uncaught exception
 			catch(Throwable e){
-				logger.warn("Instance of type "+serviceName+" with id <"+uniqueID+">",e);
+				logger.warn("Instance {}/{}", serviceName, uniqueID, e);
 			}
 		}
 		list.removeAll(toRemove);	

@@ -45,7 +45,7 @@ public class ResourceAvailability implements AdminAction {
 		return res;
 	}
 
-	private static final Set<String>resources=Collections.synchronizedSet(new HashSet<String>());
+	private static final Set<String>resources = Collections.synchronizedSet(new HashSet<>());
 	
 	public static boolean isUnavailable(String resourceID){
 		return resources.contains(resourceID);

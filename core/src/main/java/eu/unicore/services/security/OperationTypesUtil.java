@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2012 ICM Uniwersytet Warszawski All rights reserved.
- * See LICENCE.txt file for licensing information.
- */
 package eu.unicore.services.security;
 
 import java.util.HashMap;
@@ -18,8 +14,8 @@ import eu.unicore.security.OperationType;
  * @author K. Benedyczak
  */
 public class OperationTypesUtil {
-	private Map<String, Map<String, OperationType>> types = new HashMap<String, 
-			Map<String, OperationType>>();
+
+	private final Map<String, Map<String, OperationType>> types = new HashMap<>();
 	
 	public void addService(String serviceName, Map<String, OperationType> types) {
 		this.types.put(serviceName, types);

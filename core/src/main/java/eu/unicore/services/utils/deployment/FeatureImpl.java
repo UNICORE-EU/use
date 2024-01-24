@@ -17,7 +17,6 @@ import eu.unicore.services.Kernel;
  */
 public class FeatureImpl implements Feature {
 
-
 	protected String name;
 
 	protected Kernel kernel;
