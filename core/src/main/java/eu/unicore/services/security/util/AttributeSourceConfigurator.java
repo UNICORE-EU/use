@@ -84,7 +84,7 @@ public class AttributeSourceConfigurator {
 		}
 		String oldPrefix = "eu.unicore.uas.security";
 		if(clazz.startsWith(oldPrefix)) {
-			clazz = "eu.unicore.services.pdp" + clazz.substring(oldPrefix.length());
+			clazz = "eu.unicore.services.aip" + clazz.substring(oldPrefix.length());
 			updated = true;
 		}
 		if(updated) {
