@@ -12,7 +12,7 @@ import javax.security.auth.x500.X500Principal;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.impl.OpensslNameUtils;
-import eu.unicore.services.utils.Pair;
+import eu.unicore.util.Pair;
 
 
 public class TestGridMapFileParsing {
