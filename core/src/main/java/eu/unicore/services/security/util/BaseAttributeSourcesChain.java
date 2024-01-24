@@ -13,7 +13,7 @@ import eu.unicore.services.ISubSystem;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.IAttributeSourceBase;
-import eu.unicore.services.utils.Pair;
+import eu.unicore.util.Pair;
 import eu.unicore.util.configuration.ConfigurationException;
 
 /**

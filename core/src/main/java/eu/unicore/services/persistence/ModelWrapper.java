@@ -102,23 +102,13 @@ public class ModelWrapper implements Serializable {
 				JsonDeserializationContext context)
 						throws JsonParseException {
 			String className = json.getAsJsonObject().get("className").getAsString();
-			Class<?>modelClass = null;
 			try{
-				modelClass = Class.forName(className);
+				Class<?>modelClass = Class.forName(className);
+				Model model =  context.deserialize(json.getAsJsonObject().get("model"),modelClass);
+				return new ModelWrapper(model);
 			}catch(ClassNotFoundException cne) {
-				try{
-					// TODO remove in U9
-					String newName = _classname_updates.get(className);
-					if(newName==null) {
-						newName = className.replace("de.fzj.unicore.wsrflite", "eu.unicore.services");
-					}
-					modelClass = Class.forName(newName);
-				}catch(ClassNotFoundException cne1){
-					throw new JsonParseException("Unknown model class "+className, cne);
-				}
+				throw new JsonParseException("Unknown model class "+className, cne);
 			}
-			Model model =  context.deserialize(json.getAsJsonObject().get("model"),modelClass);
-			return new ModelWrapper(model);
 		}
 
 	}

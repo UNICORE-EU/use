@@ -23,8 +23,8 @@ import eu.unicore.services.rest.security.sshkey.SSHKeyUC;
 import eu.unicore.services.rest.security.sshkey.SSHUtils;
 import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
-import eu.unicore.services.utils.Pair;
 import eu.unicore.util.Log;
+import eu.unicore.util.Pair;
 import eu.unicore.util.configuration.ConfigurationException;
 import jakarta.servlet.http.HttpServletRequest;
 

@@ -36,8 +36,8 @@ import eu.unicore.services.security.ACLEntry;
 import eu.unicore.services.security.SecurityManager;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.services.utils.LoadingMap;
-import eu.unicore.services.utils.Pair;
 import eu.unicore.util.Log;
+import eu.unicore.util.Pair;
 
 /**
  * This is a basic implementation of the Home interface. 

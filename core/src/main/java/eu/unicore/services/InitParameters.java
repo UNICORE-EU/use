@@ -5,7 +5,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import eu.unicore.services.ExtendedResourceStatus.ResourceStatus;
 import eu.unicore.services.security.ACLEntry;
