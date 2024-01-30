@@ -68,7 +68,7 @@
     <xuudb.version>2.9.0</xuudb.version>
     <cxf.version>4.0.3</cxf.version>
     <jetty.version>11.0.19</jetty.version>
-    <metrics.version>4.2.23</metrics.version>
+    <metrics.version>4.2.25</metrics.version>
     <jwt.version>9.37.2</jwt.version>
     <tink.version>1.12.0</tink.version>
     <sshj.version>0.38.0</sshj.version>
