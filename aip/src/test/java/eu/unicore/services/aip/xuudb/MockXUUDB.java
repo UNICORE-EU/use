@@ -10,9 +10,9 @@ import de.fzJuelich.unicore.xuudb.CheckCertificateResponseDocument;
 import de.fzJuelich.unicore.xuudb.CheckDNDocument;
 import de.fzJuelich.unicore.xuudb.CheckDNResponseDocument;
 import de.fzJuelich.unicore.xuudb.LoginDataType;
-import de.fzj.unicore.xuudb.X509Utils;
-import de.fzj.unicore.xuudb.interfaces.IPublic;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
+import eu.unicore.xuudb.X509Utils;
+import eu.unicore.xuudb.interfaces.IPublic;
 
 public class MockXUUDB implements IPublic{
 

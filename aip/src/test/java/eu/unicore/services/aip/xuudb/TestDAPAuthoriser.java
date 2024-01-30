@@ -3,7 +3,6 @@ package eu.unicore.services.aip.xuudb;
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 
-import de.fzj.unicore.xuudb.interfaces.IDynamicAttributesPublic;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.unicore.security.Client;
@@ -13,6 +12,7 @@ import eu.unicore.security.Xlogin;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.TestConfigUtil;
+import eu.unicore.xuudb.interfaces.IDynamicAttributesPublic;
 import junit.framework.TestCase;
 
 public class TestDAPAuthoriser extends TestCase {

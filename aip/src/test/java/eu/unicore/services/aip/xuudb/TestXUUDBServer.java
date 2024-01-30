@@ -12,11 +12,11 @@ import org.junit.Test;
 
 import de.fzJuelich.unicore.xuudb.AddCertificateDocument;
 import de.fzJuelich.unicore.xuudb.LoginDataType;
-import de.fzj.unicore.xuudb.server.HttpsServer;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.TestConfigUtil;
+import eu.unicore.xuudb.server.HttpsServer;
 
 public class TestXUUDBServer {
 

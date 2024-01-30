@@ -11,7 +11,6 @@ import de.fzJuelich.unicore.xuudb.GetAttributesRequestType;
 import de.fzJuelich.unicore.xuudb.GetAttributesResponseDocument;
 import de.fzJuelich.unicore.xuudb.GetAttributesResponseType;
 import de.fzJuelich.unicore.xuudb.SimplifiedAttributeType;
-import de.fzj.unicore.xuudb.interfaces.IDynamicAttributesPublic;
 import eu.unicore.security.Client;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.XACMLAttribute;
@@ -21,6 +20,7 @@ import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.IDynamicAttributeSource;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.IClientConfiguration;
+import eu.unicore.xuudb.interfaces.IDynamicAttributesPublic;
 
 public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPublic> implements
 		IDynamicAttributeSource {

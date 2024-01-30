@@ -6,7 +6,7 @@ import de.fzJuelich.unicore.xuudb.GetAttributesResponseDocument;
 import de.fzJuelich.unicore.xuudb.GetAttributesResponseType;
 import de.fzJuelich.unicore.xuudb.SimulateGetAttributesRequestDocument;
 import de.fzJuelich.unicore.xuudb.SimulateGetAttributesResponseDocument;
-import de.fzj.unicore.xuudb.interfaces.IDynamicAttributesPublic;
+import eu.unicore.xuudb.interfaces.IDynamicAttributesPublic;
 
 public class MockDAP implements IDynamicAttributesPublic{
 
