@@ -27,6 +27,7 @@ import eu.unicore.services.Kernel;
 import eu.unicore.services.KernelInjectable;
 import eu.unicore.services.Model;
 import eu.unicore.services.Resource;
+import eu.unicore.services.admin.ResourceAvailability;
 import eu.unicore.services.exceptions.ResourceUnavailableException;
 import eu.unicore.services.exceptions.ResourceUnknownException;
 import eu.unicore.services.impl.SecuredResourceModel;
@@ -159,6 +160,10 @@ public class USERestInvoker extends JAXRSInvoker {
 			// get and inject the resource and the model
 			try{
 				if(home!=null && resourceID!=null){
+					if(ResourceAvailability.isUnavailable(resourceID)){
+						throw new ResourceUnavailableException("Resource <"+resourceID
+								+"> set to unavailable by an administrator.");
+					}
 					logger.debug("Invoking on resource ID : {}", resourceID);
 					r = needLock ? home.getForUpdate(resourceID) : home.get(resourceID);
 					br.setModel(r.getModel());

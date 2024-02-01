@@ -8,7 +8,7 @@ import java.util.Set;
 import eu.unicore.services.Kernel;
 
 /**
- * Allows to toggle that availability of certain ws-resources.
+ * Allows to toggle the availability of certain resources.
  * If set to unavailable, all attempts to access will result in a 
  * "Resource unavailable" fault. 
  * The state will be cleared by a server restart.
@@ -16,7 +16,7 @@ import eu.unicore.services.Kernel;
  * @author schuller
  */
 public class ResourceAvailability implements AdminAction {
-	
+
 	@Override
 	public String getName() {
 		return "ToggleResourceAvailability";
@@ -24,9 +24,9 @@ public class ResourceAvailability implements AdminAction {
 
 	@Override
 	public String getDescription() {
-		return "'resources' - comma separated list of IDs";
+		return "parameters: resources (comma separated list of IDs)";
 	}
-	
+
 	@Override
 	public AdminActionResult invoke(Map<String, String> params, Kernel kernel) {
 		StringBuilder msg=new StringBuilder();
@@ -41,12 +41,11 @@ public class ResourceAvailability implements AdminAction {
 				msg.append(id).append("=").append(available?"available ":"unavailable ");
 			}
 		}
-		AdminActionResult res=new AdminActionResult(true, msg.toString());
-		return res;
+		return new AdminActionResult(true, msg.toString());
 	}
 
 	private static final Set<String>resources = Collections.synchronizedSet(new HashSet<>());
-	
+
 	public static boolean isUnavailable(String resourceID){
 		return resources.contains(resourceID);
 	}
