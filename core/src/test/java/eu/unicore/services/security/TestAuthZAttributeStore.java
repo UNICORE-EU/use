@@ -1,13 +1,19 @@
 package eu.unicore.services.security;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.services.security.util.AuthZAttributeStore;
-import junit.framework.TestCase;
 
-public class TestAuthZAttributeStore extends TestCase{
+public class TestAuthZAttributeStore {
 	boolean ok = false;
 
+	@Test
 	public void test1()throws InterruptedException{
 		final Client c=new Client();
 		final SecurityTokens t=new SecurityTokens();

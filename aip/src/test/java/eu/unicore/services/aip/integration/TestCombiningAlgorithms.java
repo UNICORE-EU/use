@@ -4,8 +4,12 @@ import static eu.unicore.services.security.ContainerSecurityProperties.PREFIX;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_COMBINING_POLICY;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_ORDER;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_PREFIX;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
+
+import org.junit.Test;
 
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
@@ -20,10 +24,8 @@ import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import eu.unicore.util.httpclient.HttpClientProperties;
-import junit.framework.TestCase;
 
-public class TestCombiningAlgorithms extends TestCase
-{
+public class TestCombiningAlgorithms {
 	protected Kernel kernel;
 
 	protected Properties getProperties()
@@ -77,6 +79,7 @@ public class TestCombiningAlgorithms extends TestCase
 	 * LDAP UVOS-Pull XUUDB File
 	 * where 3 first have inaccessible server configured.
 	 */
+	@Test
 	public void testFirstAccessible() throws Exception {
 		kernel= new Kernel("src/test/resources/use.properties", getProperties());
 		kernel.startSynchronous();

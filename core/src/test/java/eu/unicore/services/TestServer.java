@@ -1,26 +1,27 @@
 package eu.unicore.services;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Properties;
 
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
+import org.junit.Test;
 
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.server.ContainerHttpServerProperties;
 import eu.unicore.services.server.JettyServer;
 import eu.unicore.services.testservice.MockService;
 import eu.unicore.util.httpclient.HttpUtils;
-import junit.framework.TestCase;
 
-public class TestServer extends TestCase{
+public class TestServer {
 
+	@Test
 	public void testSingleService()throws Exception{
 		Properties props = TestConfigUtil.getInsecureProperties();
-		props.setProperty(ContainerProperties.PREFIX + 
-				ContainerProperties.SERVER_HOST, "localhost");
+		props.setProperty(ContainerProperties.PREFIX + ContainerProperties.SERVER_HOST, "localhost");
 		Kernel k=new Kernel(props);
-		
 		JettyServer server=new JettyServer(k, new ContainerHttpServerProperties(props));
 		try {
 			server.start();

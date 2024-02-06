@@ -1,14 +1,18 @@
 package eu.unicore.services.utils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class TestFileWatcher extends TestCase {
+public class TestFileWatcher {
 	
 	Boolean actionRun=Boolean.FALSE;
 	
+	@Test
 	public void testRun()throws Exception{
 		File f=File.createTempFile("wsrflitetest", "bar");
 		f.deleteOnExit();

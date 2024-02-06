@@ -18,7 +18,6 @@ import eu.unicore.services.Feature;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Service;
 import eu.unicore.services.ServiceFactory;
-import eu.unicore.services.exceptions.ServiceDeploymentException;
 import eu.unicore.services.utils.FileWatcher;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
@@ -64,7 +63,7 @@ public class ServiceConfigurator implements IServiceConfigurator {
 		return properties;
 	}
 	
-	public void configureServices() throws Exception{
+	public void configureServices() {
 		if (properties == null)
 			throw new IllegalStateException("loadProperties() must be invoked prior to this method");
 		doConfigureFeatures();
@@ -72,7 +71,7 @@ public class ServiceConfigurator implements IServiceConfigurator {
 		addUserDefinedStartupTasks();
 	}
 	
-	private void doConfigureFeatures() throws Exception {
+	private void doConfigureFeatures() {
 		ServiceLoader<Feature> fl = ServiceLoader.load(Feature.class);
 		for (Feature ft: fl) {
 			ft.setKernel(kernel);
@@ -80,7 +79,7 @@ public class ServiceConfigurator implements IServiceConfigurator {
 		}
 	}
 	
-	private void doConfigureServices() throws Exception {
+	private void doConfigureServices() {
 		ServiceLoader<DeploymentDescriptor> sl = ServiceLoader.load(DeploymentDescriptor.class);
 		for (DeploymentDescriptor dd: sl) {
 			dd.setKernel(kernel);
@@ -91,7 +90,7 @@ public class ServiceConfigurator implements IServiceConfigurator {
 	/*
 	 * add init tasks defined in a property "container.onstartup"
 	 */
-	private void addUserDefinedStartupTasks()throws Exception{
+	private void addUserDefinedStartupTasks() {
 		ContainerProperties settings = kernel.getContainerProperties();
 		List<String> values = settings.getListOfValues(ContainerProperties.ON_STARTUP_LIST_KEY);
 		if (settings.isSet(ContainerProperties.ON_STARTUP_KEY))
@@ -147,10 +146,10 @@ public class ServiceConfigurator implements IServiceConfigurator {
 		}
 	}
 	
-	private void doDeployService(DeploymentDescriptor dd) throws Exception {
+	private void doDeployService(DeploymentDescriptor dd) {
 		ServiceFactory f=kernel.getServiceFactory(dd.getType());
 		if(f==null){
-			throw new ServiceDeploymentException("No factory available for service type <"+dd.getType()+">");
+			throw new ConfigurationException("No factory available for service type <"+dd.getType()+">");
 		}
 		kernel.getDeploymentManager().deployService(f.build(dd));
 		startupTasks.addAll(dd.getInitTasks());

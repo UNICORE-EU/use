@@ -14,10 +14,10 @@ public class DefaultContainerSecurityConfiguration extends DefaultAuthnAndTrustC
 	private boolean sslEnabled;
 	private boolean accessControlEnabled;
 	private String[] defaultVOs;
-	private boolean gatewayAuthnEnabled;
 	private boolean haveFixedGatewayCert;
 	private X509Certificate gatewayCertificate;
 	private String pdpConfigurationFile;
+	private boolean gatewayEnabled;
 	private boolean gatewayWaitingEnabled;
 	private int gatewayWaitTime;
 	private boolean gatewayRegistrationEnabled;
@@ -57,10 +57,10 @@ public class DefaultContainerSecurityConfiguration extends DefaultAuthnAndTrustC
 	}
 
 	@Override
-	public boolean isGatewaySignatureCheckingEnabled() {
-		return true;
+	public boolean isGatewayEnabled() {
+		return gatewayEnabled;
 	}
-	
+
 	@Override
 	public X509Certificate getGatewayCertificate() {
 		return gatewayCertificate;
@@ -79,13 +79,8 @@ public class DefaultContainerSecurityConfiguration extends DefaultAuthnAndTrustC
 		this.haveFixedGatewayCert = value;
 	}
 
-	@Override
-	public boolean isGatewayAuthnEnabled() {
-		return gatewayAuthnEnabled;
-	}
-
-	public void setGatewayAuthnEnabled(boolean gatewayAuthnEnabled) {
-		this.gatewayAuthnEnabled = gatewayAuthnEnabled;
+	public void setGatewayEnabled(boolean gatewayEnabled) {
+		this.gatewayEnabled = gatewayEnabled;
 	}
 
 	@Override

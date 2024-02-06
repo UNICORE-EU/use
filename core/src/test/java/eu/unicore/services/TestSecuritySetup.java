@@ -1,13 +1,15 @@
 package eu.unicore.services;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.util.Properties;
 
-import eu.unicore.services.security.CertificateInfoMetric;
-import eu.unicore.util.Log;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class TestSecuritySetup extends TestCase
+import eu.unicore.services.security.CertificateInfoMetric;
+
+public class TestSecuritySetup
 {
 	private String p1 = "container.security.truststore.keystorePath=src/test/resources/conf/truststore.jks\n" +
 			"container.security.truststore.keystorePassword=unicore\n" +
@@ -42,44 +44,28 @@ public class TestSecuritySetup extends TestCase
 			"container.security.gateway.enable=false\n" +
 			"persistence.directory=/tmp";
 
-	public void testInvalidSettings()
-	{
-		try
-		{
-			Properties p = new Properties();
-			p.load(new ByteArrayInputStream(p1.getBytes()));
-			new Kernel(p);
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-			fail("Should get no error");
-		}
-
-		try
-		{
+	@Test
+	public void testValidSettings() throws Exception {
+		Properties p = new Properties();
+		p.load(new ByteArrayInputStream(p1.getBytes()));
+		new Kernel(p);
+	}
+		
+	@Test(expected = Exception.class)
+	public void testInvalidSettings() throws Exception {
 			Properties p = new Properties();
 			p.load(new ByteArrayInputStream(p2.getBytes()));
 			new Kernel(p);
-			fail("Should get an error");
-		} catch (Exception e)
-		{
-			//OK
-			System.out.println("Got an expected error: "+Log.createFaultMessage("",e));
-		}
-
-		try
-		{
-			Properties p = new Properties();
-			p.load(new ByteArrayInputStream(p3.getBytes()));
-			new Kernel(p);
-			fail("Should get an error");
-		} catch (Exception e)
-		{
-			//OK
-			System.out.println("Got an expected error: "+Log.createFaultMessage("",e));
-		}
+	}
+	
+	@Test(expected = Exception.class)
+	public void testInvalidSettings2() throws Exception {
+		Properties p = new Properties();
+		p.load(new ByteArrayInputStream(p3.getBytes()));
+		new Kernel(p);
 	}
 
+	@Test
 	public void testCertInfoMetric() throws Exception{
 		Properties p = new Properties();
 		p.load(new ByteArrayInputStream(p1.getBytes()));

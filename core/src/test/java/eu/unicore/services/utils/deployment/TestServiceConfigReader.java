@@ -1,15 +1,21 @@
 package eu.unicore.services.utils.deployment;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.List;
+
+import org.junit.Test;
 
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Service;
 import eu.unicore.services.testservice.MockService;
-import junit.framework.TestCase;
 
-public class TestServiceConfigReader extends TestCase {
+public class TestServiceConfigReader {
 
+	@Test
 	public void testDeployService()throws Exception{
 		Kernel k=new Kernel("src/test/resources/conf/use.properties");
 		k.start();
@@ -17,10 +23,8 @@ public class TestServiceConfigReader extends TestCase {
 		assertNotNull(s);
 		assertEquals(MockService.TYPE,s.getType());
 	}
-	
-	/**
-	 * tests that the "uas.onstartup*" properties are properly processed
-	 */
+
+	@Test
 	public void testStartupTasks()throws Exception{
 		String config = "src/test/resources/conf/use-2.properties";
 		Kernel k=new Kernel(config);

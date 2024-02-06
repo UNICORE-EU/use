@@ -11,7 +11,7 @@ import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
  * <ul>
  *  <li> access control settings (PDP)
  *  <li> attribute information points settings (AIP)
- *  <li> gateway integration (whether signatures on gw assertions are required etc)
+ *  <li> gateway integration
  *  <li> default VOs 
  * </ul>
  * Also the local credential and trust settings are accessible as this interface extends 
@@ -51,21 +51,12 @@ public interface IContainerSecurityConfiguration extends IAuthnAndTrustConfigura
 	public String[] getDefaultVOs();
 	
 	/**
-	 * @return whether Consignor assertions (produced by the gateway) should
-	 * processed or ignored.
+	 * @return whether Gateway-related features should be enabled
 	 */
-	public boolean isGatewayAuthnEnabled();
-	
+	public boolean isGatewayEnabled();
+
 	/**
-	 * @return whether signatures of Consignor assertions (produced by the gateway) should
-	 * are required and if are checked. Relevant only if {@link #isGatewayAuthnEnabled()} returns true.
-	 */
-	public boolean isGatewaySignatureCheckingEnabled();
-	
-	/**
-	 * @return the Gateway's certificate. May be null only if 
-	 * {@link #isGatewayAuthnEnabled()} or {@link #isGatewaySignatureCheckingEnabled()} returns false or 
-	 * early during startup when gateway's dn was not yet discovered.
+	 * @return the Gateway's certificate. May be null only if during startup when gateway's dn was not yet discovered.
 	 */
 	public X509Certificate getGatewayCertificate();
 	

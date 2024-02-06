@@ -1,7 +1,14 @@
 package eu.unicore.services.aip.xuudb;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
@@ -13,14 +20,13 @@ import eu.unicore.services.Kernel;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.xuudb.interfaces.IDynamicAttributesPublic;
-import junit.framework.TestCase;
 
-public class TestDAPAuthoriser extends TestCase {
+public class TestDAPAuthoriser {
 	XUUDBDynamicAttributeSource xuudb;
 	MockDAP mock;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Kernel k = new Kernel(TestConfigUtil.getInsecureProperties());
 		mock = new MockDAP();
 		xuudb = new XUUDBDynamicAttributeSource() {
@@ -32,6 +38,7 @@ public class TestDAPAuthoriser extends TestCase {
 		xuudb.configure("test", k);
 	}
 
+	@Test
 	public void testGetAttr() throws Exception {
 		SecurityTokens tokens = new SecurityTokens();
 		X509Certificate[] cert = CertificateUtils.loadCertificateChain(
@@ -67,6 +74,7 @@ public class TestDAPAuthoriser extends TestCase {
 
 	}
 
+	@Test
 	public void testCache() throws Exception {
 		SecurityTokens tokens = new SecurityTokens();
 		X509Certificate[] cert = CertificateUtils.loadCertificateChain(

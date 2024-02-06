@@ -67,6 +67,9 @@ public class TestRegistry {
 			registry.addEntry(endpoint, content, null);
 			return registry.getModel().getEntryID(endpoint);
 		}
+		/**
+		 * tests that the "uas.onstartup*" properties are properly processed
+		 */
 	}
 
 	protected void setupServices(Kernel kernel) throws Exception {

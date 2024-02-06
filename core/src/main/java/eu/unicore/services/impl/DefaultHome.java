@@ -541,10 +541,8 @@ public abstract class DefaultHome implements Home {
 				AtomicInteger num=getInstancesPerUser(owner);
 				int current = num.get();
 				if(current>=getInstanceLimit(owner)){
-					ResourceNotCreatedException rnc=new ResourceNotCreatedException("Limit of <"
+					throw new ResourceNotCreatedException("Limit of <"
 							+current+"> instances of <"+serviceName+"> for <"+owner+"> has been reached.");
-					rnc.setErrorCode(ResourceNotCreatedException.ERR_INSTANCE_LIMIT_EXCEEDED);
-					throw rnc;
 				}
 			}
 			return owner;

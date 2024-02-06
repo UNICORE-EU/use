@@ -7,11 +7,16 @@ import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_CHECKACCESS;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_DAP_ORDER;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_DAP_PREFIX;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import org.junit.Test;
 
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
@@ -19,9 +24,8 @@ import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.Xlogin;
 import eu.unicore.services.Kernel;
 import eu.unicore.util.configuration.ConfigurationException;
-import junit.framework.TestCase;
 
-public class TestSecurityManager extends TestCase {
+public class TestSecurityManager {
 	private static int calls=0;
 	private static boolean aInitCalled = false;
 	private static int intProperty;
@@ -36,6 +40,7 @@ public class TestSecurityManager extends TestCase {
 	private static String dstringProperty = "";
 	private static String dname = "";
 
+	@Test
 	public void testAuthZChainNew()throws Exception{
 		calls=0;
 		aInitCalled = false;
@@ -103,6 +108,7 @@ public class TestSecurityManager extends TestCase {
 	
 	}
 
+	@Test
 	public void testAuthZChainNew2()throws Exception{
 		calls=0;
 		aInitCalled = false;

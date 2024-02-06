@@ -1,14 +1,18 @@
 package eu.unicore.services.utils;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
+import org.junit.Test;
+
 import eu.unicore.services.Capabilities;
 import eu.unicore.services.Capability;
-import junit.framework.TestCase;
 
-public class TestCapabilityFinder extends TestCase {
+public class TestCapabilityFinder {
 
+	@Test
 	public void testLoadCapabilities(){
 		ServiceLoader<Capabilities> sl=ServiceLoader.load(Capabilities.class);
 		Iterator<Capabilities>iter=sl.iterator();

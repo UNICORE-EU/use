@@ -1,10 +1,18 @@
 package eu.unicore.services.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.Properties;
+
+import org.junit.Test;
 
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
@@ -13,11 +21,9 @@ import eu.unicore.services.ExtendedResourceStatus.ResourceStatus;
 import eu.unicore.services.InitParameters;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Resource;
-import eu.unicore.services.exceptions.ErrorCodes;
 import eu.unicore.services.exceptions.ResourceNotCreatedException;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.security.util.AuthZAttributeStore;
-import junit.framework.TestCase;
 
 
 /**
@@ -25,7 +31,7 @@ import junit.framework.TestCase;
  * 
  * @author schuller
  */
-public class TestResourceImpl extends TestCase {
+public class TestResourceImpl {
 
 	private ResourceImpl makeResource(InitParameters initMap)throws Exception{
 		return makeResource(null, initMap);
@@ -49,6 +55,7 @@ public class TestResourceImpl extends TestCase {
 		return r;
 	}
 	
+	@Test
 	public void testSetTerminationTime() throws Exception {
 		Calendar c=new GregorianCalendar();
 		c.add(Calendar.YEAR,1);
@@ -60,12 +67,14 @@ public class TestResourceImpl extends TestCase {
 		assertEquals(tt.getTimeInMillis(),c.getTimeInMillis());
 	}
 
+	@Test
 	public void testSetUniqueIdAndServiceName() throws Exception {
 		Resource r=makeResource(null);
 		assertEquals("123",r.getUniqueID());
 		assertEquals("test",r.getServiceName());
 	}
-	
+
+	@Test
 	public void testSetInitialTerminationTime() throws Exception {
 		Calendar c=new GregorianCalendar();
 		c.add(Calendar.YEAR,1);
@@ -80,6 +89,7 @@ public class TestResourceImpl extends TestCase {
 		
 	}
 	
+	@Test
 	public void testExceedSystemMaxTermTime(){
 		Calendar c=Calendar.getInstance();
 		c.add(Calendar.SECOND, 1500);
@@ -95,20 +105,17 @@ public class TestResourceImpl extends TestCase {
 		}
 	}
 
-	public void testNotExceedSystemMaxTermTime(){
+	@Test
+	public void testNotExceedSystemMaxTermTime() throws Exception {
 		Calendar c=Calendar.getInstance();
 		c.add(Calendar.SECOND, 1500);
 		Properties p = TestConfigUtil.getInsecureProperties();
 		InitParameters initobjs = new InitParameters(null, c);
-		try{
-			ResourceImpl ws=makeResource(p, initobjs);
-			assertNotNull(ws);
-		}
-		catch(Exception ex){
-			fail("Unexpected exception: "+ex);
-		}
+		ResourceImpl ws=makeResource(p, initobjs);
+		assertNotNull(ws);
 	}
 
+	@Test(expected = ResourceNotCreatedException.class)
 	public void testLimitServiceInstancesPerUser()throws Exception{
 		MockHome h=new MockHome(){
 			@Override
@@ -138,15 +145,10 @@ public class TestResourceImpl extends TestCase {
 		assertNotNull(id);
 		id=h.createResource(initobjs);
 		assertNotNull(id);
-		try{
-			id=h.createResource(initobjs);
-			fail("Service limit should be exceeded");
-		}catch(ResourceNotCreatedException rnc){
-			//expected... check it is due to the correct reason
-			assertEquals(ErrorCodes.ERR_INSTANCE_LIMIT_EXCEEDED, rnc.getErrorCode());
-		}
+		id=h.createResource(initobjs);
 	}
-	
+
+	@Test
 	public void testResourceStatus()throws Exception{
 		final ResourceImpl x=makeResource(null);
 		assertEquals(ResourceStatus.READY,x.getResourceStatus());
@@ -157,6 +159,7 @@ public class TestResourceImpl extends TestCase {
 		assertEquals("OK",x.getStatusMessage());
 	}
 
+	@Test
 	public void testRemoveChildren() throws Exception {
 		ResourceImpl r=makeResource(null);
 		r.getModel().addChild("foo", "123");

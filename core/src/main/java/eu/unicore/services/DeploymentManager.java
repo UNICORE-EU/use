@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
-import eu.unicore.services.exceptions.ServiceDeploymentException;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 
@@ -26,7 +25,7 @@ public class DeploymentManager {
 		this.kernel=kernel;
 	}
 
-	public synchronized void deployService(Service service)throws ServiceDeploymentException{
+	public synchronized void deployService(Service service) {
 		if(kernel.getService(service.getName())!=null){
 			logger.info("Service <{}> already deployed, skipping.", service.getName());
 			return;
@@ -39,19 +38,14 @@ public class DeploymentManager {
 			}
 			logger.info("Service <{}> successfully deployed.", service.getName());
 		}catch(Throwable ex){
-			throw new ServiceDeploymentException("Can't deploy service <"+service.getName()+">",ex);
+			throw new ConfigurationException("Can't deploy service <"+service.getName()+">",ex);
 		}
 	}
 
-	public synchronized void deployService(DeploymentDescriptor info) throws ServiceDeploymentException {
-		try {
-			ServiceFactory sf=kernel.getServiceFactory(info.getType());
-			Service service = sf.build(info);
-			deployService(service);
-		}
-		catch(Exception e) {
-			throw new ServiceDeploymentException(e);			
-		}
+	public synchronized void deployService(DeploymentDescriptor info) {
+		ServiceFactory sf=kernel.getServiceFactory(info.getType());
+		Service service = sf.build(info);
+		deployService(service);
 	}
 
 	public final Kernel getKernel(){

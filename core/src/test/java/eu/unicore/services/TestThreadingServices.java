@@ -1,5 +1,9 @@
 package eu.unicore.services;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -9,13 +13,14 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 
-public class TestThreadingServices extends TestCase {
+public class TestThreadingServices {
 
+	@Test
 	public void test1()throws Exception{
-		Callable<String>c=new Callable<String>(){
+		Callable<String>c = new Callable<>(){
 			public String call()throws Exception{
 				Thread.sleep(2000);
 				return "OK";
@@ -34,7 +39,8 @@ public class TestThreadingServices extends TestCase {
 	}
 
 	AtomicInteger running = new AtomicInteger(0);
-	
+
+	@Test
 	public void testExecutor()throws InterruptedException{
 		running.set(0);
 		ContainerProperties cp = new ContainerProperties(new Properties(), false);
@@ -61,7 +67,8 @@ public class TestThreadingServices extends TestCase {
 		Thread.sleep(1000);
 		assertTrue("Have "+threads.size(), threads.size()==poolSize);
 	}
-	
+
+	@Test
 	public void testScheduler()throws InterruptedException{
 		running.set(0);
 		ContainerProperties cp = new ContainerProperties(new Properties(), false);

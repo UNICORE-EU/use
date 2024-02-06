@@ -51,7 +51,7 @@ public class X509Authenticator implements IAuthenticator, KernelInjectable  {
 	public void setKernel(Kernel kernel){
 		this.kernel = kernel;
 		try {
-			haveGateway = kernel.getContainerSecurityConfiguration().isGatewayAuthnEnabled();
+			haveGateway = kernel.getContainerSecurityConfiguration().isGatewayEnabled();
 		}catch(Exception e) {}
 	}
 	
@@ -104,7 +104,12 @@ public class X509Authenticator implements IAuthenticator, KernelInjectable  {
 	
 	private boolean isValid(String dn, String signature){
 		try{
-			PublicKey pub = kernel.getContainerSecurityConfiguration().getGatewayCertificate().getPublicKey();
+			X509Certificate gwCert = kernel.getContainerSecurityConfiguration().getGatewayCertificate(); 
+			if(gwCert==null) {
+				logger.debug("No gateway cert - cannot verify signature for DN <{}>", dn);
+				return false;
+			}
+			PublicKey pub = gwCert.getPublicKey();
 			String alg = "RSA".equalsIgnoreCase(pub.getAlgorithm())? "SHA1withRSA" : "SHA1withDSA";
 			Signature dsig = Signature.getInstance(alg);
 			dsig.initVerify(pub);

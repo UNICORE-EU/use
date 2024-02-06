@@ -1,20 +1,27 @@
 package eu.unicore.services.persistence;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
 import eu.unicore.persist.impl.InMemory;
 import eu.unicore.persist.impl.LockSupport;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.impl.ResourceImpl;
 import eu.unicore.services.security.TestConfigUtil;
-import junit.framework.TestCase;
 
-public class TestPersistenceManager extends TestCase{
+public class TestPersistenceManager {
 
+	@Test
 	public void testLockSupport() throws Exception{
 		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
 		LockSupport ls=k.getPersistenceManager().getLockSupport();
 		assertNotNull(ls);
 	}
-	
+
+	@Test
 	public void testStoreHandling() throws Exception{
 		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
 		PersistenceManager p=k.getPersistenceManager();
@@ -28,14 +35,16 @@ public class TestPersistenceManager extends TestCase{
 		s=p.persistMap.get("test");
 		assertNull(s);
 	}
-	
+
+	@Test
 	public void testGetPersistenceSettings() throws Exception{
 		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
 		PersistenceManager p=k.getPersistenceManager();
 		PersistenceSettings ps=p.getPersistenceSettings(ResourceImpl.class);
 		assertNotNull(ps);
 	}
-	
+
+	@Test
 	public void testInMemory() throws Exception{
 		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
 		PersistenceManager p=k.getPersistenceManager();
@@ -45,5 +54,5 @@ public class TestPersistenceManager extends TestCase{
 		assertTrue (((Persistence)s).getBackEnd() instanceof InMemory);
 		assertNotNull(s.getUniqueIDs());
 	}
-	
+
 }

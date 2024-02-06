@@ -22,7 +22,7 @@ public class TestAdminActions {
 		AdminAction aAct=act.get("mock");
 		assertNotNull(aAct);
 		assertEquals("mock", aAct.getName());
-		Map<String,String>params=new HashMap<String, String>();
+		Map<String,String>params = new HashMap<>();
 		params.put("foo", "foo-value");
 		AdminActionResult result=aAct.invoke(params, k);
 		assertTrue(result.successful());

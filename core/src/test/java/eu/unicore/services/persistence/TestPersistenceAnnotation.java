@@ -1,15 +1,17 @@
 package eu.unicore.services.persistence;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.List;
 
+import org.junit.Test;
+
 import eu.unicore.util.ConcurrentAccess;
-import junit.framework.TestCase;
 
-public class TestPersistenceAnnotation extends TestCase{
+public class TestPersistenceAnnotation {
 
-	protected void setUp(){
-	}
-	
+	@Test
 	public void test1(){
 		PersistenceSettings ps=PersistenceSettings.get(MockWSR1.class);
 		assertTrue(ps.isConcurrentMethod("foo"));
@@ -18,6 +20,7 @@ public class TestPersistenceAnnotation extends TestCase{
 		
 	}
 
+	@Test
 	public void testInherited(){
 		PersistenceSettings ps=PersistenceSettings.get(MockWSR2.class);
 		assertFalse(ps.isLoadOnce());
@@ -25,6 +28,7 @@ public class TestPersistenceAnnotation extends TestCase{
 		assertTrue(ps.isConcurrentMethod("bar"));
 	}
 	
+	@Test
 	public void testSpecifyConcurrentMethods(){
 		PersistenceSettings ps=PersistenceSettings.get(MockWSR1.class);
 		assertTrue(ps.isLoadOnce());
@@ -32,7 +36,6 @@ public class TestPersistenceAnnotation extends TestCase{
 		assertTrue(methods.contains("foo"));
 		assertFalse(methods.contains("bar"));
 		assertFalse(methods.contains("baz"));
-		System.out.println(ps);
 	}
 	
 	@Persistent(loadSemantics=LoadSemantics.LOAD_ONCE)

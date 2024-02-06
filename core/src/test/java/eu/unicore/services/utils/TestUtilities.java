@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Properties;
 
 import org.apache.xmlbeans.XmlObject;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import eu.unicore.services.ContainerProperties;
@@ -15,11 +15,11 @@ import eu.unicore.services.security.util.AuthZAttributeStore;
 
 public class TestUtilities {
 	
-	static String gw="http://gwhost:1234";
-	static ContainerProperties k;
+	String gw="http://gwhost:1234";
+	ContainerProperties k;
 	
-	@BeforeClass
-	public static void setUp(){
+	@Before
+	public void setUp(){
 		Properties properties = new Properties();
 		String base=gw+"/SITE";
 		k=new ContainerProperties(properties, false);

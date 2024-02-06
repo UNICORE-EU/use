@@ -5,6 +5,10 @@ import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_ORDER;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_PREFIX;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_CHECKACCESS;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import org.junit.Test;
 
 import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.SecurityTokens;
@@ -24,10 +30,10 @@ import eu.unicore.services.security.util.AttributeSourceConfigurator;
 import eu.unicore.services.security.util.AttributeSourcesChain;
 import eu.unicore.services.security.util.BaseAttributeSourcesChain.CombiningPolicy;
 import eu.unicore.util.configuration.ConfigurationException;
-import junit.framework.TestCase;
 
-public class TestAuthChainFactory extends TestCase{
+public class TestAuthChainFactory {
 
+	@Test
 	public void testNoConfigCase()throws Exception{
 		Properties props = getDefaultConfig();
 		props.setProperty(PREFIX+PROP_CHECKACCESS, "false");
@@ -37,6 +43,7 @@ public class TestAuthChainFactory extends TestCase{
 		assertTrue(a instanceof NullAttributeSource);
 	}
 
+	@Test
 	public void testConfigureAuthoriser()throws Exception{
 		Properties props = new Properties();
 		props.put(PREFIX+PROP_AIP_ORDER,"TEST1");
@@ -54,6 +61,7 @@ public class TestAuthChainFactory extends TestCase{
 		assertTrue(ta.isFlag());
 	}
 
+	@Test
 	public void testChain()throws Exception{
 		Properties props = getDefaultConfig();
 		props.setProperty(PREFIX+PROP_CHECKACCESS, "false");
@@ -73,6 +81,7 @@ public class TestAuthChainFactory extends TestCase{
 		assertTrue(authZChain.get(2) instanceof TestAuthZ);
 	}
 
+	@Test
 	public void testChainCombiningPolicy()throws Exception{
 		Properties props = getDefaultConfig();
 		props.setProperty(PREFIX+PROP_CHECKACCESS, "false");
@@ -93,6 +102,7 @@ public class TestAuthChainFactory extends TestCase{
 		assertTrue(chain.getCombiningPolicy() == AttributeSourcesChain.FIRST_APPLICABLE);
 	}
 
+	@Test
 	public void testChainCustomCombiningPolicy()throws Exception{
 		Properties props = getDefaultConfig();
 		props.setProperty(PREFIX+PROP_CHECKACCESS, "false");
@@ -114,6 +124,7 @@ public class TestAuthChainFactory extends TestCase{
 		assertTrue(chain.getCombiningPolicy() instanceof TestPolicy);
 	}
 
+	@Test
 	public void testMergePolicy(){
 		CombiningPolicy m = AttributeSourcesChain.MERGE;
 		String[] a1=new String[]{"foo","bar"};
@@ -166,6 +177,7 @@ public class TestAuthChainFactory extends TestCase{
 		assertTrue(x3.contains(xacmlAttributes2.get(3)));
 	}
 
+	@Test
 	public void testMergeOverridesPolicy(){
 		CombiningPolicy m = AttributeSourcesChain.MERGE_LAST_OVERRIDES;
 		String[] a1=new String[]{"foo","bar"};
@@ -187,6 +199,7 @@ public class TestAuthChainFactory extends TestCase{
 		assertTrue(s.contains("spam"));
 	}
 
+	@Test
 	public void testFirstApplicablePolicy(){
 		CombiningPolicy m = AttributeSourcesChain.FIRST_APPLICABLE;
 		String[] a1=new String[]{"foo","bar"};
@@ -208,6 +221,7 @@ public class TestAuthChainFactory extends TestCase{
 		assertFalse(s.contains("spam"));
 	}
 
+	@Test
 	public void testFirstAccessiblePolicy() throws Exception {
 		Properties props = getDefaultConfig();
 		props.setProperty(PREFIX+PROP_CHECKACCESS, "false");
@@ -243,6 +257,7 @@ public class TestAuthChainFactory extends TestCase{
 		return props;
 	}
 
+	@Test
 	public void testChainedPolicy1() throws Exception {
 		Properties props=prepareProperties();
 		addDefaultConfig(props);
@@ -267,6 +282,7 @@ public class TestAuthChainFactory extends TestCase{
 		assertFalse(s.contains("spam"));
 	}
 
+	@Test
 	public void testChainedPolicy2() throws Exception {
 		Properties props=prepareProperties();
 		addDefaultConfig(props);
@@ -291,6 +307,7 @@ public class TestAuthChainFactory extends TestCase{
 		assertFalse(s.contains("spam"));
 	}
 
+	@Test
 	public void testChainedPolicy3() throws Exception {
 		Properties props=prepareProperties();
 		addDefaultConfig(props);

@@ -1,7 +1,14 @@
 package eu.unicore.services.aip.xuudb;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
@@ -17,15 +24,14 @@ import eu.unicore.services.Kernel;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.xuudb.interfaces.IPublic;
-import junit.framework.TestCase;
 
-public class TestXUUDBAuthoriser extends TestCase{
+public class TestXUUDBAuthoriser {
 
 	XUUDBAttributeSource xuudb;
 	MockXUUDB mock;
 	
-	@Override
-	protected void setUp()throws Exception{
+	@Before
+	public void setUp()throws Exception{
 		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
 		mock=new MockXUUDB();
 		xuudb=new XUUDBAttributeSource() {
@@ -38,6 +44,7 @@ public class TestXUUDBAuthoriser extends TestCase{
 		xuudb.configure("test",k);
 	}
 
+	@Test
 	public void testCheckProxyDN()throws Exception{
 		X509Credential cred = new KeystoreCredential("src/test/resources/xuudb/user-keystore.jks",
 				"the!user".toCharArray(), "the!user".toCharArray(), "demo user", "jks");
@@ -58,6 +65,7 @@ public class TestXUUDBAuthoriser extends TestCase{
 		assertEquals(userName,mock.lastDN);
 	}
 	
+	@Test
 	public void testCheckDNResult()throws Exception{
 		SecurityTokens tokens=new SecurityTokens();
 		X509Certificate[] cert=CertificateUtils.loadCertificateChain(

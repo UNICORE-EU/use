@@ -69,9 +69,9 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	
 	
 	/**
-	 * do we honor gateway assertions?
+	 * are gateway-related features enabled?
 	 */
-	public final static String PROP_GATEWAY_AUTHN = "gateway.enable";
+	public final static String PROP_GATEWAY_ENABLE = "gateway.enable";
 	
 	/**
 	 * do we check if the consignor assertion is signed?
@@ -194,10 +194,10 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		META.put(PROP_DEFAULT_VOS, new PropertyMD("").setList(true).
 				setDescription("List of default VOs, which should be assigned for a request without " +
 						"a VO set. The first VO on the list where the user is member will be used."));
-		META.put(PROP_GATEWAY_AUTHN, new PropertyMD("true").
-				setDescription("Whether to accept gateway-based authentication. Note that if it is enabled " +
-						"either the site must be secured (usually via firewall) to disable " +
-						"non-gateway access or the verification of gateway's assertions must be enabled."));
+		META.put(PROP_GATEWAY_ENABLE, new PropertyMD("true").
+				setDescription("Whether to gateway-related features are enabled. Note that if it is enabled " +
+						"either the UNICORE/X server must be secured (usually via firewall) to disable " +
+						"non-gateway access."));
 		META.put(PROP_CHECK_CONSIGNOR_SIGNATURE, new PropertyMD("true").
 				setDeprecated().setDescription("(deprecated)"));
 		META.put(PROP_GATEWAY_CERT, new PropertyMD().setPath().
@@ -270,9 +270,9 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		setSslEnabled(properties.getBooleanValue(PROP_SSL_ENABLED));
 		setAccessControlEnabled(properties.getBooleanValue(PROP_CHECKACCESS));
 		setPdpConfigurationFile(properties.getValue(PROP_CHECKACCESS_PDPCONFIG));
-		setGatewayAuthnEnabled(properties.getBooleanValue(PROP_GATEWAY_AUTHN));
+		setGatewayEnabled(properties.getBooleanValue(PROP_GATEWAY_ENABLE));
 		boolean credNeeded = isSslEnabled();
-		boolean trustNeeded = isSslEnabled() || isGatewayAuthnEnabled();
+		boolean trustNeeded = isSslEnabled() || isGatewayEnabled();
 		authAndTrustProperties = new AuthnAndTrustProperties(source,
 				PREFIX + TruststoreProperties.DEFAULT_PREFIX,
 				PREFIX + CredentialProperties.DEFAULT_PREFIX,
@@ -303,7 +303,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		List<String> defaultVos = properties.getListOfValues(PROP_DEFAULT_VOS); 
 		setDefaultVOs(defaultVos.toArray(new String[0]));
 		
-		if (isGatewayAuthnEnabled()) {
+		if (isGatewayEnabled()) {
 			logger.info("Enabling gateway support");
 			setGatewayRegistrationEnabled(properties.getBooleanValue(PROP_AUTOREGISTER_WITH_GATEWAY));
 			if (isGatewayRegistrationEnabled()) {

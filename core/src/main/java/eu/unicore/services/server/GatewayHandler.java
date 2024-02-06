@@ -79,6 +79,7 @@ public class GatewayHandler implements ISubSystem, ExternalSystemConnector {
 		myHost = containerConfiguration.getValue(ContainerProperties.SERVER_HOST) + ":"
 				+containerConfiguration.getValue(ContainerProperties.SERVER_PORT);
 	}
+
 	/**
 	 * wait until a connection to the Gateway has been established
 	 */

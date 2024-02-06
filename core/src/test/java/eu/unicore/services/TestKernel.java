@@ -1,9 +1,17 @@
 package eu.unicore.services;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+
+import org.junit.After;
+import org.junit.Test;
 
 import eu.unicore.services.security.IContainerSecurityConfiguration;
 import eu.unicore.services.security.TestConfigUtil;
@@ -14,21 +22,23 @@ import eu.unicore.services.testservice.MockHome;
 import eu.unicore.services.utils.deployment.DemoFeature;
 import eu.unicore.services.utils.deployment.DemoFeature2;
 import eu.unicore.services.utils.deployment.DemoFeature3;
-import junit.framework.TestCase;
 
-public class TestKernel extends TestCase {
+public class TestKernel {
 
-	protected void tearDown(){
+	@After
+	public void tearDown(){
 		ranStartupTask1=false;
 		ranStartupTask2=false;
 	}
 
+	@Test
 	public void testHeaders() throws Exception{	
 		Kernel k = new Kernel(TestConfigUtil.getInsecureProperties());
 		System.out.println(k.getHeader());
 		System.out.println(k.getConnectionStatus());
 	}
 
+	@Test
 	public void testKernelStartup()throws Exception{
 		Kernel k=new Kernel("src/test/resources/conf/use.properties");
 		try{
@@ -61,12 +71,14 @@ public class TestKernel extends TestCase {
 		}
 	}
 
+	@Test
 	public void testUSEContainer() throws Exception {
 		USEContainer uas=new USEContainer("src/test/resources/conf/use.properties", "TEST");
 		uas.startSynchronous();
 		uas.getKernel().shutdown();
 	}
 
+	@Test
 	public void testStartKernelUsingPropertiesFile()throws Exception{
 		Kernel k=null;
 		try
@@ -97,6 +109,7 @@ public class TestKernel extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLoadClass()throws Exception{
 		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
 		k.load(MockClass1.class);
@@ -106,7 +119,8 @@ public class TestKernel extends TestCase {
 		MockClass3 m3=k.load(MockClass3.class);
 		assertNotNull(m3);
 	}
-	
+
+	@Test
 	public void testStartupTask()throws Exception{
 		Properties extra = new Properties();
 		extra.setProperty(ContainerProperties.PREFIX+ContainerProperties.ON_STARTUP_KEY, 
@@ -128,6 +142,8 @@ public class TestKernel extends TestCase {
 	}
 
 	private int lastRun = 0;
+
+	@Test
 	public void testStartupTasksOrder() throws Exception {
 		Set<StartupTask> toRun = new HashSet<>();
 		toRun.add(new AbstractStartupTask() {
