@@ -87,7 +87,7 @@ public class ModelWrapper implements Serializable {
 	private static final ModelAdapter adapter=new ModelAdapter();
 	
 	// TODO remove for U9
-	private final static Map<String,String> _classname_updates = new HashMap<>();
+	public final static Map<String,String> _classname_updates = new HashMap<>();
 	static {
 		_classname_updates.put("de.fzj.unicore.wsrflite.registry.ServiceRegistryModel", 
 				"eu.unicore.services.registry.RegistryModel");
@@ -102,6 +102,10 @@ public class ModelWrapper implements Serializable {
 				JsonDeserializationContext context)
 						throws JsonParseException {
 			String className = json.getAsJsonObject().get("className").getAsString();
+			if(className.startsWith("de.fzj.unicore.uas.")) {
+				// ugly but simple - U9 to U10 changed package names in UNICORE/X
+				className = className.replace("de.fzj.unicore.uas.", "eu.unicore.uas.");
+			}
 			try{
 				Class<?>modelClass = Class.forName(className);
 				Model model =  context.deserialize(json.getAsJsonObject().get("model"),modelClass);
