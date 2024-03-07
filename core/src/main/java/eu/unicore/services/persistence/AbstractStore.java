@@ -102,6 +102,10 @@ public abstract class AbstractStore implements Store {
 	
 	protected Resource createResource(ResourceBean bean) throws Exception {
 		Resource inst = null;
+		if(bean.className.startsWith("de.fzj.unicore.uas.")) {
+		    // ugly but simple - U9 to U10 changed package names in UNICORE/X
+			bean.className = bean.className.replace("de.fzj.unicore.uas.", "eu.unicore.uas.");
+        }
 		Class<?> clazz = Class.forName(bean.className);
 		inst=(Resource)clazz.getConstructor().newInstance();
 		inst.setKernel(kernel);
