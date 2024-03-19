@@ -1,5 +1,6 @@
 package eu.unicore.services.rest.security;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 import org.apache.logging.log4j.Logger;
@@ -18,6 +19,7 @@ import eu.unicore.security.wsutil.samlclient.AuthnResponseAssertions;
 import eu.unicore.security.wsutil.samlclient.SAMLAuthnClient;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
+import jakarta.xml.ws.WebServiceException;
 
 /**
  * Base class for authenticating to Unity via SAML.
@@ -117,9 +119,11 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 		NameID requester = new NameID(targetUrl, SAMLConstants.NFORMAT_ENTITY);
 		try {
 			return client.authenticate(SAMLConstants.NFORMAT_DN, requester, targetUrl);
-		}catch(RuntimeException e){
-			cb.notOK();
-			throw e;
+		}catch(WebServiceException we) {
+			if(we.getCause()!=null && (we.getCause() instanceof IOException)) {
+				cb.notOK();
+			}
+			throw we;
 		}
 	}
 

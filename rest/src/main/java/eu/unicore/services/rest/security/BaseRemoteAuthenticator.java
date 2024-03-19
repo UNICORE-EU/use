@@ -99,15 +99,16 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 		clientCfg.setSslAuthn(doTLSAuthN);
 		Object cacheKey = extractCredentials(clientCfg, message, tokens);
 		if(cacheKey == null)return false;
-
-		if(!cb.isOK())return true;
 		
 		CacheEntry<T> ce = cache.getIfPresent(cacheKey);
 		boolean cacheHit = ce!=null && !ce.expired();
 		T auth = cacheHit? ce.auth : null;
-
 		try{
 			if(auth==null){
+				if(!cb.isOK()) {
+					// have credentials, but can't check
+					return true;
+				}
 				auth = performAuth(clientCfg);
 				long expires = getExpiryTime(auth);
 				cache.put(cacheKey, new CacheEntry<T>(auth,expires));

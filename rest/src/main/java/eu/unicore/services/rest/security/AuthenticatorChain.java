@@ -57,6 +57,8 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 		k.setAttribute(RESTSecurityProperties.class, sp);
 		String order = sp.getValue(RESTSecurityProperties.PROP_ORDER);
 		if(order==null) {
+			logger.warn("No authentication configured - set <{}{}>",
+					RESTSecurityProperties.PREFIX, RESTSecurityProperties.PROP_ORDER);
 			newChain.add(new RESTSecurityProperties.NullAuthenticator());
 		}
 		else {

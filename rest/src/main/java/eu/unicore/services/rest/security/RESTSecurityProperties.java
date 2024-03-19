@@ -86,6 +86,11 @@ public class RESTSecurityProperties extends PropertiesHelper {
 		public final Collection<String>getAuthSchemes(){
 			return s;
 		}
+
+		@Override
+		public String toString() {
+			return "NONE";
+		}
 	}
-	
+
 }
