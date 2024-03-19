@@ -63,9 +63,11 @@ public class TimeoutRunner<V> implements Callable<V> {
 	 * @param <Result>
 	 * @param task
 	 * @param timeout - time out in milliseconds
-	 * @return a Result or <code>null</code> if the timeout is reached, or an exception occurs
+	 * @return a Result or <code>null</code> if the timeout is reached
+	 * @throws Exception
 	 */
-	public static <Result> Result compute(Callable<Result> task, ThreadingServices service, int timeout){
+	public static <Result> Result compute(Callable<Result> task, ThreadingServices service, int timeout)
+	throws Exception {
 		return compute(task, service, timeout, TimeUnit.MILLISECONDS);
 	}
 	
@@ -76,15 +78,13 @@ public class TimeoutRunner<V> implements Callable<V> {
 	 * @param task
 	 * @param timeout
 	 * @param units the {@link TimeUnit} to use
-	 * @return a Result or <code>null</code> if the timeout is reached or an exception occurs
+	 * @return a Result or <code>null</code> if the timeout is reached
+	 * @throws Exception
 	 */
-	public static <Result> Result compute(Callable<Result> task, ThreadingServices service, int timeout, TimeUnit units){
+	public static <Result> Result compute(Callable<Result> task, ThreadingServices service,
+			int timeout, TimeUnit units) throws Exception {
 		TimeoutRunner<Result> runner=new TimeoutRunner<Result>(task, service, timeout, units);
-		try{
-			return runner.call();
-		}catch(Exception e){
-			return null;
-		}
+		return runner.call();
 	}
-	
+
 }

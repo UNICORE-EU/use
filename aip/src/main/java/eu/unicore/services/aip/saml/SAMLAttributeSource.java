@@ -135,17 +135,22 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 					}
 				}
 			};
-			String result = TimeoutRunner.compute(check, ts, 3000);
-			if ("OK".equals(result)) {
-				statusMessage = "OK [" + name
-						+ " connected to " + fetcher.getServerURL() + "]";
-				status = Status.OK;
-				cb.OK();
-			}
-			else{
-				statusMessage = "CAN'T CONNECT" + " ["+(result!=null ? result : "")+"]";
-				status = Status.DOWN;
-				cb.notOK();
+			try {
+				String result = TimeoutRunner.compute(check, ts, 3000);
+				if ("OK".equals(result)) {
+					statusMessage = "OK [" + name
+							+ " connected to " + fetcher.getServerURL() + "]";
+					status = Status.OK;
+					cb.OK();
+				}
+				else{
+					statusMessage = "CAN'T CONNECT" + " ["+(result!=null ? result : "")+"]";
+					status = Status.DOWN;
+					cb.notOK();
+				}
+			}catch(Exception e) {
+				statusMessage = Log.createFaultMessage("ERROR checking status",e);
+				status = Status.UNKNOWN;
 			}
 		}
 	}

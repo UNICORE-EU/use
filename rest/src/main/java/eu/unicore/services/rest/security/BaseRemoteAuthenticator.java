@@ -220,14 +220,19 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 		if (lastChecked+2000>System.currentTimeMillis())
 			return;
 		ContainerProperties conf = kernel.getContainerProperties();
-		Boolean result = TimeoutRunner.compute(getCheckConnectionTask(address), conf.getThreadingServices(), 2000);
-		if(result!=null && result){
-			status=Status.OK;
-			statusMessage="OK [connected to "+simpleAddress+"]";
-		}
-		else {
-			status=Status.DOWN;
-			statusMessage="CAN'T CONNECT to "+simpleAddress;
+		try {
+			Boolean result = TimeoutRunner.compute(getCheckConnectionTask(address), conf.getThreadingServices(), 2000);
+			if(result!=null && result){
+				status=Status.OK;
+				statusMessage="OK [connected to "+simpleAddress+"]";
+			}
+			else {
+				status=Status.DOWN;
+				statusMessage="CAN'T CONNECT to "+simpleAddress;
+			}
+		}catch(Exception e) {
+			status=Status.UNKNOWN;
+			statusMessage = Log.createFaultMessage("ERROR checking status", e);
 		}
 		lastChecked=System.currentTimeMillis();
 	}

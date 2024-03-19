@@ -43,14 +43,14 @@ public class TestTimeoutRunner {
 	};
 
 	@Test
-	public void testTaskWithTimeout(){
+	public void testTaskWithTimeout() throws Exception {
 		//call with short timeout
 		String result=TimeoutRunner.compute(task1, ts, 100);
 		assertNull(result);
 	}
 	
 	@Test
-	public void testTaskWithoutTimeout(){
+	public void testTaskWithoutTimeout() throws Exception {
 		//call with long timeout
 		String result=TimeoutRunner.compute(task1, ts, 2000);
 		assertNotNull(result);
@@ -58,7 +58,7 @@ public class TestTimeoutRunner {
 	}
 
 	@Test
-	public void testAccuracyOfTimeout(){
+	public void testAccuracyOfTimeout() throws Exception {
 		//call with short timeout
 		String result=TimeoutRunner.compute(task2, ts, 50);
 		assertNull(result);
@@ -68,14 +68,14 @@ public class TestTimeoutRunner {
 	}
 
 	@Test
-	public void testTaskWithTimeoutUsingUnits(){
+	public void testTaskWithTimeoutUsingUnits() throws Exception {
 		//call with short timeout
 		String result=TimeoutRunner.compute(task1, ts, 1000, TimeUnit.MICROSECONDS);
 		assertNull(result);
 	}
 
 	@Test
-	public void testTaskWithoutTimeoutUsingUnits(){
+	public void testTaskWithoutTimeoutUsingUnits() throws Exception {
 		//call with long timeout
 		String result=TimeoutRunner.compute(task1, ts, 10, TimeUnit.SECONDS);
 		assertNotNull(result);

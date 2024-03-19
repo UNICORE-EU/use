@@ -158,19 +158,31 @@ public class GatewayHandler implements ISubSystem, ExternalSystemConnector {
 			statusMessage="N/A (no gateway used)";
 		}
 		else{
-			Pair<X509Certificate, String> res = TimeoutRunner.compute(
+			try {
+				Pair<X509Certificate, String> res = TimeoutRunner.compute(
 					getCheckConnectionTask(gwURL), threadingSrv, 2000);
-			X509Certificate gwCert = res.getM1();
-			if(gwCert!=null){
-				status=Status.OK;
-				statusMessage = "OK";
-				if(!secConfiguration.haveFixedGatewayCertificate()) {
-					secConfiguration.setGatewayCertificate(gwCert);
+				if(res!=null){
+					X509Certificate gwCert = res.getM1();
+					if(gwCert!=null) {
+						status=Status.OK;
+						statusMessage = "OK";
+						if(!secConfiguration.haveFixedGatewayCertificate()) {
+							secConfiguration.setGatewayCertificate(gwCert);
+						}
+					}
+					else {
+						status=Status.DOWN;
+						statusMessage = res.getM2();
+					}
+				}
+				else {
+					status=Status.DOWN;
+					statusMessage = "Timeout error";
 				}
 			}
-			else {
-				status=Status.DOWN;
-				statusMessage = res.getM2();
+			catch(Exception e) {
+				status=Status.UNKNOWN;
+				statusMessage = Log.createFaultMessage("ERROR checking GW status", e);
 			}
 		}
 		lastChecked=System.currentTimeMillis();
