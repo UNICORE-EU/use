@@ -17,13 +17,26 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 /**
- * Utility class to parse file with attributes. Format is described in {@link FileAttributeSource}.
+ * Utility class to parse file with attributes.
+ * 
+ * The file format is quite simple:
+ * <pre>
+ * &lt;fileAttributeSource&gt;
+ *   &lt;entry key="CN=someDN,C=PL"&gt;
+ *     &lt;attribute name="xlogin"&gt;
+ *       &lt;value&gt;nobody&lt;/value&gt;
+ *       &lt;value&gt;somebody&lt;/value&gt;
+ *     &lt;/attribute&gt;
+ *     &lt;attribute name="role"&gt;&lt;value&gt;user&lt;/value&gt;&lt;/attribute&gt;
+ *   &lt;/entry&gt;
+ * &lt;/fileAttributeSource&gt;
+ * </pre>
+ * 
  * StAX parser is used.
  * @author golbi
  */
-public class AttributesFileParser
+public class XMLFileParser implements IFileParser
 {
-	private InputStream is;
 	private static final String MAIN_EL = "fileAttributeSource";
 	private static final String ENTRY_EL = "entry";
 	private static final String ATTR_EL = "attribute";
@@ -31,13 +44,8 @@ public class AttributesFileParser
 	private static final String KEY_EL = "key";
 	private static final QName KEY_AT = new QName("key");
 	private static final QName NAME_AT = new QName("name");
-	
-	public AttributesFileParser(InputStream is)
-	{
-		this.is = is;
-	}
-	
-	public Map<String, List<Attribute>> parse() throws IOException
+
+	public Map<String, List<Attribute>> parse(InputStream is) throws IOException
 	{
 		Map<String, List<Attribute>> ret = new LinkedHashMap<>();
 		XMLInputFactory factory = XMLInputFactory.newInstance();

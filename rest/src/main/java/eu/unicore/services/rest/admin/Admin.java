@@ -50,6 +50,7 @@ public class Admin extends BaseRESTController {
 		status.put("upSince", String.valueOf(kernel.getUpSince().getTime()));
 		status.put("containerVersion", String.valueOf(Kernel.getVersion()));
 		status.put("connectionStatus", getConnectionStatus());
+		status.put("subSystemsStatus", getSubsystemsStatus());
 		status.put("metrics",MetricUtils.getValues(kernel.getMetrics()));
 		return status;
 	}
@@ -89,6 +90,14 @@ public class Admin extends BaseRESTController {
 		return connectionStatus;
 	}
 	
+	protected Map<String,String> getSubsystemsStatus(){
+		Map<String,String> subsystemStatus = new HashMap<>();
+		for(ISubSystem sub: kernel.getSubSystems()){
+			subsystemStatus.put(sub.getName(), sub.getStatusDescription());
+		}
+		return subsystemStatus;
+	}
+
 	@Override
 	protected void updateLinks(){
 		super.updateLinks();

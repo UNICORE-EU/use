@@ -1,0 +1,11 @@
+{
+  "CN=Stanisław Lem, C=PL": {
+    "role": "user",
+    "xlogin": [
+      "somebody",
+      "nobody"
+    ]
+  },
+  "CN=Dead Man, C=US": {"role": "user", "xlogin": "myid"}
+}
+

@@ -64,32 +64,27 @@ public class TestFileParser {
 	{
 		for (String toTest: WRONG)
 		{
-			AttributesFileParser parser = new AttributesFileParser(
-					new ByteArrayInputStream(toTest.getBytes("UTF-16")));
 			try
 			{
-				parser.parse();
+				new XMLFileParser().parse(new ByteArrayInputStream(toTest.getBytes("UTF-16")));
 				fail("Invalid XML was parsed correctly: " + toTest);
-			} catch (IOException e)
-			{
-			}
+			} catch (IOException e){}
 		}
 	}
 
 	@Test
 	public void testOK2() throws Exception
 	{
-		AttributesFileParser parser = new AttributesFileParser(
-				new ByteArrayInputStream(OK2.getBytes("UTF-16")));
-		Map<String, List<Attribute>> map = parser.parse();
+		Map<String, List<Attribute>> map = new XMLFileParser().
+				parse(new ByteArrayInputStream(OK2.getBytes("UTF-16")));
 		assertTrue(map.isEmpty());
 	}
 
 	@Test
 	public void testOK() throws Exception {
-		AttributesFileParser parser = new AttributesFileParser(
-				new ByteArrayInputStream(OK.getBytes("UTF-16")));
-		Map<String, List<Attribute>> map = parser.parse();
+		Map<String, List<Attribute>> map = new XMLFileParser().
+				parse(new ByteArrayInputStream(OK.getBytes("UTF-16")));
+		
 		assertTrue(map.size() == 2);
 		List<Attribute> attrs = map.get("CN=Stanisław Lem, C=PL");
 		assertTrue(attrs != null && attrs.size() == 3);
@@ -112,9 +107,8 @@ public class TestFileParser {
 
 	@Test
 	public void testOK3() throws Exception {
-		AttributesFileParser parser = new AttributesFileParser(
-				new ByteArrayInputStream(OK3.getBytes("UTF-16")));
-		Map<String, List<Attribute>> map = parser.parse();
+		Map<String, List<Attribute>> map = new XMLFileParser().
+				parse(new ByteArrayInputStream(OK3.getBytes("UTF-16")));
 		List<Attribute> attrs = map.get("CN=Stanisław Lem, C=PL");
 		assertTrue(attrs != null && attrs.size() == 3);
 	}

@@ -1,17 +1,12 @@
 package eu.unicore.services.aip.file;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import eu.unicore.security.SecurityTokens;
@@ -26,29 +21,21 @@ public class TestFileAttributeSource
 {
 	public static final String NAME = "TST1";
 
-
-	private FileAttributeSource init(String file, String matching)
+	private FileAttributeSource init(String file, String matching, String format) throws Exception
 	{
 		FileAttributeSource src = new FileAttributeSource();
 		src.setFile(file);
 		src.setMatching(matching);
-		try
-		{
-			Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
-			src.configure(NAME, k);
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-			fail("Can't init AttributeSource: " + e);
-		}
-
+		src.setFormat(format);
+		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
+		src.configure(NAME, k);
 		assertTrue(NAME.equals(src.getName()));
 		return src;
 	}
 
 	@Test
 	public void testStrict() throws Exception {
-		FileAttributeSource src = init("src/test/resources/file/testUudb-strict.xml", "strict");
+		FileAttributeSource src = init("src/test/resources/file/testUudb-strict.xml", "strict", null);
 
 		SecurityTokens tokens = new SecurityTokens();
 		tokens.setUserName("CN=Stanisław Lem, C=PL");
@@ -94,7 +81,7 @@ public class TestFileAttributeSource
 
 	@Test
 	public void testRegExp() throws Exception {
-		FileAttributeSource src = init("src/test/resources/file/testUudb-regexp.xml", "regexp");
+		FileAttributeSource src = init("src/test/resources/file/testUudb-regexp.xml", "regexp", null);
 
 		SecurityTokens tokens = new SecurityTokens();
 		tokens.setConsignorTrusted(true);
@@ -124,9 +111,9 @@ public class TestFileAttributeSource
 		String dst = "target/test-classes/testUudb-copy.xml";
 		File f = new File(dst);
 		f.delete();
-		copyFile(srcF, dst);
-
-		FileAttributeSource src = init(dst, "regexp");
+		FileUtils.copyFile(new File(srcF), new File(dst), false);
+		
+		FileAttributeSource src = init(dst, "regexp", null);
 
 		SecurityTokens tokens = new SecurityTokens();
 		tokens.setConsignorTrusted(true);
@@ -141,8 +128,8 @@ public class TestFileAttributeSource
 		assertTrue(def.get("role") != null && def.get("role").length == 1
 				&& def.get("role")[0].equals("user1"));
 		Thread.sleep(1000);
-		copyFile("src/test/resources/file/testUudb-regexp.xml", 
-				dst);
+		FileUtils.copyFile(new File("src/test/resources/file/testUudb-regexp.xml"), 
+				new File(dst), false);
 
 		holder = src.getAttributes(tokens, null);
 		def = holder.getDefaultIncarnationAttributes();
@@ -152,20 +139,14 @@ public class TestFileAttributeSource
 
 	}
 
-
-
-
-	private static void copyFile(String from, String to) throws IOException
-	{
-		BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(to));
-		InputStream fis = new BufferedInputStream(new FileInputStream(from));
-		int b;
-		while ((b = fis.read()) != -1)
-			os.write(b);
-		os.close();
-		fis.close();
+	@Test
+	public void testDetectFormat() throws Exception {
+		FileAttributeSource src = new FileAttributeSource();
+		String f = "src/test/resources/file/testUudb-strict.xml";
+		assertEquals("XML", src.detectFormat(new File(f)));
+		f = "src/test/resources/file/testUudb.json";
+		assertEquals("JSON", src.detectFormat(new File(f)));
+		
 	}
-
-
 
 }

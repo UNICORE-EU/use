@@ -1,6 +1,10 @@
 package eu.unicore.services.aip.file;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,69 +13,65 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.XACMLAttribute;
+import eu.unicore.security.XACMLAttribute.Type;
+import eu.unicore.services.Kernel;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.util.Log;
-
+import eu.unicore.util.configuration.ConfigurationException;
 
 /**
- * Retrieves client's attributes from a file. File format is quite simple:
- * <pre>
- * &lt;fileAttributeSource&gt;
- *   &lt;entry key="CN=someDN,C=PL"&gt;
- *     &lt;attribute name="xlogin"&gt;
- *       &lt;value&gt;nobody&lt;/value&gt;
- *       &lt;value&gt;somebody&lt;/value&gt;
- *     &lt;/attribute&gt;
- *     &lt;attribute name="role"&gt;&lt;value&gt;user&lt;/value&gt;&lt;/attribute&gt;
- *   &lt;/entry&gt;
- * &lt;/fileAttributeSource&gt;
- * </pre>
- * You can add arbitrary number of attributes and attribute values.
- * <p>
- * Configuration of this source consist of two entries:
- * <ul>
- * <li>file - the path of the described above file with attributes</li>
- * <li>matching - strict|regexp In strict mode canonical representation of the key is compared 
- * with the canonical representation of the argument. In regexp mode then key is considered a regular expression
- * and argument is matched with it.  </li>
- * </ul>
- * <p>
- * Evaluation is simplistic: the first entry matching the client is used (important when
- * you use wildcards). 
- * <p>
- * The attributes file is automatically refreshed after any change, before subsequent read. If the
- * syntax is wrong then loud message is logged and old version is used.
- * <p>
- * Some attribute names are special: xlogin, role, group, supplementaryGroups, addOsGroups, queue.
- * Attributes with those names (case insensitive)
- * are handled as those special UNICORE attributes (e.g. xlogin is used to provide available local OS 
- * user names for the client).
- * <p>
- * All other attributes are treated as XACML authorization attributes of String type and are
- * passed to the PDP. Such attributes must have at least one value to be processed.
- * 
- * @author golbi
- *
+ * Code shared by both existing File sources
+ * @author K. Benedyczak
  */
-public class FileAttributeSource extends FileAttributeSourceBase implements IAttributeSource 
-{
+public class FileAttributeSource implements IAttributeSource {
+	
 	private static final Logger logger = Log.getLogger(Log.SECURITY, FileAttributeSource.class);
 	
+	public static final String SPECIAL_XLOGIN = "xlogin"; 
+	public static final String SPECIAL_ROLE = "role"; 
+	public static final String SPECIAL_GROUP = "group"; 
+	public static final String SPECIAL_SUP_GROUPS = "supplementaryGroups";
+	public static final String SPECIAL_ADD_OS_GIDS = "addOsGroups";
+	public static final String SPECIAL_QUEUE = "queue";
+	
+	private String name;
+
+	private long lastChanged;
+	
 	//config options
+	private File uudbFile;
+	
+	private String format;
+	
 	private enum MatchingTypes {STRICT, REGEXP};
+	
 	private boolean strictMatching = true;
 	
 	private Map<String, List<Attribute>> map;
-	
-	public FileAttributeSource() {
-		super(logger);
+
+	@Override
+	public void configure(String name, Kernel kernel) throws ConfigurationException {
+		this.name = name;
+		try (InputStream is = new FileInputStream(uudbFile)){
+			lastChanged = uudbFile.lastModified();
+			installNewMappings(createParser().parse(is));
+		} catch (FileNotFoundException e1) {
+			throw new ConfigurationException("The file " + uudbFile + " configured as an " +
+					"input of attribute source " + name + " does not exists");
+		} catch (IOException e)
+		{
+			throw new ConfigurationException("Error loading configuration of file attribute source " + 
+					name + ": " + e.toString(), e);
+		}
 	}
+	
 
 	@Override
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens,
@@ -107,7 +107,6 @@ public class FileAttributeSource extends FileAttributeSourceBase implements IAtt
 		return null;
 	}
 	
-	@Override
 	protected void installNewMappings(Map<String, List<Attribute>> newData)
 	{
 		map = newData;
@@ -136,12 +135,123 @@ public class FileAttributeSource extends FileAttributeSourceBase implements IAtt
 			logger.error("Invalid value of the 'matching' configuration option: " + 
 					val + ", using default: " + MatchingTypes.STRICT);
 	}
+
+	@Override
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setFile(String uudbFile) {
+		this.uudbFile = new File(uudbFile);
+	}
+
+	public void setFormat(String format) {
+		this.format = format;
+	}
+	
+	protected void putAttributes(List<Attribute> attrs, Map<String, String[]> allIncRet, 
+			Map<String, String[]> firstIncRet, List<XACMLAttribute> authzRet)
+	{
+		for (Attribute a: attrs)
+		{
+			String name = a.getName();
+			boolean isIncarnation = true;
+			if (name.equalsIgnoreCase(SPECIAL_XLOGIN))
+				name = IAttributeSource.ATTRIBUTE_XLOGIN;
+			else if (name.equalsIgnoreCase(SPECIAL_ROLE))
+				name = IAttributeSource.ATTRIBUTE_ROLE;
+			else if (name.equalsIgnoreCase(SPECIAL_GROUP))
+				name = IAttributeSource.ATTRIBUTE_GROUP;
+			else if (name.equalsIgnoreCase(SPECIAL_SUP_GROUPS))
+				name = IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS;
+			else if (name.equalsIgnoreCase(SPECIAL_ADD_OS_GIDS))
+				name = IAttributeSource.ATTRIBUTE_ADD_DEFAULT_GROUPS;
+			else if (name.equalsIgnoreCase(SPECIAL_QUEUE))
+				name = IAttributeSource.ATTRIBUTE_QUEUES;
+			else
+				isIncarnation = false;
+
+			if (isIncarnation)
+			{
+				//defaults: for all we take a first value listed, 
+				//except of supplementary groups, where we take all.
+				if (!name.equals(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS))
+				{
+					if (a.getValues().size() > 0)
+						firstIncRet.put(name, new String[] {a.getValues().get(0)});
+					else
+						firstIncRet.put(name, new String[] {});
+				} else
+					firstIncRet.put(name, a.getValues().toArray(
+							new String[a.getValues().size()]));
+
+				allIncRet.put(name, a.getValues().toArray(
+						new String[a.getValues().size()]));
+			} else
+			{
+				List<String> values = a.getValues();
+				for (String value: values)
+					authzRet.add(new XACMLAttribute(name, value, Type.STRING));
+				if (values.size() == 0)
+					throw new ConfigurationException("XACML Authorization attribute '"+ name +
+							"' defined without a value (file attribute source " + 
+							getName() + ")");
+			}
+		}
+	}
+	
+	protected synchronized void parseIfNeeded()
+	{
+		long lastMod = uudbFile.lastModified();
+		if (lastMod <= lastChanged)
+			return;
+		lastChanged = lastMod;
+		try(InputStream is = new FileInputStream(uudbFile))
+		{
+			installNewMappings(createParser().parse(is));
+			logger.info("Updated user attributes were loaded from the file {}", uudbFile);
+		} catch (Exception e)
+		{
+			logger.error("Attributes list was NOT updated: {}", e.getMessage());
+		}
+	}
+
+	protected IFileParser createParser() {
+		if(format==null) {
+			format = detectFormat(uudbFile);
+		}
+		if("JSON".equalsIgnoreCase(format)) {
+			return new JSONFileParser();
+		}
+		else if ("XML".equalsIgnoreCase(format)){
+			return new XMLFileParser();
+		}
+		else {
+			throw new ConfigurationException("Unsupported format: "+format);
+		}
+	}
+
+	public String detectFormat(File file) {
+		String f = null;
+		try(InputStream is = new FileInputStream(file))
+		{
+			String content = IOUtils.toString(is, "UTF-8").strip();
+			if(content.startsWith("{")) {
+				f = "JSON";
+			}
+			else if(content.startsWith("<")) {
+				f = "XML";
+			}
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+		return f;
+	}
+
+	public String toString() {
+		return getName()+" ["+uudbFile.getPath()+" ("+format+")]";
+	}
+
 }
-
-
-
-
-
-
-
-
