@@ -31,29 +31,28 @@ import eu.unicore.util.configuration.ConfigurationException;
  * @author K. Benedyczak
  */
 public class FileAttributeSource implements IAttributeSource {
-	
+
 	private static final Logger logger = Log.getLogger(Log.SECURITY, FileAttributeSource.class);
-	
-	public static final String SPECIAL_XLOGIN = "xlogin"; 
-	public static final String SPECIAL_ROLE = "role"; 
-	public static final String SPECIAL_GROUP = "group"; 
+
+	public static final String SPECIAL_XLOGIN = "xlogin";
+	public static final String SPECIAL_ROLE = "role";
+	public static final String SPECIAL_GROUP = "group";
 	public static final String SPECIAL_SUP_GROUPS = "supplementaryGroups";
 	public static final String SPECIAL_ADD_OS_GIDS = "addOsGroups";
 	public static final String SPECIAL_QUEUE = "queue";
-	
+
 	private String name;
 
 	private long lastChanged;
-	
-	//config options
+
 	private File uudbFile;
-	
+
 	private String format;
-	
+
 	private enum MatchingTypes {STRICT, REGEXP};
-	
+
 	private boolean strictMatching = true;
-	
+
 	private Map<String, List<Attribute>> map;
 
 	@Override
@@ -71,7 +70,6 @@ public class FileAttributeSource implements IAttributeSource {
 					name + ": " + e.toString(), e);
 		}
 	}
-	
 
 	@Override
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens,
@@ -87,7 +85,7 @@ public class FileAttributeSource implements IAttributeSource {
 			putAttributes(attrs, retAll, retFirst, retXACML);
 		return new SubjectAttributesHolder(retXACML, retFirst, retAll);
 	}
-	
+
 	private List<Attribute> searchFor(String name)
 	{
 		if (strictMatching)
@@ -106,14 +104,14 @@ public class FileAttributeSource implements IAttributeSource {
 		}
 		return null;
 	}
-	
+
 	protected void installNewMappings(Map<String, List<Attribute>> newData)
 	{
 		map = newData;
 		if (strictMatching)
 			canonMap();
 	}
-	
+
 	private void canonMap()
 	{
 		Map<String, List<Attribute>> map2 = new HashMap<>();
@@ -149,7 +147,7 @@ public class FileAttributeSource implements IAttributeSource {
 	public void setFormat(String format) {
 		this.format = format;
 	}
-	
+
 	protected void putAttributes(List<Attribute> attrs, Map<String, String[]> allIncRet, 
 			Map<String, String[]> firstIncRet, List<XACMLAttribute> authzRet)
 	{
@@ -200,7 +198,7 @@ public class FileAttributeSource implements IAttributeSource {
 			}
 		}
 	}
-	
+
 	protected synchronized void parseIfNeeded()
 	{
 		long lastMod = uudbFile.lastModified();
