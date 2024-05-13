@@ -66,6 +66,10 @@
      <groupId>org.kohsuke</groupId>
      <artifactId>libpam4j</artifactId>
    </dependency>
+   <dependency>
+     <groupId>org.mvel</groupId>
+     <artifactId>mvel2</artifactId>
+   </dependency>
   </dependencies>
 
 </project>

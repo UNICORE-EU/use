@@ -3,11 +3,13 @@ package eu.unicore.services.rest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
 import org.json.JSONObject;
+import org.mvel2.MVEL;
 
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.client.BaseClient;
@@ -43,7 +45,7 @@ public class RESTUtils {
 		}
 		return res;
 	}
-	
+
 	public static String expandTemplate(String template, JSONObject context) {
 		Map<String,String> vars = asMap(context);
 		System.out.println(vars);
@@ -54,11 +56,36 @@ public class RESTUtils {
 		}
 		return template;
 	}
-	
+
+	public static String evaluateToString(String expression, Map<String, Object>vars) {
+		Object res = MVEL.eval(expression, vars);
+		if(res==null)return null;
+		if(res instanceof List<?>){
+			List<?> l = (List<?>)res;
+			if(l.size()>0) {
+				return String.valueOf(((List<?>)res).get(0));
+			}else return null;
+		}
+		else return String.valueOf(res);
+	}
+
+	public static String[] evaluateToArray(String expression, Map<String, Object>vars) {
+		Object res = MVEL.eval(expression, vars);
+		if(res==null)return null;
+		if(res instanceof List<?>){
+			List<?> l = (List<?>)res;
+			String[] result = new String[l.size()];
+			for(int i=0;i<l.size();i++) {
+				result[i]=String.valueOf(l.get(i));
+			}
+			return result;
+		}
+		else return new String[] {String.valueOf(res)};
+	}
+
 	public static Map<String,String>asMap(JSONObject o){
 		return BaseClient.asMap(o);
 	}
-
 
 	public static class HtmlBuilder{
 		

@@ -117,10 +117,14 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 			String dn = tokens.getUserName();
 			if(dn!=null){
 				logger.debug("Successfully authenticated (cached: {}) via {}: <{}>", cacheHit, this, dn);
-				BasicAttributeHolder attr = extractBasicAttributes(auth);
-				if(attr!=null) {
-					tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, attr);
-					logger.debug("Extracted attributes: {}", attr);
+				try {
+					BasicAttributeHolder attr = extractBasicAttributes(auth);
+					if(attr!=null) {
+						tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, attr);
+						logger.debug("Extracted attributes: {}", attr);
+					}
+				}catch(Exception ex) {
+					logger.debug("Error extracting attributes from {}: {}", address, ex.getMessage());
 				}
 			}
 		}catch(Exception ex){

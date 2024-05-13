@@ -73,6 +73,7 @@
     <tink.version>1.13.0</tink.version>
     <sshj.version>0.38.0</sshj.version>
     <jna.version>5.14.0</jna.version>
+    <mvel.version>2.5.2.Final</mvel.version>
   </properties>
 
   <modules>
@@ -230,9 +231,14 @@
       <version>${jwt.version}</version>
     </dependency>
     <dependency>
-    <groupId>com.google.crypto.tink</groupId>
-    <artifactId>tink</artifactId>
-     <version>${tink.version}</version>
+      <groupId>com.google.crypto.tink</groupId>
+      <artifactId>tink</artifactId>
+      <version>${tink.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mvel</groupId>
+      <artifactId>mvel2</artifactId>
+      <version>${mvel.version}</version>
     </dependency>
     <dependency>
       <groupId>com.hierynomus</groupId>

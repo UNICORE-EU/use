@@ -2,6 +2,9 @@ package eu.unicore.services.rest.security;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
@@ -9,6 +12,8 @@ import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.unicore.samly2.SAMLBindings;
 import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.assertion.AssertionParser;
+import eu.unicore.samly2.assertion.AttributeAssertionParser;
+import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.samly2.elements.NameID;
 import eu.unicore.samly2.exceptions.SAMLValidationException;
 import eu.unicore.samly2.trust.TruststoreBasedSamlTrustChecker;
@@ -17,6 +22,8 @@ import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.samlclient.AuthnResponseAssertions;
 import eu.unicore.security.wsutil.samlclient.SAMLAuthnClient;
+import eu.unicore.services.rest.RESTUtils;
+import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import jakarta.xml.ws.WebServiceException;
@@ -37,8 +44,25 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 
 	private boolean validate = true;
 
+	// MVEL scripts for assigning basic attributes
+	protected String uid = null;
+	protected String role = null;
+	protected String groups = null;
+
 	public void setValidate(boolean validate) {
 		this.validate = validate;
+	}
+
+	public void setUid(String uid) {
+		this.uid = uid;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	public void setGroups(String groups) {
+		this.groups = groups;
 	}
 
 	protected AuthnResponseAssertions performAuth(DefaultClientConfiguration clientCfg) throws Exception{
@@ -132,4 +156,45 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 		return  "Unity @ "+simpleAddress;
 	}
 
+	@Override
+	protected BasicAttributeHolder extractBasicAttributes(AuthnResponseAssertions auth) {
+		if(uid==null&&role==null&&groups==null)return null;
+		List<AttributeAssertionParser> samlAttributes = auth.getAttributeAssertions();
+		if(samlAttributes==null || samlAttributes.size()==0)return null;
+		Map<String,List<String>> attr = extractAttributes(auth);
+		if(attr==null || attr.size()==0)return null;
+		BasicAttributeHolder bah = new BasicAttributeHolder();
+		Map<String, Object> vars = new HashMap<>();
+		vars.put("attr", attr);
+		if(uid!=null) {
+			bah.uid = RESTUtils.evaluateToString(uid, vars);
+		}
+		if(role!=null) {
+			bah.role = RESTUtils.evaluateToString(role, vars);
+		}
+		if(groups!=null) {
+			bah.groups = RESTUtils.evaluateToArray(groups, vars);
+		}
+		return bah;
+	}
+
+	protected Map<String,List<String>> extractAttributes(AuthnResponseAssertions auth) {
+		List<AttributeAssertionParser> samlAttributes = auth.getAttributeAssertions();
+		if(samlAttributes==null || samlAttributes.size()==0)return null;
+		Map<String,List<String>> attr = new HashMap<>();
+		for(AttributeAssertionParser aap: samlAttributes) {
+			try {
+				List<ParsedAttribute>samlAttr = aap.getAttributes();
+				if(samlAttr!=null && samlAttr.size()!=0) {
+					for(ParsedAttribute a: samlAttr) {
+						attr.put(a.getName(), a.getStringValues());
+					}
+				}
+			}catch(Exception ex) {
+				logger.debug("Parse error: {}", ex.getMessage());
+			}
+		}
+		logger.debug("Parsed attributes: {}", attr);
+		return attr;
+	}
 }
