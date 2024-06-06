@@ -65,7 +65,7 @@ public class ForwardingHelper implements Runnable {
 	 *
 	 * The host/port of the backend service is either implicit
 	 * (the endpoint knows what to do) or encoded into the endpoint
-	 * using query parameters "?host=...&port=..."
+	 * using query parameters "?host=...&amp;port=..."
 	 *
 	 * @param endpoint the URL to connect to.
 	 * @return SocketChannel

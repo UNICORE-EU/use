@@ -33,8 +33,9 @@ import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.util.Log;
 
 /**
- * base class for resources providing general information about client&server
- * 
+ * base class for resources providing general information
+ * about client and server
+ *
  * @author schuller
  */
 public class ApplicationBaseResource extends RESTRendererBase {

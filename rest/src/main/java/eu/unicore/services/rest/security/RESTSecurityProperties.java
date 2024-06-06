@@ -60,8 +60,7 @@ public class RESTSecurityProperties extends PropertiesHelper {
 	Properties rawProperties;
 	
 	/**
-	 * @param kernel
-	 * @param p
+	 * @param p - Properties to initialise from
 	 * @throws ConfigurationException
 	 */
 	public RESTSecurityProperties(Properties p) throws ConfigurationException {

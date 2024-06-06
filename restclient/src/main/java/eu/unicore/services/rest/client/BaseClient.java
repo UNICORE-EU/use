@@ -411,8 +411,8 @@ public class BaseClient {
 	}
 
 	/**
-	 * Check if the response represents an error (i.e., HTTP status >= 400). In case of
-	 * an error, error information is extracted an a RESTException is thrown.
+	 * Check if the response represents an error (i.e., HTTP status &gt;= 400).
+	 * In case of an error, error information is extracted and a RESTException is thrown.
 	 * 
 	 * @param response - HTTP response
 	 * @throws RESTException - in case the response represents an error

@@ -9,6 +9,7 @@ import java.util.Properties;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.services.persistence.Persistence;
+import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.DocumentationReferenceMeta;
@@ -288,7 +289,7 @@ public class ContainerProperties extends PropertiesHelper {
 			String port = getValue(SERVER_PORT);
 			String protocol = sslMode ? "https" : "http";
 			String site = getValue(VSITE_NAME_PROPERTY);
-			String gwS = getValue("security.gateway.enable");
+			String gwS = getValue("security."+ContainerSecurityProperties.PROP_GATEWAY_ENABLE);
 			if(gwS==null)gwS="true";
 			boolean gw = Boolean.parseBoolean(gwS);
 			
@@ -338,6 +339,7 @@ public class ContainerProperties extends PropertiesHelper {
 	 * For convenience only - this is very often used.
 	 * @return base URL of the container
 	 */
+	@Deprecated
 	public String getBaseUrl() {
 		return getValue(WSRF_BASEURL);
 	}
