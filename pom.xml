@@ -64,7 +64,7 @@
     <herasaf.version>3.0.2</herasaf.version>
     <json.version>20240303</json.version>
     <gson.version>2.11.0</gson.version>
-    <xuudb.version>2.9.0</xuudb.version>
+    <xuudb.version>2.10.0</xuudb.version>
     <cxf.version>4.0.4</cxf.version>
     <jetty.version>11.0.21</jetty.version>
     <metrics.version>4.2.25</metrics.version>
