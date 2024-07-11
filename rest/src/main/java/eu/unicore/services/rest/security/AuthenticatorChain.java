@@ -193,6 +193,11 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 	public String getName() {
 		return "User authentication";
 	}
+
+	@Override
+	public Collection<ExternalSystemConnector> getExternalConnections(){
+		return Collections.unmodifiableCollection(connectors);
+	}
 	
 	public RESTSecurityProperties getSecurityProperties() { 
 		return sp;

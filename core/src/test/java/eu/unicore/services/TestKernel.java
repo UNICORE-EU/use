@@ -93,16 +93,11 @@ public class TestKernel {
 			String test2=k.getContainerProperties().getRawProperties().getProperty("test.foo.property");
 			assertEquals("spam",test2);
 			
-			//base URL
-			String base = k.getContainerProperties().getBaseUrl();
 			//external URL
 			String ext = k.getContainerProperties().getContainerURL();
-			System.out.println(base);
 			System.out.println(ext);
-			assertEquals(base,ext+"/services");
-
+			assertFalse(ext.endsWith("/"));
 			k.refreshConfig();
-
 		} finally {
 			if (k != null)
 				k.shutdown();

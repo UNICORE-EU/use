@@ -163,7 +163,7 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 		if(roleTemplate!=null) {
 			String expanded = RESTUtils.expandTemplate(roleTemplate, auth);
 			if(!roleTemplate.equals(expanded)){
-				attr.role = expanded;
+				attr.setRole(expanded);
 			}
 		}
 		return attr;

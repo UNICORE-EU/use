@@ -1,6 +1,7 @@
 package eu.unicore.services.security;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +17,7 @@ import eu.unicore.util.configuration.ConfigurationException;
  * For example, when authenticating via PAM username/password, the username and group
  * is already established.
  *
- * The role is set to "user".
+ * The role is set to "user" if there is a valid UID
  *
  * This attribute source is enabled by default, and depending on the configured attribute merging policy,
  * is first or last in the chain, so other attribute sources can override the attributes collected here.
@@ -71,9 +72,23 @@ public class AuthAttributesCollector implements IAttributeSource {
 	}
 
 	public static class BasicAttributeHolder {
-		public String role = "user";
+		private String role;
 		public String uid;
 		public String[] groups;
+
+		public String getRole() {
+			if(role!=null)return role;
+			return uid!=null? "user": null;
+		}
+
+		public void setRole(String role) {
+			this.role = role;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("role=%s uid=%s groups=%s", role, uid, Arrays.asList(groups));
+		}
 	}
 	
 }

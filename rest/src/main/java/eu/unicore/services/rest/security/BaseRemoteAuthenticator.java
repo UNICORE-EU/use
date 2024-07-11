@@ -55,7 +55,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	protected final CircuitBreaker cb = new CircuitBreaker();
 
 	protected Cache<Object,CacheEntry<T>> cache;
-	
+
 	// how long to cache "failed" authentication results (millis)
 	protected static long defaultCacheTime =  5 * 60 * 1000;
 

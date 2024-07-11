@@ -66,7 +66,7 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 	}
 
 	protected AuthnResponseAssertions performAuth(DefaultClientConfiguration clientCfg) throws Exception{
-		AuthnResponseAssertions auth = doAuth(kernel.getContainerProperties().getBaseUrl(), clientCfg);
+		AuthnResponseAssertions auth = doAuth(kernel.getContainerProperties().getContainerURL(), clientCfg);
 		if(validate)validate(auth);
 		return auth;
 	}
@@ -105,7 +105,7 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 	protected void validate(AuthnResponseAssertions authn){
 		X509CertChainValidator x509 = kernel.getContainerSecurityConfiguration().getTrustedAssertionIssuers();
 		TruststoreBasedSamlTrustChecker samlTrustChecker = new TruststoreBasedSamlTrustChecker(x509);
-		String endpointURI = kernel.getContainerProperties().getBaseUrl();
+		String endpointURI = kernel.getContainerProperties().getContainerURL();
 		String consumerName = kernel.getContainerSecurityConfiguration().getCredential().getSubjectName();
 
 		SSOAuthnAssertionValidator validator = new SSOAuthnAssertionValidator(consumerName, 
@@ -170,7 +170,7 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 			bah.uid = RESTUtils.evaluateToString(uid, vars);
 		}
 		if(role!=null) {
-			bah.role = RESTUtils.evaluateToString(role, vars);
+			bah.setRole(RESTUtils.evaluateToString(role, vars));
 		}
 		if(groups!=null) {
 			bah.groups = RESTUtils.evaluateToArray(groups, vars);
