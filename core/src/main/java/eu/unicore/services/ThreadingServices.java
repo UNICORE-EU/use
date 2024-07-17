@@ -1,5 +1,6 @@
 package eu.unicore.services;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -93,13 +94,13 @@ public class ThreadingServices {
 	}
 	
 	protected void configureExecutor(){
-		int min=kernelCfg.getIntValue(ContainerProperties.EXEC_CORE_POOL_SIZE);
-		int max=kernelCfg.getIntValue(ContainerProperties.EXEC_MAX_POOL_SIZE);
-		int idle=kernelCfg.getIntValue(ContainerProperties.EXEC_POOL_TIMEOUT);
-		
-		executor=new ThreadPoolExecutor(min, max,
-				idle,TimeUnit.MILLISECONDS,
-				new LinkedBlockingQueue<>(max),
+		int min = kernelCfg.getIntValue(ContainerProperties.EXEC_CORE_POOL_SIZE);
+		int max = kernelCfg.getIntValue(ContainerProperties.EXEC_MAX_POOL_SIZE);
+		int idle = kernelCfg.getIntValue(ContainerProperties.EXEC_POOL_TIMEOUT);
+
+		executor = new UseExecutor(min, max,
+				idle, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<>(4*max),
 				new ThreadFactory(){
         			final AtomicInteger threadNumber = new AtomicInteger(1);
 		        	public Thread newThread(Runnable r) {
@@ -109,40 +110,71 @@ public class ThreadingServices {
 		        	}
 				});
 	}
-	
+
 	/**
 	 * get the current minimum pool size of the scheduler pool
 	 */
 	public int getScheduledExecutorCorePoolSize(){
 		return scheduler.getCorePoolSize();
 	}
-	
+
 	/**
 	 * get the current maximum pool size of the scheduler pool
 	 */
 	public int getScheduledExecutorMaxPoolSize(){
 		return scheduler.getMaximumPoolSize();
 	}
-	
+
 	/**
 	 * get the number of currently active threads in the scheduler pool
 	 */
 	public int getScheduledExecutorActiveThreadCount(){
 		return scheduler.getActiveCount();
 	}
-	
+
 	public int getExecutorCorePoolSize(){
 		return executor.getCorePoolSize();
 	}
-	
+
 	public int getExecutorMaxPoolSize(){
 		return executor.getMaximumPoolSize();
 	}
-	
+
 	public int getExecutorActiveThreadCount(){
 		return executor.getActiveCount();
 	}
 
+	/**
+	 * Improves the behaviour of the ThreadPoolExecutor:
+	 * in case there are less than max threads running,
+	 * more threads are be started before filling up the queue
+	 *
+	 * @author schuller
+	 */
+	public static class UseExecutor extends ThreadPoolExecutor {
+
+		private int coreSize;
+
+		public UseExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
+				BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
+			super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
+			this.coreSize = corePoolSize;
+		}
+
+		@Override
+		public void execute(Runnable command) {
+		    super.execute(command);
+		    final int poolSize = getPoolSize();
+		    if (poolSize < getMaximumPoolSize()) {
+		    	if (getQueue().size() > 0) {
+		            synchronized (this) {
+		                setCorePoolSize(poolSize + 1);
+		                setCorePoolSize(coreSize);
+		            }
+		        }
+		    }
+		}
+	}
 
 }
 

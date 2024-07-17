@@ -23,6 +23,7 @@ import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder
 import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.services.utils.TimeoutRunner;
 import eu.unicore.util.Log;
+import eu.unicore.util.Pair;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.httpclient.ConnectionUtil;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
@@ -225,14 +226,14 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 			return;
 		ContainerProperties conf = kernel.getContainerProperties();
 		try {
-			Boolean result = TimeoutRunner.compute(getCheckConnectionTask(address), conf.getThreadingServices(), 2000);
-			if(result!=null && result){
+			Pair<Boolean, String> result = TimeoutRunner.compute(getCheckConnectionTask(address), conf.getThreadingServices(), 2000);
+			if(result!=null && result.getM1()){
 				status=Status.OK;
 				statusMessage="OK [connected to "+simpleAddress+"]";
 			}
 			else {
 				status=Status.DOWN;
-				statusMessage="CAN'T CONNECT to "+simpleAddress;
+				statusMessage = result!=null? result.getM2() : "CAN'T CONNECT to "+simpleAddress;
 			}
 		}catch(Exception e) {
 			status=Status.UNKNOWN;
@@ -241,9 +242,9 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 		lastChecked=System.currentTimeMillis();
 	}
 	
-	private Callable<Boolean> getCheckConnectionTask(final String url) {
-		Callable<Boolean> getCert=new Callable<Boolean>(){
-			public Boolean call() {
+	private Callable<Pair<Boolean,String>> getCheckConnectionTask(final String url) {
+		return new Callable<>(){
+			public Pair<Boolean, String> call() {
 				try {
 					DefaultClientConfiguration clientCfg = kernel.getClientConfiguration();
 					if(!url.toLowerCase().startsWith("https")) {
@@ -257,16 +258,13 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 					else {
 						ConnectionUtil.getPeerCertificate(clientCfg, url, 2000, logger);
 					}
-					return true;
+					return new Pair<>(Boolean.TRUE, "OK");
 				} catch (UnknownHostException e) {
-					logger.warn("Host is unknown: " + e);
-					return false;
+					return new Pair<>(Boolean.FALSE, "Host is unknown: " + e);
 				} catch (IOException e) {
-					logger.warn("Can't contact {}: {}", url, e);
-					return false;
+					return new Pair<>(Boolean.FALSE, String.format("Can't contact %s: %s", url, e));
 				}
 			}
 		};
-		return getCert;
 	}
 }
