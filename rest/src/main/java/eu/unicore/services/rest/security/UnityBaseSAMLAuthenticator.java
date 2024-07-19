@@ -22,8 +22,6 @@ import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.samlclient.AuthnResponseAssertions;
 import eu.unicore.security.wsutil.samlclient.SAMLAuthnClient;
-import eu.unicore.services.rest.RESTUtils;
-import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import jakarta.xml.ws.WebServiceException;
@@ -157,31 +155,10 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 	}
 
 	@Override
-	protected BasicAttributeHolder extractBasicAttributes(AuthnResponseAssertions auth) {
-		if(uid==null&&role==null&&groups==null)return null;
+	protected Map<String, Object> extractAttributes(AuthnResponseAssertions auth) {
 		List<AttributeAssertionParser> samlAttributes = auth.getAttributeAssertions();
 		if(samlAttributes==null || samlAttributes.size()==0)return null;
-		Map<String,List<String>> attr = extractAttributes(auth);
-		if(attr==null || attr.size()==0)return null;
-		BasicAttributeHolder bah = new BasicAttributeHolder();
-		Map<String, Object> vars = new HashMap<>();
-		vars.put("attr", attr);
-		if(uid!=null) {
-			bah.uid = RESTUtils.evaluateToString(uid, vars);
-		}
-		if(role!=null) {
-			bah.setRole(RESTUtils.evaluateToString(role, vars));
-		}
-		if(groups!=null) {
-			bah.groups = RESTUtils.evaluateToArray(groups, vars);
-		}
-		return bah;
-	}
-
-	protected Map<String,List<String>> extractAttributes(AuthnResponseAssertions auth) {
-		List<AttributeAssertionParser> samlAttributes = auth.getAttributeAssertions();
-		if(samlAttributes==null || samlAttributes.size()==0)return null;
-		Map<String,List<String>> attr = new HashMap<>();
+		Map<String, Object> attr = new HashMap<>();
 		for(AttributeAssertionParser aap: samlAttributes) {
 			try {
 				List<ParsedAttribute>samlAttr = aap.getAttributes();

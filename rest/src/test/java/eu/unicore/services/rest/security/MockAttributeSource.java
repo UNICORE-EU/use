@@ -1,4 +1,4 @@
-package eu.unicore.services.rest;
+package eu.unicore.services.rest.security;
 
 import java.io.IOException;
 import java.util.HashMap;

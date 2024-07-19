@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -18,6 +20,7 @@ import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.KernelInjectable;
+import eu.unicore.services.rest.RESTUtils;
 import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.utils.CircuitBreaker;
@@ -60,6 +63,12 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	// how long to cache "failed" authentication results (millis)
 	protected static long defaultCacheTime =  5 * 60 * 1000;
 
+	// translation scripts / attributes assignment
+	protected String uidAssign;
+	protected String roleAssign;
+	protected String groupsAssign;
+	
+	
 	public void setKernel(Kernel kernel){
 		this.kernel = kernel;
 		createCache();
@@ -88,6 +97,19 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	
 	public void setDoTLSAuthn(boolean use) {
 		this.doTLSAuthN = use;
+	}
+
+	
+	public void setUidAssign(String uidAssign) {
+		this.uidAssign = uidAssign;
+	}
+
+	public void setRoleAssign(String roleAssign) {
+		this.roleAssign = roleAssign;
+	}
+
+	public void setGroupsAssign(String groupsAssign) {
+		this.groupsAssign = groupsAssign;
 	}
 
 	public String toString(){
@@ -119,10 +141,11 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 			if(dn!=null){
 				logger.debug("Successfully authenticated (cached: {}) via {}: <{}>", cacheHit, this, dn);
 				try {
-					BasicAttributeHolder attr = extractBasicAttributes(auth);
-					if(attr!=null) {
-						tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, attr);
-						logger.debug("Extracted attributes: {}", attr);
+					var attr = extractAttributes(auth);
+					BasicAttributeHolder bah = assignAttributes(attr);
+					if(bah!=null) {
+						tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, bah);
+						logger.debug("Extracted attributes: {}", bah);
 					}
 				}catch(Exception ex) {
 					logger.debug("Error extracting attributes from {}: {}", address, ex.getMessage());
@@ -164,10 +187,35 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	 * @param tokens
 	 */
 	protected abstract void extractAuthInfo(T auth, SecurityTokens tokens);
-	
-	// extract basic attributes from the auth reply
-	protected BasicAttributeHolder extractBasicAttributes(T auth) {
+
+	/**
+	 * extract attributes (uid, role, groups) from the auth reply
+	 * @param auth
+	 * @return
+	 */
+	protected Map<String, Object> extractAttributes(T auth) {
 		return null;
+	}
+
+	/**
+	 * assign attributes based on the configured attribute translation profile(s)  
+	 */
+	protected BasicAttributeHolder assignAttributes(Map<String, Object> attr) {
+		if(attr==null || attr.size()==0)return null;
+		if(uidAssign==null&&roleAssign==null&&groupsAssign==null)return null;
+		BasicAttributeHolder bah = new BasicAttributeHolder();
+		Map<String, Object> vars = new HashMap<>();
+		vars.put("attr", attr);
+		if(uidAssign!=null) {
+			bah.uid = RESTUtils.evaluateToString(uidAssign, vars);
+		}
+		if(roleAssign!=null) {
+			bah.setRole(RESTUtils.evaluateToString(roleAssign, vars));
+		}
+		if(groupsAssign!=null) {
+			bah.groups = RESTUtils.evaluateToArray(groupsAssign, vars);
+		}
+		return bah;
 	}
 
 	protected long getExpiryTime(T authObject){

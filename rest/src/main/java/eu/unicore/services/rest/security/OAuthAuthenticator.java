@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.cxf.message.Message;
 import org.apache.hc.client5.http.classic.HttpClient;
@@ -24,7 +25,6 @@ import eu.unicore.security.wsutil.client.OAuthBearerTokenOutInterceptor;
 import eu.unicore.services.rest.RESTUtils;
 import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.services.rest.client.IAuthCallback;
-import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
@@ -41,26 +41,14 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 
 	private final static Collection<String> s = Collections.singletonList("Bearer");
 
-	protected String dnTemplate="UID=%email";
+	protected String dnTemplate; // = "UID=%email";
 
 	protected boolean validate = false;
 	protected String clientID;
 	protected String clientSecret;
 
-	// basic attributes
-	protected String uidTemplate=null;
-	protected String roleTemplate=null;
-
 	public void setDnTemplate(String dnTemplate) {
 		this.dnTemplate = dnTemplate;
-	}
-
-	public void setUidTemplate(String uidTemplate) {
-		this.uidTemplate = uidTemplate;
-	}
-
-	public void setRoleTemplate(String roleTemplate) {
-		this.roleTemplate = roleTemplate;
 	}
 
 	public void setClientID(String clientID) {
@@ -152,21 +140,9 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 		}
 	}
 
-	protected BasicAttributeHolder extractBasicAttributes(JSONObject auth) {
-		BasicAttributeHolder attr = new BasicAttributeHolder();
-		if(uidTemplate!=null) {
-			String expanded = RESTUtils.expandTemplate(uidTemplate, auth);
-			if(!uidTemplate.equals(expanded)){
-				attr.uid = expanded;
-			}
-		}
-		if(roleTemplate!=null) {
-			String expanded = RESTUtils.expandTemplate(roleTemplate, auth);
-			if(!roleTemplate.equals(expanded)){
-				attr.setRole(expanded);
-			}
-		}
-		return attr;
+	@Override
+	protected Map<String,Object> extractAttributes(JSONObject auth) {
+		return RESTUtils.asMap2(auth);
 	}
 
 	public String toString(){

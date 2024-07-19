@@ -2,14 +2,19 @@ package eu.unicore.services.rest;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.mvel2.MVEL;
+
+import com.google.common.collect.ImmutableList;
 
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.client.BaseClient;
@@ -85,6 +90,32 @@ public class RESTUtils {
 
 	public static Map<String,String>asMap(JSONObject o){
 		return BaseClient.asMap(o);
+	}
+
+	public static String[] asStringArray(JSONArray array) throws JSONException {
+		if(array==null) return new String[0];
+		String[] res = new String[array.length()];
+		for(int i=0;i<res.length;i++) {
+			res[i] = String.valueOf(array.get(i));
+		}
+		return res;
+	}
+	
+	public static Map<String, Object>asMap2(JSONObject o){
+		Map<String, Object> attr = new HashMap<>();
+		for(String key: o.keySet()) {
+			Object v = o.get(key);
+			if(v instanceof String) {
+				attr.put(key, String.valueOf(v));
+			}
+			else if(v instanceof JSONArray) {
+				attr.put(key, ImmutableList.copyOf(RESTUtils.asStringArray(o.getJSONArray(key))));
+			}
+			else if (v instanceof JSONObject) {
+				attr.put(key, asMap2(o.getJSONObject(key)));
+			}
+		}
+		return attr;
 	}
 
 	public static class HtmlBuilder{
