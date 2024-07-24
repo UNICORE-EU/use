@@ -19,7 +19,6 @@ import eu.unicore.samly2.exceptions.SAMLValidationException;
 import eu.unicore.samly2.trust.TruststoreBasedSamlTrustChecker;
 import eu.unicore.samly2.validators.SSOAuthnAssertionValidator;
 import eu.unicore.security.AuthenticationException;
-import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.samlclient.AuthnResponseAssertions;
 import eu.unicore.security.wsutil.samlclient.SAMLAuthnClient;
 import eu.unicore.util.Log;
@@ -42,25 +41,8 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 
 	private boolean validate = true;
 
-	// MVEL scripts for assigning basic attributes
-	protected String uid = null;
-	protected String role = null;
-	protected String groups = null;
-
 	public void setValidate(boolean validate) {
 		this.validate = validate;
-	}
-
-	public void setUid(String uid) {
-		this.uid = uid;
-	}
-
-	public void setRole(String role) {
-		this.role = role;
-	}
-
-	public void setGroups(String groups) {
-		this.groups = groups;
 	}
 
 	protected AuthnResponseAssertions performAuth(DefaultClientConfiguration clientCfg) throws Exception{
@@ -83,21 +65,18 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 		return expires;
 	}
 	
-	protected void extractAuthInfo(AuthnResponseAssertions auth, SecurityTokens tokens){
+	@Override
+	protected String assignIdentity(AuthnResponseAssertions auth, Map<String,Object> attrs){
 		if(auth.getAuthNAssertions().size()>0){
 			if(auth.getAuthNAssertions().size()>1){
 				logger.debug("More than one authn assertion found! Will use first one.");
 			}
-			String dn = auth.getAuthNAssertions().get(0).getSubjectName();
-			if(dn != null){
-				tokens.setUserName(dn);
-				tokens.setConsignorTrusted(true);
-				tokens.getContext().put(AuthNHandler.USER_AUTHN_METHOD, "UNITY-SAML");
-			}	
+			return auth.getAuthNAssertions().get(0).getSubjectName();	
 		}
 		else{
 			logger.debug("No authentication assertion found!");
 		}
+		return null;
 	}
 
 	protected void validate(AuthnResponseAssertions authn){
@@ -123,7 +102,6 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 				throw new AuthenticationException("SAML authentication assertion is " +
 						"not trusted: " + e1.getMessage());
 			}
-
 		}
 	}
 
@@ -173,5 +151,10 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 		}
 		logger.debug("Parsed attributes: {}", attr);
 		return attr;
+	}
+
+	@Override
+	protected String getAuthNMethod() {
+		return "UNITY-SAML";
 	}
 }

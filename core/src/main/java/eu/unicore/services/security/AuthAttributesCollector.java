@@ -55,8 +55,9 @@ public class AuthAttributesCollector implements IAttributeSource {
 
 	private void putAttributes(BasicAttributeHolder attrs, Map<String, String[]> ret)
 	{
-		if(attrs.role!=null) {
-			ret.put(IAttributeSource.ATTRIBUTE_ROLE, new String[]{attrs.role});
+		String role = attrs.getRole();
+		if(role!=null) {
+			ret.put(IAttributeSource.ATTRIBUTE_ROLE, new String[]{role});
 		}
 		if(attrs.uid!=null) {
 			ret.put(IAttributeSource.ATTRIBUTE_XLOGIN, new String[]{attrs.uid});

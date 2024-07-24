@@ -41,13 +41,15 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 
 	private final static Collection<String> s = Collections.singletonList("Bearer");
 
-	protected String dnTemplate; // = "UID=%email";
+	// kept for backwards compatibility
+	protected String dnTemplate;
 
 	protected boolean validate = false;
 	protected String clientID;
 	protected String clientSecret;
 
 	public void setDnTemplate(String dnTemplate) {
+		logger.warn("DEPRECATION - instead of dnTemplate, use identityAssign - see documentation.");
 		this.dnTemplate = dnTemplate;
 	}
 
@@ -128,16 +130,22 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 		return j;
 	}
 
-	protected void extractAuthInfo(JSONObject auth, SecurityTokens tokens){
+	@Override
+	protected String assignIdentity(JSONObject auth,  Map<String,Object>  attrs){
 		boolean active = auth.optBoolean("active", true);
+		String dn = null;
 		if(active) {
-			String expanded = RESTUtils.expandTemplate(dnTemplate, auth);
-			if(!dnTemplate.equals(expanded)){
-				tokens.setUserName(expanded);
-				tokens.setConsignorTrusted(true);
-				tokens.getContext().put(AuthNHandler.USER_AUTHN_METHOD, "OAUTH");
+			if(dnTemplate!=null) {
+				String expanded = RESTUtils.expandTemplate(dnTemplate, attrs);
+				if(!dnTemplate.equals(expanded)){
+					dn = expanded;
+				}
+			}
+			if(identityAssign!=null) {
+				dn = RESTUtils.evaluateToString(identityAssign, attrs);
 			}
 		}
+		return dn;
 	}
 
 	@Override
@@ -148,6 +156,11 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 	public String toString(){
 		String mode = validate ? "validate" : "userinfo";
 		return "OAuth Bearer Token ["+address+ " mode="+mode+"]";
+	}
+
+	@Override
+	protected String getAuthNMethod() {
+		return "OAUTH";
 	}
 
 	@Override

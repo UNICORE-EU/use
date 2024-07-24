@@ -51,12 +51,10 @@ public class RESTUtils {
 		return res;
 	}
 
-	public static String expandTemplate(String template, JSONObject context) {
-		Map<String,String> vars = asMap(context);
-		System.out.println(vars);
+	public static String expandTemplate(String template, Map<String,Object> vars) {
 		for(String key: vars.keySet()) {
 			if(template.contains("%"+key)) {
-				template = template.replace("%"+key, vars.get(key));
+				template = template.replace("%"+key, String.valueOf(vars.get(key)));
 			}
 		}
 		return template;

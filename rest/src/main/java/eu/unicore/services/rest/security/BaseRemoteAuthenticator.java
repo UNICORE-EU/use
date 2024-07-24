@@ -1,14 +1,15 @@
 package eu.unicore.services.rest.security;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.cxf.message.Message;
 import org.apache.logging.log4j.Logger;
 
@@ -32,12 +33,17 @@ import eu.unicore.util.httpclient.ConnectionUtil;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 
 /**
- * Base class for authenticating with a remote server
+ * Base class for authenticating with a remote server<br/>
  * 
- * The credentials are extracted from the incoming message. Assertions are validated 
- * using the container's configured trusted assertion issuers.
- * Valid assertions are cached for some time, usually the validity period specified
- * in the authentication assertion from Unity.
+ * The credentials are extracted from the incoming message, and authentication is
+ * performed with the configured endpoint.<br>
+ * Valid assertions are cached for a time, either the validity period specified
+ * in the authentication result, or a default time of 5 minutes.<br/>
+ * 
+ * Aside from assigning the user's identity, the remote authenticator can be configured
+ * to also set authorization attributes (uid, role, groups). This is intended to simplify
+ * common use cases. The attributes assigned here can be overriden later with the
+ * configured attribute sources.   
  * 
  * @author schuller 
  */
@@ -64,6 +70,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	protected static long defaultCacheTime =  5 * 60 * 1000;
 
 	// translation scripts / attributes assignment
+	protected String identityAssign;
 	protected String uidAssign;
 	protected String roleAssign;
 	protected String groupsAssign;
@@ -99,23 +106,39 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 		this.doTLSAuthN = use;
 	}
 
-	
+	public void setIdentityAssign(String identityAssign) {
+		this.identityAssign = handleAssignScript(identityAssign, "identityAssign");
+	}
+
 	public void setUidAssign(String uidAssign) {
-		this.uidAssign = uidAssign;
+		this.uidAssign = handleAssignScript(uidAssign, "uidAssign");
 	}
 
 	public void setRoleAssign(String roleAssign) {
-		this.roleAssign = roleAssign;
+		this.roleAssign = handleAssignScript(roleAssign, "roleAssign");
 	}
 
 	public void setGroupsAssign(String groupsAssign) {
-		this.groupsAssign = groupsAssign;
+		this.groupsAssign = handleAssignScript(groupsAssign, "groupsAssign");
 	}
 
 	public String toString(){
 		return address;
 	}
-			
+
+	private String handleAssignScript(String script, String paramName) {
+		if(script!=null && script.startsWith("@")) {
+			try{
+				return FileUtils.readFileToString(new File(script), "UTF-8");
+			}catch(IOException io) {
+				throw new ConfigurationException("Cannot read value for '"+paramName+"'", io);
+			}
+		}
+		else{
+			return script;
+		}
+	}
+
 	@Override
 	public final boolean authenticate(Message message, SecurityTokens tokens) {
 		DefaultClientConfiguration clientCfg = kernel.getClientConfiguration();
@@ -136,12 +159,14 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 				long expires = getExpiryTime(auth);
 				cache.put(cacheKey, new CacheEntry<T>(auth,expires));
 			}
-			extractAuthInfo(auth, tokens);
-			String dn = tokens.getUserName();
+			Map<String,Object> attr = extractAttributes(auth);
+			String dn = assignIdentity(auth, attr);
 			if(dn!=null){
 				logger.debug("Successfully authenticated (cached: {}) via {}: <{}>", cacheHit, this, dn);
+				tokens.setUserName(dn);
+				tokens.setConsignorTrusted(true);
+				tokens.getContext().put(AuthNHandler.USER_AUTHN_METHOD, getAuthNMethod());
 				try {
-					var attr = extractAttributes(auth);
 					BasicAttributeHolder bah = assignAttributes(attr);
 					if(bah!=null) {
 						tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, bah);
@@ -156,7 +181,12 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 		}
 		return true;
 	}
-	
+
+	/**
+	 * returns the name of the authentication method supported by this authenticator
+	 */
+	protected abstract String getAuthNMethod();
+
 	/**
 	 * extract credentials from the incoming message, and setup the client configuration 
 	 * accordingly. If the message does not contain appropriate credentials, 
@@ -179,14 +209,15 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	 * the circuit breaker to notOK())
 	 */
 	protected abstract T performAuth(DefaultClientConfiguration clientCfg) throws Exception;
-	
+
 	/**
-	 * extract info for authenticated users - like the DN and any TD stuff
-	 * 
+	 * assign identity based on the authentication - like the DN and any TD stuff
+	 *
 	 * @param auth
-	 * @param tokens
+	 * @param attrs attributes extracted via {@link #extractAttributes()}
+	 * @return user identity (X500name) or <code>null</code> if not authenticated
 	 */
-	protected abstract void extractAuthInfo(T auth, SecurityTokens tokens);
+	protected abstract String assignIdentity(T auth, Map<String, Object>attrs);
 
 	/**
 	 * extract attributes (uid, role, groups) from the auth reply
@@ -204,16 +235,14 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 		if(attr==null || attr.size()==0)return null;
 		if(uidAssign==null&&roleAssign==null&&groupsAssign==null)return null;
 		BasicAttributeHolder bah = new BasicAttributeHolder();
-		Map<String, Object> vars = new HashMap<>();
-		vars.put("attr", attr);
 		if(uidAssign!=null) {
-			bah.uid = RESTUtils.evaluateToString(uidAssign, vars);
+			bah.uid = RESTUtils.evaluateToString(uidAssign, attr);
 		}
 		if(roleAssign!=null) {
-			bah.setRole(RESTUtils.evaluateToString(roleAssign, vars));
+			bah.setRole(RESTUtils.evaluateToString(roleAssign, attr));
 		}
 		if(groupsAssign!=null) {
-			bah.groups = RESTUtils.evaluateToArray(groupsAssign, vars);
+			bah.groups = RESTUtils.evaluateToArray(groupsAssign, attr);
 		}
 		return bah;
 	}
