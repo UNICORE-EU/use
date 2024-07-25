@@ -39,11 +39,11 @@ import eu.unicore.util.httpclient.DefaultClientConfiguration;
  * performed with the configured endpoint.<br>
  * Valid assertions are cached for a time, either the validity period specified
  * in the authentication result, or a default time of 5 minutes.<br/>
- * 
+ *
  * Aside from assigning the user's identity, the remote authenticator can be configured
  * to also set authorization attributes (uid, role, groups). This is intended to simplify
  * common use cases. The attributes assigned here can be overriden later with the
- * configured attribute sources.   
+ * configured attribute sources.
  * 
  * @author schuller 
  */
@@ -74,8 +74,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	protected String uidAssign;
 	protected String roleAssign;
 	protected String groupsAssign;
-	
-	
+
 	public void setKernel(Kernel kernel){
 		this.kernel = kernel;
 		createCache();
@@ -229,7 +228,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	}
 
 	/**
-	 * assign attributes based on the configured attribute translation profile(s)  
+	 * assign attributes based on the configured attribute assignment scripts
 	 */
 	protected BasicAttributeHolder assignAttributes(Map<String, Object> attr) {
 		if(attr==null || attr.size()==0)return null;

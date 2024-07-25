@@ -70,7 +70,7 @@ public class Attribute
 			return false;
 		return true;
 	}
-	
+
 	public String toString() {
 		return name+": "+String.valueOf(values);
 	}

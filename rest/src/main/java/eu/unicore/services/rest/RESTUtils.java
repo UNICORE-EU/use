@@ -98,7 +98,7 @@ public class RESTUtils {
 		}
 		return res;
 	}
-	
+
 	public static Map<String, Object>asMap2(JSONObject o){
 		Map<String, Object> attr = new HashMap<>();
 		for(String key: o.keySet()) {

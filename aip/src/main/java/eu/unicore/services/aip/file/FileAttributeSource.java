@@ -66,7 +66,7 @@ public class FileAttributeSource implements IAttributeSource {
 					"input of attribute source " + name + " does not exists");
 		} catch (IOException e)
 		{
-			throw new ConfigurationException("Error loading configuration of file attribute source " + 
+			throw new ConfigurationException("Error loading configuration of file attribute source " +
 					name + ": " + e.toString(), e);
 		}
 	}
@@ -130,8 +130,8 @@ public class FileAttributeSource implements IAttributeSource {
 		else if (val.equalsIgnoreCase(MatchingTypes.REGEXP.name()))
 			strictMatching = false;
 		else
-			logger.error("Invalid value of the 'matching' configuration option: " + 
-					val + ", using default: " + MatchingTypes.STRICT);
+			logger.error("Invalid value of the 'matching' configuration option: {}, using default: {}",
+					val, MatchingTypes.STRICT);
 	}
 
 	@Override
@@ -148,7 +148,7 @@ public class FileAttributeSource implements IAttributeSource {
 		this.format = format;
 	}
 
-	protected void putAttributes(List<Attribute> attrs, Map<String, String[]> allIncRet, 
+	protected void putAttributes(List<Attribute> attrs, Map<String, String[]> allIncRet,
 			Map<String, String[]> firstIncRet, List<XACMLAttribute> authzRet)
 	{
 		for (Attribute a: attrs)
@@ -172,7 +172,7 @@ public class FileAttributeSource implements IAttributeSource {
 
 			if (isIncarnation)
 			{
-				//defaults: for all we take a first value listed, 
+				//defaults: for all we take a first value listed,
 				//except of supplementary groups, where we take all.
 				if (!name.equals(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS))
 				{
@@ -193,7 +193,7 @@ public class FileAttributeSource implements IAttributeSource {
 					authzRet.add(new XACMLAttribute(name, value, Type.STRING));
 				if (values.size() == 0)
 					throw new ConfigurationException("XACML Authorization attribute '"+ name +
-							"' defined without a value (file attribute source " + 
+							"' defined without a value (file attribute source " +
 							getName() + ")");
 			}
 		}
@@ -208,29 +208,24 @@ public class FileAttributeSource implements IAttributeSource {
 		try(InputStream is = new FileInputStream(uudbFile))
 		{
 			installNewMappings(createParser().parse(is));
-			logger.info("Updated user attributes were loaded from the file {}", uudbFile);
+			logger.info("Updated user attributes were loaded from the file <{}>", uudbFile);
 		} catch (Exception e)
 		{
 			logger.error("Attributes list was NOT updated: {}", e.getMessage());
 		}
 	}
 
-	protected IFileParser createParser() {
+	protected IFileParser createParser() throws IOException {
 		if(format==null) {
 			format = detectFormat(uudbFile);
 		}
 		if("JSON".equalsIgnoreCase(format)) {
 			return new JSONFileParser();
 		}
-		else if ("XML".equalsIgnoreCase(format)){
-			return new XMLFileParser();
-		}
-		else {
-			throw new ConfigurationException("Unsupported format: "+format);
-		}
+		else return new XMLFileParser();
 	}
 
-	public String detectFormat(File file) {
+	public String detectFormat(File file) throws IOException {
 		String f = null;
 		try(InputStream is = new FileInputStream(file))
 		{
@@ -241,9 +236,7 @@ public class FileAttributeSource implements IAttributeSource {
 			else if(content.startsWith("<")) {
 				f = "XML";
 			}
-		}
-		catch(IOException e) {
-			e.printStackTrace();
+			else throw new ConfigurationException("File <"+file+"> is invalid.");
 		}
 		return f;
 	}

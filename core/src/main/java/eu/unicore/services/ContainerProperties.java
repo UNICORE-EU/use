@@ -325,7 +325,7 @@ public class ContainerProperties extends PropertiesHelper {
 	/**
 	 * @return URL of the container as it is accessible from clients, i.e. using
 	 * the gateway address and site name if appropriate. <br/>
-	 * 
+	 *
 	 * It does NOT end in a "/" <br/>
 	 */
 	public String getContainerURL() {

@@ -26,7 +26,7 @@ import org.json.JSONObject;
  *  }
  * </pre>
  * where each attribute can have a single value or a list of values
- * 
+ *
  * @author schuller
  */
 public class JSONFileParser implements IFileParser
@@ -57,7 +57,7 @@ public class JSONFileParser implements IFileParser
 					values.add(spec.getString(attributeName));
 				}
 				attributes.add(toAdd);
-			}			
+			}
 			ret.put(key, attributes);
 		}
 

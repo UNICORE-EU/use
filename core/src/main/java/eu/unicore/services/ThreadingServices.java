@@ -166,7 +166,7 @@ public class ThreadingServices {
 		    super.execute(command);
 		    final int poolSize = getPoolSize();
 		    if (poolSize < getMaximumPoolSize()) {
-		    	if (getQueue().size() > 0) {
+		        if (getQueue().size() > 0) {
 		            synchronized (this) {
 		                setCorePoolSize(poolSize + 1);
 		                setCorePoolSize(coreSize);

@@ -19,9 +19,9 @@ public class TestJSONFileParser {
 		OK.put("CN=Stanisław Lem, C=PL", e1);
 		JSONObject e2 = new JSONObject();
 		e2.put("role", "user");
-		OK.put("CN=Dead Man, C=US", e2);
+		OK.put("CN=Ernst Grünfeld, C=AT", e2);
 	}
-	
+
 	@Test
 	public void testOK() throws Exception
 	{

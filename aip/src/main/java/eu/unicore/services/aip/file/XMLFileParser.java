@@ -18,7 +18,7 @@ import javax.xml.stream.events.XMLEvent;
 
 /**
  * Utility class to parse file with attributes.
- * 
+ *
  * The file format is quite simple:
  * <pre>
  * &lt;fileAttributeSource&gt;
@@ -31,7 +31,7 @@ import javax.xml.stream.events.XMLEvent;
  *   &lt;/entry&gt;
  * &lt;/fileAttributeSource&gt;
  * </pre>
- * 
+ *
  * StAX parser is used.
  * @author golbi
  */

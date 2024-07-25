@@ -18,7 +18,6 @@
   <developers>
     <developer>
       <name>Bernd Schuller</name>
-      <email>bschuller at users.sourceforge.net</email>
       <organization>Forschungszentrum Juelich GmbH</organization>
       <organizationUrl>https://www.fz-juelich.de/jsc</organizationUrl>
     </developer>
@@ -64,7 +63,7 @@
     <herasaf.version>3.0.2</herasaf.version>
     <json.version>20240303</json.version>
     <gson.version>2.11.0</gson.version>
-    <xuudb.version>2.10.0</xuudb.version>
+    <xuudb.version>2.10.1</xuudb.version>
     <cxf.version>4.0.5</cxf.version>
     <jetty.version>11.0.22</jetty.version>
     <metrics.version>4.2.26</metrics.version>

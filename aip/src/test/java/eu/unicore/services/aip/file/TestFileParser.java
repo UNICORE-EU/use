@@ -36,7 +36,7 @@ public class TestFileParser {
 					"         <value>nobody</value>" +
 					"      </attribute>" +			
 					"   </entry>" +
-					"   <entry key=\"CN=Dead Man, C=US\">" +
+					"   <entry key=\"CN=Ernst Grünfeld, C=AT\">" +
 					"      <attribute name=\"role\"><value>user</value></attribute>" +
 					"   </entry>" +
 					"</fileAttributeSource>";
@@ -84,7 +84,6 @@ public class TestFileParser {
 	public void testOK() throws Exception {
 		Map<String, List<Attribute>> map = new XMLFileParser().
 				parse(new ByteArrayInputStream(OK.getBytes("UTF-16")));
-		
 		assertTrue(map.size() == 2);
 		List<Attribute> attrs = map.get("CN=Stanisław Lem, C=PL");
 		assertTrue(attrs != null && attrs.size() == 3);
@@ -98,7 +97,7 @@ public class TestFileParser {
 				attrs.get(2).getValues().get(0).equals("somebody") &&
 				attrs.get(2).getValues().get(1).equals("nobody"));
 
-		attrs = map.get("CN=Dead Man, C=US");
+		attrs = map.get("CN=Ernst Grünfeld, C=AT");
 		assertTrue(attrs != null && attrs.size() == 1);
 		assertTrue(attrs.get(0).getName().equals("role") &&
 				attrs.get(0).getValues().size() == 1 &&

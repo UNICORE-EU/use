@@ -71,7 +71,7 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 			if(auth.getAuthNAssertions().size()>1){
 				logger.debug("More than one authn assertion found! Will use first one.");
 			}
-			return auth.getAuthNAssertions().get(0).getSubjectName();	
+			return auth.getAuthNAssertions().get(0).getSubjectName();
 		}
 		else{
 			logger.debug("No authentication assertion found!");

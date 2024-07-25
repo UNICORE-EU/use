@@ -112,7 +112,6 @@ public class TestFileAttributeSource
 		File f = new File(dst);
 		f.delete();
 		FileUtils.copyFile(new File(srcF), new File(dst), false);
-		
 		FileAttributeSource src = init(dst, "regexp", null);
 
 		SecurityTokens tokens = new SecurityTokens();
@@ -128,7 +127,7 @@ public class TestFileAttributeSource
 		assertTrue(def.get("role") != null && def.get("role").length == 1
 				&& def.get("role")[0].equals("user1"));
 		Thread.sleep(1000);
-		FileUtils.copyFile(new File("src/test/resources/file/testUudb-regexp.xml"), 
+		FileUtils.copyFile(new File("src/test/resources/file/testUudb-regexp.xml"),
 				new File(dst), false);
 
 		holder = src.getAttributes(tokens, null);
@@ -146,7 +145,6 @@ public class TestFileAttributeSource
 		assertEquals("XML", src.detectFormat(new File(f)));
 		f = "src/test/resources/file/testUudb.json";
 		assertEquals("JSON", src.detectFormat(new File(f)));
-		
 	}
 
 }
