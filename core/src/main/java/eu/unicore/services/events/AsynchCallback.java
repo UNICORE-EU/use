@@ -1,7 +1,5 @@
 package eu.unicore.services.events;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-
 import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Logger;
