@@ -10,7 +10,6 @@ import eu.unicore.services.Home;
 import eu.unicore.services.InitParameters;
 import eu.unicore.services.InitParameters.TerminationMode;
 import eu.unicore.services.Kernel;
-import eu.unicore.services.Model;
 import eu.unicore.services.exceptions.TerminationTimeChangeRejectedException;
 import eu.unicore.services.exceptions.UnableToSetTerminationTimeException;
 import eu.unicore.services.messaging.PullPoint;
@@ -133,11 +132,6 @@ public abstract class ResourceImpl extends SecuredResourceImpl implements Extend
 	@Override
 	public BaseModel getModel(){
 		return (BaseModel)model;
-	}
-	
-	@Override
-	public Model passivate(){
-		return getModel();
 	}
 
 	@Override

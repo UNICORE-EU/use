@@ -10,8 +10,7 @@ import eu.unicore.services.messaging.PullPoint;
  * These are called by the hosting environment to initialize, destroy or persist
  * Resource instances. 
  * 
- * To persist a Resource, the hosting environment calls {@link #passivate()}, and
- * stores the resulting Model instance.
+ * To persist a Resource, the hosting environment stores the Model instance.
  *
  * @author schuller
  */
@@ -76,13 +75,6 @@ public interface Resource extends AutoCloseable {
 	 * </ul>
 	 */
 	public void destroy();
-	
-	/**
-	 * called when the instance is persisted
-	 * 
-	 * @return the resource's state
-	 */
-	public Model passivate();
 	
 	/**
 	 * get the model which holds the resource's state

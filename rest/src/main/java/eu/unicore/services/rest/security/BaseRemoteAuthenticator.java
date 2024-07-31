@@ -213,7 +213,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	 * assign identity based on the authentication - like the DN and any TD stuff
 	 *
 	 * @param auth
-	 * @param attrs attributes extracted via {@link #extractAttributes()}
+	 * @param attrs attributes extracted via extractAttributes()
 	 * @return user identity (X500name) or <code>null</code> if not authenticated
 	 */
 	protected abstract String assignIdentity(T auth, Map<String, Object>attrs);
