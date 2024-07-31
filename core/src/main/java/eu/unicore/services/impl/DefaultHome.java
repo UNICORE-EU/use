@@ -148,490 +148,489 @@ public abstract class DefaultHome implements Home {
 		kernel.getContainerProperties().getThreadingServices().getExecutorService().submit(r);
 	}
 
-		/**
-		 * Called when checking the stored data on server start runs into an error. 
-		 */
-		protected void recoverInstanceActivationError(Exception e, String id, boolean logIt){
-			Throwable cause=e;
-			while(cause.getCause()!=null){
-				cause=cause.getCause();
+	/**
+	 * Called when checking the stored data on server start runs into an error.
+	 */
+	protected void recoverInstanceActivationError(Exception e, String id, boolean logIt){
+		Throwable cause=e;
+		while(cause.getCause()!=null){
+			cause=cause.getCause();
+		}
+		if(logIt){
+			Log.logException("Problem reading stored data for <"+serviceName+">", e, logger);
+		}
+		try{
+			if(ClassNotFoundException.class.isAssignableFrom(cause.getClass())){
+				if(logIt)logger.info("Deleting stored data due to incompatible class change (server update?) for <{}>", serviceName);
+				serviceInstances.remove(id);
 			}
-			if(logIt){
-				Log.logException("Problem reading stored data for <"+serviceName+">", e, logger);
-			}
-			try{
-				if(ClassNotFoundException.class.isAssignableFrom(cause.getClass())){
-					if(logIt)logger.info("Deleting stored data due to incompatible class change (server update?) for <{}>", serviceName);
-					serviceInstances.remove(id);
-				}
-			}catch(Exception ex){}
-		}
+		}catch(Exception ex){}
+	}
 
-		/**
-		 * When activating the Home, this method is called for each instance 
-		 * It is used to populate some internal info, such as the number of instances
-		 * per user
-		 * 
-		 * @param id
-		 */
-		protected void doPerInstanceActivation(String id) throws Exception {
-			Pair<String, List<ACLEntry>> secInfo = readSecurityInfo(id);
-			if(secInfo!=null)secInfoCache.put(id, secInfo);
-		}
+	/**
+	 * When activating the Home, this method is called for each instance
+	 * It is used to populate some internal info, such as the number of instances
+	 * per user
+	 *
+	 * @param id
+	 */
+	protected void doPerInstanceActivation(String id) throws Exception {
+		Pair<String, List<ACLEntry>> secInfo = readSecurityInfo(id);
+		if(secInfo!=null)secInfoCache.put(id, secInfo);
+	}
 
-		private Pair<String, List<ACLEntry>> readSecurityInfo(String id) throws Exception {
-			Resource r = serviceInstances.read(id);
-			if(r!=null){
-				if(r.getModel() instanceof SecuredResourceModel){
-					SecuredResourceModel srm = (SecuredResourceModel)r.getModel();
-					String owner = srm.getOwnerDN();	
-					if(owner!=null && shouldCountForResourceLimit(r)){
-						getInstancesPerUser(owner).incrementAndGet();
-					}
-					else{
-						// set server as owner
-						X509Credential kernelIdentity = getKernel().getContainerSecurityConfiguration().getCredential();
-						if (kernelIdentity != null) {
-							owner = kernelIdentity.getSubjectName();
-							logger.debug("Setting server as owner of {}/{}", serviceName, id);
-						}
-						else {
-							owner = Client.ANONYMOUS_CLIENT_DN;
-						}
-					}
-					return new Pair<>(owner, srm.getAcl());
-				}
-			}
-			return null;
-		}
-
-
-
-
-		protected boolean shouldCountForResourceLimit(Resource r) {
-			return true;
-		}
-
-		/**
-		 * setup the expiry check
-		 * this implementation can be customised by
-		 * setting two parameters:
-		 * @see ContainerProperties#EXPIRYCHECK_INITIAL 
-		 * @see ContainerProperties#EXPIRYCHECK_PERIOD
-		 */
-		protected void initExpiryCheck(Collection<String> uniqueIDs)throws Exception{
-			instanceChecking.addAll(uniqueIDs);
-			int initial = kernel.getContainerProperties().getSubkeyIntValue(
-					ContainerProperties.EXPIRYCHECK_INITIAL, serviceName);
-			int period = kernel.getContainerProperties().getSubkeyIntValue(
-					ContainerProperties.EXPIRYCHECK_PERIOD, serviceName);
-			logger.debug("[{}] Expiry thread scheduled at a period of {} secs.", serviceName, period);
-			ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
-			ts.getScheduledExecutorService().scheduleWithFixedDelay(instanceChecking,
-					initial,period,TimeUnit.SECONDS);
-		}
-
-		public void runExpiryCheckNow(){
-			try{
-				instanceChecking.run();
-			}catch(Exception e){
-				logger.warn("["+serviceName+"] Uncaught exception occured while running expiry check",e);
-			}
-		}
-
-
-		/**
-		 * stops expiry checks 
-		 */
-		@Override
-		public void stopExpiryCheckNow(){
-			try{
-				instanceChecking.removeChecker(expiryChecker);
-			}catch(Exception e){
-				logger.warn("["+serviceName+"] Uncaught exception occured while stopping expiry check",e);
-			}
-		}
-
-		/**
-		 * called when the container shuts down
-		 */
-		@Override
-		public void shutdown(){
-			if(isShuttingDown)return;
-			isShuttingDown=true;
-			logger.info("[{}] Shutting down.", serviceName);
-			if (serviceInstances != null)
-				serviceInstances.shutdown();
-		}
-
-		/**
-		 * the container has been restarted or the container config has changed
-		 */
-		@Override
-		public void notifyConfigurationRefresh(){
-			lastRefreshNotificationInstant=System.currentTimeMillis();
-		}
-
-		@Override
-		public String getServiceName(){return serviceName;}
-
-		public void setServiceName(String serviceName){this.serviceName=serviceName;}
-
-		@Override
-		public Resource get(String id)throws ResourceUnknownException, ResourceUnavailableException{
-			Resource res = null;
-			try{
-				res = serviceInstances.read(id);
-			}catch(Exception e) {
-				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",e);
-			}
-			if(res==null)throw new ResourceUnknownException("Instance with ID <"+buildFullServiceID(id)+"> does not exist");
-			return res;
-		}
-
-		@Override
-		public Resource refresh(String id) throws ResourceUnknownException, ResourceUnavailableException {
-			try(Resource resource = serviceInstances.getForUpdate(id,locking_timeout,TimeUnit.SECONDS)){
-				if(resource==null)throw new ResourceUnknownException("Instance with ID <"+id+"> does not exist");
-				processMessages(resource);
-				return resource;
-			}catch(TimeoutException te){
-				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> is not available.");
-			}catch(Exception pe){
-				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",pe);
-			}
-		}
-
-		/**
-		 * lock a resource which was already read from persistence. This is
-		 * effectively upgrading a read to a write operation
-		 * 
-		 * @param resource
-		 * @throws ResourceUnavailableException
-		 */
-		@Override
-		public void lock(Resource resource) throws ResourceUnavailableException {
-			try{
-				serviceInstances.lock(resource,locking_timeout,TimeUnit.SECONDS);
-				processMessages(resource);
-			}catch(TimeoutException te){
-				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(resource.getUniqueID())+"> is not available.");
-			}catch(Exception pe){
-				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(resource.getUniqueID())+"> cannot be accessed",pe);
-			}
-		}
-
-		@Override
-		public Resource getForUpdate(String id) throws ResourceUnknownException, ResourceUnavailableException {
-			try{
-				Resource resource = serviceInstances.getForUpdate(id,locking_timeout,TimeUnit.SECONDS);
-				if(resource==null)throw new ResourceUnknownException("Instance with ID <"+id+"> does not exist");
-				processMessages(resource);
-				return resource;
-			}catch(TimeoutException te){
-				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> is not available.");
-			}catch(Exception pe){
-				throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",pe);
-			}
-		}
-
-		private void processMessages(Resource r){
-			PullPoint pp=null;
-			try{
-				if(kernel.getMessaging().hasMessages(r.getUniqueID())){
-					pp=kernel.getMessaging().getPullPoint(r.getUniqueID());
-					if(pp.hasNext()){
-						r.processMessages(pp);
-					}
-				}
-			}
-			catch(Exception e){
-			}finally{
-				if(pp!=null)pp.dispose();
-			}
-		}
-
-		private String buildFullServiceID(String resourceID){
-			return serviceName+":"+resourceID;
-		}
-
-		@Override
-		public String createResource(InitParameters initParams) throws ResourceNotCreatedException {
-			String owner = checkLimits();
-			if(owner!=null) {
-				getInstancesPerUser(owner).incrementAndGet();
-			}
-			try{
-				Resource newInstance=doCreateInstance(initParams);
-				newInstance.setHome(this);
-				newInstance.setKernel(kernel);
-				newInstance.initialise(initParams);
-				postInitialise(newInstance);
-				persist(newInstance);
-				String uniqueID = newInstance.getUniqueID();
-				instanceChecking.add(uniqueID);	
-				return uniqueID;
-			}
-			catch(Exception e){
-				String msg=Log.createFaultMessage("Resource not created.", e);
-				throw new ResourceNotCreatedException(msg,e);
-			}
-		}
-
-		/**
-		 * invoked after the new resource has been initialised, and before it is stored
-		 * @param instance - the newly created instance
-		 */
-		protected void postInitialise(Resource instance){}
-
-		@Override
-		public void persist(Resource instance)throws Exception{
-			serviceInstances.persist(instance);
-			if(instance.getModel() instanceof SecuredResourceModel){
-				SecuredResourceModel srm = (SecuredResourceModel)instance.getModel();
-				secInfoCache.put(instance.getUniqueID(), new Pair<>(srm.getOwnerDN(), srm.getAcl()));
-			}
-		}
-
-		@Override
-		public Calendar getTerminationTime(String uniqueID)throws Exception{
-			updateTT();
-			return terminationTimes.get(uniqueID);
-		}
-
-		//re-load tt time map from the persistence layer
-		protected void updateTT()throws Exception{
-			synchronized (ttLock) {
-				if(System.currentTimeMillis()-lastAccessed<tt_update_interval)return;
-				if(serviceInstances!=null){
-					terminationTimes = serviceInstances.getTerminationTimes();
-				}
-				lastAccessed=System.currentTimeMillis();
-			}
-		}
-
-		@Override
-		public void setTerminationTime(String uniqueID, Calendar c)throws TerminationTimeChangeRejectedException,UnableToSetTerminationTimeException{
-			//check if maximum termination time is exceeded
-			Integer maxLifetime=null;
-			if(kernel!=null){ // TODO can be null in unit tests -> should refactor
-				maxLifetime=getKernel().getContainerProperties().getSubkeyIntValue(ContainerProperties.MAXIMUM_LIFETIME, serviceName);
-			}
-			if(maxLifetime!=null){
-				boolean exceeded=false;
-				if(c==null){
-					//infinite LT was requested
-					exceeded=true;
+	private Pair<String, List<ACLEntry>> readSecurityInfo(String id) throws Exception {
+		Resource r = serviceInstances.read(id);
+		if(r!=null){
+			if(r.getModel() instanceof SecuredResourceModel){
+				SecuredResourceModel srm = (SecuredResourceModel)r.getModel();
+				String owner = srm.getOwnerDN();
+				if(owner!=null && shouldCountForResourceLimit(r)){
+					getInstancesPerUser(owner).incrementAndGet();
 				}
 				else{
-					long req=(c.getTimeInMillis()-System.currentTimeMillis())/1000;
-					if(req>maxLifetime){
-						exceeded=true;
+					// set server as owner
+					X509Credential kernelIdentity = getKernel().getContainerSecurityConfiguration().getCredential();
+					if (kernelIdentity != null) {
+						owner = kernelIdentity.getSubjectName();
+						logger.debug("Setting server as owner of {}/{}", serviceName, id);
+					}
+					else {
+						owner = Client.ANONYMOUS_CLIENT_DN;
 					}
 				}
-				if(exceeded){
-					throw new TerminationTimeChangeRejectedException("Requested lifetime is larger than maximum configured on the system.");
-				}
-			}
-			try{
-				if(serviceInstances!=null){
-					serviceInstances.setTerminationTime(uniqueID, c);
-				}
-				if(c!=null){
-					terminationTimes.put(uniqueID,c);
-				}
-				else{
-					terminationTimes.remove(uniqueID);
-				}
-			}catch(Exception e){
-				throw new UnableToSetTerminationTimeException(e);
+				return new Pair<>(owner, srm.getAcl());
 			}
 		}
+		return null;
+	}
 
-		@Override
-		public String getOwner(String resourceID){
-			Pair<String,List<ACLEntry>>secInfo = secInfoCache.get(resourceID);
-			return secInfo!=null ? secInfo.getM1() : null;
-		}
 
-		/**
-		 * You must override this in subclasses to actually create the instance.
-		 * In case you need to access the init parameters, override the
-		 * {@link #doCreateInstance(InitParameters initParams)} method
-		 */
-		protected abstract Resource doCreateInstance()throws Exception;
 
-		/**
-		 * You may override in subclasses to create the instance. 
-		 * The default implementation simply delegates to {@link #doCreateInstance()}
-		 */
-		protected Resource doCreateInstance(InitParameters initParams)throws Exception{
-			return doCreateInstance();
-		}
 
-		/**
-		 * remove resource from persistent storage
-		 * 
-		 * @param resourceId - the ID of the resource to remove
-		 */
-		public void removeFromStorage(String resourceId) throws Exception{
-			serviceInstances.remove(resourceId);
-			terminationTimes.remove(resourceId);
-		}
+	protected boolean shouldCountForResourceLimit(Resource r) {
+		return true;
+	}
 
-		/**
-		 * remove resource from all internal data structures
-		 * 
-		 * @param resourceId - the ID of the resource to remove
-		 */
-		@Override
-		public void destroyResource(String resourceId) throws Exception{
-			removeFromStorage(resourceId);
-			instanceChecking.remove(resourceId);
-			secInfoCache.remove(resourceId);
-		}
 
-		@Override
-		public long getNumberOfInstances()throws Exception{
-			return serviceInstances.size();
-		}
+	/**
+	 * setup the expiry check
+	 * this implementation can be customised by
+	 * setting two parameters:
+	 * @see ContainerProperties#EXPIRYCHECK_INITIAL
+	 * @see ContainerProperties#EXPIRYCHECK_PERIOD
+	 */
+	protected void initExpiryCheck(Collection<String> uniqueIDs)throws Exception{
+		instanceChecking.addAll(uniqueIDs);
+		int initial = kernel.getContainerProperties().getSubkeyIntValue(
+				ContainerProperties.EXPIRYCHECK_INITIAL, serviceName);
+		int period = kernel.getContainerProperties().getSubkeyIntValue(
+				ContainerProperties.EXPIRYCHECK_PERIOD, serviceName);
+		logger.debug("[{}] Expiry thread scheduled at a period of {} secs.", serviceName, period);
+		ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
+		ts.getScheduledExecutorService().scheduleWithFixedDelay(instanceChecking,
+				initial,period,TimeUnit.SECONDS);
+	}
 
-		@Override
-		public Store getStore() {
-			return serviceInstances;
-		}
-
-		public void setStore(Store serviceInstances) {
-			this.serviceInstances = serviceInstances;
-		}
-
-		@Override
-		public boolean isShuttingDown(){
-			return isShuttingDown;
-		}
-
-		public boolean supportsNotification(){
-			return supportsNotification;
-		}
-
-		/**
-		 * Initialise notification support. This default implementation does nothing.
-		 */
-		protected void initNotification()throws MessagingException{
-		}
-
-		/**
-		 * check whether the current user's limit of service instances has not yet been exceeded
-		 * @throws ResourceNotCreatedException - if limit exceeded
-		 */
-		protected String checkLimits() throws ResourceNotCreatedException{
-			String owner=null;
-			try{
-				SecurityTokens tokens=AuthZAttributeStore.getTokens();
-				if(tokens!=null && tokens.getEffectiveUserName()!=null){
-					owner = tokens.getEffectiveUserName();
-				}
-				else{
-					logger.debug("No security information available.");
-				}
-			}catch(Exception ex){
-				Log.logException("Error processing security information.", ex, logger);
-			}
-			if(owner!=null){
-				AtomicInteger num=getInstancesPerUser(owner);
-				int current = num.get();
-				if(current>=getInstanceLimit(owner)){
-					throw new ResourceNotCreatedException("Limit of <"
-							+current+"> instances of <"+serviceName+"> for <"+owner+"> has been reached.");
-				}
-			}
-			return owner;
-		}
-
-		protected int getInstanceLimit(String owner){
-			return kernel.getContainerProperties().getSubkeyIntValue(
-					ContainerProperties.MAX_INSTANCES, serviceName);
-		}
-
-		public void instanceDestroyed(String owner){
-			if(owner!=null){
-				AtomicInteger num=getInstancesPerUser(owner);
-				if(num.intValue()>0)num.decrementAndGet();
-			}
-		}
-
-		private AtomicInteger getInstancesPerUser(String owner){
-			if(owner == null)return null;
-			AtomicInteger num=null;
-			synchronized (instancesPerUser) {
-				num=instancesPerUser.get(owner);
-				if(num==null){ //can happen after a restart
-					num=new AtomicInteger(0);
-					instancesPerUser.put(owner, num);
-				}
-			}
-			return num;
-		}
-
-		/**
-		 * get the last time the configuration was refreshed or the server restarted
-		 */
-		public long getLastRefreshInstant(){
-			return lastRefreshNotificationInstant;
-		}
-
-		/**
-		 * Post-server startup task. It is executed after server start, but before any user-defined startup tasks. 
-		 * 
-		 * By default, nothing is done here.
-		 */
-		@Override
-		public void run(){
-			//NOP
-		}
-
-		@Override
-		public Kernel getKernel(){
-			return kernel;
-		}
-
-		@Override
-		public void setKernel(Kernel kernel){
-			this.kernel=kernel;
-		}
-
-		/**
-		 * return a read-only copy of the map holding the number of resources per user DN
-		 */
-		public Map<String, AtomicInteger>getInstancesPerUser(){
-			return Collections.unmodifiableMap(instancesPerUser);
-		}
-
-		@Override
-		public List<String>getAccessibleResources(Client client) throws Exception {
-			return getAccessibleResources(getStore().getUniqueIDs(), client);
-		}
-
-		@Override
-		public List<String>getAccessibleResources(Collection<String> ids, Client client) {
-			SecurityManager sec = kernel.getSecurityManager();
-			List<String>accessible=new ArrayList<>();
-			for(String id: ids){
-				Pair<String, List<ACLEntry>> secInfo = secInfoCache.get(id);
-				String ownerDN = secInfo.getM1();
-				List<ACLEntry> acl = secInfo.getM2();
-				try{
-					if(sec.isAccessible(client, serviceName, id, ownerDN, acl)){
-						accessible.add(id);
-					}
-				}catch(Exception ex){
-					Log.logException("["+serviceName+"] Error checking accessibility", ex, Log.getLogger(Log.SERVICES, DefaultHome.class));
-				}
-			}
-			return accessible;
-		}
-
-		public List<String>getTaggedResources(String...tags) throws Exception {
-			return getStore().getTaggedResources(tags);
+	public void runExpiryCheckNow(){
+		try{
+			instanceChecking.run();
+		}catch(Exception e){
+			logger.warn("["+serviceName+"] Uncaught exception occured while running expiry check",e);
 		}
 	}
+
+	@Override
+	public void stopExpiryCheckNow(){
+		try{
+			instanceChecking.removeChecker(expiryChecker);
+		}catch(Exception e){
+			logger.warn("["+serviceName+"] Uncaught exception occured while stopping expiry check",e);
+		}
+	}
+
+	/**
+	 * called when the container shuts down
+	 */
+	@Override
+	public void shutdown(){
+		if(isShuttingDown)return;
+		isShuttingDown=true;
+		logger.info("[{}] Shutting down.", serviceName);
+		if (serviceInstances != null)
+			serviceInstances.shutdown();
+	}
+
+	/**
+	 * the container has been restarted or the container config has changed
+	 */
+	@Override
+	public void notifyConfigurationRefresh(){
+		lastRefreshNotificationInstant=System.currentTimeMillis();
+	}
+
+	@Override
+	public String getServiceName(){return serviceName;}
+
+	public void setServiceName(String serviceName){this.serviceName=serviceName;}
+
+	@Override
+	public Resource get(String id)throws ResourceUnknownException, ResourceUnavailableException{
+		Resource res = null;
+		try{
+			res = serviceInstances.read(id);
+		}catch(Exception e) {
+			throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",e);
+		}
+		if(res==null)throw new ResourceUnknownException("Instance with ID <"+buildFullServiceID(id)+"> does not exist");
+		return res;
+	}
+
+	@Override
+	public Resource refresh(String id) throws ResourceUnknownException, ResourceUnavailableException {
+		try(Resource resource = serviceInstances.getForUpdate(id,locking_timeout,TimeUnit.SECONDS)){
+			if(resource==null)throw new ResourceUnknownException("Instance with ID <"+id+"> does not exist");
+			processMessages(resource);
+			return resource;
+		}catch(TimeoutException te){
+			throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> is not available.");
+		}catch(Exception pe){
+			throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",pe);
+		}
+	}
+
+	/**
+	 * lock a resource which was already read from persistence. This is
+	 * effectively upgrading a read to a write operation
+	 *
+	 * @param resource
+	 * @throws ResourceUnavailableException
+	 */
+	@Override
+	public void lock(Resource resource) throws ResourceUnavailableException {
+		try{
+			serviceInstances.lock(resource,locking_timeout,TimeUnit.SECONDS);
+			processMessages(resource);
+		}catch(TimeoutException te){
+			throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(resource.getUniqueID())+"> is not available.");
+		}catch(Exception pe){
+			throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(resource.getUniqueID())+"> cannot be accessed",pe);
+		}
+	}
+
+	@Override
+	public Resource getForUpdate(String id) throws ResourceUnknownException, ResourceUnavailableException {
+		try{
+			Resource resource = serviceInstances.getForUpdate(id,locking_timeout,TimeUnit.SECONDS);
+			if(resource==null)throw new ResourceUnknownException("Instance with ID <"+id+"> does not exist");
+			processMessages(resource);
+			return resource;
+		}catch(TimeoutException te){
+			throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> is not available.");
+		}catch(Exception pe){
+			throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",pe);
+		}
+	}
+
+	private void processMessages(Resource r){
+		PullPoint pp=null;
+		try{
+			if(kernel.getMessaging().hasMessages(r.getUniqueID())){
+				pp=kernel.getMessaging().getPullPoint(r.getUniqueID());
+				if(pp.hasNext()){
+					r.processMessages(pp);
+				}
+			}
+		}
+		catch(Exception e){
+		}finally{
+			if(pp!=null)pp.dispose();
+		}
+	}
+
+	private String buildFullServiceID(String resourceID){
+		return serviceName+":"+resourceID;
+	}
+
+	@Override
+	public String createResource(InitParameters initParams) throws ResourceNotCreatedException {
+		String owner = checkLimits();
+		if(owner!=null) {
+			getInstancesPerUser(owner).incrementAndGet();
+		}
+		try{
+			Resource newInstance=doCreateInstance(initParams);
+			newInstance.setHome(this);
+			newInstance.setKernel(kernel);
+			newInstance.initialise(initParams);
+			postInitialise(newInstance);
+			persist(newInstance);
+			String uniqueID = newInstance.getUniqueID();
+			instanceChecking.add(uniqueID);
+			return uniqueID;
+		}
+		catch(Exception e){
+			String msg=Log.createFaultMessage("Resource not created.", e);
+			throw new ResourceNotCreatedException(msg,e);
+		}
+	}
+
+	/**
+	 * invoked after the new resource has been initialised, and before it is stored
+	 * @param instance - the newly created instance
+	 */
+	protected void postInitialise(Resource instance){}
+
+	@Override
+	public void persist(Resource instance)throws Exception{
+		serviceInstances.persist(instance);
+		if(instance.getModel() instanceof SecuredResourceModel){
+			SecuredResourceModel srm = (SecuredResourceModel)instance.getModel();
+			secInfoCache.put(instance.getUniqueID(), new Pair<>(srm.getOwnerDN(), srm.getAcl()));
+		}
+	}
+
+	@Override
+	public Calendar getTerminationTime(String uniqueID)throws Exception{
+		updateTT();
+		return terminationTimes.get(uniqueID);
+	}
+
+	//re-load tt time map from the persistence layer
+	protected void updateTT()throws Exception{
+		synchronized (ttLock) {
+			if(System.currentTimeMillis()-lastAccessed<tt_update_interval)return;
+			if(serviceInstances!=null){
+				terminationTimes = serviceInstances.getTerminationTimes();
+			}
+			lastAccessed=System.currentTimeMillis();
+		}
+	}
+
+	@Override
+	public void setTerminationTime(String uniqueID, Calendar c)throws TerminationTimeChangeRejectedException,UnableToSetTerminationTimeException{
+		//check if maximum termination time is exceeded
+		Integer maxLifetime=null;
+		if(kernel!=null){ // TODO can be null in unit tests -> should refactor
+			maxLifetime=getKernel().getContainerProperties().getSubkeyIntValue(ContainerProperties.MAXIMUM_LIFETIME, serviceName);
+		}
+		if(maxLifetime!=null){
+			boolean exceeded=false;
+			if(c==null){
+				//infinite LT was requested
+				exceeded=true;
+			}
+			else{
+				long req=(c.getTimeInMillis()-System.currentTimeMillis())/1000;
+				if(req>maxLifetime){
+					exceeded=true;
+				}
+			}
+			if(exceeded){
+				throw new TerminationTimeChangeRejectedException("Requested lifetime is larger than maximum configured on the system.");
+			}
+		}
+		try{
+			if(serviceInstances!=null){
+				serviceInstances.setTerminationTime(uniqueID, c);
+			}
+			if(c!=null){
+				terminationTimes.put(uniqueID,c);
+			}
+			else{
+				terminationTimes.remove(uniqueID);
+			}
+		}catch(Exception e){
+			throw new UnableToSetTerminationTimeException(e);
+		}
+	}
+
+	@Override
+	public String getOwner(String resourceID){
+		Pair<String,List<ACLEntry>>secInfo = secInfoCache.get(resourceID);
+		return secInfo!=null ? secInfo.getM1() : null;
+	}
+
+	/**
+	 * You must override this in subclasses to actually create the instance.
+	 * In case you need to access the init parameters, override the
+	 * {@link #doCreateInstance(InitParameters initParams)} method
+	 */
+	protected abstract Resource doCreateInstance()throws Exception;
+
+	/**
+	 * You may override in subclasses to create the instance.
+	 * The default implementation simply delegates to {@link #doCreateInstance()}
+	 */
+	protected Resource doCreateInstance(InitParameters initParams)throws Exception{
+		return doCreateInstance();
+	}
+
+	/**
+	 * remove resource from persistent storage
+	 *
+	 * @param resourceId - the ID of the resource to remove
+	 */
+	public void removeFromStorage(String resourceId) throws Exception{
+		serviceInstances.remove(resourceId);
+		terminationTimes.remove(resourceId);
+	}
+
+	/**
+	 * remove resource from all internal data structures
+	 * 
+	 * @param resourceId - the ID of the resource to remove
+	 */
+	@Override
+	public void destroyResource(String resourceId) throws Exception{
+		removeFromStorage(resourceId);
+		instanceChecking.remove(resourceId);
+		secInfoCache.remove(resourceId);
+	}
+
+	@Override
+	public long getNumberOfInstances()throws Exception{
+		return serviceInstances.size();
+	}
+
+	@Override
+	public Store getStore() {
+		return serviceInstances;
+	}
+
+	public void setStore(Store serviceInstances) {
+		this.serviceInstances = serviceInstances;
+	}
+
+	@Override
+	public boolean isShuttingDown(){
+		return isShuttingDown;
+	}
+
+	public boolean supportsNotification(){
+		return supportsNotification;
+	}
+
+	/**
+	 * Initialise notification support. This default implementation does nothing.
+	 */
+	protected void initNotification()throws MessagingException{
+	}
+
+	/**
+	 * check whether the current user's limit of service instances has not yet been exceeded
+	 * @throws ResourceNotCreatedException - if limit exceeded
+	 */
+	protected String checkLimits() throws ResourceNotCreatedException{
+		String owner=null;
+		try{
+			SecurityTokens tokens=AuthZAttributeStore.getTokens();
+			if(tokens!=null && tokens.getEffectiveUserName()!=null){
+				owner = tokens.getEffectiveUserName();
+			}
+			else{
+				logger.debug("No security information available.");
+			}
+		}catch(Exception ex){
+			Log.logException("Error processing security information.", ex, logger);
+		}
+		if(owner!=null){
+			AtomicInteger num=getInstancesPerUser(owner);
+			int current = num.get();
+			if(current>=getInstanceLimit(owner)){
+				throw new ResourceNotCreatedException("Limit of <"
+						+current+"> instances of <"+serviceName+"> for <"+owner+"> has been reached.");
+			}
+		}
+		return owner;
+	}
+
+	protected int getInstanceLimit(String owner){
+		return kernel.getContainerProperties().getSubkeyIntValue(
+				ContainerProperties.MAX_INSTANCES, serviceName);
+	}
+
+	public void instanceDestroyed(String owner){
+		if(owner!=null){
+			AtomicInteger num=getInstancesPerUser(owner);
+			if(num.intValue()>0)num.decrementAndGet();
+		}
+	}
+
+	private AtomicInteger getInstancesPerUser(String owner){
+		if(owner == null)return null;
+		AtomicInteger num=null;
+		synchronized (instancesPerUser) {
+			num=instancesPerUser.get(owner);
+			if(num==null){ //can happen after a restart
+				num=new AtomicInteger(0);
+				instancesPerUser.put(owner, num);
+			}
+		}
+		return num;
+	}
+
+	/**
+	 * get the last time the configuration was refreshed or the server restarted
+	 */
+	public long getLastRefreshInstant(){
+		return lastRefreshNotificationInstant;
+	}
+
+	/**
+	 * Post-server startup task. It is executed after server start,
+	 * but before any user-defined startup tasks.
+	 *
+	 * By default, nothing is done here.
+	 */
+	@Override
+	public void run(){
+		//NOP
+	}
+
+	@Override
+	public Kernel getKernel(){
+		return kernel;
+	}
+
+	@Override
+	public void setKernel(Kernel kernel){
+		this.kernel=kernel;
+	}
+
+	/**
+	 * return a read-only copy of the map holding the number of resources per user DN
+	 */
+	public Map<String, AtomicInteger>getInstancesPerUser(){
+		return Collections.unmodifiableMap(instancesPerUser);
+	}
+
+	@Override
+	public List<String>getAccessibleResources(Client client) throws Exception {
+		return getAccessibleResources(getStore().getUniqueIDs(), client);
+	}
+
+	@Override
+	public List<String>getAccessibleResources(Collection<String> ids, Client client) {
+		SecurityManager sec = kernel.getSecurityManager();
+		List<String>accessible=new ArrayList<>();
+		for(String id: ids){
+			Pair<String, List<ACLEntry>> secInfo = secInfoCache.get(id);
+			String ownerDN = secInfo.getM1();
+			List<ACLEntry> acl = secInfo.getM2();
+			try{
+				if(sec.isAccessible(client, serviceName, id, ownerDN, acl)){
+					accessible.add(id);
+				}
+			}catch(Exception ex){
+				Log.logException("["+serviceName+"] Error checking accessibility", ex, Log.getLogger(Log.SERVICES, DefaultHome.class));
+			}
+		}
+		return accessible;
+	}
+
+	public List<String>getTaggedResources(String...tags) throws Exception {
+		return getStore().getTaggedResources(tags);
+	}
+
+}
