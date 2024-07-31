@@ -1,17 +1,17 @@
 package eu.unicore.services.impl;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Calendar;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.Home;
 import eu.unicore.services.Resource;
@@ -19,14 +19,14 @@ import eu.unicore.services.exceptions.ResourceUnavailableException;
 import eu.unicore.services.exceptions.ResourceUnknownException;
 import eu.unicore.services.persistence.Store;
 
-public class TestExpireWSResources {
+public class TestExpireResources {
 	private Home home;
 	private Resource item;
 	private Resource item2;
 	private boolean destroyed=false;
 	private boolean destroyed2=false;
 	
-	@Before
+	@BeforeEach
 	public void setUp()throws Exception{
 		
 		item=new ResourceImpl(){

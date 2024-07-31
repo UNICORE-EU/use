@@ -4,12 +4,12 @@ import static eu.unicore.services.security.ContainerSecurityProperties.PREFIX;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_COMBINING_POLICY;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_ORDER;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_PREFIX;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;

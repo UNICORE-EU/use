@@ -1,15 +1,15 @@
 package eu.unicore.services.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ThreadingServices;
@@ -18,7 +18,7 @@ public class TestTimeoutRunner {
 	
 	protected ThreadingServices ts;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		ContainerProperties cp = new ContainerProperties(new Properties(), false);
 		ts = cp.getThreadingServices();		

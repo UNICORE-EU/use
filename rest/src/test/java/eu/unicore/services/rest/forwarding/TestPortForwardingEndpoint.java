@@ -1,6 +1,6 @@
 package eu.unicore.services.rest.forwarding;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,9 +26,9 @@ import jakarta.ws.rs.core.Response;
 
 import org.apache.cxf.jaxrs.impl.ResponseBuilderImpl;
 import org.eclipse.jetty.http.HttpStatus;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.RestService;
@@ -45,7 +45,7 @@ public class TestPortForwardingEndpoint {
 	Kernel kernel;
 	static EchoServer echo;
 	
-	@Before
+	@BeforeEach
 	public void startServer()throws Exception{
 		Properties p = TestConfigUtil.getInsecureProperties();
 		p.setProperty("container.host", "localhost");
@@ -57,7 +57,7 @@ public class TestPortForwardingEndpoint {
 		echo.start();
 	}
 
-	@After
+	@AfterEach
 	public void stopServer()throws Exception{
 		kernel.shutdown();
 		echo.shutdown();

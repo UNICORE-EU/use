@@ -1,8 +1,8 @@
 package eu.unicore.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Properties;
 import java.util.Set;
@@ -14,7 +14,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class TestThreadingServices {
@@ -36,7 +36,7 @@ public class TestThreadingServices {
 		//test with timeout
 		cs.submit(c);
 		Future<String>r1=cs.poll(1, TimeUnit.MILLISECONDS);
-		assertNull("Should timeout",r1);
+		assertNull(r1, "Should timeout!");
 	}
 
 	AtomicInteger running = new AtomicInteger(0);
@@ -66,7 +66,7 @@ public class TestThreadingServices {
 		while(running.get()>0){
 			Thread.sleep(500);
 		}
-		assertTrue("Have "+threads.size(), threads.size()<=poolSize);
+		assertTrue(threads.size()<=poolSize);
 		System.out.println("Threads used:   "+threads.size());
 		System.out.println("Active threads: "+cp.getThreadingServices().getExecutorActiveThreadCount());
 		ThreadPoolExecutor ex = (ThreadPoolExecutor)cp.getThreadingServices().getExecutorService();
@@ -97,7 +97,7 @@ public class TestThreadingServices {
 			Thread.sleep(500);
 		}
 		Thread.sleep(1000);
-		assertTrue("Have "+threads.size(), threads.size()==cp.getIntValue(ContainerProperties.CORE_POOL_SIZE));
+		assertTrue(threads.size()==cp.getIntValue(ContainerProperties.CORE_POOL_SIZE));
 	}
 
 }

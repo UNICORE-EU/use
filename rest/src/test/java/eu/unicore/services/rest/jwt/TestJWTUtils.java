@@ -1,11 +1,12 @@
 package eu.unicore.services.rest.jwt;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.security.interfaces.RSAPublicKey;
 import java.util.Properties;
 import java.util.Random;
 
-import org.junit.Test;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.services.rest.security.jwt.JWTUtils;
@@ -54,7 +55,7 @@ public class TestJWTUtils {
 		jwt.verifyJWTToken(token, null);
 	}
 	
-	@Test(expected=AuthenticationException.class)
+	@Test
 	public void testFailOnExpiredToken() throws Exception {
 		ContainerSecurityProperties cp = getContainerSecurityProperties();
 		Properties p = new Properties();
@@ -68,7 +69,9 @@ public class TestJWTUtils {
 		System.out.println("Token: "+token);
 		System.out.println("Payload: "+JWTUtils.getPayload(token));
 		System.out.println("Headers: "+JWTUtils.getHeaders(token));
-		jwt.verifyJWTToken(token, null);
+		assertThrows(AuthenticationException.class, ()->{
+			jwt.verifyJWTToken(token, null);
+		});
 	}
 
 	private PubkeyCache getKeyCache(ContainerSecurityProperties cp){
@@ -100,6 +103,6 @@ public class TestJWTUtils {
 		jwtProps = new JWTServerProperties(p);
 		pc = new PubkeyCache();
 		new JWTHelper(jwtProps, cp, pc);
-		Assert.assertNotNull(pc.getPublicKey("CN=Demo CA,O=UNICORE,C=EU"));
+		assertNotNull(pc.getPublicKey("CN=Demo CA,O=UNICORE,C=EU"));
 	}
 }

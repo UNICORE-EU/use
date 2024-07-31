@@ -1,13 +1,13 @@
 package eu.unicore.services.pdp.local;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import eu.unicore.services.pdp.AbstractPDPTest;
 
 
 public class PDPTest extends AbstractPDPTest
 {
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception
 	{
 		String f = "src/test/resources/local/pdp2.conf";

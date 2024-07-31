@@ -1,7 +1,7 @@
 package eu.unicore.services.aip.gridmapfile;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.File;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.emi.security.authn.x509.impl.OpensslNameUtils;
 import eu.unicore.util.Pair;
@@ -26,7 +26,6 @@ public class TestGridMapFileParsing {
 		assertEquals(normalizedDN, mapping.getM1());
 		assertEquals("communig", mapping.getM2()[0]);
 	}
-
 
 	@Test
 	public void testWholeFile() throws Exception{
@@ -49,9 +48,7 @@ public class TestGridMapFileParsing {
 		assertEquals(2, logins.size());
 		assertEquals("weddie", logins.get(0));
 		assertEquals("admin", logins.get(1));
-
 	}	
-
 
 }
 

@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import de.fzJuelich.unicore.xuudb.AddCertificateDocument;
 import de.fzJuelich.unicore.xuudb.LoginDataType;
@@ -23,7 +23,7 @@ public class TestXUUDBServer {
 	XUUDBJSONAttributeSource xuudb;
 	static HttpsServer xuudbServer = null;
 
-	@BeforeClass
+	@BeforeAll
 	public static void startXUUDBServer() throws Exception {
 		File dir = new File("target/data");
 		FileUtils.deleteDirectory(dir);
@@ -42,7 +42,7 @@ public class TestXUUDBServer {
 		xuudbServer.getAdminImpl().addCertificate(e1);
 	}
 
-	@Before
+	@BeforeEach
 	public void setupEndpoint() throws Exception{
 		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
 		xuudb = new XUUDBJSONAttributeSource();

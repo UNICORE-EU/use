@@ -1,14 +1,14 @@
 package eu.unicore.services.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Properties;
 
 import org.apache.xmlbeans.XmlObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.security.util.AuthZAttributeStore;
@@ -18,7 +18,7 @@ public class TestUtilities {
 	String gw="http://gwhost:1234";
 	ContainerProperties k;
 	
-	@Before
+	@BeforeEach
 	public void setUp(){
 		Properties properties = new Properties();
 		String base=gw+"/SITE";

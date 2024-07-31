@@ -1,9 +1,6 @@
 package eu.unicore.services.rest.testservice;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.security.cert.X509Certificate;
@@ -27,10 +24,9 @@ import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import com.nimbusds.jose.util.X509CertUtils;
 
@@ -61,7 +57,7 @@ public class TestRestSecurity {
 	static String sName="test";
 	static String url;
 	
-	@BeforeClass
+	@BeforeAll
 	public static void startServer()throws Exception{
 		FileUtils.deleteQuietly(new File("target/data"));
 		kernel=new Kernel("src/test/resources/use.properties");
@@ -76,15 +72,13 @@ public class TestRestSecurity {
 		url = server.getUrls()[0].toExternalForm()+"/rest";
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopServer()throws Exception{
 		kernel.shutdown();
 	}
 
-
 	@Test
 	public void testSecuritySessions()throws Exception {
-		
 		int invoked=MockResource.invocationCounter.get();
 		HttpClient client=HttpUtils.createClient(url, kernel.getClientConfiguration());
 		HttpGet get=new HttpGet(url+"/"+sName+"/User");
@@ -129,7 +123,6 @@ public class TestRestSecurity {
 	public void testJWTDelegationAuth() throws Exception {
 		String dn = "CN=Demo User, O=UNICORE, C=EU";
 		String issuer = "CN=UNICOREX,O=UNICORE,C=EU";
-		
 		HttpClient client=HttpUtils.createClient(url, kernel.getClientConfiguration());
 		HttpGet get=new HttpGet(url+"/"+sName+"/User");
 		JWTServerProperties props = new JWTServerProperties(new Properties());
@@ -139,10 +132,10 @@ public class TestRestSecurity {
 			assertEquals(200, response.getCode());
 			JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
 			System.out.println("Service reply: "+reply.toString(2));
-			Assert.assertEquals(dn, reply.getString("dn"));
-			Assert.assertEquals(issuer, reply.getString("td_consignor"));
-			Assert.assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
-			Assert.assertEquals("ETD", reply.getString("auth_method"));
+			assertEquals(dn, reply.getString("dn"));
+			assertEquals(issuer, reply.getString("td_consignor"));
+			assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
+			assertEquals("ETD", reply.getString("auth_method"));
 		}
 	}
 	
@@ -155,10 +148,8 @@ public class TestRestSecurity {
 
 		JWTServerProperties props = new JWTServerProperties(new Properties());
 		IAuthCallback auth = new JWTDelegation(kernel.getContainerSecurityConfiguration(), props, dn);
-		
 		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
 		String sessionId = null;
-		
 		for(int i=1; i<3; i++){
 			JSONObject reply = bc.getJSON();
 			if(i==1){
@@ -170,12 +161,11 @@ public class TestRestSecurity {
 				assertEquals(sessionId, bc.getSessionIDProvider().getSessionID(resource, 
 						bc.getSessionKey()));
 			}
-			Assert.assertEquals(dn, reply.getString("dn"));
-			Assert.assertEquals(issuer, reply.getString("td_consignor"));
-			Assert.assertEquals("ETD", reply.getString("auth_method"));
-			Assert.assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
+			assertEquals(dn, reply.getString("dn"));
+			assertEquals(issuer, reply.getString("td_consignor"));
+			assertEquals("ETD", reply.getString("auth_method"));
+			assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
 		}
-		
 	}
 	
 	@Test
@@ -197,7 +187,7 @@ public class TestRestSecurity {
 		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
 		JSONObject reply = bc.getJSON();
 		System.out.println("Service reply: "+reply.toString(2));
-		Assert.assertEquals("SSHKEY", reply.getString("auth_method"));
+		assertEquals("SSHKEY", reply.getString("auth_method"));
 	}
 	
 	@Test
@@ -211,7 +201,7 @@ public class TestRestSecurity {
 			String token = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 			JSONObject t = JWTUtils.getPayload(token);
 			System.out.println(t.toString(2));
-			Assert.assertEquals("CN=Demo User, O=UNICORE, C=EU", t.get("sub"));
+			assertEquals("CN=Demo User, O=UNICORE, C=EU", t.get("sub"));
 		}
 	}
 
@@ -225,7 +215,7 @@ public class TestRestSecurity {
 			assertEquals(200, response.getCode());
 			String pem = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 			X509Certificate cert = X509CertUtils.parse(pem);
-			Assert.assertEquals("CN=UNICOREX,O=UNICORE,C=EU", 
+			assertEquals("CN=UNICOREX,O=UNICORE,C=EU", 
 					cert.getSubjectX500Principal().getName());
 		}
 	}
@@ -250,7 +240,6 @@ public class TestRestSecurity {
 		@Produces("application/json")
 		public String getRepresentation(@PathParam("uniqueID") String name) throws JSONException {
 			invocationCounter.incrementAndGet();
-			
 			JSONObject res = new JSONObject();
 			try{
 				res.put("invocations", invocationCounter.get());
@@ -267,5 +256,4 @@ public class TestRestSecurity {
 			return res.toString();
 		}
 	}
-	
 }

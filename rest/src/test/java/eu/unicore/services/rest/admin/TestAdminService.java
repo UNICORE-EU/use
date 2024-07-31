@@ -1,15 +1,13 @@
 package eu.unicore.services.rest.admin;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Properties;
 
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.client.BaseClient;
@@ -19,7 +17,7 @@ public class TestAdminService {
 
 	private static Kernel kernel;
 	
-	@BeforeClass
+	@BeforeAll
 	public static void startServer()throws Exception{
 		Properties p = TestConfigUtil.getInsecureProperties();
 		p.setProperty("container.host", "localhost");
@@ -30,7 +28,7 @@ public class TestAdminService {
 		kernel.getDeploymentManager().deployFeature(new AdminFeature(kernel));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopServer()throws Exception{
 		kernel.shutdown();
 	}

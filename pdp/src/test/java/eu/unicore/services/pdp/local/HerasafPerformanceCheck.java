@@ -1,12 +1,12 @@
 package eu.unicore.services.pdp.local;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import eu.unicore.services.pdp.AbstractPerformanceTester;
 
 public class HerasafPerformanceCheck extends AbstractPerformanceTester
 {
-	@Before
+	@BeforeEach
 	public void setup() throws Exception
 	{
 		pdp = new LocalHerasafPDP();

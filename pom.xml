@@ -58,12 +58,12 @@
   <properties>
     <compiler.fork>false</compiler.fork>
     <persistence.version>1.1.0</persistence.version>
-    <secutils.version>4.0.1</secutils.version>
-    <seclib.version>7.0.0</seclib.version>
+    <secutils.version>4.1.0</secutils.version>
+    <seclib.version>7.1.0</seclib.version>
     <herasaf.version>3.0.2</herasaf.version>
     <json.version>20240303</json.version>
     <gson.version>2.11.0</gson.version>
-    <xuudb.version>2.10.1</xuudb.version>
+    <xuudb.version>2.10.2</xuudb.version>
     <cxf.version>4.0.5</cxf.version>
     <jetty.version>11.0.22</jetty.version>
     <metrics.version>4.2.26</metrics.version>
@@ -85,9 +85,9 @@
   <dependencyManagement>
     <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.2</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.10.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>

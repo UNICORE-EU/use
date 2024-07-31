@@ -1,5 +1,7 @@
 package eu.unicore.services.rest.registry;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,9 +9,9 @@ import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.Kernel;
 import eu.unicore.services.registry.RegistryFeature;
@@ -22,7 +24,7 @@ public class TestRegistryService {
 
 	private static Kernel kernel;
 	
-	@BeforeClass
+	@BeforeAll
 	public static void startServer()throws Exception{
 		FileUtils.deleteDirectory(new File("target/data"));
 		Properties p = TestConfigUtil.getInsecureProperties();
@@ -34,7 +36,7 @@ public class TestRegistryService {
 		kernel.getDeploymentManager().deployFeature(kernel.load(RegistryFeature.class));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopServer()throws Exception{
 		kernel.shutdown();
 		FileUtils.deleteDirectory(new File("target/data"));
@@ -45,7 +47,7 @@ public class TestRegistryService {
 	public void testRegistry() throws Exception {
 		BaseClient client = getClient();
 		JSONObject o = client.getJSON();
-		assert o.getJSONArray("entries").length()==0;
+		assertEquals(0, o.getJSONArray("entries").length());
 
 		// add something
 		RegistryHandler rh = kernel.getAttribute(RegistryHandler.class);
@@ -56,7 +58,7 @@ public class TestRegistryService {
 		rh.getRegistryClient().addEntry("http://foo", content, null);
 		o = client.getJSON();
 		System.out.println("*** registry properties ***\n"+o.toString(2));
-		assert o.getJSONArray("entries").length()==1;
+		assertEquals(1, o.getJSONArray("entries").length());
 	}
 	
 	private BaseClient getClient() throws Exception {

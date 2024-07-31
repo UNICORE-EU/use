@@ -3,11 +3,12 @@ package eu.unicore.services.aip.gridmapfile;
 import static eu.unicore.services.security.ContainerSecurityProperties.PREFIX;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_ORDER;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_PREFIX;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.IAttributeSource;
@@ -17,12 +18,14 @@ import eu.unicore.util.configuration.ConfigurationException;
 
 public class TestGridmapFileAuthoriser {
 
-	@Test(expected=ConfigurationException.class)
+	@Test
 	public void testErrorMissingFile()throws Exception{
 		Properties p = TestConfigUtil.getInsecureProperties();
 		p.setProperty(PREFIX+PROP_AIP_ORDER, "GMF");
 		p.setProperty(PREFIX+PROP_AIP_PREFIX+".GMF.class", GridMapFileAttributeSource.class.getName());
-		new Kernel(p);
+		assertThrows(ConfigurationException.class,()->{
+			new Kernel(p);
+		});
 	}
 	
 	@Test

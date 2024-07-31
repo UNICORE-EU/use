@@ -1,13 +1,13 @@
 package eu.unicore.services;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Properties;
 
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.server.ContainerHttpServerProperties;

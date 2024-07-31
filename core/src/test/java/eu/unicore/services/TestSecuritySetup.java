@@ -1,11 +1,12 @@
 package eu.unicore.services;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.security.CertificateInfoMetric;
 
@@ -51,18 +52,22 @@ public class TestSecuritySetup
 		new Kernel(p);
 	}
 		
-	@Test(expected = Exception.class)
+	@Test
 	public void testInvalidSettings() throws Exception {
-			Properties p = new Properties();
-			p.load(new ByteArrayInputStream(p2.getBytes()));
+		Properties p = new Properties();
+		p.load(new ByteArrayInputStream(p2.getBytes()));
+		assertThrows(Exception.class, ()->{
 			new Kernel(p);
+		});
 	}
 	
-	@Test(expected = Exception.class)
+	@Test
 	public void testInvalidSettings2() throws Exception {
 		Properties p = new Properties();
 		p.load(new ByteArrayInputStream(p3.getBytes()));
-		new Kernel(p);
+		assertThrows(Exception.class, ()->{
+			new Kernel(p);
+		});
 	}
 
 	@Test

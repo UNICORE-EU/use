@@ -1,17 +1,14 @@
 package eu.unicore.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.security.IContainerSecurityConfiguration;
 import eu.unicore.services.security.TestConfigUtil;
@@ -25,7 +22,7 @@ import eu.unicore.services.utils.deployment.DemoFeature3;
 
 public class TestKernel {
 
-	@After
+	@AfterEach
 	public void tearDown(){
 		ranStartupTask1=false;
 		ranStartupTask2=false;

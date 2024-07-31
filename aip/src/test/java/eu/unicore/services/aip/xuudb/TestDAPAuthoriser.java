@@ -1,14 +1,12 @@
 package eu.unicore.services.aip.xuudb;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
@@ -25,7 +23,7 @@ public class TestDAPAuthoriser {
 	XUUDBDynamicAttributeSource xuudb;
 	MockDAP mock;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		Kernel k = new Kernel(TestConfigUtil.getInsecureProperties());
 		mock = new MockDAP();

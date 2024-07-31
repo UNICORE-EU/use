@@ -1,10 +1,11 @@
 package eu.unicore.services.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -12,7 +13,7 @@ import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
@@ -25,12 +26,6 @@ import eu.unicore.services.exceptions.ResourceNotCreatedException;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 
-
-/**
- * some tests for the ResourceImpl
- * 
- * @author schuller
- */
 public class TestResourceImpl {
 
 	private ResourceImpl makeResource(InitParameters initMap)throws Exception{
@@ -115,7 +110,7 @@ public class TestResourceImpl {
 		assertNotNull(ws);
 	}
 
-	@Test(expected = ResourceNotCreatedException.class)
+	@Test
 	public void testLimitServiceInstancesPerUser()throws Exception{
 		MockHome h=new MockHome(){
 			@Override
@@ -126,26 +121,27 @@ public class TestResourceImpl {
 		Properties p = TestConfigUtil.getInsecureProperties();
 		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.MAX_INSTANCES+".test", "2");
 		Kernel kernel = new Kernel(p);
-		
+
 		h.setKernel(kernel);
 		h.start("test");
-		
+
 		InitParameters initobjs=new InitParameters();
-		
+
 		SecurityTokens secTokens=new SecurityTokens();
 		secTokens.setUserName("cn=test");
 		secTokens.setConsignorTrusted(true);
 		Client c = new Client();
 		c.setAuthenticatedClient(secTokens);
 		AuthZAttributeStore.setClient(c);
-		
+
 		String id=h.createResource(initobjs);
 		assertNotNull(h.getStore().read(id));
-		
 		assertNotNull(id);
 		id=h.createResource(initobjs);
 		assertNotNull(id);
-		id=h.createResource(initobjs);
+		assertThrows(ResourceNotCreatedException.class, ()->{
+			h.createResource(initobjs);
+		});
 	}
 
 	@Test

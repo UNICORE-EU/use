@@ -2,8 +2,9 @@ package eu.unicore.services.rest.security;
 
 import java.util.Properties;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import eu.unicore.security.HTTPAuthNTokens;
 import eu.unicore.security.SecurityTokens;
@@ -24,12 +25,12 @@ public class TestConfig {
 		p.setProperty("container.security.rest.authentication.FILE.file", file);
 		Kernel k = new Kernel(p);
 		IAuthenticator auth = AuthenticatorChain.get(k);
-		Assert.assertNotNull(auth);
-		Assert.assertEquals(AuthenticatorChain.class, auth.getClass());
+		assertNotNull(auth);
+		assertEquals(AuthenticatorChain.class, auth.getClass());
 		AuthenticatorChain chain = (AuthenticatorChain)auth;
-		Assert.assertEquals(1, chain.getChain().size());
+		assertEquals(1, chain.getChain().size());
 		FilebasedAuthenticator fba = (FilebasedAuthenticator)chain.getChain().get(0);
-		Assert.assertEquals(file,fba.getFile());
+		assertEquals(file,fba.getFile());
 		
 		// and finally test that authn works
 		SecurityTokens tokens = new SecurityTokens();
@@ -38,7 +39,7 @@ public class TestConfig {
 		chain.authenticate(null,tokens);
 		String dn = tokens.getEffectiveUserName();
 		System.out.println("Authenticated DN : "+dn);
-		Assert.assertEquals(demoUser,dn);
+		assertEquals(demoUser,dn);
 	}
 	
 	@Test
@@ -57,9 +58,9 @@ public class TestConfig {
 	public void testAttribHolder(){
 		String line = "user:hash:salt:CN=a:b";
 		AttributesHolder ah = new AttributesHolder(line);
-		Assert.assertEquals("user", ah.user);
-		Assert.assertEquals("hash", ah.hash);
-		Assert.assertEquals("salt", ah.salt);
-		Assert.assertEquals("CN=a:b", ah.dn);
+		assertEquals("user", ah.user);
+		assertEquals("hash", ah.hash);
+		assertEquals("salt", ah.salt);
+		assertEquals("CN=a:b", ah.dn);
 	}
 }

@@ -1,14 +1,14 @@
 package eu.unicore.services.aip.xuudb;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
@@ -30,7 +30,7 @@ public class TestXUUDBAuthoriser {
 	XUUDBAttributeSource xuudb;
 	MockXUUDB mock;
 	
-	@Before
+	@BeforeEach
 	public void setUp()throws Exception{
 		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
 		mock=new MockXUUDB();

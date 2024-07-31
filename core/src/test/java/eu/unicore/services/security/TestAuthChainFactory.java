@@ -5,10 +5,10 @@ import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_ORDER;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_PREFIX;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_CHECKACCESS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.SecurityTokens;
@@ -167,7 +167,7 @@ public class TestAuthChainFactory {
 		assertTrue(s2.contains("spam"));
 
 		List<XACMLAttribute> x3 = masterH.getXacmlAttributes();
-		assertTrue("Size of XACML attribtues is not 7: " + x3.size(), x3.size() == 7);
+		assertEquals(7, x3.size());
 		assertTrue(x3.contains(xacmlAttributes1.get(0)));
 		assertTrue(x3.contains(xacmlAttributes1.get(1)));
 		assertTrue(x3.contains(xacmlAttributes1.get(2)));

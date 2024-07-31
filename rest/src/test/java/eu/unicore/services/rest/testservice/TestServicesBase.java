@@ -1,7 +1,6 @@
 package eu.unicore.services.rest.testservice;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.util.HashSet;
@@ -13,9 +12,9 @@ import jakarta.ws.rs.core.Application;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.Home;
 import eu.unicore.services.InitParameters;
@@ -35,7 +34,7 @@ public class TestServicesBase {
 	static Kernel k;
 	static String sName="counter";
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws Exception {
 		FileUtils.deleteQuietly(new File("target/data"));
 		Properties p = TestConfigUtil.getInsecureProperties();
@@ -54,7 +53,7 @@ public class TestServicesBase {
 		
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stop() throws Exception {
 		if(k!=null)k.shutdown();
 	}

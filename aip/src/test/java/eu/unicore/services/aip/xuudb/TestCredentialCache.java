@@ -1,16 +1,19 @@
 package eu.unicore.services.aip.xuudb;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.security.SubjectAttributesHolder;
 
 public class TestCredentialCache {
 
+	@Test
 	public void test1() throws Exception {
 		CredentialCache c = new CredentialCache(1);
 		Object o1 = new Object();

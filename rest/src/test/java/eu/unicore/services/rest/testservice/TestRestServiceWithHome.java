@@ -1,10 +1,10 @@
 package eu.unicore.services.rest.testservice;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -16,26 +16,15 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Application;
-import jakarta.ws.rs.core.MediaType;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.message.StatusLine;
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.Home;
 import eu.unicore.services.InitParameters;
@@ -54,6 +43,15 @@ import eu.unicore.services.rest.impl.BaseRESTController;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
 import eu.unicore.util.ConcurrentAccess;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.MediaType;
 
 public class TestRestServiceWithHome {
 
@@ -61,7 +59,7 @@ public class TestRestServiceWithHome {
 	
 	static String sName="counter";
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws Exception {
 		FileUtils.deleteQuietly(new File("target/data"));
 		Properties p = TestConfigUtil.getInsecureProperties();
@@ -81,7 +79,7 @@ public class TestRestServiceWithHome {
 		System.out.println(k.getConnectionStatus());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stop() throws Exception {
 		if(k!=null)k.shutdown();
 	}
@@ -124,14 +122,14 @@ public class TestRestServiceWithHome {
 		System.out.println("Putting value: "+v);
 		try(ClassicHttpResponse response=client.put(new ByteArrayInputStream(v.getBytes()),ContentType.APPLICATION_JSON)){
 			int status=client.getLastHttpStatus();
-			assertEquals("Got: "+new StatusLine(response), 200, status);
+			assertEquals(200, status);
 		}
 		resource  = url+"/"+sName+"/my_counter/NO_SUCH_PROPERTY";
 		client.setURL(resource);
 		try(ClassicHttpResponse response = client.put(new ByteArrayInputStream(v.getBytes()),ContentType.APPLICATION_JSON)){
 		}catch(Exception ex) {
 			int status=client.getLastHttpStatus();
-			assertEquals("Did not get the expected 404", 404, status);
+			assertEquals(404, status);
 		}
 
 		// get properties
@@ -181,7 +179,7 @@ public class TestRestServiceWithHome {
 		client.setURL(resource);
 		client.delete();
 		// assert that resource is gone
-		assertFalse("Not correctly deleted.",k.getHome(sName).getStore().getUniqueIDs().contains("my_counter"));
+		assertFalse(k.getHome(sName).getStore().getUniqueIDs().contains("my_counter"));
 	}
 
 	@Test

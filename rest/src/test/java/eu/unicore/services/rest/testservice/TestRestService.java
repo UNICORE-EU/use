@@ -1,8 +1,8 @@
 package eu.unicore.services.rest.testservice;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -10,19 +10,14 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.core.Application;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.RestService;
@@ -30,6 +25,10 @@ import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.server.JettyServer;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
 import eu.unicore.util.httpclient.HttpUtils;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.core.Application;
 
 public class TestRestService {
 
@@ -111,7 +110,7 @@ public class TestRestService {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void startServer()throws Exception{
 		Properties p = TestConfigUtil.getInsecureProperties();
 		p.setProperty("container.host", "localhost");
@@ -121,7 +120,7 @@ public class TestRestService {
 		kernel.start();
 	}
 
-	@After
+	@AfterEach
 	public void stopServer()throws Exception{
 		kernel.shutdown();
 	}

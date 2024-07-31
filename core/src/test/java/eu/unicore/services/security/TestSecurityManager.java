@@ -7,17 +7,17 @@ import static eu.unicore.services.security.ContainerSecurityProperties.PROP_AIP_
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_CHECKACCESS;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_DAP_ORDER;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_DAP_PREFIX;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
+	
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
