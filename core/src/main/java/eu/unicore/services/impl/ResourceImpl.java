@@ -155,7 +155,7 @@ public abstract class ResourceImpl extends SecuredResourceImpl implements Extend
 
 	@Override
 	public boolean isReady(){
-		return ResourceStatus.READY==getModel().getResourceStatus();
+		return ResourceStatus.READY==getResourceStatus();
 	}
 	
 	@Override
