@@ -148,11 +148,11 @@ public class TestResourceImpl {
 	public void testResourceStatus()throws Exception{
 		final ResourceImpl x=makeResource(null);
 		assertEquals(ResourceStatus.READY,x.getResourceStatus());
-		assertEquals("N/A",x.getStatusMessage());
+		assertEquals("N/A",x.getResourceStatusMessage());
 		x.setResourceStatus(ResourceStatus.DISABLED);
 		assertEquals(ResourceStatus.DISABLED,x.getResourceStatus());
-		x.setStatusMessage("OK");
-		assertEquals("OK",x.getStatusMessage());
+		x.setResourceStatusMessage("OK");
+		assertEquals("OK",x.getResourceStatusMessage());
 	}
 
 	@Test

@@ -153,7 +153,7 @@ public abstract class ResourceImpl extends SecuredResourceImpl implements Extend
 	}
 	
 	@Override
-	public String getStatusMessage() {
+	public String getResourceStatusMessage() {
 		return getModel().getResourceStatusDetails();
 	}
 
@@ -163,7 +163,7 @@ public abstract class ResourceImpl extends SecuredResourceImpl implements Extend
 	}
 
 	@Override
-	public void setStatusMessage(String message) {
+	public void setResourceStatusMessage(String message) {
 		getModel().setResourceStatusDetails(message);
 	}
 

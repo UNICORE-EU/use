@@ -23,7 +23,7 @@ public interface ExtendedResourceStatus {
 	 * Get a detailed human-readable message associated with the current status. This may be <code>null</code> if
 	 * there is no particular message is available
 	 */
-	public String getStatusMessage();
+	public String getResourceStatusMessage();
 	
 	/**
 	 * get the current resource status
@@ -33,7 +33,7 @@ public interface ExtendedResourceStatus {
 	/**
 	 * Set a detailed human-readable message associated with the current status
 	 */
-	public void setStatusMessage(String message);
+	public void setResourceStatusMessage(String message);
 	
 	/**
 	 * update the current resource status

@@ -298,7 +298,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 		if(resource!=null && resource instanceof ExtendedResourceStatus){
 			ExtendedResourceStatus esr = (ExtendedResourceStatus)resource;
 			props.put("resourceStatus", String.valueOf(esr.getResourceStatus()));
-			props.put("resourceStatusMessage", esr.getStatusMessage());
+			props.put("resourceStatusMessage", esr.getResourceStatusMessage());
 		}
 		props.put("tags", model.getTags());
 		try {
