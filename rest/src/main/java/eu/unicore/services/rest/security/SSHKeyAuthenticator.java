@@ -168,7 +168,7 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 				return null;
 			}
 			String exp = json.optString("exp", null);
-			if(exp==null)throw new AuthenticationException("JWT Token does not specify a lifetime ('exp' attribute).");
+			if(exp==null)throw new Exception("JWT Token does not specify a lifetime ('exp' attribute).");
 			String subject = json.getString("sub");
 			String issuer = json.getString("iss");
 			if(!subject.equals(issuer)){
@@ -183,7 +183,7 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		return null;
 	}
 	
-	private String jwtTokenAuth(String username, String jwtToken) throws Exception {
+	private String jwtTokenAuth(String username, String jwtToken) throws IOException {
 		AttributeHolders attr = keyCache.get(username);
 		if(attr==null)return null;
 		List<AttributesHolder>coll = attr.get();
@@ -193,8 +193,10 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 					logger.error("Server config error: No public key stored for {}", username);
 					continue;
 				}
-				JWTUtils.verifyJWTToken(jwtToken, SSHUtils.readPubkey(af.sshkey), serverDN);
-				return af.dn;
+				try {
+					JWTUtils.verifyJWTToken(jwtToken, SSHUtils.readPubkey(af.sshkey), serverDN);
+					return af.dn;
+				}catch(Exception ae) {}
 			}
 		}
 		return null;

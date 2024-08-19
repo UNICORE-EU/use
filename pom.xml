@@ -67,12 +67,13 @@
     <xuudb.version>2.10.3</xuudb.version>
     <cxf.version>4.0.5</cxf.version>
     <jetty.version>11.0.22</jetty.version>
-    <metrics.version>4.2.26</metrics.version>
+    <metrics.version>4.2.27</metrics.version>
     <jwt.version>9.40</jwt.version>
-    <tink.version>1.14.0</tink.version>
+    <tink.version>1.14.1</tink.version>
     <sshj.version>0.38.0</sshj.version>
     <jna.version>5.14.0</jna.version>
     <mvel.version>2.5.2.Final</mvel.version>
+    <junit.version>5.11.0</junit.version>
   </properties>
 
   <modules>
@@ -88,7 +89,7 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>5.10.3</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
