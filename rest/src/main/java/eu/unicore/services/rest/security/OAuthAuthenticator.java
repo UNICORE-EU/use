@@ -77,6 +77,9 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 			throw new ConfigurationException(getClass().getName()+": 'validate=true' requires parameters "
 					+ "'clientID' and 'clientSecret'");
 		}
+		if(identityAssign==null && dnTemplate==null) {
+			throw new ConfigurationException(getClass().getName()+": parameter 'identityAssign' is required");
+		}
 	}
 
 	protected Object extractCredentials(DefaultClientConfiguration clientCfg, 
