@@ -51,7 +51,7 @@ public class ForwardingHelper implements Runnable {
 	 *
 	 * @param baseClient - it is only used for handling authentication
 	 *        and user preferences, not for the actual HTTP communication
-	 * @throws IOException if the selector cannot be openend
+	 * @throws IOException if the selector cannot be opened
 	 */
 	public ForwardingHelper(BaseClient baseClient) throws IOException {
 		this.baseClient = baseClient;
@@ -84,21 +84,24 @@ public class ForwardingHelper implements Runnable {
 	}
 
 	protected SocketChannel openSocketChannel(URI u) throws IOException {
-		SocketChannel s = SocketChannel.open(new InetSocketAddress(u.getHost(), u.getPort()));
+		int port = u.getPort();
+		if(port==-1) {
+			port = "https".equalsIgnoreCase(u.getScheme()) ? 443 : 80;
+		}
+		SocketChannel s = SocketChannel.open(new InetSocketAddress(u.getHost(), port));
 		s.configureBlocking(false);
 		if("http".equalsIgnoreCase(u.getScheme())){
 			return s;
 		}
 		else if("https".equalsIgnoreCase(u.getScheme())) {
 			SSLContext sslc = HttpUtils.createSSLContext(baseClient.getSecurityConfiguration());
-			SSLEngine sslEngine = sslc.createSSLEngine(u.getHost(), u.getPort());
+			SSLEngine sslEngine = sslc.createSSLEngine(u.getHost(), port);
 			sslEngine.setUseClientMode(true);
 			return new SSLSocketChannel(s, sslEngine, null);
 		}
 		else throw new IOException();
 	}
 
-	@SuppressWarnings("resource") // we do not want to close the channel of course
 	protected void doHandshake(SocketChannel s, URI u, Header[] headers) throws Exception {
 		OutputStream os = ChannelUtils.newOutputStream(s, 65536);
 		PrintWriter pw = new PrintWriter(os, true, Charset.forName("UTF-8"));
