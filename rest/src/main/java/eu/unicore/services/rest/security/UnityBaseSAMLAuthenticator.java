@@ -26,12 +26,15 @@ import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import jakarta.xml.ws.WebServiceException;
 
 /**
- * Base class for authenticating to Unity via SAML.
- * 
+ * Base class for authenticating to Unity via SAML. <br/>
+ *
  * The credentials are extracted from the incoming message. Assertions are validated 
  * using the container's configured trusted assertion issuers.
  * Valid assertions are cached for some time, usually the validity period specified
- * in the authentication assertion from Unity.
+ * in the authentication assertion from Unity. <br/>
+ *
+ * Identity assignment is from the returned SAML AuthN assertion, other attributes (uid, groups role)
+ * can be assigned via MVL scripts.
  * 
  * @author schuller 
  */
