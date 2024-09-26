@@ -110,7 +110,7 @@ public class ContainerProperties extends PropertiesHelper {
 	/**
 	 * property defining which class to use as Persist implementation
 	 */
-	public static final String WSRF_PERSIST_CLASSNAME = "services.persistence.persist";
+	public static final String PERSIST_CLASSNAME = "services.persistence.persist";
 
 	/**
 	 * property for limiting the number of service instances per user. Attach the service name.
@@ -203,7 +203,7 @@ public class ContainerProperties extends PropertiesHelper {
 		META.put(EXEC_POOL_TIMEOUT, new PropertyMD("60000").
 				setDescription("The timeout in millis for removing idle threads."));
 
-		META.put(WSRF_PERSIST_CLASSNAME, new PropertyMD(Persistence.class.getName()).
+		META.put(PERSIST_CLASSNAME, new PropertyMD(Persistence.class.getName()).
 				setDescription("Implementation used to maintain the persistence of resources state."));
 
 		META.put(EXPIRYCHECK_INITIAL, new PropertyMD("120").setCanHaveSubkeys().

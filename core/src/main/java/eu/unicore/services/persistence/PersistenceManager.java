@@ -35,13 +35,13 @@ public class PersistenceManager {
 	
 	/**
 	 * initialise persistence manager: load persistence class configured via 
-	 * container propery {@link ContainerProperties#WSRF_PERSIST_CLASSNAME}
+	 * container property {@link ContainerProperties#PERSIST_CLASSNAME}
 	 */
 	synchronized void init(){
 		if(!haveInit){
 			haveInit=true;
 			try{
-				String clazz=kernel.getContainerProperties().getValue(ContainerProperties.WSRF_PERSIST_CLASSNAME);
+				String clazz=kernel.getContainerProperties().getValue(ContainerProperties.PERSIST_CLASSNAME);
 				if(clazz.startsWith("de.fzj.unicore.wsrflite")) {
 					clazz = clazz.replace("de.fzj.unicore.wsrflite", "eu.unicore.services");
 				}

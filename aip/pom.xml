@@ -1,22 +1,19 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>use-aip</artifactId>
-  <packaging>jar</packaging>
-  <description>Attribute Information Point implementations for UNICORE/X (formerly uas-authz)</description>
-  <inceptionYear>2008</inceptionYear>
-  <name>UNICORE Services Environment attribute sources</name>
-
-  <properties>
-     <automatic.module.name>${project.groupId}.use.aip</automatic.module.name>
-  </properties>
-
   <parent>
     <groupId>eu.unicore.services</groupId>
     <artifactId>use</artifactId>
     <version>5.1.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
+  <artifactId>use-aip</artifactId>
+  <name>UNICORE Services Environment attribute sources</name>
+  <description>Attribute Information Point implementations</description>
+
+  <properties>
+     <automatic.module.name>${project.groupId}.use.aip</automatic.module.name>
+  </properties>
 
   <dependencies>
     <dependency>

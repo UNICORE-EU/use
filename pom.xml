@@ -58,7 +58,7 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>1.1.0</persistence.version>
+    <persistence.version>1.2.2</persistence.version>
     <secutils.version>4.1.1</secutils.version>
     <seclib.version>7.1.1</seclib.version>
     <herasaf.version>3.0.2</herasaf.version>
@@ -66,14 +66,14 @@
     <gson.version>2.11.0</gson.version>
     <xuudb.version>2.10.3</xuudb.version>
     <cxf.version>4.0.5</cxf.version>
-    <jetty.version>11.0.22</jetty.version>
+    <jetty.version>11.0.24</jetty.version>
     <metrics.version>4.2.27</metrics.version>
-    <jwt.version>9.40</jwt.version>
-    <tink.version>1.14.1</tink.version>
-    <sshj.version>0.38.0</sshj.version>
-    <jna.version>5.14.0</jna.version>
+    <jwt.version>9.41.1</jwt.version>
+    <tink.version>1.15.0</tink.version>
+    <sshj.version>0.39.0</sshj.version>
+    <jna.version>5.15.0</jna.version>
     <mvel.version>2.5.2.Final</mvel.version>
-    <junit.version>5.11.0</junit.version>
+    <junit.version>5.11.1</junit.version>
   </properties>
 
   <modules>

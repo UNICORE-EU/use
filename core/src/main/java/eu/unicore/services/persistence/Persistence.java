@@ -12,7 +12,6 @@ import eu.unicore.persist.Persist;
 import eu.unicore.persist.PersistenceFactory;
 import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.persist.impl.PersistImpl;
-import eu.unicore.persist.impl.PersistenceDescriptor;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.exceptions.UnableToSetTerminationTimeException;
 import eu.unicore.util.Log;
@@ -38,9 +37,7 @@ public class Persistence extends AbstractStore{
 		super.init(kernel, serviceName);
 		persistenceProperties = kernel.getPersistenceProperties();
 		try{
-			PersistenceDescriptor pd=PersistenceDescriptor.get(ResourceBean.class);
-			pd.setTableName(serviceName);
-			p=PersistenceFactory.get(persistenceProperties).getPersist(ResourceBean.class,pd);
+			p = PersistenceFactory.get(persistenceProperties).getPersist(ResourceBean.class);
 			initTerminationTimeStore();
 		} catch (Exception e) {
 			Log.logException("Error initialising database for <"+serviceName+">",e,logger);
@@ -160,10 +157,9 @@ public class Persistence extends AbstractStore{
 	}
 
 	private synchronized void initTerminationTimeStore() throws Exception {
-		if(terminationTime!=null)return;
-		PersistenceDescriptor pd=PersistenceDescriptor.get(InstanceInfoBean.class);
-		pd.setTableName("TerminationTimes");
-		terminationTime=PersistenceFactory.get(persistenceProperties).getPersist(InstanceInfoBean.class, pd);
+		if(terminationTime==null) {
+			terminationTime = PersistenceFactory.get(persistenceProperties).getPersist(InstanceInfoBean.class);
+		}
 	}
 
 	@Override
