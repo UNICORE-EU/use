@@ -37,7 +37,7 @@ public class Persistence extends AbstractStore{
 		super.init(kernel, serviceName);
 		persistenceProperties = kernel.getPersistenceProperties();
 		try{
-			p = PersistenceFactory.get(persistenceProperties).getPersist(ResourceBean.class);
+			p = PersistenceFactory.get(persistenceProperties).getPersist(ResourceBean.class, serviceName);
 			initTerminationTimeStore();
 		} catch (Exception e) {
 			Log.logException("Error initialising database for <"+serviceName+">",e,logger);
