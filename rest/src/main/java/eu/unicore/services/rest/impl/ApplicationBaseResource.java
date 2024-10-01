@@ -132,7 +132,7 @@ public class ApplicationBaseResource extends RESTRendererBase {
 		}
 		Queue q = c.getQueue();
 		if(q!=null && q.getValidQueues()!=null && q.getValidQueues().length>0){
-			Map<String,Object>rProps = new HashMap<String, Object>();
+			Map<String,Object>rProps = new HashMap<>();
 			rProps.put("selected",q.getSelectedQueue());
 			rProps.put("availableQueues",q.getValidQueues());
 			props.put("queues",rProps);

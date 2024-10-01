@@ -49,7 +49,12 @@ public abstract class RESTRendererBase implements KernelInjectable {
 	 * the user wants all the fields
 	 */
 	protected final List<String> requestedProperties = new ArrayList<>();
-	
+
+	/**
+	 * list of result fields the user does NOT want
+	 */
+	protected final List<String> excludedProperties = new ArrayList<>();
+
 	public String getBaseURL() {
 		return baseURL;
 	}
@@ -87,13 +92,21 @@ public abstract class RESTRendererBase implements KernelInjectable {
 
 	protected void parsePropertySpec(String fields) {
 		if(fields!=null){
-			for(String f: fields.split("[ +,]"))requestedProperties.add(f);
+			for(String f: fields.split("[ +,]")) {
+				if(f.startsWith("!")) {
+					excludedProperties.add(f.substring(1));
+				} else { 
+					requestedProperties.add(f);
+				}
+			}
 		}
 	}
+
 	protected boolean wantProperty(String property) {
-		return requestedProperties.size()==0 || requestedProperties.contains(property);
+		return !excludedProperties.contains(property) &&
+				(requestedProperties.size()==0 || requestedProperties.contains(property));
 	}
-	
+
 	protected void renderJSONProperties(JSONObject o) throws Exception {
 		Map<String,Object> status = getProperties();
 		for(Map.Entry<String,Object> e: status.entrySet()){

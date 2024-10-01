@@ -1,19 +1,17 @@
 package eu.unicore.services.rest.testservice;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.security.cert.X509Certificate;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Application;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -22,7 +20,6 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -48,8 +45,13 @@ import eu.unicore.services.rest.security.sshkey.SSHUtils;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.services.server.JettyServer;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
-import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.HttpUtils;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Application;
 
 public class TestRestSecurity {
 
@@ -219,6 +221,38 @@ public class TestRestSecurity {
 					cert.getSubjectX500Principal().getName());
 		}
 	}
+	
+	@Test
+	public void testQueryFields()throws Exception {
+		HttpClient client = HttpUtils.createClient(url, kernel.getClientConfiguration());
+		// only show certain fields
+		HttpGet get = new HttpGet(url+"/"+sName+"/User?fields=role,dn");
+		IAuthCallback pwd = new UsernamePassword("demouser", "test123");
+		pwd.addAuthenticationHeaders(get);
+		try(ClassicHttpResponse response = client.executeOpen(null, get, HttpClientContext.create())){
+			assertEquals(200, response.getCode());
+			JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
+			System.out.println(reply.toString(2));
+			Set<String>keys = reply.keySet();
+			assertEquals(2, keys.size());
+			assertFalse(keys.contains("auth_method"));
+			assertTrue(keys.contains("dn"));
+			assertTrue(keys.contains("role"));
+		}
+		// exclude fields
+		get = new HttpGet(url+"/"+sName+"/User?fields=!role,!dn");
+		pwd.addAuthenticationHeaders(get);
+		try(ClassicHttpResponse response = client.executeOpen(null, get, HttpClientContext.create())){
+			assertEquals(200, response.getCode());
+			JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
+			System.out.println(reply.toString(2));
+			Set<String>keys = reply.keySet();
+			assertTrue(keys.size()>0);
+			assertFalse(keys.contains("dn"));
+			assertFalse(keys.contains("role"));
+		}
+		
+	}
 
 	public static class MyApplication extends Application {
 		@Override
@@ -238,22 +272,26 @@ public class TestRestSecurity {
 		@GET
 		@Path("/{uniqueID}")
 		@Produces("application/json")
-		public String getRepresentation(@PathParam("uniqueID") String name) throws JSONException {
+		public String getRepresentation(@PathParam("uniqueID") String name, 
+					@QueryParam("fields") String fields) throws Exception {
 			invocationCounter.incrementAndGet();
-			JSONObject res = new JSONObject();
-			try{
-				res.put("invocations", invocationCounter.get());
-				res.put("dn", AuthZAttributeStore.getClient().getDistinguishedName());
-				res.put("role", AuthZAttributeStore.getClient().getRole().getName());
-				res.put("td_status", AuthZAttributeStore.getTokens().isConsignorTrusted());
-				res.put("td_consignor", String.valueOf(AuthZAttributeStore.getTokens().getConsignorName()));
-				res.put("auth_method", String.valueOf(AuthZAttributeStore.getTokens().getContext().
-						get(AuthNHandler.USER_AUTHN_METHOD)));
-			}catch(Exception ex){
-				ex.printStackTrace();
-				res.put("error", Log.createFaultMessage("", ex));
+			parsePropertySpec(fields);
+			return getJSON().toString();
+		}
+
+		@Override
+		protected Map<String,Object>getProperties() throws Exception {
+			Map<String,Object> properties = super.getProperties();
+			properties.put("invocations", invocationCounter.get());
+			properties.put("dn", AuthZAttributeStore.getClient().getDistinguishedName());
+			if(wantProperty("role")){
+				properties.put("role", AuthZAttributeStore.getClient().getRole().getName());
 			}
-			return res.toString();
+			properties.put("td_status", AuthZAttributeStore.getTokens().isConsignorTrusted());
+			properties.put("td_consignor", String.valueOf(AuthZAttributeStore.getTokens().getConsignorName()));
+			properties.put("auth_method", String.valueOf(AuthZAttributeStore.getTokens().getContext().
+					get(AuthNHandler.USER_AUTHN_METHOD)));
+			return properties;
 		}
 	}
 }
