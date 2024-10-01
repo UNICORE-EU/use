@@ -101,8 +101,8 @@ public class ApplicationBaseResource extends RESTRendererBase {
 	@Override
 	protected Map<String, Object> getProperties() throws Exception {
 		Map<String,Object>props = new HashMap<>();
-		props.put("client", renderClientProperties());
-		props.put("server", renderServerProperties());
+		if(wantProperty("client"))props.put("client", renderClientProperties());
+		if(wantProperty("server"))props.put("server", renderServerProperties());
 		return props;
 	}
 	
@@ -125,7 +125,7 @@ public class ApplicationBaseResource extends RESTRendererBase {
 		}
 		Role r = c.getRole();
 		if(r!=null){
-			Map<String,Object>rProps = new HashMap<String, Object>();
+			Map<String,Object>rProps = new HashMap<>();
 			rProps.put("selected",r.getName());
 			rProps.put("availableRoles",r.getValidRoles());
 			props.put("role",rProps);
@@ -171,7 +171,6 @@ public class ApplicationBaseResource extends RESTRendererBase {
 			}
 		}catch(Exception ex) {}
 		props.put("trustedCAs",trusted);
-		
 		List<String>trustedSAML = new ArrayList<>();
 		try{
 			X509Certificate[] trustedCAs = kernel.getContainerSecurityConfiguration().getTrustedAssertionIssuers().getTrustedIssuers();
@@ -180,8 +179,7 @@ public class ApplicationBaseResource extends RESTRendererBase {
 			}
 		}catch(Exception ex) {}
 		props.put("trustedSAMLIssuers",trustedSAML);
-		
-		Map<String,Object>connectors = new HashMap<String, Object>();  
+		Map<String,Object>connectors = new HashMap<>();
 		for(ISubSystem sub: kernel.getSubSystems()){
 			for(ExternalSystemConnector ec: sub.getExternalConnections()){
 				connectors.put(ec.getExternalSystemName(), ec.getConnectionStatus());

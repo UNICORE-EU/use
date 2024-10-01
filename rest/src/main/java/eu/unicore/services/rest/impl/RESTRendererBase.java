@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.cxf.jaxrs.impl.ResponseBuilderImpl;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,10 +39,13 @@ public abstract class RESTRendererBase implements KernelInjectable {
 	 */
 	protected Kernel kernel;
 
-	protected Collection<Link> links = new ArrayList<>();
-
 	protected String resourceID;
-	
+
+	/**
+	 * list of links to publish in a GET
+	 */
+	protected final Collection<Link> links = new ArrayList<>();
+
 	/**
 	 * list of result fields requested in a GET - if empty, 
 	 * the user wants all the fields
@@ -289,7 +291,6 @@ public abstract class RESTRendererBase implements KernelInjectable {
 			if(status>499 && logger!=null)Log.logException(message, cause, logger);
 		}
 		else msg = message;
-		
 		return createErrorResponse(status, msg);
 	}
 
@@ -298,16 +299,15 @@ public abstract class RESTRendererBase implements KernelInjectable {
 	 * The error info will be placed in the response body as JSON.
 	 */
 	public static Response createErrorResponse(int status, String message) {
-		ResponseBuilderImpl res = new ResponseBuilderImpl();
-		res.status(status);
-		res.type(MediaType.APPLICATION_JSON);
 		JSONObject json = new JSONObject();
 		try{
 			json.put("errorMessage", message);
 			json.put("status", status);
 		}catch(Exception ex){}
-		res.entity(json.toString());
-		return res.build();
+		return Response.status(status).
+				type(MediaType.APPLICATION_JSON).
+				entity(json.toString()).
+				build();
 	}	
 }
 
