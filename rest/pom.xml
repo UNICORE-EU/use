@@ -8,6 +8,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>use-rest</artifactId>
+  <version>5.1.1-p1</version>
   <name>UNICORE Services Environment REST support</name>
   <properties>
      <automatic.module.name>${project.groupId}.use.rest</automatic.module.name>
@@ -33,7 +34,7 @@
     <dependency>
       <groupId>eu.unicore.services</groupId>
       <artifactId>use-core</artifactId>
-      <version>${project.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -42,7 +43,7 @@
     <dependency>
       <groupId>eu.unicore.services</groupId>
       <artifactId>use-restclient</artifactId>
-      <version>${project.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
     <dependency>
       <groupId>eu.unicore.security</groupId>

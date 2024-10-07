@@ -128,7 +128,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	private String handleAssignScript(String script, String paramName) {
 		if(script!=null && script.startsWith("@")) {
 			try{
-				return FileUtils.readFileToString(new File(script), "UTF-8");
+				return FileUtils.readFileToString(new File(script.substring(1)), "UTF-8");
 			}catch(IOException io) {
 				throw new ConfigurationException("Cannot read value for '"+paramName+"'", io);
 			}

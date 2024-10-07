@@ -120,7 +120,7 @@ public class RESTUtils {
 		
 		private final StringBuilder sb = new StringBuilder();
 		
-		private final Stack<String> stack = new Stack<String>();
+		private final Stack<String> stack = new Stack<>();
 				
 		private final boolean fragment;
 		
