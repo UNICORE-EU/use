@@ -5,11 +5,6 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.UUID;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ContainerRequestFilter;
-import jakarta.ws.rs.core.Response;
-
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.hc.core5.http.HttpStatus;
@@ -17,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
 
+import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.Client;
@@ -30,11 +26,17 @@ import eu.unicore.services.rest.impl.PostInvokeHandler;
 import eu.unicore.services.rest.jwt.JWTHelper;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.jwt.JWTUtils;
+import eu.unicore.services.security.AuthAttributesCollector;
+import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.IContainerSecurityConfiguration;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.services.security.util.PubkeyCache;
 import eu.unicore.util.Log;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.Response;
 
 /**
  * AuthN handler for REST services.
@@ -193,8 +195,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 		String subject = payload.optString("sub", null);
 		String issuer = payload.optString("iss", null);
 		boolean etd = Boolean.parseBoolean(payload.optString("etd", null));
-		boolean isDelegationToken = etd && 
-				subject!=null && issuer!=null && subject!=issuer;
+		boolean isDelegationToken = etd && subject!=null && issuer!=null && subject!=issuer;
 		if(isDelegationToken){
 			jwt.verifyJWTToken(bearerToken, serverDN);
 			tokens.setUserName(subject);
@@ -204,6 +205,12 @@ public class AuthNHandler implements ContainerRequestFilter {
 			Boolean renewable = Boolean.parseBoolean(payload.optString("renewable", "false"));
 			tokens.getContext().put(ETD_RENEWABLE, renewable);
 			logger.debug("Trust delegated authentication as <{}> via JWT issued by <{}>", subject, issuer);
+			// process delegated attributes - only if the token came from this server
+			BasicAttributeHolder bah = assignAttributes(payload);
+			if(bah!=null && X500NameUtils.equal(issuer, serverDN)) {
+				tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, bah);
+				logger.debug("Attributes from ETD token: {}", bah);
+			}
 		}
 	}
 	
@@ -311,5 +318,14 @@ public class AuthNHandler implements ContainerRequestFilter {
 		session = new SecuritySession(sessionID, securityTokens, lt);
 		sessionStore.storeSession(session, securityTokens);
 		return session;
+	}
+
+	private BasicAttributeHolder assignAttributes(JSONObject etdPayload) {
+		BasicAttributeHolder bah = new BasicAttributeHolder();
+		if(etdPayload.get("uid")!=null) {
+			bah.uid = String.valueOf(etdPayload.get("uid"));
+			bah.setRole("user");
+		}
+		return bah;
 	}
 }

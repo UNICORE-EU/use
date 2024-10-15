@@ -7,13 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
 import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.X509Credential;
@@ -23,14 +16,23 @@ import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.Client;
 import eu.unicore.security.Queue;
 import eu.unicore.security.Role;
+import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.Xlogin;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.ISubSystem;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.AuthNHandler;
 import eu.unicore.services.rest.security.jwt.JWTUtils;
+import eu.unicore.services.security.AuthAttributesCollector;
+import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.util.Log;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * base class for resources providing general information
@@ -62,6 +64,13 @@ public class ApplicationBaseResource extends RESTRendererBase {
 			long lifetime = lifetimeParam!=null? Long.valueOf(lifetimeParam): jwtProps.getTokenValidity();
 			Map<String,String> claims = new HashMap<>();
 			claims.put("etd", "true");
+			try {
+				SecurityTokens tokens = AuthZAttributeStore.getTokens();
+				BasicAttributeHolder attr = (BasicAttributeHolder)tokens.getContext().get(AuthAttributesCollector.ATTRIBUTES);
+				if(attr.uid!=null) {
+					claims.put("uid", attr.uid);
+				}
+			}catch(Exception e) {}
 			if(Boolean.parseBoolean(renewable)) {
 				claims.put("renewable", "true");
 			}

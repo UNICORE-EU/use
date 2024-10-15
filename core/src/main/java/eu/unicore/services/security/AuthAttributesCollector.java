@@ -88,7 +88,8 @@ public class AuthAttributesCollector implements IAttributeSource {
 
 		@Override
 		public String toString() {
-			return String.format("role=%s uid=%s groups=%s", role, uid, Arrays.asList(groups));
+			return String.format("role=%s uid=%s groups=%s", role, uid,
+						groups!=null ? Arrays.asList(groups) : "[]");
 		}
 	}
 	
