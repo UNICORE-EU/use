@@ -322,8 +322,8 @@ public class AuthNHandler implements ContainerRequestFilter {
 
 	private BasicAttributeHolder assignAttributes(JSONObject etdPayload) {
 		BasicAttributeHolder bah = new BasicAttributeHolder();
-		if(etdPayload.get("uid")!=null) {
-			bah.uid = String.valueOf(etdPayload.get("uid"));
+		if(etdPayload.optString("uid", null)!=null) {
+			bah.uid = etdPayload.getString("uid");
 			bah.setRole("user");
 		}
 		return bah;
