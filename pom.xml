@@ -64,16 +64,16 @@
     <herasaf.version>3.0.2</herasaf.version>
     <json.version>20240303</json.version>
     <gson.version>2.11.0</gson.version>
-    <xuudb.version>2.10.4</xuudb.version>
+    <xuudb.version>2.10.5</xuudb.version>
     <cxf.version>4.0.5</cxf.version>
     <jetty.version>11.0.24</jetty.version>
-    <metrics.version>4.2.27</metrics.version>
+    <metrics.version>4.2.28</metrics.version>
     <jwt.version>9.41.2</jwt.version>
     <tink.version>1.15.0</tink.version>
     <sshj.version>0.39.0</sshj.version>
     <jna.version>5.15.0</jna.version>
     <mvel.version>2.5.2.Final</mvel.version>
-    <junit.version>5.11.1</junit.version>
+    <junit.version>5.11.3</junit.version>
   </properties>
 
   <modules>
