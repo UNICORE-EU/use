@@ -149,10 +149,5 @@ public class SecuredResourceModel implements Model {
 	public Set<String>getTags(){
 		return tags;
 	}
-	
-	@Override
-	public String getFrontend(String serviceType) {
-		return "self";
-	}
 
 }

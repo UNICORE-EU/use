@@ -1,10 +1,11 @@
 package eu.unicore.services.rest.security;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 import eu.unicore.security.HTTPAuthNTokens;
 import eu.unicore.security.SecurityTokens;

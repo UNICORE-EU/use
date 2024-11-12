@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.apache.hc.core5.http.HttpMessage;
 
-import eu.unicore.services.rest.client.IAuthCallback;
+import eu.unicore.services.restclient.IAuthCallback;
 import eu.unicore.services.security.IContainerSecurityConfiguration;
 
 /**

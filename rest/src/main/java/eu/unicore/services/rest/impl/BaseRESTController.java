@@ -26,9 +26,9 @@ import eu.unicore.services.impl.BaseModel;
 import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.services.impl.SecuredResourceImpl;
 import eu.unicore.services.impl.SecuredResourceModel;
+import eu.unicore.services.restclient.utils.UnitParser;
 import eu.unicore.services.security.ACLEntry;
 import eu.unicore.services.security.util.AuthZAttributeStore;
-import eu.unicore.services.utils.UnitParser;
 import eu.unicore.util.ConcurrentAccess;
 import eu.unicore.util.Log;
 import jakarta.ws.rs.Consumes;
@@ -311,7 +311,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	protected List<String>renderACL(List<ACLEntry>acl){
 		List<String> res = new ArrayList<>();
 		for(ACLEntry e: acl){
-			res.add(e.getAccessType()+":"+e.getMatchType()+":"+e.getRequiredValue());
+			res.add(e.toString());
 		}
 		return res;
 	}

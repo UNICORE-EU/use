@@ -36,17 +36,13 @@ public class MessagingImpl implements IMessaging{
 	
 	final BlockingQueue<MessageBean> queue;
 	
-	public MessagingImpl(PersistenceProperties kernelCfg)throws MessagingException{
+	public MessagingImpl(PersistenceProperties kernelCfg)throws Exception{
 		this.persistenceProperties=kernelCfg;
-		try{
-			store=createStore();
-			this.queue = new BlockingArrayQueue<>(256, 16, 1024);
-			messagingWriteThread = new MessageWriteThread(queue,store);
-			messagingWriteThread.start();
-		}catch(PersistenceException pe){
-			throw new MessagingException(pe);
-		}
-		providers = new HashMap<>();
+		this.store=createStore();
+		this.queue = new BlockingArrayQueue<>(256, 16, 1024);
+		this.messagingWriteThread = new MessageWriteThread(queue,store);
+		this.messagingWriteThread.start();
+		this.providers = new HashMap<>();
 	}
 
 	protected Persist<MessageBean>createStore()throws PersistenceException{
@@ -81,16 +77,12 @@ public class MessagingImpl implements IMessaging{
 	 * The messages will be removed from the store, so the application has to process them all,
 	 * or call
 	 */
-	public PullPoint getPullPoint(final String destination) throws MessagingException {
+	public PullPoint getPullPoint(final String destination) throws Exception {
 		final List<Message>messages = new ArrayList<>();
 		synchronized(store){
-			try{
-				for(String messageID: store.getIDs("destination",destination)){
-					messages.add(store.read(messageID).getMessage());
-					store.remove(messageID);
-				}
-			}catch(Exception ex){
-				throw new MessagingException(ex);
+			for(String messageID: store.getIDs("destination",destination)){
+				messages.add(store.read(messageID).getMessage());
+				store.remove(messageID);
 			}
 		}
 		
@@ -124,7 +116,7 @@ public class MessagingImpl implements IMessaging{
 
 	}
 	
-	public IMessagingChannel getChannel(final String name) throws MessagingException {
+	public IMessagingChannel getChannel(final String name) throws Exception {
 		IMessagingProvider provider=providers.get(name);
 		if(provider!=null){
 			return provider.getChannel();
@@ -132,15 +124,11 @@ public class MessagingImpl implements IMessaging{
 		
 		//fallback to internal messaging
 		return new IMessagingChannel(){
-			public void publish(Message message) throws MessagingException{
-				try{
-					queue.offer(new MessageBean(message.getMessageId(),name,message));
-				}catch(Exception ex){
-					throw new MessagingException(ex);
-				}
+			public void publish(Message message) throws Exception{
+				queue.offer(new MessageBean(message.getMessageId(),name,message));
 			}
 			
-			public void flush() throws MessagingException {
+			public void flush() throws Exception {
 				while(queue.size()>0) {
 					try{
 						Thread.sleep(1000);

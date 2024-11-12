@@ -5,24 +5,16 @@ package eu.unicore.services.exceptions;
  * 
  * @author schuller
  */
-public class ResourceNotCreatedException extends USEException {
+public class ResourceNotCreatedException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
-	public ResourceNotCreatedException() {
-		super();
-	}
-
 	public ResourceNotCreatedException(String message) {
-		super(message);
+		this(message,null);
 	}
 
 	public ResourceNotCreatedException(String message, Throwable cause) {
 		super(message, cause);
-	}
-
-	public ResourceNotCreatedException(Throwable cause) {
-		super(cause);
 	}
 
 }

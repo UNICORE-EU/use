@@ -3,10 +3,9 @@ package eu.unicore.services.rest.registry;
 import java.util.HashSet;
 import java.util.Set;
 
-import jakarta.ws.rs.core.Application;
-
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.USERestApplication;
+import jakarta.ws.rs.core.Application;
 
 /**
  * REST application for local/shared Registry

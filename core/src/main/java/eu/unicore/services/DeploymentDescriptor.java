@@ -27,12 +27,7 @@ public interface DeploymentDescriptor extends KernelInjectable
 	 * the implementation class name
 	 */
 	public Class<?> getImplementation();
-	
-	/**
-	 * ws frontend class
-	 */
-	public Class<?> getFrontend();
-	
+
 	/**
 	 * init tasks to be executed after deployment
 	 */

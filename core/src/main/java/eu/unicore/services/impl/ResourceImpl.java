@@ -10,8 +10,6 @@ import eu.unicore.services.Home;
 import eu.unicore.services.InitParameters;
 import eu.unicore.services.InitParameters.TerminationMode;
 import eu.unicore.services.Kernel;
-import eu.unicore.services.exceptions.TerminationTimeChangeRejectedException;
-import eu.unicore.services.exceptions.UnableToSetTerminationTimeException;
 import eu.unicore.services.messaging.PullPoint;
 import eu.unicore.util.Log;
 
@@ -42,8 +40,7 @@ public abstract class ResourceImpl extends SecuredResourceImpl implements Extend
 		return home!=null? home.getServiceName() : null;
 	}
 
-	public void setTerminationTime(Calendar newTT) 
-			throws TerminationTimeChangeRejectedException,UnableToSetTerminationTimeException {
+	public void setTerminationTime(Calendar newTT) throws Exception {
 		if(home!=null)home.setTerminationTime(getModel().getUniqueID(),newTT);
 	}
 
@@ -88,16 +85,12 @@ public abstract class ResourceImpl extends SecuredResourceImpl implements Extend
 		if(getModel()==null){
 			setModel(new BaseModel());
 		}
-		
 		String uniqueID = initParams.uniqueID;
-		
 		getModel().setUniqueID(uniqueID);
 		getModel().setParentServiceName(initParams.parentServiceName);
 		getModel().setParentUID(initParams.parentUUID);
-		
 		//security stuff
 		super.initialise(initParams);
-
 		Calendar tt = null;
 		if(TerminationMode.DEFAULT == initParams.terminationMode){
 			tt=Calendar.getInstance();

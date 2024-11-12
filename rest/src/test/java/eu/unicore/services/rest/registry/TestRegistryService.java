@@ -14,10 +14,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.Kernel;
-import eu.unicore.services.registry.RegistryFeature;
-import eu.unicore.services.registry.RegistryHandler;
 import eu.unicore.services.registry.RegistryImpl;
-import eu.unicore.services.rest.client.BaseClient;
+import eu.unicore.services.restclient.BaseClient;
 import eu.unicore.services.security.TestConfigUtil;
 
 public class TestRegistryService {

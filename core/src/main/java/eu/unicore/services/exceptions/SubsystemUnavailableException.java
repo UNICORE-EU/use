@@ -2,20 +2,16 @@ package eu.unicore.services.exceptions;
 
 /**
  * thrown when an external / subsystem cannot be accessed
- * because it is (temporarily) unavalaibe
- * 
+ * because it is (temporarily) unavailable
+ *
  * @author schuller
  */
 public class SubsystemUnavailableException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public SubsystemUnavailableException() {
-		super();
-	}
-
 	public SubsystemUnavailableException(String message) {
-		super(message);
+		this(message,null);
 	}
 
 	public SubsystemUnavailableException(String message, Throwable cause) {

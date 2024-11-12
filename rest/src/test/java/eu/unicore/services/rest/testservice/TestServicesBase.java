@@ -1,14 +1,12 @@
 package eu.unicore.services.rest.testservice;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.File;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
-
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Application;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
@@ -24,10 +22,12 @@ import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.services.rest.RestService;
 import eu.unicore.services.rest.USEResource;
 import eu.unicore.services.rest.USERestApplication;
-import eu.unicore.services.rest.client.BaseClient;
 import eu.unicore.services.rest.impl.ServicesBase;
+import eu.unicore.services.restclient.BaseClient;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Application;
 
 public class TestServicesBase {
 

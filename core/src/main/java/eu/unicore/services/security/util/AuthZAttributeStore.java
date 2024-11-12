@@ -2,7 +2,6 @@ package eu.unicore.services.security.util;
 
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
-import eu.unicore.services.security.SecurityManager;
 import eu.unicore.services.utils.TimeProfile;
 
 /**
@@ -19,17 +18,15 @@ import eu.unicore.services.utils.TimeProfile;
 public class AuthZAttributeStore {
 
 	private AuthZAttributeStore (){}
-	
-	private static ThreadLocal<Client> client=new ThreadLocal<>();
+
+	private static ThreadLocal<Client> client = new ThreadLocal<>();
 
 	private static ThreadLocal<TimeProfile> timeProfile = new ThreadLocal<>();
-	
+
 	public static Client getClient(){
 		Client ret = client.get();
 		if (ret == null) {
 			ret = new Client();
-			if (SecurityManager.isLocalCall())
-				ret.setLocalClient();
 			client.set(ret);
 		}
 		return ret;
@@ -38,10 +35,11 @@ public class AuthZAttributeStore {
 	public static void setClient(Client c){
 		client.set(c);
 	}
+
 	public static void removeClient(){
 		client.remove();
 	}
-	
+
 	public static SecurityTokens getTokens(){
 		return getClient().getSecurityTokens();
 	}

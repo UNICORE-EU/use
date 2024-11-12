@@ -46,7 +46,7 @@ implements IAttributeSourceBase, ISubSystem {
 	protected List<T> chain;
 	protected String name;
 	protected String orderString;
-	protected CombiningPolicy combiner;
+	protected CombiningPolicy combiner = BaseAttributeSourcesChain.MERGE_LAST_OVERRIDES;
 	protected Properties properties = null;
 	
 	protected final List<ExternalSystemConnector>externalConnections = new ArrayList<>();

@@ -13,7 +13,6 @@ import eu.unicore.persist.PersistenceFactory;
 import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.persist.impl.PersistImpl;
 import eu.unicore.services.Kernel;
-import eu.unicore.services.exceptions.UnableToSetTerminationTimeException;
 import eu.unicore.util.Log;
 
 /**
@@ -143,16 +142,12 @@ public class Persistence extends AbstractStore{
 		return tt;
 	}
 
-	public void setTerminationTime(String uniqueID, Calendar c)throws UnableToSetTerminationTimeException{
+	public void setTerminationTime(String uniqueID, Calendar c)throws Exception{
+		InstanceInfoBean t=terminationTime.getForUpdate(uniqueID,100,TimeUnit.MILLISECONDS);
 		try{
-			InstanceInfoBean t=terminationTime.getForUpdate(uniqueID,100,TimeUnit.MILLISECONDS);
-			try{
-				t=new InstanceInfoBean(uniqueID,serviceName,c);
-			}finally{
-				terminationTime.write(t);
-			}
-		}catch(Exception ex){
-			throw new UnableToSetTerminationTimeException("Cannot set termination time.",ex);
+			t=new InstanceInfoBean(uniqueID,serviceName,c);
+		}finally{
+			terminationTime.write(t);
 		}
 	}
 

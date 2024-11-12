@@ -3,7 +3,7 @@ package eu.unicore.services.rest.jwt;
 import java.util.Properties;
 
 import eu.unicore.services.rest.security.RESTSecurityProperties;
-import eu.unicore.services.rest.security.jwt.JWTProperties;
+import eu.unicore.services.restclient.jwt.JWTProperties;
 import eu.unicore.util.configuration.DocumentationReferencePrefix;
 import eu.unicore.util.configuration.PropertyMD;
 

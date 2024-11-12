@@ -27,7 +27,6 @@ import eu.unicore.security.wsutil.SecuritySessionStore;
 import eu.unicore.services.admin.AdminAction;
 import eu.unicore.services.admin.AdminActionLoader;
 import eu.unicore.services.messaging.IMessaging;
-import eu.unicore.services.messaging.MessagingException;
 import eu.unicore.services.messaging.MessagingImpl;
 import eu.unicore.services.persistence.PersistenceManager;
 import eu.unicore.services.registry.RegistryCreator;
@@ -396,7 +395,7 @@ public final class Kernel {
 	/**
 	 * get access to the message system
 	 */
-	public IMessaging getMessaging() throws MessagingException {
+	public IMessaging getMessaging() {
 		return msg;
 	}
 

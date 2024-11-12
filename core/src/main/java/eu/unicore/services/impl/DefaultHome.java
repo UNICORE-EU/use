@@ -24,12 +24,10 @@ import eu.unicore.services.InitParameters;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Resource;
 import eu.unicore.services.ThreadingServices;
+import eu.unicore.services.exceptions.InvalidModificationException;
 import eu.unicore.services.exceptions.ResourceNotCreatedException;
 import eu.unicore.services.exceptions.ResourceUnavailableException;
 import eu.unicore.services.exceptions.ResourceUnknownException;
-import eu.unicore.services.exceptions.TerminationTimeChangeRejectedException;
-import eu.unicore.services.exceptions.UnableToSetTerminationTimeException;
-import eu.unicore.services.messaging.MessagingException;
 import eu.unicore.services.messaging.PullPoint;
 import eu.unicore.services.persistence.Store;
 import eu.unicore.services.security.ACLEntry;
@@ -90,7 +88,7 @@ public abstract class DefaultHome implements Home {
 		expiryChecker = new ExpiryChecker();
 		instanceChecking.addChecker(expiryChecker);
 		secInfoCache = new LoadingMap<>(
-				new Function<String, Pair<String,List<ACLEntry>>>() {
+				new Function<>() {
 					public Pair<String,List<ACLEntry>> apply(String id) {
 						try{
 							return readSecurityInfo(id);				
@@ -280,9 +278,10 @@ public abstract class DefaultHome implements Home {
 		try{
 			res = serviceInstances.read(id);
 		}catch(Exception e) {
-			throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",e);
+			throw new ResourceUnavailableException("Instance with ID <"+_fullID(id)+"> cannot be accessed",e);
 		}
-		if(res==null)throw new ResourceUnknownException("Instance with ID <"+buildFullServiceID(id)+"> does not exist");
+		if(res==null)throw new ResourceUnknownException("Instance with ID <"+_fullID(id)+"> does not exist");
+		res.setHome(kernel.getHome(serviceName));
 		return res;
 	}
 
@@ -293,9 +292,9 @@ public abstract class DefaultHome implements Home {
 			processMessages(resource);
 			return resource;
 		}catch(TimeoutException te){
-			throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> is not available.");
+			throw new ResourceUnavailableException("Instance with ID <"+_fullID(id)+"> is not available.");
 		}catch(Exception pe){
-			throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",pe);
+			throw new ResourceUnavailableException("Instance with ID <"+_fullID(id)+"> cannot be accessed",pe);
 		}
 	}
 
@@ -312,9 +311,9 @@ public abstract class DefaultHome implements Home {
 			serviceInstances.lock(resource,locking_timeout,TimeUnit.SECONDS);
 			processMessages(resource);
 		}catch(TimeoutException te){
-			throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(resource.getUniqueID())+"> is not available.");
+			throw new ResourceUnavailableException("Instance with ID <"+_fullID(resource.getUniqueID())+"> is not available.");
 		}catch(Exception pe){
-			throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(resource.getUniqueID())+"> cannot be accessed",pe);
+			throw new ResourceUnavailableException("Instance with ID <"+_fullID(resource.getUniqueID())+"> cannot be accessed",pe);
 		}
 	}
 
@@ -323,12 +322,13 @@ public abstract class DefaultHome implements Home {
 		try{
 			Resource resource = serviceInstances.getForUpdate(id,locking_timeout,TimeUnit.SECONDS);
 			if(resource==null)throw new ResourceUnknownException("Instance with ID <"+id+"> does not exist");
+			resource.setHome(this);
 			processMessages(resource);
 			return resource;
 		}catch(TimeoutException te){
-			throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> is not available.");
+			throw new ResourceUnavailableException("Instance with ID <"+_fullID(id)+"> is not available.");
 		}catch(Exception pe){
-			throw new ResourceUnavailableException("Instance with ID <"+buildFullServiceID(id)+"> cannot be accessed",pe);
+			throw new ResourceUnavailableException("Instance with ID <"+_fullID(id)+"> cannot be accessed",pe);
 		}
 	}
 
@@ -348,7 +348,7 @@ public abstract class DefaultHome implements Home {
 		}
 	}
 
-	private String buildFullServiceID(String resourceID){
+	private String _fullID(String resourceID){
 		return serviceName+":"+resourceID;
 	}
 
@@ -408,7 +408,7 @@ public abstract class DefaultHome implements Home {
 	}
 
 	@Override
-	public void setTerminationTime(String uniqueID, Calendar c)throws TerminationTimeChangeRejectedException,UnableToSetTerminationTimeException{
+	public void setTerminationTime(String uniqueID, Calendar c) throws Exception {
 		//check if maximum termination time is exceeded
 		Integer maxLifetime=null;
 		if(kernel!=null){ // TODO can be null in unit tests -> should refactor
@@ -427,21 +427,17 @@ public abstract class DefaultHome implements Home {
 				}
 			}
 			if(exceeded){
-				throw new TerminationTimeChangeRejectedException("Requested lifetime is larger than maximum configured on the system.");
+				throw new InvalidModificationException("Requested lifetime is larger than maximum configured on the system.");
 			}
 		}
-		try{
-			if(serviceInstances!=null){
-				serviceInstances.setTerminationTime(uniqueID, c);
-			}
-			if(c!=null){
-				terminationTimes.put(uniqueID,c);
-			}
-			else{
-				terminationTimes.remove(uniqueID);
-			}
-		}catch(Exception e){
-			throw new UnableToSetTerminationTimeException(e);
+		if(serviceInstances!=null){
+			serviceInstances.setTerminationTime(uniqueID, c);
+		}
+		if(c!=null){
+			terminationTimes.put(uniqueID,c);
+		}
+		else{
+			terminationTimes.remove(uniqueID);
 		}
 	}
 
@@ -514,8 +510,7 @@ public abstract class DefaultHome implements Home {
 	/**
 	 * Initialise notification support. This default implementation does nothing.
 	 */
-	protected void initNotification()throws MessagingException{
-	}
+	protected void initNotification() {}
 
 	/**
 	 * check whether the current user's limit of service instances has not yet been exceeded

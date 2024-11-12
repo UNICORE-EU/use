@@ -2,6 +2,7 @@ package eu.unicore.services.registry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,26 +11,24 @@ import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.Home;
-import eu.unicore.services.InitParameters;
-import eu.unicore.services.InitParameters.TerminationMode;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Service;
+import eu.unicore.services.exceptions.ResourceUnknownException;
 import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.services.security.TestConfigUtil;
 
 public class TestRegistry {
 
 	Kernel kernel;
+
 	long defaultEntryLifetime;
-	
+
 	@Test
 	public void testRegistry() throws Exception {
 		kernel = new Kernel(TestConfigUtil.getInsecureProperties());
 		setupServices(kernel);
-
-		RegistryHome home = (RegistryHome)kernel.getHome("Registry");
-		InitParameters initParams = new InitParameters("default_registry", TerminationMode.NEVER);
-		home.createResource(initParams);
+		RegistryCreator rc = RegistryCreator.get(kernel);
+		rc.createRegistry();
 
 		// create entry
 		Map<String,String>content = new HashMap<>();
@@ -60,6 +59,7 @@ public class TestRegistry {
 
 		LocalRegistryClient lrc = new LocalRegistryClient(kernel);
 		System.out.println(lrc.listEntries());
+
 	}
 
 	private String update(String endpoint, Map<String,String>content) throws Exception {
@@ -67,9 +67,6 @@ public class TestRegistry {
 			registry.addEntry(endpoint, content, null);
 			return registry.getModel().getEntryID(endpoint);
 		}
-		/**
-		 * tests that the "uas.onstartup*" properties are properly processed
-		 */
 	}
 
 	protected void setupServices(Kernel kernel) throws Exception {

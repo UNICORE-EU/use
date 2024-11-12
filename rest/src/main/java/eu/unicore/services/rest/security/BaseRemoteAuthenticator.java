@@ -221,11 +221,9 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	/**
 	 * extract attributes (uid, role, groups) from the auth reply
 	 * @param auth
-	 * @return
+	 * @return map with attributes
 	 */
-	protected Map<String, Object> extractAttributes(T auth) {
-		return null;
-	}
+	protected abstract Map<String, Object> extractAttributes(T auth);
 
 	/**
 	 * assign attributes based on the configured attribute assignment scripts
@@ -268,17 +266,6 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 				.expireAfterAccess(300, TimeUnit.SECONDS)
 				.expireAfterWrite(300, TimeUnit.SECONDS)
 				.build();
-	}
-	
-	@Override
-	@SuppressWarnings("rawtypes")
-	public boolean equals(Object other) {
-		if(other!=null && other.getClass().isAssignableFrom(BaseRemoteAuthenticator.class)){
-			try {
-				return this.simpleAddress.equals(((BaseRemoteAuthenticator)other).simpleAddress);
-			}catch(Exception e) {}
-		}
-		return super.equals(other);
 	}
 
 	private Status status=Status.UNKNOWN;

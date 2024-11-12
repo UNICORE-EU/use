@@ -141,9 +141,25 @@ public class TestSecurityManager {
 		assertTrue(booleanProperty);
 		assertTrue(stringProperty.equals("testtest"));
 		assertTrue("A1A2".equals(name));
-		
 	}
 
+	@Test
+	public void testCreateSecureClient()throws Exception{
+		Properties p = TestConfigUtil.getInsecureProperties();
+		p.setProperty(PREFIX+PROP_CHECKACCESS, "false");
+		p.setProperty(PREFIX+PROP_AIP_PREFIX+"."+"A1.class", 
+				SimpleAIP.class.getName());
+		p.setProperty(PREFIX+PROP_AIP_ORDER, "A1");
+		p.setProperty(PREFIX+PROP_AIP_COMBINING_POLICY, "FIRST_ACCESSIBLE");
+		addDefaultConfig(p);
+		Kernel k = new Kernel(p);
+		SecurityManager secMan = k.getSecurityManager();
+		SecurityTokens st = new SecurityTokens();
+		st.setUserName("cn=foo");
+		st.setConsignorTrusted(true);
+		Client c = secMan.createSecureClient(st);
+		assertEquals("cn=foo", c.getDistinguishedName());
+	}
 	private void addDefaultConfig(Properties props) {
 		props.put("container.security.sslEnabled", "false");
 		props.put("container.security.gateway.enable", "false");
@@ -216,4 +232,5 @@ public class TestSecurityManager {
 			return new SubjectAttributesHolder(res);
 		}
 	}
+	
 }

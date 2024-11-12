@@ -84,16 +84,16 @@ public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeS
 			ThreadContext.push(name);
 			try{
 				SubjectAttributesHolder current = a.getAttributes(tokens, resultMap);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Attribute source {} returned the following attributes:\n{}", name, current);
-				}
+				logger.debug("Attribute source {} returned the following attributes: {}",
+						()->name, ()-> current.toString());
+				
 				if (!combiner.combineAttributes(resultMap, current)) {
 					logger.debug("Attributes combiner decided to stop processing attribute sources at {}", name);
 					break;
 				}
 			}
 			catch(SubsystemUnavailableException e){
-				logger.debug("Attribute source <"+name+"> (temporarily) not available.");
+				logger.debug("Attribute source <{}> (temporarily) not available.", name);
 			}
 			catch(Exception e){
 				logger.error(Log.createFaultMessage("Error accessing attribute source <"+name+">", e));
@@ -107,7 +107,6 @@ public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeS
 
 	@Override
 	protected List<IAttributeSource> createChain(Kernel kernel) throws ConfigurationException {
-		assert combiner != null;
 		var p = super.createChain(ContainerSecurityProperties.PROP_AIP_PREFIX, kernel);
 		List<IAttributeSource> newChain = p.getM1();
 		List<String> newNames = p.getM2();
@@ -120,13 +119,14 @@ public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeS
 			}
 		}
 		if(needAAC) {
+			AuthAttributesCollector aac = new AuthAttributesCollector();
+			aac.setAutoConfigured();
+			aac.configure("DEFAULT", kernel);
 			if (combiner == MERGE_LAST_OVERRIDES){
-				AuthAttributesCollector aac = new AuthAttributesCollector();
-				aac.setAutoConfigured();
 				newChain.add(0, aac);
 				newNames.add(0, "DEFAULT");
 			}else {
-				newChain.add(new AuthAttributesCollector());
+				newChain.add(aac);
 				newNames.add("DEFAULT");
 			}
 		}

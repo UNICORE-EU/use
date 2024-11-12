@@ -22,7 +22,7 @@ import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.ISubSystem;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.AuthNHandler;
-import eu.unicore.services.rest.security.jwt.JWTUtils;
+import eu.unicore.services.restclient.jwt.JWTUtils;
 import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.security.util.AuthZAttributeStore;

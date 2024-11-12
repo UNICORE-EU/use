@@ -39,6 +39,9 @@ public class ACLEntry {
 		this.accessType = grant;
 		this.requiredValue = clientAttribute;
 		this.matchType = ofType;
+		if(MatchType.DN.equals(matchType)) {
+			X500NameUtils.getComparableForm(requiredValue);
+		}
 	}
 
 	public boolean allowed(OperationType type, Client c){
@@ -85,20 +88,9 @@ public class ACLEntry {
 		return allow;
 	}
 
-	public OperationType getAccessType() {
-		return accessType;
-	}
-
-	public String getRequiredValue() {
-		return requiredValue;
-	}
-
-	public MatchType getMatchType() {
-		return matchType;
-	}
-
+	@Override
 	public String toString(){
-		return "ACLEntry['"+accessType+"' if "+matchType+" matches " + requiredValue+"]";
+		return accessType+":"+matchType+":"+requiredValue;
 	}
 
 	/**

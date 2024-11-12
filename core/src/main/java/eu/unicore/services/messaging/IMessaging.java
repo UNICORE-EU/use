@@ -21,16 +21,16 @@ public interface IMessaging {
 	 * @param name -  the name of the messaging queue
 	 * @return a {@link IMessagingChannel}
 	 */
-	public IMessagingChannel getChannel(String name) throws MessagingException;
+	public IMessagingChannel getChannel(String name) throws Exception;
 	
 	/**
 	 * get a pullpoint for reading messages targeted at the given destination
 	 * 
 	 * @param destination - the name of the messaging queue
 	 * @return a {@link PullPoint}
-	 * @throws MessagingException
+	 * @throws Exception
 	 */
-	public PullPoint getPullPoint(String destination) throws MessagingException;
+	public PullPoint getPullPoint(String destination) throws Exception;
 	
 	/**
 	 * checks if unread messages exist for the given destination
@@ -38,6 +38,6 @@ public interface IMessaging {
 	 * @param destination
 	 * @return <code>true</code> if unread messages exist
 	 */
-	public boolean hasMessages(String destination)throws MessagingException;
+	public boolean hasMessages(String destination)throws Exception;
 	
 }

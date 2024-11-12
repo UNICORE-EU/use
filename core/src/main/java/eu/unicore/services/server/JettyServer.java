@@ -72,7 +72,6 @@ public class JettyServer extends JettyServerBase {
 	@Override
 	public void start() throws Exception {
 		super.start();
-		
 		URL url = getUrls()[0];
 		if ("0".equals(kernel.getContainerProperties().getValue(ContainerProperties.SERVER_PORT)))
 			kernel.getContainerProperties().setProperty(ContainerProperties.SERVER_PORT, 
@@ -91,25 +90,21 @@ public class JettyServer extends JettyServerBase {
 	@SuppressWarnings("unchecked")
 	protected void addServlets(ServletContextHandler root) throws ClassNotFoundException {
 		for (ServiceFactory f: kernel.getServiceFactories()){
-			
-			Servlet servlet=f.getServlet();
-			
-			String servletClass=f.getServletClass();
-			
-			String path=f.getServletPath();
+			Servlet servlet = f.getServlet();
+			String servletClass = f.getServletClass();
+			String path = f.getServletPath();
 			String desc = servlet!=null? String.valueOf(servlet.getClass().getName()) : servletClass;
-			
+			ServletHolder sh = null;
 			if(servlet!=null){
-				ServletHolder sh=new ServletHolder(servlet);
-				root.addServlet(sh, path);
+				sh =new ServletHolder(servlet);
 			}
 			else{
 				Class<?> loadedClazz = Class.forName(servletClass);
 				if (!Servlet.class.isAssignableFrom(loadedClazz))
 					throw new ConfigurationException("Class " + servletClass + " must extend Servlet class");
-				ServletHolder sh=new ServletHolder((Class<? extends Servlet>)loadedClazz);
-				root.addServlet(sh, path);
+				sh=new ServletHolder((Class<? extends Servlet>)loadedClazz);
 			}
+			root.addServlet(sh, path);
 			logger.debug("Added <{}> on {} for service type {}", desc, f.getType());
 		}
 	}

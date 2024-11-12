@@ -1,6 +1,7 @@
 package eu.unicore.services.rest.jwt;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.security.interfaces.RSAPublicKey;
 import java.util.Properties;
@@ -9,7 +10,7 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import eu.unicore.security.AuthenticationException;
-import eu.unicore.services.rest.security.jwt.JWTUtils;
+import eu.unicore.services.restclient.jwt.JWTUtils;
 import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.util.PubkeyCache;
 

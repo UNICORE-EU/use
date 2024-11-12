@@ -10,12 +10,8 @@ public class ResourceUnavailableException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public ResourceUnavailableException() {
-		super();
-	}
-
 	public ResourceUnavailableException(String message) {
-		super(message);
+		this(message, null);
 	}
 
 	public ResourceUnavailableException(String message, Throwable cause) {

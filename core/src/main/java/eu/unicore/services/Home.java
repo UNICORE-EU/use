@@ -9,8 +9,6 @@ import eu.unicore.security.Client;
 import eu.unicore.services.exceptions.ResourceNotCreatedException;
 import eu.unicore.services.exceptions.ResourceUnavailableException;
 import eu.unicore.services.exceptions.ResourceUnknownException;
-import eu.unicore.services.exceptions.TerminationTimeChangeRejectedException;
-import eu.unicore.services.exceptions.UnableToSetTerminationTimeException;
 import eu.unicore.services.persistence.Store;
 
 /**
@@ -133,7 +131,7 @@ public interface Home extends Runnable, KernelInjectable {
 	 * 
 	 */
 	public void setTerminationTime(String resourceId, Calendar newTT)
-			throws ResourceUnknownException,TerminationTimeChangeRejectedException,UnableToSetTerminationTimeException;
+			throws ResourceUnknownException, Exception;
 
 	/**
 	 * get the owner of a resource

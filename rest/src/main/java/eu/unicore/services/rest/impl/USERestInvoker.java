@@ -3,11 +3,6 @@ package eu.unicore.services.rest.impl;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-
 import org.apache.cxf.jaxrs.JAXRSInvoker;
 import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.jaxrs.model.OperationResourceInfo;
@@ -31,7 +26,6 @@ import eu.unicore.services.admin.ResourceAvailability;
 import eu.unicore.services.exceptions.ResourceUnavailableException;
 import eu.unicore.services.exceptions.ResourceUnknownException;
 import eu.unicore.services.impl.SecuredResourceModel;
-import eu.unicore.services.messaging.MessagingException;
 import eu.unicore.services.persistence.PersistenceSettings;
 import eu.unicore.services.rest.RestService;
 import eu.unicore.services.rest.USEResource;
@@ -42,6 +36,10 @@ import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.services.utils.TimeProfile;
 import eu.unicore.util.Log;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 public class USERestInvoker extends JAXRSInvoker {
 
@@ -145,20 +143,16 @@ public class USERestInvoker extends JAXRSInvoker {
 		if(o instanceof BaseRESTController){
 			BaseRESTController br = (BaseRESTController)o;
 			br.setHome(home);
+			PersistenceSettings ps = PersistenceSettings.get(br.getClass());
 			try{
 				hasMessages = resourceID!=null && br.usesKernelMessaging()
 						&& kernel.getMessaging().hasMessages(resourceID);
 				if(hasMessages)exchange.put(HAVEMESSAGESKEY, Boolean.TRUE);
-			}catch(MessagingException e){
-				Log.logException("Error getting messages for "+resourceID,e,logger);
-			}
-			PersistenceSettings ps = PersistenceSettings.get(br.getClass());
 
-			// we must lock if we have internal updates or the service method cannot be run concurrently
-			needLock = hasMessages || !(isSubresource || ps.isConcurrentMethod(method.getName()));
-			
-			// get and inject the resource and the model
-			try{
+				// we must lock if we have internal updates or the service method cannot be run concurrently
+				needLock = hasMessages || !(isSubresource || ps.isConcurrentMethod(method.getName()));
+
+				// get and inject the resource and the model
 				if(home!=null && resourceID!=null){
 					if(ResourceAvailability.isUnavailable(resourceID)){
 						throw new ResourceUnavailableException("Resource <"+resourceID
@@ -179,6 +173,10 @@ public class USERestInvoker extends JAXRSInvoker {
 			}
 			catch(ResourceUnknownException rue){
 				Response resp = Response.status(Status.NOT_FOUND).build();
+				throw new WebApplicationException(resp);
+			}
+			catch(Exception e) {
+				Response resp = RESTRendererBase.handleError(500, "Cannot access requested resource", e, logger);
 				throw new WebApplicationException(resp);
 			}
 		}

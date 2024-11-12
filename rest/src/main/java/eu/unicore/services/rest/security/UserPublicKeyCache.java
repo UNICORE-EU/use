@@ -16,7 +16,7 @@ import java.util.Map;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.services.Kernel;
-import eu.unicore.services.rest.security.sshkey.SSHUtils;
+import eu.unicore.services.restclient.sshkey.SSHUtils;
 import eu.unicore.util.Log;
 
 /**
@@ -94,8 +94,7 @@ public class UserPublicKeyCache {
 					}
 					try{
 						AttributesHolder af = new AttributesHolder(line);
-						List<AttributesHolder> coll = getOrCreateAttributes(af.user).get();
-						coll.add(0,af);
+						getOrCreateAttributes(af.user).add(af);
 					}
 					catch(IllegalArgumentException ex){
 						logger.error("Invalid line in user keys file {}", dbFile.getAbsolutePath());
@@ -109,22 +108,24 @@ public class UserPublicKeyCache {
 		if(!useAuthorizedKeys)return;
 		AttributeHolders attrs = getOrCreateAttributes(requestedUserName);
 		if(!attrs.wantUpdate())return;
-		Collection<AttributesHolder> attributes = attrs.get();
+		Collection<AttributesHolder> updatedKeys = new ArrayList<>();
 		String dn = String.format(dnTemplate, requestedUserName);
 		boolean ok = true;
-		
 		for(UserInfoSource lServer: sources){
 			try{
 				Collection<String> response = lServer.getAcceptedKeys(requestedUserName);
-				if(response!=null)parseUserInfo(response, requestedUserName, dn, attributes);
+				if(response!=null)parseUserInfo(response, requestedUserName, dn, updatedKeys);
 			}
 			catch(Exception ex){
 				Log.logException("Could not get info for user <"+requestedUserName+">", ex, logger);
 				ok = false;
 			}
 		}
-
-		if(ok)attrs.refresh();
+		if(ok) {
+			logger.debug("Have <{}> valid public keys for <{}>", updatedKeys.size(), requestedUserName);
+			attrs.mergeKeysFromServer(updatedKeys);
+			attrs.refresh();
+		}
 		else attrs.invalidate();
 	}
 
@@ -141,7 +142,9 @@ public class UserPublicKeyCache {
 		for(String key: keys){
 			if(!hasEntry(attrs,key)){
 				if(isValidKey(key)){
-					attrs.add(new AttributesHolder(user,key,dn));
+					AttributesHolder ah = new AttributesHolder(user,key,dn);
+					ah.fromFile = false;
+					attrs.add(ah);
 					logger.info("Added SSH pub key for <{}>", user);
 				}
 			}
@@ -166,6 +169,7 @@ public class UserPublicKeyCache {
 		public final String user;
 		public final String sshkey;
 		public final String dn;
+		public boolean fromFile = true;
 
 		public AttributesHolder(String user, String sshkey, String dn){
 			this.user = user;
@@ -184,38 +188,52 @@ public class UserPublicKeyCache {
 			sshkey=fields[1];
 			dn=fields[2];
 		}
-
-		public boolean fromFile = true;
 	}
 
 	public static class AttributeHolders {
-		
+
 		private final List<AttributesHolder> coll = new ArrayList<>();
-		
+
 		private long lastUpdated;
-		
+
 		public boolean wantUpdate(){
 			return lastUpdated+1000*updateInterval<System.currentTimeMillis();
 		}
-		
+
 		public void refresh(){
 			lastUpdated = System.currentTimeMillis();
 		}
-		
+
 		public void invalidate(){
 			lastUpdated = 0;
 		}
+
+		public synchronized void removeFileEntries(){
+			filterEntries(true);
+		}
 		
-		public void removeFileEntries(){
+		private void filterEntries(boolean fromFile){
 			Iterator<AttributesHolder>attrs = coll.iterator();
 			while(attrs.hasNext()){
 				AttributesHolder ah = attrs.next();
-				if(ah.fromFile)attrs.remove();
+				if(ah.fromFile == fromFile)attrs.remove();
 			}
 		}
-		
-		public List<AttributesHolder> get(){
-			return coll;
+
+		public synchronized void add(AttributesHolder ah) {
+			coll.add(ah);
+		}
+
+		/**
+		 * get a (read-only) view of the current list off keys
+		 */
+		public synchronized List<AttributesHolder> get(){
+			return new ArrayList<>(coll);
+		}
+
+		public synchronized void mergeKeysFromServer(Collection<AttributesHolder> newAttrs){
+			filterEntries(false);
+			coll.addAll(newAttrs);
 		}
 	}
 

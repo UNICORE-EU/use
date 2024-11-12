@@ -1,2 +1,2 @@
 eu.unicore.services.rest.admin.AdminFeature
-eu.unicore.services.registry.RegistryFeature
+eu.unicore.services.rest.registry.RegistryFeature

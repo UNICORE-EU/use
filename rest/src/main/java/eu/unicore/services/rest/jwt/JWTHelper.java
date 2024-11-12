@@ -12,7 +12,7 @@ import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.Client;
-import eu.unicore.services.rest.security.jwt.JWTUtils;
+import eu.unicore.services.restclient.jwt.JWTUtils;
 import eu.unicore.services.security.IContainerSecurityConfiguration;
 import eu.unicore.services.security.util.PubkeyCache;
 import eu.unicore.util.Log;

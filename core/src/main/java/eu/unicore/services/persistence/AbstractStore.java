@@ -109,7 +109,6 @@ public abstract class AbstractStore implements Store {
 		Class<?> clazz = Class.forName(bean.className);
 		inst=(Resource)clazz.getConstructor().newInstance();
 		inst.setKernel(kernel);
-		inst.setHome(kernel.getHome(serviceName));
 		inst.setModel(bean.getState());
 		if(settings.isLoadOnce()){
 			instances.put(bean.uniqueID,inst);

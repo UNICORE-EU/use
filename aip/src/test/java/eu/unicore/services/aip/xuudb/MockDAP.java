@@ -20,21 +20,16 @@ public class MockDAP implements IDynamicAttributesPublic{
 			GetAttributesRequestDocument xml) {
 		callCount++;
 		GetAttributesResponseDocument doc=GetAttributesResponseDocument.Factory.newInstance();
-		
 		GetAttributesResponseType resp = doc.addNewGetAttributesResponse();
 		resp.setGid(gid);
 		resp.setXlogin(xlogin);
 		resp.setSupplementaryGidsArray(supplementaryGids);
-		
-		
-		
 		return doc;
 	}
 
 	@Override
 	public SimulateGetAttributesResponseDocument simulateGetAttributes(
 			SimulateGetAttributesRequestDocument xml) {
-		
 		return null;
 	}
 

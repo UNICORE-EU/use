@@ -25,11 +25,12 @@ import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.impl.PostInvokeHandler;
 import eu.unicore.services.rest.jwt.JWTHelper;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
-import eu.unicore.services.rest.security.jwt.JWTUtils;
+import eu.unicore.services.restclient.jwt.JWTUtils;
 import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.IContainerSecurityConfiguration;
+import eu.unicore.security.SecurityException;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.services.security.util.PubkeyCache;
 import eu.unicore.util.Log;
@@ -105,21 +106,17 @@ public class AuthNHandler implements ContainerRequestFilter {
 		}
 	}
 
-
 	public Response handleRequest(Message message) {
 		try{
 			return doHandle(message);
 		}
-		catch(eu.unicore.security.SecurityException ex){
-			if(logger.isDebugEnabled()) {
-				logger.debug(Log.createFaultMessage("User authentication failed", ex));
-			}
+		catch(SecurityException ex){
+			logger.debug(()->Log.createFaultMessage("User authentication failed", ex));
 			throw new WebApplicationException(ex, HttpStatus.SC_FORBIDDEN);
 		}
 	}
 
 	protected Response doHandle(Message message){
-
 		Response response = null;
 		SecuritySession session = null;
 		SecurityTokens token;

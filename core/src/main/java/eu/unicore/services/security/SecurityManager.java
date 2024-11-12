@@ -55,9 +55,6 @@ public final class SecurityManager {
 	
 	public static final String UNKNOWN_ACTION = "___ANY_ACTION___";
 
-	
-	private static final ThreadLocal<Boolean> localCalls = new ThreadLocal<>();
-	
 	private final Set<AttributeHandlingCallback> attribHandlingCallbacks=new HashSet<>();
 	
 	private final OperationTypesUtil operationTypesUtil;
@@ -273,7 +270,6 @@ public final class SecurityManager {
 		//this check should not be needed but for double security...
 		if (selectedVo != null) {
 			if (vos == null) {
-				logger.fatal("BUG! attribute handlers set a VO for the request, but the user is not member of any VO");
 				throw new SecurityException("BUG! attribute handlers set a VO for the request, but the user is not member of any VO");
 			}
 			int i;
@@ -281,7 +277,6 @@ public final class SecurityManager {
 				if (vos[i].equals(selectedVo))
 					break;
 			if (i == vos.length) {
-				logger.fatal("BUG! attribute handlers set a VO for the request, but the user is not a member of this VO");
 				throw new SecurityException("BUG! attribute handlers set a VO for the request, but the user is not a member of this VO");
 			}
 			
@@ -338,14 +333,12 @@ public final class SecurityManager {
 	 * @param tokens - Security tokens
 	 * @return fully initialized Client object 
 	 */
-	private Client createSecureClient(final SecurityTokens tokens) {
+	Client createSecureClient(final SecurityTokens tokens) {
 		Client client=new Client();
 		client.setAuthenticatedClient(tokens);
 		if (client.getType() != Client.Type.ANONYMOUS) {
 			assembleClientAttributes(client, tokens);
-			if(logger.isDebugEnabled()){
-				logger.debug("Client info (after static AIPs):\n{}", client.toString());
-			}
+			logger.debug("Client info (after static AIPs): {}", client);
 		}
 		return client;
 	}
@@ -360,19 +353,8 @@ public final class SecurityManager {
 	 * @return authorised Client object 
 	 */
 	public Client createClientWithAttributes(final SecurityTokens tokens) {
-		Client client;
-		
-		// for local call, and for non local calls when the security is enabled
-		if (isLocalCall()) {
-			client = new Client();
-			client.setLocalClient();
-		} else if (securityConfig.isAccessControlEnabled()) {
-			client = createSecureClient(tokens);
-		} else {
-			//in all other cases client should be left as anonymous.
-			client = new Client();
-		}
-		
+		Client client = securityConfig.isAccessControlEnabled() ?
+			createSecureClient(tokens) : new Client();
 		if (isTrustedAgent(client)) {
 			if(logger.isDebugEnabled()) {
 				String consignor = tokens.getConsignorName(); 
@@ -552,47 +534,14 @@ public final class SecurityManager {
 		}
 		return false;
 	}
-	
-	/**
-	 * for the current thread, set the "local call" flag. This should be used always in 
-	 * using a try-finally construct, i.e.
-	 * 
-	 * <pre>
-	 *  SecurityManager.setLocalCall();
-	 *  try{
-	 *    //... perform call
-	 *  }
-	 *  finally{
-	 *    SecurityManager.clearLocalCall();
-	 *  }
-	 * </pre> 
-	 */
-	public static void setLocalCall(){
-		localCalls.set(Boolean.TRUE);
-	}
-	
-	/**
-	 * for the current thread, clear the "local call" flag
-	 */
-	public static void clearLocalCall(){
-		localCalls.set(null);
-	}
-	
-	/**
-	 * check whether the current request is local (i.e. made from within the same VM)
-	 */
-	public static boolean isLocalCall(){
-		return Boolean.TRUE.equals(localCalls.get());
-	}
-	
+
 	/**
 	 * helper method to get the server cert from the Kernel security config
 	 * @return X509Certificate or <code>null</code> if not available
 	 */
 	public X509Certificate getServerCert() {
-		if (securityConfig.getCredential() != null)
-			return securityConfig.getCredential().getCertificate();
-		return null;
+		return securityConfig.getCredential() != null ?
+			securityConfig.getCredential().getCertificate() : null;
 	}
 	
 	/**

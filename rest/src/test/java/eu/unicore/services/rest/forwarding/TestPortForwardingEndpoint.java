@@ -1,6 +1,6 @@
 package eu.unicore.services.rest.forwarding;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,14 +16,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Application;
-import jakarta.ws.rs.core.Response;
-
 import org.apache.cxf.jaxrs.impl.ResponseBuilderImpl;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
@@ -33,12 +25,19 @@ import org.junit.jupiter.api.Test;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.RestService;
 import eu.unicore.services.rest.RestServlet;
-import eu.unicore.services.rest.client.BaseClient;
-import eu.unicore.services.rest.client.ForwardingHelper;
+import eu.unicore.services.restclient.BaseClient;
+import eu.unicore.services.restclient.ForwardingHelper;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.server.JettyServer;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
 import eu.unicore.util.ChannelUtils;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.Response;
 
 public class TestPortForwardingEndpoint {
 

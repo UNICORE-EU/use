@@ -3,6 +3,7 @@ package eu.unicore.services.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -12,6 +13,8 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.Properties;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +28,7 @@ import eu.unicore.services.Resource;
 import eu.unicore.services.exceptions.ResourceNotCreatedException;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.security.util.AuthZAttributeStore;
+import eu.unicore.services.utils.AsyncCallback;
 
 public class TestResourceImpl {
 
@@ -169,8 +173,25 @@ public class TestResourceImpl {
 		assertTrue(r.getModel().getChildren().get("foo").isEmpty());
 		assertTrue(r.getModel().getChildren().get("bar").isEmpty());
 	}
-	
-	public static class _ResourceImpl extends ResourceImpl {
-		
+
+
+	@Test
+	public void testAsyncCallback() throws Exception {
+		ResourceImpl r = makeResource(null);
+		r.getHome().persist(r);
+		String id = r.getUniqueID();
+		AsyncCallback<ResourceImpl> ac = new AsyncCallback<>(r.getHome(), r.getUniqueID()) {
+			@Override
+			public void callback(ResourceImpl r) {
+				r.getModel().addChild("foo", "123");
+			};
+		};
+		Future<?> f = ac.submit();
+		f.get(10, TimeUnit.SECONDS);
+		ResourceImpl r2 = (ResourceImpl)r.getHome().get(id);
+		assertEquals("123", r2.getModel().getChildren("foo").get(0));
+		assertNull(ac.getException());
 	}
+
+	public static class _ResourceImpl extends ResourceImpl {}
 }

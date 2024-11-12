@@ -20,12 +20,6 @@ public class DeploymentDescriptorImpl implements DeploymentDescriptor {
 	protected Class<?> interfaceClass;
 	
 	protected Class<?> implementationClass;
-	
-	protected Class<?> frontendClass;
-	
-	protected final List<String>inHandlers=new ArrayList<>();
-	
-	protected final List<String>outHandlers=new ArrayList<>();
 
 	protected final List<Runnable>initTasks=new ArrayList<>();
 
@@ -63,32 +57,6 @@ public class DeploymentDescriptorImpl implements DeploymentDescriptor {
 
 	public void setImplementation(Class<?> implementationClass) {
 		this.implementationClass = implementationClass;
-	}
-
-	public Class<?> getFrontend() {
-		return frontendClass;
-	}
-
-	public void setFrontend(Class<?> frontendClass) {
-		this.frontendClass = frontendClass;
-	}
-
-	public List<String> getInHandlers() {
-		return inHandlers;
-	}
-
-	public void setInHandlers(List<String> inHandlers) {
-		this.inHandlers.clear();
-		this.inHandlers.addAll(inHandlers);
-	}
-
-	public List<String> getOutHandlers() {
-		return outHandlers;
-	}
-
-	public void setOutHandlers(List<String> outHandlers) {
-		this.outHandlers.clear();
-		this.outHandlers.addAll(outHandlers);
 	}
 
 	public List<Runnable> getInitTasks() {

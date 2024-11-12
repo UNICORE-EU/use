@@ -17,7 +17,7 @@ import org.mvel2.MVEL;
 import com.google.common.collect.ImmutableList;
 
 import eu.unicore.services.Kernel;
-import eu.unicore.services.rest.client.BaseClient;
+import eu.unicore.services.restclient.BaseClient;
 
 public class RESTUtils {
 

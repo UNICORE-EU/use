@@ -1,6 +1,8 @@
 package eu.unicore.services.rest.admin;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Properties;
 
@@ -10,7 +12,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.Kernel;
-import eu.unicore.services.rest.client.BaseClient;
+import eu.unicore.services.restclient.BaseClient;
 import eu.unicore.services.security.TestConfigUtil;
 
 public class TestAdminService {

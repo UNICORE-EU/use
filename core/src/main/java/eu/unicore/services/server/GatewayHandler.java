@@ -44,9 +44,7 @@ import eu.unicore.util.httpclient.IClientConfiguration;
 
 /**
  * Encapsulates the interaction with a Gateway.
- * 
- * TODO: this should be able to communicate with Gw in non-SSL mode too, but this requires
- * development on Gw side as well.
+ *
  * @author schuller
  */
 public class GatewayHandler implements ISubSystem, ExternalSystemConnector {
@@ -203,13 +201,14 @@ public class GatewayHandler implements ISubSystem, ExternalSystemConnector {
 	 * 
 	 * @throws Exception
 	 */
-	public void enableGatewayRegistration()throws Exception{
+	public GatewayRegistration enableGatewayRegistration()throws Exception{
 		if(secConfiguration.isGatewayRegistrationEnabled()){
-			Integer update=secConfiguration.getGatewayRegistrationUpdateInterval();
+			Integer update = secConfiguration.getGatewayRegistrationUpdateInterval();
 			logger.info("Enabling dynamic registration at the Gateway at {} updated every {} seconds",
 					Utilities.getGatewayAddress(containerConfiguration), update);
-			new GatewayRegistration(containerConfiguration, update);
+			return new GatewayRegistration(containerConfiguration, update);
 		}
+		return null;
 	}
 
 
@@ -251,29 +250,22 @@ public class GatewayHandler implements ISubSystem, ExternalSystemConnector {
 
 		private HttpClient client;
 		private final String gwAddress;
-		
 		private final ContainerProperties containerConfiguration;
-		
-		/**
-		 * creates a new GatewayRegistration using the default update
-		 * interval of 60 seconds
-		 */
-		public GatewayRegistration(ContainerProperties containerConfiguration) throws Exception {
-			this(containerConfiguration, 60);
-		}
 
 		/**
 		 * creates a new GatewayRegistration
+		 * @param containerConfiguration
 		 * @param updateInterval - in seconds
 		 */
 		public GatewayRegistration(ContainerProperties containerConfiguration, int updateInterval)
 				throws Exception{
-			this.containerConfiguration=containerConfiguration;
+			this.containerConfiguration = containerConfiguration;
 			gwAddress = extractGWAddress(containerConfiguration.getValue(ContainerProperties.EXTERNAL_URL))
 					+"/VSITE_REGISTRATION_REQUEST";
 			client = HttpUtils.createClient(gwAddress, clientConfiguration);
 			threadingSrv.getScheduledExecutorService().scheduleWithFixedDelay(
 					this, 0, 1000*updateInterval, TimeUnit.MILLISECONDS);	
+		
 		}
 
 		public void run(){
