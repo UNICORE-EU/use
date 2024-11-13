@@ -99,13 +99,16 @@ public abstract class AbstractStore implements Store {
 		}
 		return inst;
 	}
-	
+
 	protected Resource createResource(ResourceBean bean) throws Exception {
 		Resource inst = null;
+		// backwards compatibility hacks...
 		if(bean.className.startsWith("de.fzj.unicore.uas.")) {
-		    // ugly but simple - U9 to U10 changed package names in UNICORE/X
-			bean.className = bean.className.replace("de.fzj.unicore.uas.", "eu.unicore.uas.");
-        }
+		   bean.className = bean.className.replace("de.fzj.unicore.uas.", "eu.unicore.uas.");
+                }
+                else if(bean.className.equals("eu.unicore.services.registry.LocalRegistryImpl")) {
+			bean.className = "eu.unicore.services.rest.registry.LocalRegistryImpl";
+		}
 		Class<?> clazz = Class.forName(bean.className);
 		inst=(Resource)clazz.getConstructor().newInstance();
 		inst.setKernel(kernel);
