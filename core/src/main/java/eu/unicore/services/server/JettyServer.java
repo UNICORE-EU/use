@@ -105,7 +105,7 @@ public class JettyServer extends JettyServerBase {
 				sh=new ServletHolder((Class<? extends Servlet>)loadedClazz);
 			}
 			root.addServlet(sh, path);
-			logger.debug("Added <{}> on {} for service type {}", desc, f.getType());
+			logger.debug("Added <{}> on {} for service type {}", desc, path, f.getType());
 		}
 	}
 

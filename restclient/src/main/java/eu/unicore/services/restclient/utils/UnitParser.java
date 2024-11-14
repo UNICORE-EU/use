@@ -66,6 +66,20 @@ public class UnitParser {
 	}
 
 	/**
+	 * get the value (in default units)
+	 * @param valueWithUnits
+	 * @return long
+	 */
+	public long getLongValue(String valueWithUnits){
+		String u = getUnits(valueWithUnits);
+		int conversion = 1;
+		if(u!=null){
+			conversion = getConversionFactor(u);
+		}
+		return Long.parseLong(getNumber(valueWithUnits))*conversion;
+	}
+
+	/**
 	 * return the "optimal" string representation of the given value
 	 * 
 	 * @param d - the value to represent

@@ -3,12 +3,11 @@
   <parent>
     <groupId>eu.unicore.services</groupId>
     <artifactId>use</artifactId>
-    <version>5.2.0</version>
+    <version>5.2.0-1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>use-core</artifactId>
   <name>UNICORE Services Environment Core</name>
-  <version>5.2.0-1</version>
   <properties>
      <automatic.module.name>${project.groupId}.use.core</automatic.module.name>
   </properties>

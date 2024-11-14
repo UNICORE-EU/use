@@ -13,8 +13,6 @@ import java.security.interfaces.RSAPublicKey;
 
 import org.junit.jupiter.api.Test;
 
-import eu.unicore.services.restclient.sshkey.PasswordSupplierImpl;
-import eu.unicore.services.restclient.sshkey.SSHUtils;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public class TestUtils {

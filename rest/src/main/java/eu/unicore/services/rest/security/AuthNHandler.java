@@ -84,7 +84,6 @@ public class AuthNHandler implements ContainerRequestFilter {
 		this.kernel = kernel;
 		this.useSessions = secConfig.isSessionsEnabled();
 		this.sessionStore = sessionStore;
-
 		JWTServerProperties p = new JWTServerProperties(kernel.getContainerProperties().getRawProperties());
 		PubkeyCache cache = PubkeyCache.get(kernel);
 		try{
@@ -204,7 +203,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 			logger.debug("Trust delegated authentication as <{}> via JWT issued by <{}>", subject, issuer);
 			// process delegated attributes - only if the token came from this server
 			BasicAttributeHolder bah = assignAttributes(payload);
-			if(bah!=null && X500NameUtils.equal(issuer, serverDN)) {
+			if(bah!=null && serverDN!=null && X500NameUtils.equal(issuer, serverDN)) {
 				tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, bah);
 				logger.debug("Attributes from ETD token: {}", bah);
 			}
