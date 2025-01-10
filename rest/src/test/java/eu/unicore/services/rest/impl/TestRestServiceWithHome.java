@@ -1,4 +1,4 @@
-package eu.unicore.services.rest.testservice;
+package eu.unicore.services.rest.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -21,6 +21,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,7 +38,8 @@ import eu.unicore.services.rest.Link;
 import eu.unicore.services.rest.RestService;
 import eu.unicore.services.rest.USEResource;
 import eu.unicore.services.rest.USERestApplication;
-import eu.unicore.services.rest.impl.BaseRESTController;
+import eu.unicore.services.rest.testservice.CounterModel;
+import eu.unicore.services.rest.testservice.CounterResource;
 import eu.unicore.services.restclient.BaseClient;
 import eu.unicore.services.restclient.RESTException;
 import eu.unicore.services.security.TestConfigUtil;
@@ -192,9 +194,13 @@ public class TestRestServiceWithHome {
 		client.postQuietly(null);
 		// set properties via PUT
 		JSONObject setP = new JSONObject();
-		String aclE = "modify:DN:CN=Demo";
+		JSONArray aclE = new JSONArray();
+		aclE.put("modify:DN:CN=Demo");
+		aclE.put("modify:DN:CN=Someone Else");
 		setP.put("acl", aclE);
 		setP.put("terminationTime", "23:59");
+		
+		setP.put("tags","test,foo,bar");
 		setP.put("noSuchProperty", "foo");
 		try(ClassicHttpResponse response = client.put(setP)){
 			int status=client.getLastHttpStatus();
@@ -208,12 +214,12 @@ public class TestRestServiceWithHome {
 		}
 		JSONObject o = client.getJSON();
 		System.out.println(o.toString(2));
-		assertEquals(aclE,o.getJSONArray("acl").get(0));
+		assertEquals("modify:DN:CN=Demo",o.getJSONArray("acl").get(0));
+		assertEquals("modify:DN:CN=Someone Else",o.getJSONArray("acl").get(1));
 
 		// provoke error in setProperty
 		setP = new JSONObject();
-		aclE = "garble:DN:CN=Demo";
-		setP.put("acl", aclE);
+		setP.put("acl", "garble:DN:CN=Demo");
 		try(ClassicHttpResponse response = client.put(setP)){
 			assertEquals(200, client.getLastHttpStatus());
 			String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");

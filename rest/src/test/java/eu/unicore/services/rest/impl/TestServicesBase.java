@@ -1,4 +1,4 @@
-package eu.unicore.services.rest.testservice;
+package eu.unicore.services.rest.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -22,7 +22,8 @@ import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.services.rest.RestService;
 import eu.unicore.services.rest.USEResource;
 import eu.unicore.services.rest.USERestApplication;
-import eu.unicore.services.rest.impl.ServicesBase;
+import eu.unicore.services.rest.testservice.CounterModel;
+import eu.unicore.services.rest.testservice.CounterResource;
 import eu.unicore.services.restclient.BaseClient;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;

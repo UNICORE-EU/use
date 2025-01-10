@@ -3,8 +3,10 @@ package eu.unicore.services.rest.impl;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
@@ -47,15 +49,15 @@ public abstract class RESTRendererBase implements KernelInjectable {
 	protected final Collection<Link> links = new ArrayList<>();
 
 	/**
-	 * list of result fields requested in a GET - if empty, 
+	 * properties requested in a GET - if empty, 
 	 * the user wants all the fields
 	 */
-	protected final List<String> requestedProperties = new ArrayList<>();
+	protected final Collection<String> requestedProperties = new HashSet<>();
 
 	/**
-	 * list of result fields the user does NOT want
+	 * properties the user explicitly does NOT want
 	 */
-	protected final List<String> excludedProperties = new ArrayList<>();
+	protected final Collection<String> excludedProperties = new HashSet<>();
 
 	public String getBaseURL() {
 		return baseURL;
@@ -65,7 +67,6 @@ public abstract class RESTRendererBase implements KernelInjectable {
 		this.baseURL = baseURL;
 	}
 
-	
 	@Override
 	public void setKernel(Kernel kernel){
 		this.kernel = kernel;
@@ -80,10 +81,28 @@ public abstract class RESTRendererBase implements KernelInjectable {
 	 * (Invoked when the resource's representation is retrieved)
 	 */
 	protected void updateLinks(){
-
 	}
 
-	protected abstract Map<String,Object>getProperties() throws Exception;
+	protected Map<String,Object>getProperties() throws Exception{
+		return new HashMap<String,Object>() {
+
+			 public static final long serialVersionUID=1l;
+
+			 @Override
+			 @SuppressWarnings("unchecked")
+			 public Object put(String k, Object v) {
+				 if(wantProperty(k)) {
+					 if(v instanceof Supplier) {
+						 return super.put(k, ((Supplier<Object>)v).get());
+					 }
+					 else {
+						 return super.put(k, v);
+					 }
+				 }
+				 else return null;
+			 }
+		 };
+	}
 
 	protected JSONObject getJSON() throws Exception{
 		JSONObject o = new JSONObject();
@@ -309,5 +328,6 @@ public abstract class RESTRendererBase implements KernelInjectable {
 				entity(json.toString()).
 				build();
 	}	
+
 }
 

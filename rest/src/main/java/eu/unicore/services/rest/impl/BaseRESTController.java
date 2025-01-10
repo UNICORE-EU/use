@@ -1,10 +1,8 @@
 package eu.unicore.services.rest.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +56,7 @@ import jakarta.ws.rs.core.Response.Status;
 public abstract class BaseRESTController extends RESTRendererBase {
 
 	private static final Logger logger = Log.getLogger(Log.SERVICES, BaseRESTController.class);
-	
+
 	/**
 	 *  injected by the container
 	 */
@@ -151,7 +149,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 			((DefaultHome)home).instanceDestroyed(owner);
 		}catch(Exception ex){}
 	}
-	
+
 	/**
 	 * update resource properties
 	 * 
@@ -172,18 +170,8 @@ public abstract class BaseRESTController extends RESTRendererBase {
 		while(i.hasNext()){
 			boolean found = false;
 			String propertyName = String.valueOf(i.next());
-			// value can be a JSONList,  JSONObject or just a String
 			try{
-				Object val = o.get(propertyName);
-				if(val instanceof String){
-					found = doSetProperty(propertyName,(String)val);
-				}
-				else if(val instanceof JSONArray){
-					found = doSetProperty(propertyName,(JSONArray)val);
-				}
-				else if(val instanceof JSONObject){
-					found = doSetProperty(propertyName,(JSONObject)val);
-				}
+				found = doSetProperty(propertyName, o.get(propertyName));
 				if(!found){
 					reply.put(propertyName, "Property not found or cannot be modified!");
 				}
@@ -198,79 +186,64 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	}
 
 	/**
-	 * set a property
+	 * set a property to the given value
 	 * @param name - property name
-	 * @param value - property value
+	 * @param value - property value - String, JSONArray or JSONObject
 	 * @return <code>true</code> if property is known and was set correctly,
 	 *         <code>false</code> if property name is not known
 	 * @throws Exception in case of errors setting the property
 	 */
-	protected boolean doSetProperty(String name, String value) throws Exception {
+	protected boolean doSetProperty(String name, Object value) throws Exception {
 		if("acl".equals(name)){
-			List<String> update = new ArrayList<>();
-			update.add(value);
-			setACL(update);
-			return true;
+			List<String> update = asList(value, false);
+			if(update!=null) {
+				setACL(update);
+				return true;
+			}
 		}
 		if("terminationTime".equals(name)){
 			Calendar newTT = Calendar.getInstance();
-			newTT.setTime(UnitParser.extractDateTime(value));
+			newTT.setTime(UnitParser.extractDateTime((String)value));
 			home.setTerminationTime(resource.getUniqueID(), newTT);
 			return true;
 		}
 		if("tags".equals(name)){
-			String[]tags = value.split("[ +,]");
-			model.getTags().clear();
-			model.getTags().addAll(Arrays.asList(tags));
-			return true;
+			List<String> update = asList(value, true);
+			if(update!=null) {
+				model.getTags().clear();
+				model.getTags().addAll(update);
+				return true;
+			}
 		}
 		return false;
 	}
 
-	/**
-	 * set a property to the given values
-	 * @param name - property name
-	 * @param value - array of property values
-	 * @return <code>true</code> if property is known and was set correctly,
-	 *         <code>false</code> if property name is not known
-	 * @throws Exception in case of errors setting the property
-	 */
-	protected boolean doSetProperty(String name, JSONArray value) throws Exception {
-		if("acl".equals(name)){
-			List<String> update = new ArrayList<>();
-			for(int i=0;i<value.length();i++){
-				update.add(String.valueOf(value.get(i)));
+	protected List<String>asList(Object val, boolean commaSep){
+		if(val instanceof String || val instanceof JSONArray) {
+			List<String> res = new ArrayList<>();
+			if(val instanceof JSONArray) {
+				JSONArray ja = (JSONArray)val;
+				for(int i=0;i<ja.length();i++){
+					res.add(String.valueOf(ja.get(i)));
+				}
 			}
-			setACL(update);
-			return true;
-		}
-		if("tags".equals(name)){
-			List<String> update = new ArrayList<>();
-			for(int i=0;i<value.length();i++){
-				update.add(String.valueOf(value.get(i)));
+			else {
+				String value = (String)val;
+				if(commaSep) {
+					for(String v: value.split("[ +,]"))
+						res.add(v);
+				}
+				else {
+					res.add(value);
+				}
 			}
-			model.getTags().clear();
-			model.getTags().addAll(update);
-			return true;
+			return res;
 		}
-		
-		return false;
-	}
-
-	/**
-	 * set a property to the given (complex) value
-	 * @param name - property name
-	 * @param value - property value
-	 * @return <code>true</code> if property is known and was set correctly,
-	 *         <code>false</code> if property name is not known
-	 * @throws Exception in case of errors setting the property
-	 */
-	protected boolean doSetProperty(String name, JSONObject value) throws Exception {
-		return false;
+		else return null;
 	}
 
 	protected Map<String,Object>getProperties() throws Exception {
-		Map<String,Object> props = new HashMap<>();
+		Map<String,Object> props = super.getProperties();
 		Model model = getModel();
 		String resourceID = model.getUniqueID();
 		if(model instanceof SecuredResourceModel){
@@ -293,7 +266,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 			BaseModel bm = (BaseModel)model;
 			props.put("resourceStatus", String.valueOf(bm.getResourceStatus()));
 			props.put("resourceStatusMessage", String.valueOf(bm.getResourceStatusDetails()));
-			
+
 		}
 		if(resource!=null && resource instanceof ExtendedResourceStatus){
 			ExtendedResourceStatus esr = (ExtendedResourceStatus)resource;
@@ -315,7 +288,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 		}
 		return res;
 	}
-	
+
 	protected boolean setACL(List<String>acl){
 		if(model instanceof SecuredResourceModel){
 			assertOwnerLevelAccess();
@@ -331,7 +304,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 		}
 		else return false;
 	}
-	
+
 	/**
 	 * get the IDs of the subset of Resources (managed by Home) that
 	 * is accessible to the current client
@@ -341,7 +314,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	 */
 	protected List<String>getAccessibleResources(String tagSpec) throws Exception { 
 		Client c=AuthZAttributeStore.getClient(); 
-		
+
 		if(tagSpec!=null){
 			String[] tags = tagSpec.split("[ +,]");
 			List<String> tagged = home.getStore().getTaggedResources(tags);

@@ -1,4 +1,4 @@
-package eu.unicore.services.rest.testservice;
+package eu.unicore.services.rest.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

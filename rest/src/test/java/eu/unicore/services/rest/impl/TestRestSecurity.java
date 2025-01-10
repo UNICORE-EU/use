@@ -1,4 +1,4 @@
-package eu.unicore.services.rest.testservice;
+package eu.unicore.services.rest.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -30,7 +30,6 @@ import com.nimbusds.jose.util.X509CertUtils;
 import eu.unicore.security.wsutil.SecuritySessionUtils;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.RestService;
-import eu.unicore.services.rest.impl.ApplicationBaseResource;
 import eu.unicore.services.rest.jwt.JWTDelegation;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.AuthNHandler;
