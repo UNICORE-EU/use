@@ -1,6 +1,7 @@
 package eu.unicore.services.restclient.sshkey;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.security.PrivateKey;
@@ -11,6 +12,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
@@ -71,4 +73,11 @@ public class TestUtils {
 		assertNotNull(pub);
 	}
 
+	@Test
+	public void testLegacyAuth() throws Exception {
+		File key = new File("src/test/resources/ssh/id_ed25519");
+		File pub = new File("src/test/resources/ssh/id_ed25519.pub");
+		SSHKeyUC auth = SSHUtils.createAuthData(key, "test123".toCharArray(), "thisisatesttoken");
+		assertTrue(SSHUtils.validateAuthData(auth, FileUtils.readFileToString(pub, "UTF-8")));
+	}
 }

@@ -2,6 +2,8 @@ package eu.unicore.services.restclient;
 
 import org.apache.hc.core5.http.HttpMessage;
 
+import eu.unicore.services.restclient.utils.UserLogger;
+
 /**
  * callback to add authentication headers to REST calls
  * 
@@ -32,4 +34,5 @@ public interface IAuthCallback {
 		return getClass().getSimpleName();
 	}
 
+	public default void setLogger(UserLogger log) {}
 }

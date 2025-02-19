@@ -101,6 +101,9 @@ public class SSHUtils {
 		signature.initSign(pk);
 		signature.update(hashedToken);
 		byte[]signed = signature.sign();
+		if(kt.toLowerCase().contains("ecdsa")) {
+			signed = encodeECDSA(signed);
+		}
 		authData.signature = new String(Base64.encodeBase64(signed));
 		return authData;
 	}
@@ -112,30 +115,12 @@ public class SSHUtils {
 	 * @param token - plaintext token to hash and sign
 	 */
 	public static SSHKeyUC createAuthData(File key, char[] password, String token) throws GeneralSecurityException, IOException {
-		SSHKeyUC authData = new SSHKeyUC();
-		byte[] hashedToken = hash(token.getBytes());
-		authData.token = new String(Base64.encodeBase64(hashedToken));
-		PrivateKey pk = readPrivateKey(key,
+		return createAuthData(key,
 				new PasswordSupplier() {
 					@Override
-					public char[] getPassword() {
-						return	password;
-					}
-		});
-		final String kt = KeyType.fromKey(pk).toString();
-		KeyAlgorithm ka = Factory.Named.Util.create(sshConfig.getKeyAlgorithms(), kt);
-		Signature signature = ka.newSignature();
-		if (signature == null) {
-			throw new GeneralSecurityException("Could not create signature instance for " + kt + " key");
-		}
-		signature.initSign(pk);
-		signature.update(hashedToken);
-		byte[]signed = signature.sign();
-		if(kt.toLowerCase().contains("ecdsa")) {
-			signed = encodeECDSA(signed);
-		}
-		authData.signature = new String(Base64.encodeBase64(signed));
-		return authData;
+					public char[] getPassword() { return	password; }
+				},
+				token);
 	}
 
 	/**
