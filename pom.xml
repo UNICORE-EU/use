@@ -12,7 +12,7 @@
   <parent>
     <groupId>eu.unicore</groupId>
     <artifactId>unicore-parent</artifactId>
-    <version>3.0.2</version>
+    <version>3.0.3</version>
   </parent>
 
   <developers>
@@ -58,7 +58,7 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>1.2.3</persistence.version>
+    <persistence.version>1.2.4</persistence.version>
     <secutils.version>4.1.2</secutils.version>
     <seclib.version>7.1.2</seclib.version>
     <herasaf.version>3.0.2</herasaf.version>
