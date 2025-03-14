@@ -30,13 +30,13 @@ import eu.unicore.util.Log;
 public class FilebasedAuthenticator implements IAuthenticator {
 
 	private static final Logger logger =  Log.getLogger(Log.SECURITY,FilebasedAuthenticator.class);
-	
+
 	private final Map<String,AttributesHolder>db = new HashMap<>();
-	
+
 	private File dbFile;
 	private long lastUpdated;
 	private String file;
-	
+
 	public void setFile(String fileName) {
 		this.file = fileName;
 		dbFile = new File(file);
@@ -47,7 +47,7 @@ public class FilebasedAuthenticator implements IAuthenticator {
 	}
 
 	private final static Collection<String> s = Collections.singletonList("Basic");
-	
+
 	@Override
 	public final Collection<String>getAuthSchemes(){
 		return s;
@@ -61,13 +61,13 @@ public class FilebasedAuthenticator implements IAuthenticator {
 			tokens.getContext().put(SecurityTokens.CTX_LOGIN_HTTP,http);
 		}
 		if(http == null)return false;
-		
+
 		try{
 			updateDB();
 		}catch(IOException ioe){
 			throw new RuntimeException("Server error: could not update user database.", ioe);
 		}
-		
+
 		String dn = usernamePassword(http.getUserName(), http.getPasswd());
 		if(dn != null){
 			tokens.setUserName(dn);
@@ -77,11 +77,11 @@ public class FilebasedAuthenticator implements IAuthenticator {
 		}
 		return true;
 	}
-	
+
 	public String toString(){
 		return "Username/password ["+dbFile+"]";
 	}
-	
+
 	private synchronized void updateDB() throws IOException {
 		if(lastUpdated == 0 || dbFile.lastModified() > lastUpdated){
 			logger.info("(Re)reading username/password authentication info from <"+dbFile.getAbsolutePath()+">");
@@ -97,23 +97,19 @@ public class FilebasedAuthenticator implements IAuthenticator {
 						db.put(af.user,af);
 					}
 					catch(IllegalArgumentException ex){
-						logger.error("Invalid line in user db "+dbFile.getAbsolutePath());
+						logger.error("Invalid line in user authfile {}: {}", dbFile.getAbsolutePath(), line);
 					}
 				}
 			}
 		}
 	}
-	
+
 	private String usernamePassword(String username, String password) {
-		String dn=null;
 		AttributesHolder af = db.get(username);
 		if(af == null){
 			return null;
 		}
-		if(verifyPass(password,af.hash,af.salt)){
-			dn=af.dn;
-		}
-		return dn;
+		return verifyPass(password,af.hash,af.salt) ? af.dn : null;
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -121,22 +117,21 @@ public class FilebasedAuthenticator implements IAuthenticator {
 		console.printf("Generate line for the username/password file\n");
 		String username = console.readLine("Username:");
 		String password = new String(console.readPassword("Password:"));
-		String dn = new String(console.readPassword("DN:"));
+		String dn = new String(console.readLine("DN:"));
 		System.out.println("Add following line to password file");
 		System.out.printf(generateLine(username,password,dn));
 	}
-	
+
 	public static String generateLine(String username,String password,String dn) throws Exception {
 		boolean havePassword = !password.isEmpty();
 		String salt = getSalt();
 		String hash = havePassword?generatePassHash(password, salt):"";
 		return String.format("%s:%s:%s:%s\n",username,hash,salt,dn);
 	}
-	
+
 	private boolean verifyPass(String pass, String hash, String salt) {
 		try {
-			String pashHash = generatePassHash(pass, salt);
-			return hash.equals(pashHash);
+			return hash.equals(generatePassHash(pass, salt));
 		} catch (NoSuchAlgorithmException ex) {
 			logger.error("Unable to generate hash", ex);
 			return false;
@@ -174,9 +169,8 @@ public class FilebasedAuthenticator implements IAuthenticator {
 		
 		public AttributesHolder(String line) throws IllegalArgumentException {
 			String[] fields = line.split(":",4);
-			//#user:hash:salt
+			//#user:hash:salt:dn
 			if (fields.length!=4) {
-				logger.error("Invalid line:"+line);
 				throw new IllegalArgumentException();
 			}
 			user=fields[0];

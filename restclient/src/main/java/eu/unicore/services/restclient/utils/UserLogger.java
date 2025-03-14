@@ -29,4 +29,13 @@ public interface UserLogger {
 	 */
 	public default void debug(String msg, Object...params) {}
 
+	/**
+	 * output an ERROR
+	 *
+	 * @param t
+	 * @param msg log4j-style formatted message
+	 * @param params
+	 */
+	public default void error(Throwable t, String msg, Object...params) {}
+
 }
