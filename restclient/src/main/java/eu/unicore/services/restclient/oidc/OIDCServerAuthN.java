@@ -133,11 +133,14 @@ public class OIDCServerAuthN implements IAuthCallback {
 		}
 		params.add(new BasicNameValuePair("username", properties.getUsername()));
 		params.add(new BasicNameValuePair("password", properties.getPassword()));
-		params.add(new BasicNameValuePair("scope", properties.getScope()));
+		String scope = properties.getScope();
+		if(scope!=null && !scope.isEmpty()) {
+			params.add(new BasicNameValuePair("scope", properties.getScope()));
+		}
 		handleReply(executeCall(params));
 		log.verbose("Retrieved new token from <{}>", properties.getTokenEndpoint());
 	}
-	
+
 	private void handleReply(JSONObject reply) throws IOException {
 		token = reply.optString("access_token", null);
 		refreshToken = reply.optString("refresh_token", null);
@@ -172,5 +175,4 @@ public class OIDCServerAuthN implements IAuthCallback {
 			return new JSONObject(body);
 		}
 	}
-
 }

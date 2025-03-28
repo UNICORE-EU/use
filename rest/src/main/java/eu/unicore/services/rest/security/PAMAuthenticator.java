@@ -36,9 +36,15 @@ public class PAMAuthenticator implements IAuthenticator {
 		
 	protected final Map<Object,CacheEntry<UnixUser>> cache = new ConcurrentHashMap<>();
 	
+	private String moduleName = "unicorex";
+
 	@Override
 	public final Collection<String>getAuthSchemes(){
 		return s;
+	}
+
+	public void setModuleName(String moduleName) {
+		this.moduleName = moduleName;
 	}
 
 	@Override
@@ -55,7 +61,7 @@ public class PAMAuthenticator implements IAuthenticator {
 			boolean cacheHit = ce!=null && !ce.expired();
 			UnixUser unixUser = cacheHit ? ce.auth : null;
 			if(unixUser==null){
-				PAM pam = new PAM("unicore/x");
+				PAM pam = new PAM(moduleName);
 				unixUser = pam.authenticate(username, password);
 				cache.put(cacheKey, new CacheEntry<>(unixUser,cacheTime));
 			}

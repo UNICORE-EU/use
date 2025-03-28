@@ -67,7 +67,7 @@ public class OIDCProperties extends PropertiesHelper {
 		META.put(GRANT_TYPE, new PropertyMD("password").setDescription("Grant type to request."));
 		META.put(AUTH_MODE, new PropertyMD().setEnum(AuthMode.BASIC)
 				.setDescription("How to authenticate (i.e. send client id/secret) to the OIDC server (BASIC or POST)."));
-		META.put(SCOPE, new PropertyMD("openid").setDescription("Token scope to request from the OIDC server."));
+		META.put(SCOPE, new PropertyMD().setDescription("Token scope to request from the OIDC server."));
 	}
 
 	public OIDCProperties(Properties properties, String prefix) throws ConfigurationException
