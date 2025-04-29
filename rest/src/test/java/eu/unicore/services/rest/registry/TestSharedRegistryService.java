@@ -55,6 +55,8 @@ public class TestSharedRegistryService {
 		((DefaultHome)kernel.getHome("Registry")).runExpiryCheckNow();
 	
 		ExternalRegistryClient extClient = getExtClient();
+		System.out.println("Ext registry client: "+
+						extClient.getConnectionStatus()+" " +extClient.getConnectionStatusMessage());
 		assertEquals(1, extClient.listEntries().size());
 		content.put(RegistryClient.INTERFACE_NAME, "http://spam2");
 		content.put(RegistryClient.INTERFACE_NAMESPACE, "http://ham2");
