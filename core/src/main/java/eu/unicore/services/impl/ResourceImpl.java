@@ -34,7 +34,7 @@ public abstract class ResourceImpl extends SecuredResourceImpl implements Extend
 
 	protected Kernel kernel;
 
-	private boolean isDestroyed=false;
+	private boolean isDestroyed = false;
 
 	public String getServiceName(){
 		return home!=null? home.getServiceName() : null;
@@ -136,15 +136,13 @@ public abstract class ResourceImpl extends SecuredResourceImpl implements Extend
 	}
 
 	@Override
-	public void postRestart()throws Exception{
-		//NOP
-	}
+	public void postRestart()throws Exception{}
 
 	@Override
 	public boolean isReady(){
 		return ResourceStatus.READY==getResourceStatus();
 	}
-	
+
 	@Override
 	public String getResourceStatusMessage() {
 		return getModel().getResourceStatusDetails();
@@ -170,7 +168,7 @@ public abstract class ResourceImpl extends SecuredResourceImpl implements Extend
 		try{
 			home.persist(this);
 		}catch(Exception e) {
-			Log.logException("Could not persist <"+home.getServiceName()+" "+getUniqueID()+">" , e);
+			Log.logException("Could not persist <"+home+" "+getUniqueID()+">" , e);
 		}
 	}
 

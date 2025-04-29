@@ -38,7 +38,8 @@ import jakarta.xml.bind.JAXBException;
  */
 public class LocalPolicyStore
 {
-	public static final Logger log = Log.getLogger(Log.SECURITY, LocalPolicyStore.class);
+	private static final Logger log = Log.getLogger(Log.SECURITY, LocalPolicyStore.class);
+
 	public static final String POLICY_ALG_DENY_OVERRIDES = "urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:deny-overrides";
 	public static final String SPOLICY_ALG_DENY_OVERRIDES = "deny-overrides";
 	public static final String POLICY_ALG_PERMIT_OVERRIDES = "urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:permit-overrides";
@@ -51,11 +52,11 @@ public class LocalPolicyStore
 	public static final String SPOLICY_ALG_ORDERED_DENY_OVERRIDES = "ordered-deny-overrides";
 	public static final String POLICY_ALG_ORDERED_PERMIT_OVERRIDES = "urn:oasis:names:tc:xacml:1.1:policy-combining-algorithm:ordered-permit-overrides";
 	public static final String SPOLICY_ALG_ORDERED_PERMIT_OVERRIDES = "ordered-permit-overrides";
-
 	public static final String PREFIX = "localpdp.";
 	public static final String DIR_KEY = "directory";
 	public static final String COMBINING_ALG_KEY = "combiningAlg";
 	public static final String WILDCARD_KEY = "filesWildcard";
+
 	private Map<String, String> algKeys2FullNames;
 	
 	public static Map<String, PropertyMD> META = new HashMap<>();
@@ -87,10 +88,9 @@ public class LocalPolicyStore
 		initPolicyNameMap();
 		reload(configurationFile);
 	}
-	
+
 	public void reload(String configurationFile) throws ConfigurationException, IOException, SyntaxException
 	{
-		
 		if(this.configFile==null || !configurationFile.equals(this.configFile)) {
 			this.cfg = new FilePropertiesHelper(PREFIX, configurationFile, META, log);
 			this.configFile = configurationFile;
@@ -105,8 +105,7 @@ public class LocalPolicyStore
 			throw new ConfigurationException("Configured XACML policy combining algorithm " +
 					talg + " is unknown.");
 		String wildcard = cfg.getValue(WILDCARD_KEY);
-		
-		FilenameFilter filter = new WildcardFileFilter(wildcard);
+		FilenameFilter filter = WildcardFileFilter.builder().setWildcards(wildcard).get();
 		String []files = dir.list(filter);
 		if (files.length == 0) {
 			throw new IOException("Configured XACML policies repository " + 
@@ -119,14 +118,9 @@ public class LocalPolicyStore
 			return;
 		}
 		directoryHash = hash;
-
-		if (log.isDebugEnabled())
-		{
-			log.debug("Using policy directory: " + dir + 
-				" with files matching " + wildcard +
-				" (found " + files.length + " policies)");
-			log.debug("Using policy combining algorithm: " + alg);
-		}
+		log.debug("Using policy directory: {} with files matching {} (found {} policies)",
+				dir, wildcard, files.length);
+		log.debug("Using policy combining algorithm: {}", alg);
 
 		Arrays.sort(files);
 		List<Evaluatable> policies = new ArrayList<>();
@@ -135,18 +129,15 @@ public class LocalPolicyStore
 			File p = new File(dir.getAbsolutePath() + File.separator + policyF);
 			try
 			{
-				Evaluatable policy = PolicyMarshaller.unmarshal(p);
-				policies.add(policy);
+				policies.add(PolicyMarshaller.unmarshal(p));
 			} catch(SyntaxException e)
 			{
-				throw new SyntaxException("Syntax error in file " 
-						+ policyF, e);
+				throw new SyntaxException("Syntax error in file " + policyF, e);
 			}
 		}
-		
 		pdp.updateConfiguration(policies, alg);
 	}
-	
+
 	private void initPolicyNameMap()
 	{
 		algKeys2FullNames = new HashMap<>();

@@ -13,6 +13,7 @@ public class MockAdminAction implements AdminAction {
 		return "mock";
 	}
 
+	@Override
 	public String getDescription() {
 		return "echoes incoming parameters";
 	}

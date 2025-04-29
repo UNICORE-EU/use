@@ -287,14 +287,8 @@ public abstract class DefaultHome implements Home {
 
 	@Override
 	public Resource refresh(String id) throws ResourceUnknownException, ResourceUnavailableException {
-		try(Resource resource = serviceInstances.getForUpdate(id,locking_timeout,TimeUnit.SECONDS)){
-			if(resource==null)throw new ResourceUnknownException("Instance with ID <"+id+"> does not exist");
-			processMessages(resource);
+		try(Resource resource = getForUpdate(id)){
 			return resource;
-		}catch(TimeoutException te){
-			throw new ResourceUnavailableException("Instance with ID <"+_fullID(id)+"> is not available.");
-		}catch(Exception pe){
-			throw new ResourceUnavailableException("Instance with ID <"+_fullID(id)+"> cannot be accessed",pe);
 		}
 	}
 
@@ -627,5 +621,8 @@ public abstract class DefaultHome implements Home {
 	public List<String>getTaggedResources(String...tags) throws Exception {
 		return getStore().getTaggedResources(tags);
 	}
-
+	
+	public String toString() {
+		return "Home["+serviceName+"]";
+	}
 }

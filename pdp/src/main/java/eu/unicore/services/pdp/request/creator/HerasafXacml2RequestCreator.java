@@ -21,74 +21,49 @@ import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.util.Log;
 
 public class HerasafXacml2RequestCreator extends RequestCreatorBase {
-	private static final Logger log = Log.getLogger(Log.SECURITY,
-			HerasafXacml2RequestCreator.class);
+
+	private static final Logger log = Log.getLogger(Log.SECURITY, HerasafXacml2RequestCreator.class);
 
 	public HerasafXacml2RequestCreator(XACMLProfile p) {
 		super(p);
 	}
 
-	public RequestType createRequest(Client c, ActionDescriptor action,
-			ResourceDescriptor des) {
-
+	public RequestType createRequest(Client c, ActionDescriptor action, ResourceDescriptor des) {
 		validateClient(c);
 		RequestType req = new RequestType();
-
 		List<SubjectType> subjects = req.getSubjects();
 		SubjectType subject = new SubjectType();
 		subjects.add(subject);
 		List<AttributeType> subjectAttrs = subject.getAttributes();
-
-		// subject
-		setAttrList(subjectAttrs, XACMLAttributeCategory.Subject, c, action,
-				des);
-
+		setAttrList(subjectAttrs, XACMLAttributeCategory.Subject, c, action, des);
 		String warn = addHeresafAttributesFromAIPs(c, subjectAttrs);
-		if (!(warn.length() == 0)) {
-			log.warn(warn);
-		}
-
-		// resource
+		if (warn.length() != 0)log.warn(warn);
 		List<ResourceType> resources = req.getResources();
 		ResourceType resource = new ResourceType();
 		resources.add(resource);
-
 		List<AttributeType> resourceAttrs = resource.getAttributes();
-		setAttrList(resourceAttrs, XACMLAttributeCategory.Resource, c, action,
-				des);
-
-		// action
+		setAttrList(resourceAttrs, XACMLAttributeCategory.Resource, c, action, des);
 		ActionType xacmlAction = new ActionType();
 		List<AttributeType> actionAttrs = xacmlAction.getAttributes();
 		setAttrList(actionAttrs, XACMLAttributeCategory.Action, c, action, des);
 		req.setAction(xacmlAction);
-
-		// environment
 		EnvironmentType env = new EnvironmentType();
 		List<AttributeType> envAttrs = env.getAttributes();
-		setAttrList(envAttrs, XACMLAttributeCategory.Environment, c, action,
-				des);
-
+		setAttrList(envAttrs, XACMLAttributeCategory.Environment, c, action, des);
 		req.setEnvironment(env);
-		
 		return req;
-
 	}
 
-	public void setAttrList(List<AttributeType> attrs,
-			XACMLAttributeCategory cat, Client c, ActionDescriptor action,
-			ResourceDescriptor des) {
-
+	public void setAttrList(List<AttributeType> attrs, XACMLAttributeCategory cat, Client c,
+			ActionDescriptor action, ResourceDescriptor des) {
 		for (XACMLAttributeMeta a : profile.getByCategory(cat)) {
 			for (String v : profile.getValue(a, c, action, des)) {
 				attrs.add(getHerasafAttribute(a, v));
 			}
 		}
-
 	}
 
-	public AttributeType getHerasafAttribute(XACMLAttributeMeta xacmlAttribute,
-			String value) {
+	public AttributeType getHerasafAttribute(XACMLAttributeMeta xacmlAttribute, String value) {
 		AttributeType attribute = new AttributeType();
 		DataTypeJAXBTypeAdapter converter = new DataTypeJAXBTypeAdapter();
 		attribute.setAttributeId(xacmlAttribute.getName());
@@ -99,11 +74,9 @@ public class HerasafXacml2RequestCreator extends RequestCreatorBase {
 		return attribute;
 	}
 
-	public String addHeresafAttributesFromAIPs(Client client,
-			List<AttributeType> subjectAttrs) {
+	public String addHeresafAttributesFromAIPs(Client client, List<AttributeType> subjectAttrs) {
 		StringBuilder warn = new StringBuilder();
-		for (XACMLAttribute attr : client.getSubjectAttributes()
-				.getXacmlAttributes()) {
+		for (XACMLAttribute attr : client.getSubjectAttributes().getXacmlAttributes()) {
 			if (!profile.checkAttr(attr.getName())) {
 				warn.append("Among clients GENERIC XACML attributes retrieved from the "
 						+ "configured attribute sources, the special attribute "

@@ -16,6 +16,7 @@ public class RegistryEntryModel extends BaseModel {
 	}
 
 	public Map<String,String> getContent() {
+		content.put(RegistryImpl.ENTRY_ID, getUniqueID());
 		return content;
 	}
 

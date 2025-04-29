@@ -9,6 +9,6 @@ import eu.unicore.services.Kernel;
  */
 public interface USERestApplication {
 
-	public void initialize(Kernel kernel) throws Exception;
+	public default void initialize(Kernel kernel) throws Exception{}
 
 }

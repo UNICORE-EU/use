@@ -96,19 +96,13 @@ public class Utilities {
 	 * @return the text content, or "" if element has no content
 	 */
 	public static String extractElementTextAsString(XmlObject source){
-		XmlCursor c=null;
-		try{
-			c=source.newCursor();
+		try(XmlCursor c = source.newCursor()){
 			while(c.hasNextToken()){
 				if(c.toNextToken().equals(TokenType.TEXT)){
 					return c.getChars();	
 				}
 			}
 			return "";
-		}finally{
-			try{
-				c.dispose();
-			}catch(Exception e){}
 		}
 	}
 

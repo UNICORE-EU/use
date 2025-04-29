@@ -10,13 +10,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import de.fzJuelich.unicore.xuudb.AddCertificateDocument;
-import de.fzJuelich.unicore.xuudb.LoginDataType;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.xuudb.server.HttpsServer;
+import eu.unicore.xuudb.xbeans.AddCertificateDocument;
+import eu.unicore.xuudb.xbeans.LoginDataType;
 
 public class TestXUUDBServer {
 

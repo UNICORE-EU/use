@@ -1,14 +1,13 @@
 package eu.unicore.services.aip.xuudb;
 
-
-import de.fzJuelich.unicore.xuudb.GetAttributesRequestDocument;
-import de.fzJuelich.unicore.xuudb.GetAttributesResponseDocument;
-import de.fzJuelich.unicore.xuudb.GetAttributesResponseType;
-import de.fzJuelich.unicore.xuudb.SimulateGetAttributesRequestDocument;
-import de.fzJuelich.unicore.xuudb.SimulateGetAttributesResponseDocument;
 import eu.unicore.xuudb.interfaces.IDynamicAttributesPublic;
+import eu.unicore.xuudb.xbeans.GetAttributesRequestDocument;
+import eu.unicore.xuudb.xbeans.GetAttributesResponseDocument;
+import eu.unicore.xuudb.xbeans.GetAttributesResponseType;
+import eu.unicore.xuudb.xbeans.SimulateGetAttributesRequestDocument;
+import eu.unicore.xuudb.xbeans.SimulateGetAttributesResponseDocument;
 
-public class MockDAP implements IDynamicAttributesPublic{
+public class MockDAP implements IDynamicAttributesPublic {
 
 	int callCount=0;
 	String gid;

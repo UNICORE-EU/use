@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>eu.unicore.services</groupId>
+    <artifactId>use-all</artifactId>
+    <version>2.11.1-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>xuudb-all</artifactId>
+  <packaging>pom</packaging>
+  <name>XUUDB</name>
+
+  <properties>
+    <!-- package release index (will be appended to the version) -->
+    <package.release>1</package.release>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>eu.unicore.xuudb</groupId>
+      <artifactId>xuudb-server</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>eu.unicore.xuudb</groupId>
+      <artifactId>xuudb-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>eu.unicore.xuudb</groupId>
+      <artifactId>xuudb-admin-client</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+  <profiles>
+    <!-- Generate aggregated code coverage -->
+    <profile>
+      <id>code-coverage</id>
+      <build>
+	<plugins>
+	  <plugin>
+	    <groupId>org.jacoco</groupId>
+	    <artifactId>jacoco-maven-plugin</artifactId>
+	    <version>0.8.12</version>
+	    <executions>
+	      <execution>
+		<id>aggregate-report</id>
+		<phase>verify</phase>
+		<goals>
+		  <goal>report-aggregate</goal>
+		</goals>
+	      </execution>
+	    </executions>
+	    <configuration>
+	      <excludes>
+		<exclude>**/xbeans/**/*</exclude>
+		<exclude>org/apache/xmlbeans/metadata/**/*</exclude>
+		<exclude>schemaorg_apache_xmlbeans/**/*</exclude>
+              </excludes>
+	    </configuration>
+	  </plugin>
+	</plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>

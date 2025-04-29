@@ -2,7 +2,6 @@ package eu.unicore.services.registry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +12,6 @@ import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.Home;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Service;
-import eu.unicore.services.exceptions.ResourceUnknownException;
 import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.services.security.TestConfigUtil;
 

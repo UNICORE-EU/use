@@ -47,6 +47,7 @@ import eu.unicore.util.configuration.ConfigurationException;
  */
 public class LocalHerasafPDP implements UnicoreXPDP, PolicyListener, ISubSystem
 {
+
 	private static final Logger log = Log.getLogger(Log.SECURITY, LocalHerasafPDP.class);
 	private PDP engine;
 	protected HerasafXacml2RequestCreator requestMaker;
@@ -58,7 +59,7 @@ public class LocalHerasafPDP implements UnicoreXPDP, PolicyListener, ISubSystem
 	public void setKernel(Kernel k) {
 		reloadConfig(k);
 	}
-	
+
 	void initialize(String configuration, String baseUrl) {
 		requestMaker=new HerasafXacml2RequestCreator(new UnicoreInternalProfile(baseUrl));
 		try{
@@ -110,15 +111,13 @@ public class LocalHerasafPDP implements UnicoreXPDP, PolicyListener, ISubSystem
 	public PDPResult checkAuthorisation(Client c, ActionDescriptor action,
 			ResourceDescriptor d) throws Exception
 	{
-		RequestType request = requestMaker.createRequest(c, action, d);
-			
+		RequestType request = requestMaker.createRequest(c, action, d);	
 		if (log.isDebugEnabled())
 		{
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			RequestMarshaller.marshal(request, baos);
 			log.debug("XACML request:" + baos.toString());
 		}
-		
 		ResponseType response = authorize(request);
 		if (log.isDebugEnabled())
 		{
@@ -126,8 +125,6 @@ public class LocalHerasafPDP implements UnicoreXPDP, PolicyListener, ISubSystem
 			ResponseMarshaller.marshal(response, baos);
 			log.debug("XACML response:" + baos.toString());
 		}
-
-		
 		List<ResultType> results = response.getResults();
 		if (results.size() != 1)
 			throw new Exception("XACML herasAF PDP BUG: got " + results.size() +

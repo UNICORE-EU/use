@@ -187,16 +187,17 @@ public class SAMLAttributeFetcher
 		{
 			throw new IllegalStateException("Malformed URL while we checked it??", e);
 		}
-		
 		log.debug("Performing SAML query for attributes of {}",
 				() -> X500NameUtils.getReadableForm(subject.getXBean().getStringValue()));
 		String samlId = pullConfiguration.getLocalServerURI();
 		NameID myID;
-		if (samlId != null)
+		if (samlId != null) {
 			myID = new NameID(pullConfiguration.getLocalServerURI(), SAMLConstants.NFORMAT_ENTITY);
-		else
+		}
+		else {
 			myID = new NameID(clientConfiguration.getCredential().getSubjectName(), 
 					SAMLConstants.NFORMAT_DN);
+		}
 		return client.getAssertion(subject, myID).getAttributes();
 	}
 }

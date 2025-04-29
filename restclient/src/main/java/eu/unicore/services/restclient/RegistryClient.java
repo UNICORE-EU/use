@@ -72,5 +72,6 @@ public class RegistryClient extends BaseClient {
 	public static final String INTERFACE_NAMESPACE = "InterfaceNamespace";
 	public static final String SERVER_IDENTITY = "ServerIdentity";
 	public static final String SERVER_PUBKEY = "ServerPublicKey";
+	public static final String ENTRY_ID = "EntryID";
 
 }

@@ -55,6 +55,7 @@ public class TestAdminService {
 		BaseClient client = getClient();
 		JSONObject o = client.getJSON().getJSONObject("_links");
 		JSONObject mock = o.getJSONObject("action:mock");
+		System.out.println(mock.toString(2));
 		assertTrue(mock.getString("description").contains("echoes incoming parameters"));
 	}
 	

@@ -3,16 +3,16 @@ package eu.unicore.services.aip.xuudb;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 
-import de.fzJuelich.unicore.xuudb.CheckCertChainResponseDocument;
-import de.fzJuelich.unicore.xuudb.CheckCertificateChainDocument;
-import de.fzJuelich.unicore.xuudb.CheckCertificateDocument;
-import de.fzJuelich.unicore.xuudb.CheckCertificateResponseDocument;
-import de.fzJuelich.unicore.xuudb.CheckDNDocument;
-import de.fzJuelich.unicore.xuudb.CheckDNResponseDocument;
-import de.fzJuelich.unicore.xuudb.LoginDataType;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.xuudb.X509Utils;
 import eu.unicore.xuudb.interfaces.IPublic;
+import eu.unicore.xuudb.xbeans.CheckCertChainResponseDocument;
+import eu.unicore.xuudb.xbeans.CheckCertificateChainDocument;
+import eu.unicore.xuudb.xbeans.CheckCertificateDocument;
+import eu.unicore.xuudb.xbeans.CheckCertificateResponseDocument;
+import eu.unicore.xuudb.xbeans.CheckDNDocument;
+import eu.unicore.xuudb.xbeans.CheckDNResponseDocument;
+import eu.unicore.xuudb.xbeans.LoginDataType;
 
 public class MockXUUDB implements IPublic{
 

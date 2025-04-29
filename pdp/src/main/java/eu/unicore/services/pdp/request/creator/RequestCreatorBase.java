@@ -8,15 +8,15 @@ public class RequestCreatorBase {
 	protected XACMLProfile profile;
 
 	protected boolean allowAnonymous = true;
-	
+
 	public RequestCreatorBase(XACMLProfile p) {
 		profile = p;
 	}
-	
+
 	public void setAllowAnonymous(boolean allowAnonymous){
 		this.allowAnonymous = allowAnonymous;
 	}
-	
+
 	protected void validateClient(Client c) throws IllegalArgumentException {
 		if (c.getType() == Client.Type.LOCAL)
 			throw new IllegalArgumentException(
@@ -30,7 +30,6 @@ public class RequestCreatorBase {
 		if (c.getRole().getName() == null)
 			throw new IllegalArgumentException(
 					"Subject's role name is not available in authZ subsystem");
-		
 		if (!allowAnonymous && c.getType() == Client.Type.ANONYMOUS)
 			throw new IllegalArgumentException(
 					"Can not perform authorization of an anonymous client");

@@ -6,11 +6,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.fzJuelich.unicore.xuudb.GetAttributesRequestDocument;
-import de.fzJuelich.unicore.xuudb.GetAttributesRequestType;
-import de.fzJuelich.unicore.xuudb.GetAttributesResponseDocument;
-import de.fzJuelich.unicore.xuudb.GetAttributesResponseType;
-import de.fzJuelich.unicore.xuudb.SimplifiedAttributeType;
 import eu.unicore.security.Client;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.XACMLAttribute;
@@ -21,6 +16,11 @@ import eu.unicore.services.security.IDynamicAttributeSource;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.IClientConfiguration;
 import eu.unicore.xuudb.interfaces.IDynamicAttributesPublic;
+import eu.unicore.xuudb.xbeans.GetAttributesRequestDocument;
+import eu.unicore.xuudb.xbeans.GetAttributesRequestType;
+import eu.unicore.xuudb.xbeans.GetAttributesResponseDocument;
+import eu.unicore.xuudb.xbeans.GetAttributesResponseType;
+import eu.unicore.xuudb.xbeans.SimplifiedAttributeType;
 
 public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPublic> implements
 		IDynamicAttributeSource {

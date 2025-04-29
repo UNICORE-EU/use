@@ -60,8 +60,7 @@ public class RegistryImpl extends ResourceImpl {
 		sgInit.parentUUID = this.getUniqueID();
 		sgInit.parentServiceName = this.getServiceName();
 		sgInit.content = content;
-		Home sreHome=getKernel().getHome(RegistryEntryImpl.SERVICENAME);
-		return sreHome.createResource(sgInit);
+		return getKernel().getHome(RegistryEntryImpl.SERVICENAME).createResource(sgInit);
 	}
 	
 	/**
@@ -127,7 +126,8 @@ public class RegistryImpl extends ResourceImpl {
 	public static final String INTERFACE_NAMESPACE = "InterfaceNamespace";
 	public static final String SERVER_IDENTITY = "ServerIdentity";
 	public static final String SERVER_PUBKEY = "ServerPublicKey";
-	
+	public static final String ENTRY_ID = "EntryID";
+
 	// flags an entry as internal, so it won't get pushed to
 	// any external registries
 	public static final String MARK_ENTRY_AS_INTERNAL = "InternalEntry";

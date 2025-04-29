@@ -7,13 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.fzJuelich.unicore.xuudb.CheckCertificateDocument;
-import de.fzJuelich.unicore.xuudb.CheckCertificateResponseDocument;
-import de.fzJuelich.unicore.xuudb.CheckDNDataType;
-import de.fzJuelich.unicore.xuudb.CheckDNDocument;
-import de.fzJuelich.unicore.xuudb.CheckDNResponseDocument;
-import de.fzJuelich.unicore.xuudb.CheckDataType;
-import de.fzJuelich.unicore.xuudb.LoginDataType;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.wsutil.client.WSClientFactory;
@@ -23,6 +16,13 @@ import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.IClientConfiguration;
 import eu.unicore.xuudb.X509Utils;
 import eu.unicore.xuudb.interfaces.IPublic;
+import eu.unicore.xuudb.xbeans.CheckCertificateDocument;
+import eu.unicore.xuudb.xbeans.CheckCertificateResponseDocument;
+import eu.unicore.xuudb.xbeans.CheckDNDataType;
+import eu.unicore.xuudb.xbeans.CheckDNDocument;
+import eu.unicore.xuudb.xbeans.CheckDNResponseDocument;
+import eu.unicore.xuudb.xbeans.CheckDataType;
+import eu.unicore.xuudb.xbeans.LoginDataType;
 
 /**
  * get user attributes from an XUUDB

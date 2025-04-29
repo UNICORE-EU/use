@@ -84,6 +84,7 @@ public class DeploymentManager {
 				logger.info("Feature <{}> disabled, skipping.", ftName);
 			}
 		}catch(Exception ex){
+			ex.printStackTrace();
 			String msg = Log.createFaultMessage("Cannot deploy feature <"+ft.getName()+">", ex);
 			throw new ConfigurationException(msg,ex);
 		}
