@@ -71,7 +71,7 @@ public class RegistryHandler implements ISubSystem {
 		registryClient = new LocalRegistryClient(kernel);
 		updateStatusMessage();
 	}
-	
+
 	@Override
 	public void reloadConfig(Kernel kernel) {
 		this.config = kernel.getContainerProperties();
@@ -86,15 +86,6 @@ public class RegistryHandler implements ISubSystem {
 			kernel.register(rh);
 		}
 		return rh;
-	}
-
-	/**
-	 * this is only used internally
-	 * Application code should retrieve a {@link RegistryClient} using {@link #getExternalRegistryClient()}
-	 * @returns the current list of external registry URLs
-	 */
-	public synchronized String[] getExternalRegistryURLs(){
-		return externalRegistryURLs.toArray(new String[externalRegistryURLs.size()]);
 	}
 
 	/**
@@ -130,21 +121,12 @@ public class RegistryHandler implements ISubSystem {
 	}
 
 	/**
-	 * add an the external registry URL
-	 */
-	protected void addExternalRegistryURL(String url){
-		synchronized (externalRegistryURLs) {
-			externalRegistryURLs.add(url);
-		}
-	}
-
-	/**
 	 * get a client for the internal registry 
 	 */
 	public LocalRegistryClient getRegistryClient()throws Exception{
 		return registryClient;
 	}
-	
+
 	public boolean usesExternalRegistry() {
 		return config.getBooleanValue(ContainerProperties.EXTERNAL_REGISTRY_USE);
 	}
@@ -152,7 +134,7 @@ public class RegistryHandler implements ISubSystem {
 	public boolean isSharedRegistry() {
 		return "shared".equals(config.getValue("feature.Registry.mode"));
 	}
-	
+
 	/**
 	 * get a client for talking to the external registries
 	 * @return {@link ExternalRegistryClient}
@@ -169,7 +151,7 @@ public class RegistryHandler implements ISubSystem {
 	public String getName() {
 		return "Registry";
 	}
-	
+
 	@Override
 	public String getStatusDescription(){
 		return statusMessage;
@@ -193,7 +175,7 @@ public class RegistryHandler implements ISubSystem {
 			}
 		}
 	}
-	
+
 	public void updatePublicKeys(){
 		Status oldStatus = status;
 		try{
@@ -218,23 +200,23 @@ public class RegistryHandler implements ISubSystem {
 			}
 		}
 	}
-	
+
 	private PublicKey parsePEM(String pem) throws Exception {
 		X509Certificate cert = CertificateUtils.loadCertificate(
 				IOUtils.toInputStream(pem, "UTF-8"), Encoding.PEM);
 		return cert.getPublicKey();
 	}
-	
+
 	private class RConnector implements ExternalSystemConnector {
 		private Status status = Status.NOT_APPLICABLE;
 		private String statusMessage = "N/A";
 		private long lastChecked;
 		private final String url;
-		
+
 		public RConnector(String url) {
 			this.url = url;
 		}
-		
+
 		@Override
 		public String getConnectionStatusMessage() {
 			checkConnection();

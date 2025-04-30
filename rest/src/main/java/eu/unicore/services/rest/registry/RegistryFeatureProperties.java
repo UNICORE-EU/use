@@ -12,7 +12,7 @@ public class RegistryFeatureProperties extends FeatureProperties {
 	public static enum mode {
 		local, shared
 	}
-	
+
 	static 
 	{
 		FeatureProperties.META.put("mode", new PropertyMD().setEnum(mode.local).
@@ -20,7 +20,7 @@ public class RegistryFeatureProperties extends FeatureProperties {
 	}
 
 	public final static Map<String, PropertyMD> META = FeatureProperties.META;
-	
+
 	public RegistryFeatureProperties(String featureName, ContainerProperties source) {
 		super(featureName, source);
 	}

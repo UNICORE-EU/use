@@ -9,7 +9,7 @@
   </parent>
   <artifactId>use-all</artifactId>
   <packaging>pom</packaging>
-  <name>UNICORE Services Environment</name>
+  <name>UNICORE Services Environment All</name>
 
   <dependencies>
     <dependency>

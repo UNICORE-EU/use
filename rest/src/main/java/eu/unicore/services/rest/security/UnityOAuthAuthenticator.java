@@ -22,50 +22,49 @@ import eu.unicore.util.httpclient.DefaultClientConfiguration;
 public class UnityOAuthAuthenticator extends UnityBaseSAMLAuthenticator {
 
 	private final static Collection<String> s = Collections.singletonList("Bearer");
-	
+
 	@Override
 	public final Collection<String>getAuthSchemes(){
 		return s;
 	}
-	
+
+	@Override
 	public void setKernel(Kernel kernel){
 		super.setKernel(kernel);
 		kernel.getSecurityManager().addCallback(getCallback());
 	}
-	
+
+	@Override
 	public String toString(){
 		return "Unity with OAuth Bearer token ["+super.toString()+"]";
 	}
-	
+
 	@Override
 	protected Object extractCredentials(DefaultClientConfiguration clientCfg,
 			Message message, SecurityTokens tokens) {
 		String bearerToken = CXFUtils.getBearerToken(message);
-		if(bearerToken == null)return null;
-		
-		clientCfg.setHttpAuthn(true);
-		clientCfg.setHttpPassword("n/a");
-		clientCfg.setHttpUser("n/a");
-		clientCfg.getExtraSecurityTokens().put(OAuthBearerTokenOutInterceptor.TOKEN_KEY, bearerToken);
-		
-		// store token for later use
-		tokens.getUserPreferences().put("UC_OAUTH_BEARER_TOKEN", new String[]{bearerToken});
-		
+		if(bearerToken != null) {
+			clientCfg.setHttpAuthn(true);
+			clientCfg.setHttpPassword("n/a");
+			clientCfg.setHttpUser("n/a");
+			clientCfg.getExtraSecurityTokens().put(OAuthBearerTokenOutInterceptor.TOKEN_KEY, bearerToken);
+			// store token for later use
+			tokens.getUserPreferences().put("UC_OAUTH_BEARER_TOKEN", new String[]{bearerToken});
+		}
 		return bearerToken;
 	}
 
-	
 	private static AttributeHandlingCallback aac;
-	
+
 	private synchronized AttributeHandlingCallback getCallback(){
 		if(aac==null){
 			aac = new BearerAttributeCallback();
 		}
 		return aac;
 	}
-	
+
 	private static class BearerAttributeCallback implements AttributeHandlingCallback{
-		
+
 		/**
 		 * extracts the OAuth Bearer token from the security tokens 
 		 * and returns it as an attribute which will be stored in the Client object

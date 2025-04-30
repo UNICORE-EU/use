@@ -21,27 +21,26 @@ import eu.unicore.util.httpclient.DefaultClientConfiguration;
 public class UnitySAMLAuthenticator extends UnityBaseSAMLAuthenticator {
 
 	private final static Collection<String> s = Collections.singletonList("Basic");
-	
+
 	@Override
 	public final Collection<String>getAuthSchemes(){
 		return s;
 	}
 
+	@Override
 	public String toString(){
 		return "Unity with username+password ["+super.toString()+"]";
 	}
-	
+
 	@Override
 	protected Object extractCredentials(DefaultClientConfiguration clientCfg, Message message, SecurityTokens tokens) {
 		HTTPAuthNTokens http = CXFUtils.getHTTPCredentials(message);
 		if(http == null)return null;
-		
 		String username=http.getUserName();
 		String password=http.getPasswd();
 		clientCfg.setHttpAuthn(true);
 		clientCfg.setHttpUser(username);
 		clientCfg.setHttpPassword(password);
-		
 		return username+":"+new String(password);
 	}
 

@@ -10,7 +10,7 @@ import eu.unicore.services.Resource;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class PostInvokeHandler extends AbstractPhaseInterceptor<Message> {
+public final class PostInvokeHandler extends AbstractPhaseInterceptor<Message> {
 
 	private static final ThreadLocal<SecuritySession>threadSession = new ThreadLocal<>();
 

@@ -8,7 +8,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>use-aip</artifactId>
-  <name>UNICORE Services Environment attribute sources</name>
+  <name>UNICORE Services Environment Attribute sources</name>
   <description>Attribute Information Point implementations</description>
 
   <properties>

@@ -10,6 +10,7 @@ public class RestServiceFactory implements ServiceFactory {
 
 	private static RestServlet servlet;
 
+	@Override
 	public Service build(DeploymentDescriptor dd) {
 		RestService service=new RestService(dd.getName(),dd.getKernel());
 		Class<?>applicationClass = dd.getImplementation();
@@ -22,18 +23,22 @@ public class RestServiceFactory implements ServiceFactory {
 		return service;
 	}
 
+	@Override
 	public String getType() {
 		return RestService.TYPE;
 	}
 
+	@Override
 	public String getServletClass() {
 		return RestServlet.class.getName();
 	}
 
+	@Override
 	public String getServletPath() {
 		return "/rest/*";
 	}
 
+	@Override
 	public synchronized RestServlet getServlet(){
 		if(servlet==null){
 			servlet=new RestServlet();

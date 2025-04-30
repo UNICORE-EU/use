@@ -15,11 +15,12 @@ import eu.unicore.util.Log;
 public class RegistryStartupTask implements Runnable {
 
 	private final Kernel kernel;
-	
+
 	public RegistryStartupTask(Kernel kernel) {
 		this.kernel = kernel;
 	}
-	
+
+	@Override
 	public void run() {
 		try {
 			RegistryCreator registryCreator = RegistryCreator.get(kernel);

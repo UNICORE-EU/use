@@ -39,7 +39,7 @@ public class FilebasedAuthenticator implements IAuthenticator {
 
 	public void setFile(String fileName) {
 		this.file = fileName;
-		dbFile = new File(file);
+		this.dbFile = new File(file);
 	}
 
 	public String getFile() {
@@ -61,13 +61,11 @@ public class FilebasedAuthenticator implements IAuthenticator {
 			tokens.getContext().put(SecurityTokens.CTX_LOGIN_HTTP,http);
 		}
 		if(http == null)return false;
-
 		try{
 			updateDB();
 		}catch(IOException ioe){
 			throw new RuntimeException("Server error: could not update user database.", ioe);
 		}
-
 		String dn = usernamePassword(http.getUserName(), http.getPasswd());
 		if(dn != null){
 			tokens.setUserName(dn);
@@ -78,6 +76,7 @@ public class FilebasedAuthenticator implements IAuthenticator {
 		return true;
 	}
 
+	@Override
 	public String toString(){
 		return "Username/password ["+dbFile+"]";
 	}
@@ -111,7 +110,7 @@ public class FilebasedAuthenticator implements IAuthenticator {
 		}
 		return verifyPass(password,af.hash,af.salt) ? af.dn : null;
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 		Console console = System.console();
 		console.printf("Generate line for the username/password file\n");
@@ -161,12 +160,12 @@ public class FilebasedAuthenticator implements IAuthenticator {
 	}
 
 	public static class AttributesHolder {
-		
+
 		public final String user;
 		public final String hash;
 		public final String salt;
 		public final String dn;
-		
+
 		public AttributesHolder(String line) throws IllegalArgumentException {
 			String[] fields = line.split(":",4);
 			//#user:hash:salt:dn

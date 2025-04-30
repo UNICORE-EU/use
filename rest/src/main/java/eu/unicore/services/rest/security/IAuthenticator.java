@@ -34,9 +34,9 @@ public interface IAuthenticator {
 	 * get the supported HTTP authentication schemes ("Basic", "Digest", etc) supported by this authenticator
 	 */
 	public Collection<String> getAuthSchemes();
-	
+
 	public default RESTSecurityProperties getSecurityProperties() { 
 		return null;
 	}
-	
+
 }

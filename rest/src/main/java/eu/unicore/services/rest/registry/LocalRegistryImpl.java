@@ -27,7 +27,7 @@ import eu.unicore.util.Log;
 public class LocalRegistryImpl extends RegistryImpl {
 
 	private static final Logger logger = Log.getLogger(Log.SERVICES+".registry", LocalRegistryImpl.class);
-	
+
 	/**
 	 * push entry to any configured external registries.
 	 * The lifetime of the new entry is determined by the external registry, or 

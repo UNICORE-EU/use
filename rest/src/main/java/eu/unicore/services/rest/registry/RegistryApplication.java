@@ -3,7 +3,6 @@ package eu.unicore.services.rest.registry;
 import java.util.HashSet;
 import java.util.Set;
 
-import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.USERestApplication;
 import jakarta.ws.rs.core.Application;
 
@@ -15,15 +14,10 @@ import jakarta.ws.rs.core.Application;
 public class RegistryApplication extends Application implements USERestApplication {
 
 	@Override
-	public void initialize(Kernel kernel) throws Exception {
-		// NOP
-	}
-
-	@Override
 	public Set<Class<?>> getClasses() {
 		Set<Class<?>>classes=new HashSet<>();
 		classes.add(Registries.class);
 		return classes;
 	}
-	
+
 }

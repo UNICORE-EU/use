@@ -57,7 +57,7 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 	}
 
 	private UserPublicKeyCache keyCache = null;
-	
+
 	@Override
 	public void setKernel(Kernel kernel){
 		keyCache = UserPublicKeyCache.get(kernel);
@@ -157,7 +157,7 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		}
 		return null;
 	}
-	
+
 	private Pair<String,String> authenticateJWT(String bearerToken, SecurityTokens tokens) {
 		try{
 			JSONObject json = null;
@@ -182,7 +182,7 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		}
 		return null;
 	}
-	
+
 	private String jwtTokenAuth(String username, String jwtToken) throws IOException {
 		AttributeHolders attr = keyCache.get(username);
 		if(attr==null)return null;
@@ -235,7 +235,8 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		attr.uid = requestedUser;
 		tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, attr);
 	}
-	
+
+	@Override
 	public String toString(){
 		return "SSH Keys [from:"+(file!=null?" <"+file+">":"")
 				+(!useAuthorizedKeys?"":" <target system>")+" ]";

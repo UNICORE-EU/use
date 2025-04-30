@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CoreAuthDefaults implements AuthenticatorDefaults {
-	
+
 	private static final Map<String,String> defs = new HashMap<>();
 
 	static {
@@ -21,4 +21,5 @@ public class CoreAuthDefaults implements AuthenticatorDefaults {
 	public String getImplementationClass(String name) {
 		return defs.get(name);
 	}
+
 }

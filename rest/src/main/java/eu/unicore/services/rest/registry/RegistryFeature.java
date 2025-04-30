@@ -23,17 +23,18 @@ public class RegistryFeature extends FeatureImpl {
 	public static final String SERVICE_NAME = "Registry";
 
 	private RegistryFeatureProperties properties;
-	
+
 	private boolean isSharedRegistry = false;
-	
+
 	public RegistryFeature() {
 		this.name = "Registry";
 	}
-	
+
 	public boolean isSharedRegistry() {
 		return isSharedRegistry;
 	}
-	
+
+	@Override
 	public void setKernel(Kernel kernel) {
 		super.setKernel(kernel);
 		this.properties = new RegistryFeatureProperties(SERVICE_NAME, kernel.getContainerProperties());
@@ -72,7 +73,7 @@ public class RegistryFeature extends FeatureImpl {
 			this.implementationClass = RegistryApplication.class;
 		}
 	}
-	
+
 	/**
 	 * REST application for local/shared Registry
 	 */
@@ -86,7 +87,7 @@ public class RegistryFeature extends FeatureImpl {
 		}
 
 	}
-	
+
 	/**
 	 * REST service descriptor for registry entries
 	 */
@@ -104,7 +105,7 @@ public class RegistryFeature extends FeatureImpl {
 			this.implementationClass = RegistryEntryApplication.class;
 		}
 	}
-	
+
 	/**
 	 * REST application for registry entries
 	 */

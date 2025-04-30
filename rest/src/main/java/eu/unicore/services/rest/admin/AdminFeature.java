@@ -31,7 +31,6 @@ public class AdminFeature extends FeatureImpl {
 		services.add(new AdminServiceDescriptor(kernel));
 	}
 
-
 	/**
 	 * REST application
 	 */
@@ -43,7 +42,6 @@ public class AdminFeature extends FeatureImpl {
 			classes.add(Admin.class);
 			return classes;
 		}
-		
 	}
 
 	/**
@@ -55,14 +53,13 @@ public class AdminFeature extends FeatureImpl {
 			this();
 			setKernel(kernel);
 		}
-		
+
 		public AdminServiceDescriptor(){
 			super();
 			this.name = "admin";
 			this.type = RestService.TYPE;
 			this.implementationClass = AdminApplication.class;
 		}
-		
 	}
 
 }

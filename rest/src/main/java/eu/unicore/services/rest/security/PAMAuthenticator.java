@@ -33,9 +33,9 @@ public class PAMAuthenticator implements IAuthenticator {
 	private String dnTemplate = "CN=%s, OU=pam-local-users";
 
 	private final int cacheTime = 30000;
-		
+
 	protected final Map<Object,CacheEntry<UnixUser>> cache = new ConcurrentHashMap<>();
-	
+
 	private String moduleName = "unicorex";
 
 	@Override
@@ -77,7 +77,7 @@ public class PAMAuthenticator implements IAuthenticator {
 		}
 		return true;
 	}
-	
+
 	// store PAM attributes for AuthAttributesCollector to pick up
 	private void storePAMInfo(UnixUser unixUser, SecurityTokens tokens){
 		BasicAttributeHolder attr = new BasicAttributeHolder();
@@ -89,7 +89,8 @@ public class PAMAuthenticator implements IAuthenticator {
 	public void setDNTemplate(String dnTemplate){
 		this.dnTemplate = dnTemplate;
 	}
-	
+
+	@Override
 	public String toString(){
 		return "PAM";
 	}

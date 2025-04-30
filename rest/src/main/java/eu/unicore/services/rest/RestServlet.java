@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class RestServlet extends CXFNonSpringServlet {
-	
+
 	private static final long serialVersionUID=1l;
 
 	private static final Logger logger = Log.getLogger(Log.SERVICES, RestServlet.class);
@@ -43,7 +43,7 @@ public class RestServlet extends CXFNonSpringServlet {
 		}
 	}
 
-	protected void upgradeConnection(HttpServletRequest request, HttpServletResponse response, SocketChannel backend) throws Exception {
+	private void upgradeConnection(HttpServletRequest request, HttpServletResponse response, SocketChannel backend) throws Exception {
 		Request baseRequest = Request.getBaseRequest(request);
 		ForwardingConnection toClient = createForwardingConnection(baseRequest, backend);
 		if (toClient == null)
@@ -53,16 +53,14 @@ public class RestServlet extends CXFNonSpringServlet {
 		httpChannel.getConnector().getEventListeners().forEach(toClient::addEventListener);
 		baseRequest.setHandled(true);
 		baseRequest.setAttribute(HttpTransport.UPGRADE_CONNECTION_ATTRIBUTE, toClient);
-
 		// Save state from request/response and remove reference to the base request/response.
 		new UpgradeHttpServletRequest(request).upgrade();
 		new UpgradeHttpServletResponse(response).upgrade();
-		Forwarder.get().attach(toClient);
-		
+		Forwarder.get().attach(toClient);		
 		logger.info("Forwarding from backend {}, client={}", backend, toClient.getEndPoint().getRemoteSocketAddress());
 	}
-	
-	protected ForwardingConnection createForwardingConnection(Request baseRequest, SocketChannel backend) {
+
+	private ForwardingConnection createForwardingConnection(Request baseRequest, SocketChannel backend) {
 		HttpChannel httpChannel = baseRequest.getHttpChannel();
 		Connector connector = httpChannel.getConnector();
 		return new ForwardingConnection(httpChannel.getEndPoint(),

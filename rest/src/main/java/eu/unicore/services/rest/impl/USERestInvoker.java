@@ -41,7 +41,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-public class USERestInvoker extends JAXRSInvoker {
+public final class USERestInvoker extends JAXRSInvoker {
 
 	private static final Logger logger = Log.getLogger(Log.SERVICES, USERestInvoker.class);
 
@@ -50,10 +50,10 @@ public class USERestInvoker extends JAXRSInvoker {
 	private final SecurityManager securityManager;
 
 	private static Meter callFrequency; 
-	
-	public static final String LOCKEDKEY=USERestInvoker.class.getName()+"LOCKED";
-	public static final String HOME=USERestInvoker.class.getName()+"HOME";
-	public static final String HAVEMESSAGESKEY=USERestInvoker.class.getName()+"HAVEMESSAGES";
+
+	static final String LOCKEDKEY = USERestInvoker.class.getName()+"LOCKED";
+	static final String HOME = USERestInvoker.class.getName()+"HOME";
+	static final String HAVEMESSAGESKEY = USERestInvoker.class.getName()+"HAVEMESSAGES";
 
 	public USERestInvoker(Kernel kernel){
 		super();
@@ -102,7 +102,7 @@ public class USERestInvoker extends JAXRSInvoker {
 		return o;
 	}
 	
-	public void configureServiceObject(Object o, Exchange exchange) {
+	private void configureServiceObject(Object o, Exchange exchange) {
 		String serviceName = (String)exchange.getService().get(RestService.SIMPLE_SERVICE_NAME);
 		String homeName = extractHome(exchange); 
 		String resourceID = extractUniqueID(exchange);
@@ -190,7 +190,7 @@ public class USERestInvoker extends JAXRSInvoker {
 		callFrequency.mark();
 	}
 	
-	protected void accessControl(String serviceName, Home home, String resourceID, String action, OperationType opType, Resource r, Exchange exchange)
+	private void accessControl(String serviceName, Home home, String resourceID, String action, OperationType opType, Resource r, Exchange exchange)
 	throws WebApplicationException {
 		String accessControlOnService = serviceName;
 		if(home!=null && resourceID!=null){
@@ -205,7 +205,7 @@ public class USERestInvoker extends JAXRSInvoker {
 		}
 	}
 
-	protected String extractUniqueID(Exchange exchange){
+	private String extractUniqueID(Exchange exchange){
 		String idParamName = "uniqueID";
 		MultivaluedMap<String, String> values = getTemplateValues(exchange.getInMessage());
 		List<String> ids = values.get(idParamName);
@@ -224,7 +224,7 @@ public class USERestInvoker extends JAXRSInvoker {
 	 * @param exchange
 	 * @return the name of the Home, or null if not applicable
 	 */
-	protected String extractHome(Exchange exchange){
+	private String extractHome(Exchange exchange){
 		String idParamName = "home";
 		MultivaluedMap<String, String> values = getTemplateValues(exchange.getInMessage());
 		List<String> ids = values.get(idParamName);
@@ -238,7 +238,6 @@ public class USERestInvoker extends JAXRSInvoker {
 				name = cri.getResourceClass().getAnnotation(USEResource.class).home();
 			}
 		}
-
 		return name; 
 	}
 
@@ -252,7 +251,7 @@ public class USERestInvoker extends JAXRSInvoker {
 	 * @param serviceName
 	 * @param r - resource (which may be null)
 	 */
-	protected void checkAccess(String action, OperationType opType, String serviceName, Resource r){
+	private void checkAccess(String action, OperationType opType, String serviceName, Resource r){
 		Client c = AuthZAttributeStore.getClient();
 		Model model = r!=null? r.getModel() : null; 
 		String uniqueID = null;
@@ -260,17 +259,14 @@ public class USERestInvoker extends JAXRSInvoker {
 		try{
 			owner = kernel.getContainerSecurityConfiguration().getCredential().getSubjectName();
 		}catch(Exception ex){}
-		
 		boolean aclCheckPassed = false;
 		if(model!=null && model instanceof SecuredResourceModel){
 			SecuredResourceModel secure = (SecuredResourceModel)model;
 			uniqueID=model.getUniqueID();
 			owner = secure.getOwnerDN();
-			
 			// user ACL
 			aclCheckPassed = kernel.getSecurityManager().checkAcl(secure.getAcl(),opType,c);
 		}
-		
 		ResourceDescriptor rd = new ResourceDescriptor(serviceName, uniqueID, owner);
 		rd.setAclCheckOK(aclCheckPassed);
 		securityManager.checkAuthorisation(c, new ActionDescriptor(action, opType), rd);

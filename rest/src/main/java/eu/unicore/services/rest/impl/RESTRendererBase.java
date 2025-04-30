@@ -275,7 +275,7 @@ public abstract class RESTRendererBase implements KernelInjectable {
 
 		return b.build();
 	}
-	
+
 	private DateFormat iso8601 = null;
 
 	protected synchronized DateFormat getISODateFormatter(){
@@ -284,7 +284,7 @@ public abstract class RESTRendererBase implements KernelInjectable {
 		}
 		return iso8601;
 	}
-	
+
 	/**
 	 * Create an error (500) Response. 
 	 * The error info will be placed in the response body as JSON.
@@ -330,4 +330,3 @@ public abstract class RESTRendererBase implements KernelInjectable {
 	}	
 
 }
-

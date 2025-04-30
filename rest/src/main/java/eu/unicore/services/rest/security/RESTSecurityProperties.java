@@ -24,21 +24,18 @@ import eu.unicore.util.configuration.PropertyMD;
  * @author schuller
  */
 public class RESTSecurityProperties extends PropertiesHelper {
-	
+
 	static final Logger propsLogger=Log.getLogger(Log.CONFIGURATION, RESTSecurityProperties.class);
 
 	@DocumentationReferencePrefix
 	public static final String PREFIX = ContainerSecurityProperties.PREFIX + "rest.";
-	
+
 	/**
-	 * base for authentication property names
+	 * property names
 	 */
 	public static final String PROP_AUTHN_PREFIX = "authentication";
-
 	public static final String PROP_ORDER = PROP_AUTHN_PREFIX + ".order";
-
 	public static final String PROP_FORBID_NO_CREDS = PROP_AUTHN_PREFIX + ".failOnMissingAuthCredentials";
-
 	public static final String PROP_MSG_LOGGING = "enableMessageLogging";
 
 	@DocumentationReferenceMeta
@@ -56,9 +53,9 @@ public class RESTSecurityProperties extends PropertiesHelper {
 		META.put(PROP_MSG_LOGGING, new PropertyMD("false").setBoolean().
 				setDescription("Enable the Apache CXF logging feature on services."));
 	}
-	
+
 	Properties rawProperties;
-	
+
 	/**
 	 * @param p - Properties to initialise from
 	 * @throws ConfigurationException
@@ -67,7 +64,7 @@ public class RESTSecurityProperties extends PropertiesHelper {
 		super(PREFIX, p, META, propsLogger);
 		this.rawProperties = p;
 	}
-		
+
 	public boolean forbidNoCreds(){
 		return getBooleanValue(PROP_FORBID_NO_CREDS);
 	}
@@ -77,10 +74,10 @@ public class RESTSecurityProperties extends PropertiesHelper {
 		public boolean authenticate(Message message, SecurityTokens tokens) {
 			return false;
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		private final static Collection<String> s = Collections.EMPTY_SET;
-		
+
 		@Override
 		public final Collection<String>getAuthSchemes(){
 			return s;

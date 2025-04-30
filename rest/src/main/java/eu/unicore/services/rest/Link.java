@@ -3,7 +3,7 @@ package eu.unicore.services.rest;
 public class Link {
 
 	private final String href, description, relation;
-	
+
 	public Link( String relation, String href, String description){
 		this.relation = relation;
 		this.href = href;
@@ -13,7 +13,7 @@ public class Link {
 	public Link( String relation, String href){
 		this(relation,href,null);
 	}
-	
+
 	public String getHref() {
 		return href;
 	}
@@ -25,5 +25,5 @@ public class Link {
 	public String getRelation() {
 		return relation;
 	}
-	
+
 }

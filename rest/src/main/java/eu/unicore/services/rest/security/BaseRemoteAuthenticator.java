@@ -121,6 +121,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 		this.groupsAssign = handleAssignScript(groupsAssign, "groupsAssign");
 	}
 
+	@Override
 	public String toString(){
 		return address;
 	}
@@ -259,7 +260,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 			return System.currentTimeMillis()>expires;
 		}
 	}
-	
+
 	public void createCache() {
 		cache = CacheBuilder.newBuilder()
 				.maximumSize(100)
@@ -283,7 +284,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 		checkConnection();
 		return status;
 	}
-	
+
 	private void checkConnection(){
 		if (lastChecked+2000>System.currentTimeMillis())
 			return;
@@ -304,7 +305,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 		}
 		lastChecked=System.currentTimeMillis();
 	}
-	
+
 	private Callable<Pair<Boolean,String>> getCheckConnectionTask(final String url) {
 		return new Callable<>(){
 			public Pair<Boolean, String> call() {

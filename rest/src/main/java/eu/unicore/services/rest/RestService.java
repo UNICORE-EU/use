@@ -25,45 +25,44 @@ import jakarta.ws.rs.core.Application;
 public class RestService implements Service {
 
 	public static final String TYPE="rest";
-	
+
 	/**
 	 * key for storing the name a service was deployed under in the Message properties
 	 */
 	public static final String SIMPLE_SERVICE_NAME="SIMPLE_SERVICE_NAME";
-	
+
 	private final String name;
 
-	private ClassLoader classLoader;
-	
 	private volatile boolean stopped=true;
-	
+
 	private Application application;
-	
+
 	private Server cxfServer;
-	
+
 	private final Kernel kernel;
-	
+
 	public RestService(String name, Kernel kernel){
 		this.name = name;
 		this.kernel = kernel;
 	}
-	
-	
+
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public String getType() {
 		return TYPE;
 	}
 
+	@Override
 	public void start()throws Exception{
 		initSecurity();
 		if(stopped){
-			stopped=false;
-			cxfServer=deploy();
+			stopped = false;
+			cxfServer = deploy();
 			cxfServer.getEndpoint().getService().put(SIMPLE_SERVICE_NAME,name);
-			// initialise application
 			if(application instanceof USERestApplication){
 				try{
 					((USERestApplication)application).initialize(kernel);
@@ -80,6 +79,7 @@ public class RestService implements Service {
 		AuthenticatorChain.get(kernel);
 	}
 
+	@Override
 	public void stop()throws Exception{
 		if(!stopped){
 			stopped=true;
@@ -87,18 +87,11 @@ public class RestService implements Service {
 		}
 	}
 
+	@Override
 	public void stopAndCleanup() throws Exception{
 		stop();
 	}
-	
-	public ClassLoader getClassLoader(){
-		return classLoader;
-	}
-	
-	public void setClassLoader(ClassLoader cl){
-		this.classLoader=cl;
-	}
-	
+
 	public Application getApplication() {
 		return application;
 	}
@@ -107,22 +100,21 @@ public class RestService implements Service {
 		this.application = application;
 	}
 
-
 	public Home getHome(){
 		return null;
 	}
-	
+
 	/**
 	 * check whether the service is started
 	 */
 	public boolean isStarted(){
 		return !stopped;
 	}
-	
+
 	public String getInterfaceClass(){
 		return null;
 	}
-	
+
 	public Server deploy(){
 		JAXRSServerFactoryBean bean = ResourceUtils.createApplication(application, true, false, false, null);
 		bean.setBus(new RestServiceFactory().getServlet().getBus());

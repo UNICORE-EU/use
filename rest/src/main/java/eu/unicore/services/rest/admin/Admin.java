@@ -41,9 +41,9 @@ import eu.unicore.util.Log;
  */
 @Path("/")
 public class Admin extends BaseRESTController {
-	
+
 	private static final Logger logger = Log.getLogger(Log.SERVICES, Admin.class);
-	
+
 	@Override
 	protected Map<String,Object>getProperties() throws Exception {
 		Map<String,Object> status = new HashMap<>();
@@ -54,14 +54,14 @@ public class Admin extends BaseRESTController {
 		status.put("metrics",MetricUtils.getValues(kernel.getMetrics()));
 		return status;
 	}
-	
+
 	@GET
 	@Path("/")
 	@Produces(MediaType.TEXT_HTML)
 	public String getHTMLRepresentation() throws Exception {
 		return getHTML();
 	}
-	
+
 	@GET
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -79,8 +79,8 @@ public class Admin extends BaseRESTController {
 			return handleError("Error getting properties", ex, logger);
 		}
 	}
-	
-	protected Map<String,String> getConnectionStatus(){
+
+	private Map<String,String> getConnectionStatus(){
 		Map<String,String> connectionStatus = new HashMap<>();
 		for(ISubSystem sub: kernel.getSubSystems()){
 			for(ExternalSystemConnector conn: sub.getExternalConnections()) {
@@ -89,8 +89,8 @@ public class Admin extends BaseRESTController {
 		}
 		return connectionStatus;
 	}
-	
-	protected Map<String,String> getSubsystemsStatus(){
+
+	private Map<String,String> getSubsystemsStatus(){
 		Map<String,String> subsystemStatus = new HashMap<>();
 		for(ISubSystem sub: kernel.getSubSystems()){
 			subsystemStatus.put(sub.getName(), sub.getStatusDescription());
@@ -107,7 +107,7 @@ public class Admin extends BaseRESTController {
 			links.add(new Link("action:"+name, getBaseURL()+"/actions/"+name, adm.getDescription()));
 		}
 	}
-	
+
 	/**
 	 * handles actions, accepting an optional JSON document
 	 */
@@ -126,24 +126,19 @@ public class Admin extends BaseRESTController {
 		}
 	}
 
-	protected JSONObject doHandleAction(String action, JSONObject param) throws Exception {
+	private JSONObject doHandleAction(String action, JSONObject param) throws Exception {
 		JSONObject reply = new JSONObject();
 		AdminAction adm = kernel.getAdminActions().get(action);
 		if(adm==null)throw new WebApplicationException(404);
 
 		Map<String,String>params = RESTUtils.asMap(param);
 		Client client = AuthZAttributeStore.getClient();
-		
-		logger.info("Invoking administrative action <"+action+"> :"
-				+" client='"+client.getDistinguishedName()+"'"
-				+" role="+client.getRole().getName() + " parameters="+params);
-		
+		logger.info("Invoking administrative action <{}> : client='{}' role={} parameters={}",
+				action, client.getDistinguishedName(), client.getRole().getName(), params);
 		AdminActionResult admResult = adm.invoke(params, kernel);
-		
-		logger.info("Administrative action <"+action+"> success="+admResult.successful()
-				+" message='"+admResult.getMessage()+"' results="+admResult.getResults()
-				+" resultReferences="+admResult.getResultReferences());
-		
+		logger.info("Administrative action <{}> success={} message='{}' results={} resultReferences={}",
+				action, admResult.successful(), admResult.getMessage(), admResult.getResults(),
+				admResult.getResultReferences());
 		reply.put("success", admResult.successful());
 		reply.put("message", admResult.getMessage());
 		JSONObject results = new JSONObject();

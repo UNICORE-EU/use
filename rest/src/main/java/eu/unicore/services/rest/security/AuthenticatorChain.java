@@ -25,7 +25,7 @@ import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.PropertyGroupHelper;
 
 public class AuthenticatorChain implements IAuthenticator, ISubSystem {
-	
+
 	private static final Logger logger=Log.getLogger(Log.SECURITY, AuthenticatorChain.class);
 
 	private List<IAuthenticator>chain = new ArrayList<>();
@@ -75,14 +75,14 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 		}
 		chain = newChain;
 	}
-	
+
 	private final static Collection<String> authSchemes = new HashSet<>();
-	
+
 	@Override
 	public final Collection<String>getAuthSchemes(){
 		return authSchemes;
 	}
-	
+
 	@Override
 	public boolean authenticate(Message message, SecurityTokens tokens) {
 		boolean haveAuth = false;
@@ -100,7 +100,7 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 		}
 		return haveAuth;
 	}
-	
+
 	private static Map<String,String>aliases = new HashMap<>();
 	static {
 		aliases.put("eu.unicore.uftp.authserver.authenticate.SSHKeyAuthenticator",
@@ -126,7 +126,7 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 			throw new ConfigurationException("Cannot create IAuthenticator instance  <"+clazz+">",e);
 		}
 	}
-	
+
 	private void configureAuth(String dotName, Properties properties, IAuthenticator auth, Kernel kernel) {
 		//find parameters for this attribute source
 		Map<String,String>params=new PropertyGroupHelper(properties, 
@@ -151,9 +151,9 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 			((KernelInjectable)auth).setKernel(kernel);
 		}
 	}
-	
+
 	private final HashSet<AuthenticatorDefaults>defaults = new HashSet<>();
-	
+
 	// lookup and register service factories from classpath
 	private void registerConfigDefaults() {
 		ServiceLoader<AuthenticatorDefaults> sl = ServiceLoader.load(AuthenticatorDefaults.class);
@@ -161,7 +161,7 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 			defaults.add(defs);
 		}
 	}
-	
+
 	private String getDefaultClass(String authenticatorName) {
 		String clazz = null;
 		for(AuthenticatorDefaults d: defaults) {
@@ -170,7 +170,7 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 		}
 		return clazz;
 	}
-	
+
 	public List<IAuthenticator>getChain(){
 		return Collections.unmodifiableList(chain);
 	}
@@ -198,7 +198,8 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 	public Collection<ExternalSystemConnector> getExternalConnections(){
 		return Collections.unmodifiableCollection(connectors);
 	}
-	
+
+	@Override
 	public RESTSecurityProperties getSecurityProperties() { 
 		return sp;
 	}

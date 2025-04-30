@@ -114,7 +114,7 @@ public class ApplicationBaseResource extends RESTRendererBase {
 		if(wantProperty("server"))props.put("server", renderServerProperties());
 		return props;
 	}
-	
+
 	/**
 	 * info about the current client
 	 */
@@ -155,7 +155,6 @@ public class ApplicationBaseResource extends RESTRendererBase {
 		}catch(Exception e) {}
 		return props;
 	}
-	
 
 	/**
 	 * info about the server
@@ -205,5 +204,5 @@ public class ApplicationBaseResource extends RESTRendererBase {
 		
 		return props;
 	}
-	
+
 }

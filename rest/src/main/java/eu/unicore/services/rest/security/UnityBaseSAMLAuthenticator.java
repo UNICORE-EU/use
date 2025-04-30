@@ -48,12 +48,14 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 		this.validate = validate;
 	}
 
+	@Override
 	protected AuthnResponseAssertions performAuth(DefaultClientConfiguration clientCfg) throws Exception{
 		AuthnResponseAssertions auth = doAuth(kernel.getContainerProperties().getContainerURL(), clientCfg);
 		if(validate)validate(auth);
 		return auth;
 	}
-	
+
+	@Override
 	protected long getExpiryTime(AuthnResponseAssertions auth){
 		long expires = 0;
 		if(auth.getAuthNAssertions().size()>0){
@@ -67,7 +69,7 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 		}
 		return expires;
 	}
-	
+
 	@Override
 	protected String assignIdentity(AuthnResponseAssertions auth, Map<String,Object> attrs){
 		if(auth.getAuthNAssertions().size()>0){
@@ -87,14 +89,11 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 		TruststoreBasedSamlTrustChecker samlTrustChecker = new TruststoreBasedSamlTrustChecker(x509);
 		String endpointURI = kernel.getContainerProperties().getContainerURL();
 		String consumerName = kernel.getContainerSecurityConfiguration().getCredential().getSubjectName();
-
 		SSOAuthnAssertionValidator validator = new SSOAuthnAssertionValidator(consumerName, 
 				endpointURI, null, 0, samlTrustChecker, null, SAMLBindings.OTHER);
 		validator.setLaxInResponseToChecking(true);
 		validator.addConsumerSamlNameAlias(endpointURI);
-
 		logger.debug("Validating AuthN assertions. endpointURI={} consumerName={}", endpointURI, consumerName);
-		
 		for(AssertionParser ap : authn.getAuthNAssertions()){
 			try{
 				logger.debug("Validating {}", ap.getXMLBeanDoc());

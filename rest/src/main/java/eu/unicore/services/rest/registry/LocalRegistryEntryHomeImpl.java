@@ -21,7 +21,7 @@ public class LocalRegistryEntryHomeImpl extends DefaultHome {
 		expiryChecker = new RegistryEntryUpdater();
 		instanceChecking.addChecker(expiryChecker);
 	}
-		
+
 	@Override
 	protected Resource doCreateInstance() {
 		return new RegistryEntryImpl();

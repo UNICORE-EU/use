@@ -18,7 +18,7 @@ import eu.unicore.services.rest.RESTUtils.HtmlBuilder;
 public class PagingHelper {
 
 	String linkBase, childURLBase, childResourceName;
-	
+
 	/**
 	 * @param linkBase - base URL used for the next, prev and self links
 	 * @param childURLBase - base URL for the links to child resources. These will get the child ID appended. Can be empty ("")
@@ -33,7 +33,7 @@ public class PagingHelper {
 		}
 		this.childResourceName = childResourceName;
 	}
-	
+
 	/**
 	 * Render a subset of the given list of UIDs. The resulting URLs will
 	 * be composed from the childURLBase
@@ -55,13 +55,11 @@ public class PagingHelper {
 		for(int i=offset; i<upper;i++){
 			children.put(childURLBase + objs.get(i));
 		}
-
 		JSONObject linkCollection = new JSONObject();
 		for(Link link: getLinks(offset,num, objs.size())){
 			linkCollection.put(link.getRelation(), renderJSONLink(link));
 		}
 		result.put("_links", linkCollection);
-
 		return result;
 	}
 
@@ -75,7 +73,6 @@ public class PagingHelper {
 	 */
 	public Collection<Link> getLinks(int offset, int num, int max){
 		Collection<Link> links = new ArrayList<>();
-		
 		if(offset+num<max){
 			int batch = Math.min(num, max-num);
 			Link next = new Link("next",linkBase+"?offset="+(offset+num)+"&num="+batch);
@@ -88,7 +85,6 @@ public class PagingHelper {
 		}
 		Link self= new Link("self",linkBase+"?offset="+(offset)+"&num="+num);
 		links.add(self);
-
 		return links;
 	}
 
@@ -103,7 +99,6 @@ public class PagingHelper {
 
 	public String renderHTML(int offset, int num, List<String>objs) {
 		HtmlBuilder b = new HtmlBuilder();
-		
 		b.h(2, childResourceName);
 		int upper = Math.min(offset+num, objs.size());
 		for(int i=offset; i<upper;i++){
@@ -111,7 +106,6 @@ public class PagingHelper {
 			b.href(childURLBase + id, id);
 			b.br();
 		}
-		
 		b.h(2, "Links");
 		renderHTMLLinks(b, offset, num, objs);
 		return b.build();

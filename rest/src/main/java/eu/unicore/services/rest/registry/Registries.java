@@ -43,7 +43,7 @@ public class Registries extends ServicesBase {
 	protected String getPathComponent() {
 		return "";
 	}
-	
+
 	/**
 	 * post a new entry to the registry (or update an existing one)
 	 *
@@ -79,7 +79,7 @@ public class Registries extends ServicesBase {
 			return handleError("Could not create/update registry entry", ex, logger);
 		}
 	}
-	
+
 	/**
 	 * render properties of a given Registry instance
 	 */
@@ -115,11 +115,11 @@ public class Registries extends ServicesBase {
 		map.remove(RegistryClient.ENDPOINT);
 		return map;
 	}
-	
+
 	private static final Pattern wsrfURLPattern = Pattern.compile("(https||http)://(.*)/services/([^?]*)\\?res=(.*)");
-	
+
 	private static final Map<String,String>conv = new HashMap<>();
-	
+
 	static{
 		conv.put("StorageManagement", "core/storages");
 		conv.put("TargetSystemFactoryService", "core/factories");
@@ -127,7 +127,7 @@ public class Registries extends ServicesBase {
 		conv.put("WorkflowFactory", "workflows");
 		conv.put("Registry", "registries");	
 	}
-	
+
 	/**
 	 * Converts a UNICORE WSRF URL to a UNICORE REST URL
 	 * (heuristically, i.e. using pattern matching)
@@ -143,7 +143,7 @@ public class Registries extends ServicesBase {
 		String restURL = scheme+"://"+base+"/rest/"+restPathElement+"/"+resID;
 		return restURL;
 	}
-	
+
 	public static boolean isWSRFEndpoint(String endpoint){
 		Matcher m = wsrfURLPattern.matcher(endpoint);
 		return m.matches();

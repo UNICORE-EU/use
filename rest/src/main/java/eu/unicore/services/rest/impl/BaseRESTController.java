@@ -334,4 +334,3 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	}
 
 }
-

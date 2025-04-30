@@ -76,7 +76,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 	private final boolean useSessions;
 
 	private final JWTHelper jwt;
-	
+
 	private String serverDN;
 
 	public AuthNHandler(Kernel kernel, SecuritySessionStore sessionStore){
@@ -93,21 +93,16 @@ public class AuthNHandler implements ContainerRequestFilter {
 		this.jwt = new JWTHelper(p, kernel.getContainerSecurityConfiguration(), cache);
 	}
 
-
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
 		ThreadContext.clearAll();
 		Message message = PhaseInterceptorChain.getCurrentMessage();
-		Response res = handleRequest(message);
-		if(res!=null){
-			// response will be picked up by the JAXRSInvoker
-			message.getExchange().put(Response.class,res);
-		}
-	}
-
-	public Response handleRequest(Message message) {
 		try{
-			return doHandle(message);
+			Response res = doHandle(message);
+			if(res!=null){
+				// response will be picked up by the JAXRSInvoker
+				message.getExchange().put(Response.class,res);
+			}
 		}
 		catch(SecurityException ex){
 			logger.debug(()->Log.createFaultMessage("User authentication failed", ex));
@@ -115,11 +110,10 @@ public class AuthNHandler implements ContainerRequestFilter {
 		}
 	}
 
-	protected Response doHandle(Message message){
+	private Response doHandle(Message message){
 		Response response = null;
 		SecuritySession session = null;
 		SecurityTokens token;
-
 		String sessionID = getSecuritySessionID(message);
 		if (sessionID==null) {
 			token = new SecurityTokens();
@@ -162,8 +156,8 @@ public class AuthNHandler implements ContainerRequestFilter {
 		// no delegation - invoke direct authentication chain
 		return processNoDelegation(message, token);
 	}
-	
-	protected void processDelegation(Message message, SecurityTokens tokens){
+
+	private void processDelegation(Message message, SecurityTokens tokens){
 		String bearer = CXFUtils.getBearerToken(message);
 		if(bearer != null){
 			try{
@@ -180,7 +174,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 	 * no-op if the token is not a well-formed JWT token,
 	 * or if it is not a delegation token
 	 */
-	protected void validateJWT(String bearerToken, SecurityTokens tokens) throws Exception {
+	private void validateJWT(String bearerToken, SecurityTokens tokens) throws Exception {
 		JSONObject payload;
 		try{
 			// syntax check first
@@ -209,8 +203,8 @@ public class AuthNHandler implements ContainerRequestFilter {
 			}
 		}
 	}
-	
-	protected Response processNoDelegation(Message message, SecurityTokens token){
+
+	private Response processNoDelegation(Message message, SecurityTokens token){
 		IAuthenticator auth = kernel.getAttribute(IAuthenticator.class);
 		boolean haveCredentials  = auth.authenticate(message, token);
 		if(!haveCredentials
@@ -225,13 +219,13 @@ public class AuthNHandler implements ContainerRequestFilter {
 		return null;
 	}
 
-	protected String establishClientIP(Message message){
+	private String establishClientIP(Message message){
 		String clientIP = CXFUtils.getServletRequest(message).getHeader(CONSIGNOR_IP_HEADER);
 		if(clientIP == null) clientIP = CXFUtils.getClientIP(message);
 		return clientIP;
 	}
 
-	public Client createClient(SecurityTokens tokens) {
+	private Client createClient(SecurityTokens tokens) {
 		Client client = kernel.getSecurityManager().createClientWithAttributes(tokens);
 		if(client!=null && client.getSecurityTokens()!=null){
 			kernel.getSecurityManager().collectDynamicAttributes(client);
@@ -249,7 +243,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 	 * or the long ones from {@link IAttributeSource}
 	 *  
 	 */
-	protected void handleUserPreferences(Message message, SecurityTokens tokens){
+	private void handleUserPreferences(Message message, SecurityTokens tokens){
 		Enumeration<String>headers = CXFUtils.getServletRequest(message).getHeaders(USER_PREFERENCES_HEADER);
 		Map<String, String[]> preferences = tokens.getUserPreferences();
 		while(headers.hasMoreElements()){
@@ -262,7 +256,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 			}
 		}
 	}
-	
+
 	private void handlePreference(String key, String value, Map<String, String[]> preferences){
 		if(IAttributeSource.ATTRIBUTE_XLOGIN.equalsIgnoreCase(key)
 				|| "uid".equalsIgnoreCase(key)){

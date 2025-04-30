@@ -42,11 +42,11 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 	private final static Collection<String> s = Collections.singletonList("Bearer");
 
 	// kept for backwards compatibility
-	protected String dnTemplate;
+	private String dnTemplate;
 
-	protected boolean validate = false;
-	protected String clientID;
-	protected String clientSecret;
+	private boolean validate = false;
+	private String clientID;
+	private String clientSecret;
 
 	public void setDnTemplate(String dnTemplate) {
 		logger.warn("DEPRECATION - instead of dnTemplate, use identityAssign - see documentation.");
@@ -69,7 +69,7 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 	public final Collection<String>getAuthSchemes(){
 		return s;
 	}
-	
+
 	@Override
 	protected void selfCheck() throws ConfigurationException{
 		super.selfCheck();
@@ -82,6 +82,7 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 		}
 	}
 
+	@Override
 	protected Object extractCredentials(DefaultClientConfiguration clientCfg, 
 			Message message, SecurityTokens tokens) {
 		String bearerToken = CXFUtils.getBearerToken(message);
@@ -100,6 +101,7 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 		return bearerToken;
 	}
 
+	@Override
 	protected JSONObject performAuth(DefaultClientConfiguration clientCfg) throws Exception {
 		String token = String.valueOf(clientCfg.getExtraSecurityTokens().get(OAuthBearerTokenOutInterceptor.TOKEN_KEY));
 		JSONObject userData = null;
@@ -119,7 +121,7 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 		return userData;
 	}
 
-	protected JSONObject validate(String token, DefaultClientConfiguration clientCfg) throws Exception {
+	private JSONObject validate(String token, DefaultClientConfiguration clientCfg) throws Exception {
 		HttpPost post = new HttpPost(address);
 		List<NameValuePair> postParameters = new ArrayList<>();
 	    postParameters.add(new BasicNameValuePair("client_id", clientID));
@@ -156,6 +158,7 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 		return RESTUtils.asMap2(auth);
 	}
 
+	@Override
 	public String toString(){
 		String mode = validate ? "validate" : "userinfo";
 		return "OAuth Bearer Token ["+address+ " mode="+mode+"]";

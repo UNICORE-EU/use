@@ -22,7 +22,8 @@ import eu.unicore.util.Log;
 public class RegistryEntryUpdater implements InstanceChecker {
 
 	private static final Logger logger = Log.getLogger(Log.SERVICES+".registry", RegistryEntryUpdater.class);
-	
+
+	@Override
 	public boolean check(Home home, String id)throws Exception{
 		Calendar c=home.getTerminationTime(id);
 		logger.debug("Checking <{} {}> TT = {}", home.getServiceName(), id, (c!=null?c.getTime():"none"));
@@ -82,22 +83,21 @@ public class RegistryEntryUpdater implements InstanceChecker {
 		catch(Exception e){
 			Log.logException("Could not update registry entry "+serviceName+"/"+id,e,logger);
 		}
-
 		// instance is still valid
 		return true;
 	}
-	
+
 	/**
 	 * 
 	 * @param url - the member service URL to check
 	 * @return <code>true</code> if URL looks OK
 	 */
-	protected boolean checkBasicCorrectness(String url, Kernel k){
+	private boolean checkBasicCorrectness(String url, Kernel k){
 		String baseURL = k.getContainerProperties().getContainerURL();
 		return url!=null && url.startsWith(baseURL);
 	}
 
-	protected void checkAndUpdateServerPublicKey(Kernel k, Map<String,String>content) {
+	private void checkAndUpdateServerPublicKey(Kernel k, Map<String,String>content) {
 		String dn = content.get(RegistryClient.SERVER_IDENTITY);
 		String pem = content.get(RegistryClient.SERVER_PUBKEY);
 		if(dn!=null && pem!=null) {
@@ -107,8 +107,8 @@ public class RegistryEntryUpdater implements InstanceChecker {
 			content.put(RegistryClient.SERVER_PUBKEY, pem1);
 		}
 	}
-	
-	protected void reAdd(Kernel kernel, String endpoint, Map<String,String>content) throws Exception
+
+	private void reAdd(Kernel kernel, String endpoint, Map<String,String>content) throws Exception
 	{
 		RegistryHandler handler = kernel.getAttribute(RegistryHandler.class);
 		handler.getRegistryClient().refresh(endpoint, content);
