@@ -3,7 +3,6 @@ package eu.unicore.services.aip.saml.conf;
 import eu.unicore.services.aip.saml.SAMLAttributeFetcher;
 
 
-
 /**
  * Interface used to obtain configuration options required by 
  * {@link SAMLAttributeFetcher}. The security configuration for the VO client

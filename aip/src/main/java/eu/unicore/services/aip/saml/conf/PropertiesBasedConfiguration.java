@@ -32,26 +32,26 @@ import eu.unicore.util.configuration.PropertyMD;
 public class PropertiesBasedConfiguration extends FilePropertiesHelper implements IPullConfiguration
 {
 	private static final Logger log = Log.getLogger(IBaseConfiguration.LOG_PFX, PropertiesBasedConfiguration.class);
-	
+
 	@DocumentationReferencePrefix
 	public static final String PREFIX = "saml.";
-	
+
 	public static final String DEF_CONFIG_FILE_PATH = "conf/saml.config";
 
 	public static final String CFG_INCARNATION_ATTR_PFX = "unicoreAttribute."; 
-	
+
 	public static final String CFG_SCOPE = "group"; 
 
 	public static final String CFG_LOCAL_SERVER_URI = "localServerURI";
-	
+
 	public static final String CFG_ATTRIBUTE_QUERY_URL = "attributeQueryURL";
 	public static final String CFG_SERVER_USERNAME = "attributeQuery.username";
 	public static final String CFG_SERVER_PASSWORD = "attributeQuery.password";
-	
+
 	public static final String CFG_ENABLE_GENERIC_ATTRIBUTES = "enableGenericAttributes";
 	public static final String CFG_CACHE_TTL = "cacheTtl";
 	public static final String CFG_VERIFY_SIGNATURES = "verifySignatures";
-		
+
 	@DocumentationReferenceMeta
 	public final static Map<String, PropertyMD> DEFAULTS = new HashMap<>();
 	static 
@@ -82,12 +82,12 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 	}
 
 	private SamlTrustChecker trustChecker;
-	
+
 	public PropertiesBasedConfiguration() throws FileNotFoundException, IOException
 	{
 		this(null);
 	}
-	
+
 	public PropertiesBasedConfiguration(String configFile) 
 		throws FileNotFoundException, IOException
 	{
@@ -122,7 +122,7 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 			cfgFile = DEF_CONFIG_FILE_PATH;
 		return cfgFile;
 	}
-	
+
 	@Override
 	public int getCacheTtl()
 	{
@@ -164,7 +164,7 @@ public class PropertiesBasedConfiguration extends FilePropertiesHelper implement
 	{
 		return trustChecker;
 	}
-	
+
 	public Properties getSourceProperties()
 	{
 		return properties;

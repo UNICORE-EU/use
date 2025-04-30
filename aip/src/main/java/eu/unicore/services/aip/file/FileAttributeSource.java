@@ -125,13 +125,8 @@ public class FileAttributeSource implements IAttributeSource {
 	}
 
 	public void setMatching(String val) {
-		if (val.equalsIgnoreCase(MatchingTypes.STRICT.name()))
-			strictMatching = true;
-		else if (val.equalsIgnoreCase(MatchingTypes.REGEXP.name()))
-			strictMatching = false;
-		else
-			logger.error("Invalid value of the 'matching' configuration option: {}, using default: {}",
-					val, MatchingTypes.STRICT);
+		MatchingTypes x = MatchingTypes.valueOf(val.toUpperCase());
+		strictMatching = (x==MatchingTypes.STRICT);
 	}
 
 	@Override

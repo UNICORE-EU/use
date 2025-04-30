@@ -63,8 +63,20 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 				}
 			}
 		}
-
 		return map;
+	}
+
+	@Override
+	protected IPublic createEndpoint() {
+		try {
+			IClientConfiguration sec = kernel.getClientConfiguration();
+			return new WSClientFactory(sec).createPlainWSProxy(
+					IPublic.class, getXUUDBUrl() + IPublic.SERVICE_NAME);
+		} catch (Exception e) {
+			Log.logException("Can't make connection to " + name,
+					e, logger);
+			return null;
+		}
 	}
 
 	/**
@@ -73,7 +85,7 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 	 * @param tokens
 	 * @return SubjectAttributesHolder
 	 */
-	protected SubjectAttributesHolder checkUserCert(final SecurityTokens tokens)
+	private SubjectAttributesHolder checkUserCert(final SecurityTokens tokens)
 			throws IOException {
 
 		CheckCertificateDocument in = CheckCertificateDocument.Factory
@@ -116,7 +128,7 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 	 * @param tokens
 	 * @return SubjectAttributesHolder
 	 */
-	protected SubjectAttributesHolder checkDN(final SecurityTokens tokens)
+	private SubjectAttributesHolder checkDN(final SecurityTokens tokens)
 			throws IOException {
 		CheckDNDocument in = CheckDNDocument.Factory.newInstance();
 		CheckDNDataType check = in.addNewCheckDN();
@@ -149,7 +161,7 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 	/**
 	 * parse reply from uudb and return a map of auth info
 	 */
-	public SubjectAttributesHolder makeAuthInfo(LoginDataType login) {
+	private SubjectAttributesHolder makeAuthInfo(LoginDataType login) {
 		String role = login.getRole();
 		String xlogin = login.getXlogin();
 		String groups = login.getProjects();
@@ -178,7 +190,7 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 		return new SubjectAttributesHolder(mapDef, map);
 	}
 
-	protected String[] decode(String in) {
+	private String[] decode(String in) {
 		List<String> res = new ArrayList<>();
 		for (String s : in.split(":")) {
 			String v = s.trim();
@@ -186,19 +198,6 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 				res.add(v);
 		}
 		return res.toArray(new String[res.size()]);
-	}
-
-	@Override
-	protected IPublic createEndpoint() {
-		try {
-			IClientConfiguration sec = kernel.getClientConfiguration();
-			return new WSClientFactory(sec).createPlainWSProxy(
-					IPublic.class, getXUUDBUrl() + IPublic.SERVICE_NAME);
-		} catch (Exception e) {
-			Log.logException("Can't make connection to " + name,
-					e, logger);
-			return null;
-		}
 	}
 
 }

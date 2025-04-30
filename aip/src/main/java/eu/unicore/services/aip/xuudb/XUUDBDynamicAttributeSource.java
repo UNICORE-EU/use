@@ -60,7 +60,6 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 				cInfo.append(group);
 
 			}
-
 		}
 		if (cl.getRole() != null) {
 			String role = cl.getRole().getName();
@@ -81,28 +80,22 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 		if (isNotEmpty(cl.getVo())) {
 			cInfo.append("|Selected VO: ").append(cl.getVo());
 		}
-
 		for (XACMLAttribute a : cl.getSubjectAttributes().getXacmlAttributes()) {
-
 			cInfo.append("|" + a.getName() + "=" + a.getValue());
-
 		}
-
 		return cInfo.toString();
 	}
 
 	@Override
 	public SubjectAttributesHolder getAttributes(Client client,
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException {
-		if (!isEnabled)
+		if (!isEnabled) {
 			throw new SubsystemUnavailableException("The XUUDB attribute source is disabled");
-
-		if(!cb.isOK())
+		}
+		if(!cb.isOK()) {
 			throw new SubsystemUnavailableException("Attribute source "+name+" is unavailable");
-		
-		SubjectAttributesHolder map;
-
-		map = cacheCredentials ? cache.read(getCacheKey(client)) : null;
+		}
+		SubjectAttributesHolder map = cacheCredentials ? cache.read(getCacheKey(client)) : null;
 		if (map == null) {
 			map = getDAPAttributes(client, otherAuthoriserInfo);
 			if (map != null) {
@@ -116,7 +109,6 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 
 	private SubjectAttributesHolder getDAPAttributes(Client client,
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException {
-
 		GetAttributesResponseDocument resp;
 		try {
 			GetAttributesRequestType req = GetAttributesRequestType.Factory
@@ -130,11 +122,9 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 					req.setRole(role);
 				}
 			}
-			
 			if (isNotEmpty(client.getVo())) {
 				req.setVo(client.getVo());
 			}
-
 			if (client.getXlogin() != null) {
 				String xlogin = client.getXlogin().getUserName();
 				String group = client.getXlogin().getGroup();
@@ -145,7 +135,6 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 					req.setGid(group);
 				}
 			}
-		
 			String [] uids = client.getSubjectAttributes().getDefaultIncarnationAttributes().get(IAttributeSource.ATTRIBUTE_XLOGIN);
 			if(uids!=null && uids.length>0 && isNotEmpty(uids[0])) {
 				req.setXlogin(uids[0]);
@@ -154,7 +143,6 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 			if(gids!=null && gids.length>0 && isNotEmpty(gids[0])) {
 				req.setGid(gids[0]);
 			}
-			
 			// Extra Attr
 			ArrayList<SimplifiedAttributeType> al = new ArrayList<>();
 			for (XACMLAttribute a : client.getSubjectAttributes()
@@ -164,18 +152,14 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 				ex.setName(a.getName());
 				ex.addNewValue().setStringValue(a.getValue());
 				al.add(ex);
-
 			}
 			if (al.size() > 0) {
 				SimplifiedAttributeType[] ar = new SimplifiedAttributeType[al.size()];
 				al.toArray(ar);
 				req.setExtraAttributesArray(ar);
 			}
-
-			GetAttributesRequestDocument outXml = GetAttributesRequestDocument.Factory
-					.newInstance();
+			GetAttributesRequestDocument outXml = GetAttributesRequestDocument.Factory.newInstance();
 			outXml.setGetAttributesRequest(req);
-
 			if (logger.isDebugEnabled()) {
 				logger.debug(name + " request: " + outXml.toString());
 			}
@@ -187,7 +171,6 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 			throw new IOException("Error contacting "
 					+name + ": " + e.getMessage(),e);
 		}
-
 		if (logger.isDebugEnabled()) {
 			GetAttributesResponseType data = resp.getGetAttributesResponse();
 			String reply = "[xlogin=" + data.getXlogin() + ", gid="
@@ -209,7 +192,6 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 		String gid = data.getGid();
 		String xlogin = data.getXlogin();
 		String[] supGids = data.getSupplementaryGidsArray();
-
 		Map<String, String[]> map = new HashMap<>();
 		Map<String, String[]> mapDef = new HashMap<>();
 		if (isNotEmpty(xlogin)) {
@@ -224,9 +206,7 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 		}
 		if (supGids != null && supGids.length > 0) {
 			map.put(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS, supGids);
-			mapDef
-					.put(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS,
-							supGids);
+			mapDef.put(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS, supGids);
 		}
 		return new SubjectAttributesHolder(mapDef, map);
 	}

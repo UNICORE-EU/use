@@ -38,8 +38,8 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 
 	protected String name;
 	protected boolean isEnabled = false;
-	protected Integer port;
-	protected String host;
+	protected Integer port = DEFAULT_PORT;
+	protected String host = DEFAULT_HOST;
 	protected Boolean cacheCredentials = Boolean.TRUE;
 	protected Kernel kernel;
 	protected T xuudb;
@@ -64,24 +64,20 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 
 	protected Status status = Status.UNKNOWN;
 	protected String statusMessage = "N/A";
-	
+
+	@Override
 	public void configure(String name, Kernel kernel) {
 		this.name = name;
 		this.kernel = kernel;
-		if (port == null)
-			port = DEFAULT_PORT;
-		if (host == null)
-			host = DEFAULT_HOST;
 		setupURL();
-		logger.info("Attribute source '{}': connecting to <{}>",
-				name, getXUUDBUrl());
+		logger.info("Attribute source '{}': connecting to <{}>", name, getXUUDBUrl());
 		initCache();
 		xuudb = createEndpoint();
 		isEnabled = xuudb!=null;
 	}
 
 	protected abstract T createEndpoint();
-	
+
 	protected void setupURL() {
 		xuudbURL = host + ":" + port + "/";
 	}
@@ -146,10 +142,6 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 		return cacheCredentials;
 	}
 
-	public void toggleCachingCredentials() {
-		cacheCredentials = !cacheCredentials;
-	}
-	
 	protected void updateXUUDBConnectionStatus() {
 		if (!isEnabled){
 			statusMessage = "Not enabled";
@@ -169,7 +161,7 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 			cb.notOK();
 		}
 	}
-	
+
 	protected String checkXUUDBAlive() {
 		Callable<X509Certificate[]> getCert = new Callable<>() {
 			public X509Certificate[] call() throws Exception {
@@ -207,7 +199,7 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 	public String getExternalSystemName(){
 		return name +" attribute source";
 	}
-	
+
 	protected String doGet(String url) throws IOException {
 		HttpClient hc = HttpUtils.createClient(url, kernel.getClientConfiguration());
 		HttpGet get = new HttpGet(url);
@@ -217,7 +209,8 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 			return IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 		}
 	}
-	
+
+	@Override
 	public String toString() {
 		return getName()+" ["+getXUUDBUrl()+"]";
 	}

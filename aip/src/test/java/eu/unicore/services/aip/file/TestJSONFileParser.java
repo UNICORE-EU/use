@@ -2,6 +2,7 @@ package eu.unicore.services.aip.file;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,8 @@ public class TestJSONFileParser {
 	public void testOK() throws Exception
 	{
 		Map<String, List<Attribute>> map = new JSONFileParser().parse(OK);
+		assertEquals(2, map.size());
+		map = new JSONFileParser().parse(new ByteArrayInputStream(OK.toString().getBytes("UTF-8")));
 		assertEquals(2, map.size());
 		System.out.println(map);
 	}

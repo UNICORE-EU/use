@@ -37,12 +37,12 @@ public class XUUDBJSONAttributeSource extends XUUDBBase<String> implements
 	@Override
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens,
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException {
-		if (!isEnabled)
+		if (!isEnabled) {
 			throw new SubsystemUnavailableException("Attribute source "+name+" is disabled");
-		
-		if(!cb.isOK())
+		}
+		if(!cb.isOK()) {
 			throw new SubsystemUnavailableException("Attribute source "+name+" unavailable");
-		
+		}
 		SubjectAttributesHolder map = cacheCredentials ?
 				cache.read(tokens.getEffectiveUserName()) : null;
 		if (map == null) {
@@ -60,7 +60,7 @@ public class XUUDBJSONAttributeSource extends XUUDBBase<String> implements
 	 * @param tokens
 	 * @return SubjectAttributesHolder
 	 */
-	protected SubjectAttributesHolder checkDN(final SecurityTokens tokens)
+	private SubjectAttributesHolder checkDN(final SecurityTokens tokens)
 			throws IOException {
 		String dn = tokens.getEffectiveUserName();
 		addAccessorName(dn);
@@ -104,11 +104,10 @@ public class XUUDBJSONAttributeSource extends XUUDBBase<String> implements
 			mapDef.put(IAttributeSource.ATTRIBUTE_GROUP,
 					new String[] { gids[0] });
 		}
-
 		return new SubjectAttributesHolder(mapDef, map);
 	}
 
-	protected String[] decode(String in) {
+	private String[] decode(String in) {
 		List<String> res = new ArrayList<>();
 		for (String s : in.split(":")) {
 			String v = s.trim();

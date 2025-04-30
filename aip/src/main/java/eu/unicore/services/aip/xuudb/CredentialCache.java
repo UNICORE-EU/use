@@ -15,14 +15,14 @@ import eu.unicore.security.SubjectAttributesHolder;
 public class CredentialCache {
 
 	private final Cache<Object, SubjectAttributesHolder> cache;
-	
+
 	/**
 	 * create credential cache
 	 */
 	public CredentialCache(){
 		this(10);
 	}
-	
+
 	/**
 	 * create credential cache with the specified entry lifetime
 	 * 
@@ -36,15 +36,14 @@ public class CredentialCache {
 				.build();
 	}
 
-	
 	public SubjectAttributesHolder read(Object key){
 		return cache.getIfPresent(key);
 	}
-	
+
 	public void put(Object key, SubjectAttributesHolder authzInfo){
 		cache.put(key,authzInfo);
 	}
-	
+
 	public void removeAll(){
 		cache.invalidateAll();
 	}
