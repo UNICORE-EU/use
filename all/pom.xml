@@ -58,13 +58,6 @@
 		</goals>
 	      </execution>
 	    </executions>
-	    <configuration>
-	      <excludes>
-		<exclude>**/xbeans/**/*</exclude>
-		<exclude>org/apache/xmlbeans/metadata/**/*</exclude>
-		<exclude>schemaorg_apache_xmlbeans/**/*</exclude>
-              </excludes>
-	    </configuration>
 	  </plugin>
 	</plugins>
       </build>

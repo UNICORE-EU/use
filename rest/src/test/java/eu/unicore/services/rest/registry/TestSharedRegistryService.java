@@ -62,10 +62,12 @@ public class TestSharedRegistryService {
 		content.put(RegistryClient.INTERFACE_NAMESPACE, "http://ham2");
 		content.put(RegistryClient.ENDPOINT, "http://foo2");
 		extClient.addRegistryEntry(content);
-		kernel.getAttribute(RegistryHandler.class).getRegistryClient().invalidateCache();
+		RegistryHandler rh = kernel.getAttribute(RegistryHandler.class);
+		System.out.println("Registry handler status: '" +rh.getStatusDescription()+"'");
+		rh.getRegistryClient().invalidateCache();
 		assertEquals(2, registryClient.listEntries().size());
 	}
-	
+
 	private RegistryClient getRClient() throws Exception {
 		String url = kernel.getContainerProperties().getContainerURL()+"/rest/registries/default_registry";
 		return new RegistryClient(url, kernel.getClientConfiguration());

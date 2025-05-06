@@ -106,13 +106,14 @@ public class RegistryHandler implements ISubSystem {
 				for(String registryURL: registryUrls){
 					if(registryURL!=null && registryURL.length()>0){
 						String u = registryURL.trim();
-						if(!u.contains("/rest/registries/")) {
-							u = Registries.convertToREST(u);
+						if(u.contains("/rest/registries/")) {
+							externalRegistryURLs.add(u);
+							connectors.add(new RConnector(u, kernel));
+							logger.info("Using registry: {}", u);
 						}
-						externalRegistryURLs.add(u);
-						RConnector rc = new RConnector(u);
-						connectors.add(rc);
-						logger.info("Using registry: {}", u);
+						else {
+							logger.warn("Not a UNICORE registry URL: {}", u);
+						}
 					}
 				}
 			}
@@ -207,14 +208,16 @@ public class RegistryHandler implements ISubSystem {
 		return cert.getPublicKey();
 	}
 
-	private class RConnector implements ExternalSystemConnector {
+	static class RConnector implements ExternalSystemConnector {
 		private Status status = Status.NOT_APPLICABLE;
 		private String statusMessage = "N/A";
 		private long lastChecked;
 		private final String url;
+		private final Kernel kernel;
 
-		public RConnector(String url) {
+		public RConnector(String url, Kernel kernel) {
 			this.url = url;
+			this.kernel = kernel;
 		}
 
 		@Override

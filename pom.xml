@@ -65,7 +65,7 @@
     <json.version>20250107</json.version>
     <gson.version>2.13.1</gson.version>
     <xuudb.version>2.11.0</xuudb.version>
-    <cxf.version>4.0.5</cxf.version>
+    <cxf.version>4.0.6</cxf.version>
     <jetty.version>11.0.25</jetty.version>
     <metrics.version>4.2.30</metrics.version>
     <jwt.version>10.2</jwt.version>
