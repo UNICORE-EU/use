@@ -5,6 +5,7 @@ import java.util.List;
 
 import eu.unicore.services.DeploymentDescriptor;
 import eu.unicore.services.Kernel;
+import eu.unicore.services.StartupTask;
 
 /**
  * Base class for implementing DeploymentDescriptor instances
@@ -21,7 +22,7 @@ public class DeploymentDescriptorImpl implements DeploymentDescriptor {
 	
 	protected Class<?> implementationClass;
 
-	protected final List<Runnable>initTasks=new ArrayList<>();
+	protected final List<StartupTask>initTasks=new ArrayList<>();
 
 	protected Kernel kernel;
 
@@ -59,7 +60,7 @@ public class DeploymentDescriptorImpl implements DeploymentDescriptor {
 		this.implementationClass = implementationClass;
 	}
 
-	public List<Runnable> getInitTasks() {
+	public List<StartupTask> getInitTasks() {
 		return initTasks;
 	}
 

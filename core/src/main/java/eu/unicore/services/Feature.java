@@ -8,7 +8,7 @@ import java.util.Map;
  *
  * @author schuller
  */
-public interface Feature extends KernelInjectable {
+public interface Feature extends KernelInjectable{
 
 	/**
 	 * Unique name of the feature. The name is referenced in the container property
@@ -37,7 +37,7 @@ public interface Feature extends KernelInjectable {
 	 * init tasks to be executed after all services are deployed (end of Kernel
 	 * start())
 	 */
-	public List<Runnable> getStartupTasks();
+	public List<StartupTask> getStartupTasks();
 
 	public default boolean isEnabled() {
 		return true;

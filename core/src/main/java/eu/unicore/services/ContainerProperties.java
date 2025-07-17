@@ -53,12 +53,8 @@ public class ContainerProperties extends PropertiesHelper {
 	@Deprecated
 	public static final String WSRF_BASEURL = "baseurl";
 
-
-	/** property defining the Servlet context path (usually "/services") */
-	public static final String WSRF_SERVLETPATH = "servletpath";
-
 	/**
-	 * To override the default USE startup code, set this to a list of names
+	 * To extend the default USE startup, set this to a list of names
 	 * of classes implementing java.lang.Runnable
 	 */
 	public static final String ON_STARTUP_KEY = "onstartup";
@@ -179,8 +175,6 @@ public class ContainerProperties extends PropertiesHelper {
 				setDescription("Controls whether to run tests of connections to external services on startup."));
 		META.put(VSITE_NAME_PROPERTY, new PropertyMD("DEMO-SITE").setDescription(
 				"Short, human friendly, name of the target system, should be unique in the federation."));
-		META.put(WSRF_SERVLETPATH, new PropertyMD("/services").
-				setDescription("Servlet context path. In most cases shouldn't be changed."));
 		META.put(WSRF_BASEURL, new PropertyMD().
 				setDescription("(deprecated, use 'container.externalurl') Server URL as visible from the outside, usually the gateway's address, including '<sitename>/services'"));
 		META.put(EXTERNAL_URL, new PropertyMD().

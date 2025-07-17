@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import eu.unicore.services.StartupTask;
+
 /**
  * Dummy implementation used when no real services config is provided (e.g.
  * when all services are deployed via API or during tests)
@@ -22,7 +24,7 @@ public class NullServiceConfigurator implements IServiceConfigurator {
 	}
 
 	@Override
-	public List<Runnable> getInitTasks() {
+	public List<StartupTask> getInitTasks() {
 		return Collections.emptyList();
 	}
 

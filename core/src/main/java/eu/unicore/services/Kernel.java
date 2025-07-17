@@ -37,11 +37,11 @@ import eu.unicore.services.security.util.PubkeyCache;
 import eu.unicore.services.server.ContainerHttpServerProperties;
 import eu.unicore.services.server.GatewayHandler;
 import eu.unicore.services.server.JettyServer;
-import eu.unicore.services.server.StartupTasksRunner;
 import eu.unicore.services.utils.CapabilitiesLoader;
 import eu.unicore.services.utils.deployment.IServiceConfigurator;
 import eu.unicore.services.utils.deployment.NullServiceConfigurator;
 import eu.unicore.services.utils.deployment.ServiceConfigurator;
+import eu.unicore.services.utils.deployment.StartupTasksRunner;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.UpdateableConfiguration;
@@ -66,7 +66,7 @@ public final class Kernel {
 	private PersistenceManager persistenceManager;
 
 	private final MetricRegistry metricRegistry = new MetricRegistry();
-	
+
 	private final Map<String, Home> homes = Collections
 			.synchronizedMap(new HashMap<>());
 
@@ -143,8 +143,7 @@ public final class Kernel {
 
 	public static final String getVersion() {
 		return getVersion(Kernel.class);
-	}
-	
+	}	
 
 	public static String getVersion(Class<?> versionOf) {
 		String version = versionOf.getPackage().getSpecificationVersion(); 
@@ -213,7 +212,6 @@ public final class Kernel {
 		if(isShutdown)return;
 		isShutdown=true;
 		state = State.shutting_down;
-		
 		try {
 			if (getServer() != null) {
 				getServer().stop();
@@ -273,8 +271,7 @@ public final class Kernel {
 	 * @return the attribute
 	 */
 	public <T> T getAttribute(Class<T>key){
-		Object o=attributes.get(key);
-		return  key.cast(o);
+		return key.cast(attributes.get(key));
 	}
 
 	/**
@@ -299,7 +296,7 @@ public final class Kernel {
 			}
 		});
 	}
-	
+
 	public void unregister(Class<?> type) {
 		Iterator<ISubSystem> i = subSystems.iterator();
 		while(i.hasNext()) {
@@ -331,7 +328,6 @@ public final class Kernel {
 	public ServiceFactory getServiceFactory(String type) {
 		return serviceFactories.get(type);
 	}
-
 
 	/**
 	 * get a read-only list of all service factories
@@ -405,7 +401,7 @@ public final class Kernel {
 	public SecurityManager getSecurityManager() {
 		return securityManager;
 	}
-	
+
 	/**
 	 * retrieve the server-wide security session store, or create it if not already done so
 	 */
@@ -418,7 +414,7 @@ public final class Kernel {
 		}
 		return securitySessionStore;
 	}
-	
+
 	/**
 	 * get the persistence manager
 	 */
@@ -449,7 +445,7 @@ public final class Kernel {
 	public Collection<ISubSystem>getSubSystems(){
 		return subSystems;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public <T> Collection<T>getCapabilities(Class<T> type){
 		List<T>result = new ArrayList<>();
@@ -545,23 +541,15 @@ public final class Kernel {
 	 */
 	private void prepare(String conf, Properties extraSettings) throws Exception {
 		if (conf != null) {
-			File file = new File(conf);
-			serviceConfigurator = new ServiceConfigurator(this, file);
-			
+			serviceConfigurator = new ServiceConfigurator(this, new File(conf));			
 		} else {
 			serviceConfigurator = new NullServiceConfigurator();
 		}
-
 		Properties p = serviceConfigurator.loadProperties();
-		if (extraSettings != null)
-			p.putAll(extraSettings);
-
+		if (extraSettings != null)p.putAll(extraSettings);
 		initializeConfiguration(p);
-
 		initializeBuddies();
-
 		initGateway();
-
 	}
 
 	/**
@@ -574,12 +562,15 @@ public final class Kernel {
 		isShutdown = false;
 		state = State.initializing;
 		jetty.start();
-		var startupTasks = deployServices();
-		var sl = ServiceLoader.load(StartupTask.class);
-		StartupTasksRunner.runStartupTasks(this, sl);
+
+		List<StartupTask> startupTasks = new ArrayList<>();
+		startupTasks.addAll(deployServices());
+		ServiceLoader.load(StartupTask.class).forEach((x)->startupTasks.add(x));
+		new StartupTasksRunner(this, startupTasks).run();
+
 		homes.values().forEach( h -> h.run() );
 		state = State.running;
-		// run remaining startup tasks after basic setup is complete
+		// run startup tasks after basic setup is complete
 		startupTasks.forEach( task -> {
 			logger.info("Running startup task <{}>", task.getClass().getName());
 			task.run();
@@ -634,11 +625,9 @@ public final class Kernel {
 		System.out.println(getHeader());
 	}
 
-
 	// lookup and register service factories from classpath
 	private void registerDefaultFactories() {
-		var sl = ServiceLoader.load(ServiceFactory.class);
-		sl.forEach( factory -> {
+		ServiceLoader.load(ServiceFactory.class).forEach( factory -> {
 			serviceFactories.put(factory.getType(), factory);
 			logger.info("Registered '{}' for service type '{}'", factory.getClass().getName(), factory.getType());
 		});
@@ -659,7 +648,7 @@ public final class Kernel {
 	 * 
 	 * @throws Exception
 	 */
-	private List<Runnable> deployServices() throws Exception {
+	private List<StartupTask> deployServices() throws Exception {
 		serviceConfigurator.configureServices();
 		return serviceConfigurator.getInitTasks();
 	}
@@ -691,7 +680,6 @@ public final class Kernel {
 				con = clazz.getConstructor(Kernel.class);		
 			}
 		}
-
 		if(con!=null)
 			o = con.newInstance(this);
 		else{
@@ -699,20 +687,19 @@ public final class Kernel {
 			if(o instanceof KernelInjectable)
 				((KernelInjectable)o).setKernel(this);
 		}
-
 		return o;
 	}
-	
+
 	public static enum State {
 		configuring, initializing, running, shutting_down,
 	}
-	
+
 	private volatile State state = State.configuring;
-	
+
 	public State getState(){
 		return state;
 	}
-	
+
 	/**
 	 * returns true if the container is operational and ready
 	 * to process external requests

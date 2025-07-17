@@ -18,6 +18,7 @@ import eu.unicore.services.Feature;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Service;
 import eu.unicore.services.ServiceFactory;
+import eu.unicore.services.StartupTask;
 import eu.unicore.services.utils.FileWatcher;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
@@ -37,7 +38,7 @@ public class ServiceConfigurator implements IServiceConfigurator {
 	
 	private final Kernel kernel;
 	
-	private final List<Runnable> startupTasks = new ArrayList<>();
+	private final List<StartupTask> startupTasks = new ArrayList<>();
 	
 	private FileWatcher configFileWatcher;
 	
@@ -72,19 +73,17 @@ public class ServiceConfigurator implements IServiceConfigurator {
 	}
 	
 	private void doConfigureFeatures() {
-		ServiceLoader<Feature> fl = ServiceLoader.load(Feature.class);
-		for (Feature ft: fl) {
+		ServiceLoader.load(Feature.class).forEach( ft -> {
 			ft.setKernel(kernel);
 			deployFeature(ft);
-		}
+		});
 	}
 	
 	private void doConfigureServices() {
-		ServiceLoader<DeploymentDescriptor> sl = ServiceLoader.load(DeploymentDescriptor.class);
-		for (DeploymentDescriptor dd: sl) {
+		ServiceLoader.load(DeploymentDescriptor.class).forEach( dd -> {
 			dd.setKernel(kernel);
 			deployService(dd);
-		}
+		});
 	}
 	
 	/*
@@ -95,7 +94,6 @@ public class ServiceConfigurator implements IServiceConfigurator {
 		List<String> values = settings.getListOfValues(ContainerProperties.ON_STARTUP_LIST_KEY);
 		if (settings.isSet(ContainerProperties.ON_STARTUP_KEY))
 			values.add(0, settings.getValue(ContainerProperties.ON_STARTUP_KEY));
-		
 		for(String value: values) {
 			if (value!=null) {
 				String[] classes = value.split(" ");
@@ -107,7 +105,7 @@ public class ServiceConfigurator implements IServiceConfigurator {
 						Class<?>clazz = Class.forName(c);
 						Object o=kernel.load(clazz);
 						logger.info("Loaded startup task <{}>", c);
-						startupTasks.add((Runnable)o);
+						startupTasks.add((StartupTask)o);
 					}catch(Exception e){
 						logger.warn("Error loading startup task <{}>: {}", c, Log.createFaultMessage("", e));
 					}
@@ -121,7 +119,7 @@ public class ServiceConfigurator implements IServiceConfigurator {
 			startupTasks.addAll(ft.getStartupTasks());
 		}
 	}
-	
+
 	protected void deployService(DeploymentDescriptor dd){
 		boolean deploy = true;
 		try{
@@ -145,7 +143,7 @@ public class ServiceConfigurator implements IServiceConfigurator {
 			Log.logException(msg, ex, logger);
 		}
 	}
-	
+
 	private void doDeployService(DeploymentDescriptor dd) {
 		ServiceFactory f=kernel.getServiceFactory(dd.getType());
 		if(f==null){
@@ -159,7 +157,8 @@ public class ServiceConfigurator implements IServiceConfigurator {
 	 * return the list of {@link Runnable} that were defined in the 
 	 * configuration as service init tasks
 	 */
-	public List<Runnable>getInitTasks(){
+	@Override
+	public List<StartupTask>getInitTasks(){
 		return startupTasks;
 	}
 
@@ -180,4 +179,3 @@ public class ServiceConfigurator implements IServiceConfigurator {
 		logger.info("Started monitoring of <{}> with interval {}s", configFile, 10);
 	}
 }
-

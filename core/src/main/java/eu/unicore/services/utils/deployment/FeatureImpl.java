@@ -9,6 +9,7 @@ import eu.unicore.services.DeploymentDescriptor;
 import eu.unicore.services.Feature;
 import eu.unicore.services.Home;
 import eu.unicore.services.Kernel;
+import eu.unicore.services.StartupTask;
 
 /**
  * Base class for implementing Feature instances
@@ -21,17 +22,17 @@ public class FeatureImpl implements Feature {
 
 	protected Kernel kernel;
 
-	protected final List<Runnable> startupTasks = new ArrayList<>();
+	protected final List<StartupTask> startupTasks = new ArrayList<>();
 
 	protected final Map<String, Class<? extends Home>> homeClasses = new HashMap<>();
 
 	protected final List<DeploymentDescriptor> services = new ArrayList<>();
 
 	@Override
-	public final List<Runnable> getStartupTasks(){
+	public final List<StartupTask> getStartupTasks(){
 		return startupTasks;
 	}
-	
+
 	@Override
 	public final Map<String, Class<? extends Home>> getHomeClasses() {
 		return homeClasses;
@@ -41,11 +42,11 @@ public class FeatureImpl implements Feature {
 	public final List<DeploymentDescriptor> getServices() {
 		return services;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -57,7 +58,7 @@ public class FeatureImpl implements Feature {
 	public void setKernel(Kernel kernel) {
 		this.kernel = kernel;
 	}
-	
+
 	/**
 	 * by default, the feature is enabled, and can be switched off 
 	 * using a config property
@@ -68,7 +69,7 @@ public class FeatureImpl implements Feature {
 		if(enable==null)enable=Boolean.TRUE;
 		return enable;
 	}
-	
+
 	/**
 	 * by default, services that are part of the feature are enabled, but can be 
 	 * switched off using a config property container.feature.service.NAME.enable=false  
@@ -78,12 +79,11 @@ public class FeatureImpl implements Feature {
 		if(enable==null)enable=Boolean.TRUE;
 		return enable;
 	}
-	
-	public void initialise() throws Exception {
-		
-	}
-	
+
+	public void initialise() throws Exception {}
+
 	public String toString(){
 		return "Feature: "+name;
 	}
+
 }

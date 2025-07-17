@@ -20,7 +20,7 @@ public class DeploymentManager {
 	private final Kernel kernel;
 
 	private final Map<String,Feature> features = new HashMap<>();
-	
+
 	public DeploymentManager(Kernel kernel) {
 		this.kernel=kernel;
 	}
@@ -84,18 +84,17 @@ public class DeploymentManager {
 				logger.info("Feature <{}> disabled, skipping.", ftName);
 			}
 		}catch(Exception ex){
-			ex.printStackTrace();
 			String msg = Log.createFaultMessage("Cannot deploy feature <"+ft.getName()+">", ex);
 			throw new ConfigurationException(msg,ex);
 		}
 		return enable;
 	}
-	
+
 	public boolean isFeatureEnabled(String name){
 		Feature f = features.get(name);
 		return f!=null && f.isEnabled();
 	}
-	
+
 	public Map<String, Feature> getFeatures(){
 		return Collections.unmodifiableMap(features);
 	}

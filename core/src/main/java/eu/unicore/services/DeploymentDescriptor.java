@@ -31,7 +31,7 @@ public interface DeploymentDescriptor extends KernelInjectable
 	/**
 	 * init tasks to be executed after deployment
 	 */
-	public default List<Runnable> getInitTasks(){
+	public default List<StartupTask> getInitTasks(){
 		return Collections.emptyList();
 	}
 

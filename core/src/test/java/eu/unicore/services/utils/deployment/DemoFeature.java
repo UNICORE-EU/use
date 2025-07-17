@@ -7,13 +7,10 @@ public class DemoFeature extends FeatureImpl {
 	
 	public DemoFeature() {
 		this.name = NAME;
-		getStartupTasks().add(new Runnable(){
-			public void run(){
-				System.out.println("This is feature <demo2>.");
-				initWasRun = true;
-			}
+		getStartupTasks().add(()->{
+			System.out.println("This is feature <demo2>.");
+			initWasRun = true;
 		});
 	}
-
 
 }

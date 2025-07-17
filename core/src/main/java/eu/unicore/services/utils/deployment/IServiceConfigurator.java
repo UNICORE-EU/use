@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import javax.xml.stream.XMLStreamException;
 
+import eu.unicore.services.StartupTask;
 import eu.unicore.util.configuration.ConfigurationException;
 
 /**
@@ -34,7 +35,7 @@ public interface IServiceConfigurator {
 	/**
 	 * return the list of {@link Runnable} that were defined in the configuration as service init tasks
 	 */
-	public List<Runnable>getInitTasks();
+	public List<StartupTask>getInitTasks();
 
 	public default void startConfigWatcher() {}
 }

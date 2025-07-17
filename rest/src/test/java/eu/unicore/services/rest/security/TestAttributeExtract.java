@@ -55,4 +55,19 @@ public class TestAttributeExtract {
 		System.err.println("Script: "+dnAssign);
 		assertEquals("UID=s.user@some.org,OU=user1", RESTUtils.evaluateToString(dnAssign, context));
 	}
+	
+	@Test
+	public void test3() {
+		var t = "{'details': 'urn:sth:res:SYSTEM:proj:act:xlogin:normal',"
+				+ "'email':'s.user@some.org',"
+				+ "'preferred_username':'user1'}";
+		var context = RESTUtils.asMap2(new JSONObject(t));
+		
+		var dnAssign = "f=[];if(details instanceof String)f.add(details);else{ i=details.iterator();"
+				+ "while(i.hasNext()){e=i.next();if(e.contains(preferred_username))f.add(e);}}"
+				+ "n=f.size()==0||f[0].endsWith('normal');"
+				+ "return \"UID=\"+email+(n?\"\":\",OU=\"+preferred_username);";
+		System.out.println(dnAssign);
+		assertEquals("UID=s.user@some.org", RESTUtils.evaluateToString(dnAssign, context));
+	}
 }

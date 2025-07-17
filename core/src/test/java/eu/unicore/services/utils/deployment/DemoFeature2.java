@@ -9,7 +9,7 @@ public class DemoFeature2 extends FeatureImpl {
 	public static String NAME = "demo2";
 	
 	public DemoFeature2() {
-		this.name = "demo2";
+		this.name = NAME;
 	}
 	
 	@Override
