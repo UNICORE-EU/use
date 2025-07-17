@@ -62,15 +62,15 @@
     <secutils.version>4.2.0</secutils.version>
     <seclib.version>7.2.0</seclib.version>
     <herasaf.version>3.0.2</herasaf.version>
-    <json.version>20250107</json.version>
+    <json.version>20250517</json.version>
     <gson.version>2.13.1</gson.version>
     <xuudb.version>2.11.0</xuudb.version>
     <cxf.version>4.0.6</cxf.version>
     <jetty.version>11.0.25</jetty.version>
     <metrics.version>4.2.30</metrics.version>
-    <jwt.version>10.2</jwt.version>
-    <tink.version>1.17.0</tink.version>
-    <sshj.version>0.39.0</sshj.version>
+    <jwt.version>10.3.1</jwt.version>
+    <tink.version>1.18.0</tink.version>
+    <sshj.version>0.40.0</sshj.version>
     <jna.version>5.17.0</jna.version>
     <mvel.version>2.5.2.Final</mvel.version>
     <junit.version>5.12.0</junit.version>
@@ -226,11 +226,6 @@
           </exclusion>
       </exclusions>
     </dependency>
-    <dependency>
-      <groupId>net.i2p.crypto</groupId>
-      <artifactId>eddsa</artifactId>
-      <version>0.3.0</version>
-   </dependency>
   </dependencies>
  </dependencyManagement>
 

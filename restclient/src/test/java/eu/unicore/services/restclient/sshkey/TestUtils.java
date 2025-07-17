@@ -13,9 +13,9 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jcajce.interfaces.EdDSAPrivateKey;
+import org.bouncycastle.jcajce.interfaces.EdDSAPublicKey;
 import org.junit.jupiter.api.Test;
-
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public class TestUtils {
 
@@ -58,7 +58,7 @@ public class TestUtils {
 	@Test
 	public void testED25519() throws Exception {
 		File key = new File("src/test/resources/ssh/id_ed25519");
-		PrivateKey pk = SSHUtils.readPrivateKey(key, new PasswordSupplierImpl("test123".toCharArray()));
+		EdDSAPrivateKey pk = (EdDSAPrivateKey )SSHUtils.readPrivateKey(key, new PasswordSupplierImpl("test123".toCharArray()));
 		assertNotNull(pk);
 		EdDSAPublicKey pub = (EdDSAPublicKey)SSHUtils.readPublicKey(new File("src/test/resources/ssh/id_ed25519.pub"));
 		assertNotNull(pub);

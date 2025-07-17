@@ -12,6 +12,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.jcajce.interfaces.EdDSAPrivateKey;
+import org.bouncycastle.jcajce.interfaces.EdDSAPublicKey;
+import org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPrivateKey;
 import org.json.JSONObject;
 
 import com.nimbusds.jose.JWSAlgorithm;
@@ -39,8 +44,6 @@ import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 
 import eu.unicore.security.AuthenticationException;
-import net.i2p.crypto.eddsa.EdDSAPrivateKey;
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public class JWTUtils {
 
@@ -71,11 +74,11 @@ public class JWTUtils {
 	static{
 		etd.put("etd", "true");
 	}
-	
+
 	public static String createETDToken(String user, long lifetime, String issuer, PrivateKey pk) throws Exception {
 		return createJWTToken(user, lifetime, issuer, pk, etd);
 	}
-	
+
 	public static String createJWTToken(String user, long lifetime, String issuer, PrivateKey pk, 
 			Map<String,String> claims) throws Exception {
 		JWTClaimsSet claimsSet = buildClaimsSet(user, lifetime, issuer, claims);
@@ -86,7 +89,7 @@ public class JWTUtils {
 		sig.sign(signer);
 		return sig.serialize();
 	}
-	
+
 	public static JWTClaimsSet buildClaimsSet(String user, long lifetime, String issuer, Map<String,String> claims) throws Exception {
 		JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder(); 
 		builder.issueTime(new Date(System.currentTimeMillis()))
@@ -100,7 +103,7 @@ public class JWTUtils {
 		}
 		return builder.build();
 	}
-	
+
 	public static JWSAlgorithm determineAlgorithm(PrivateKey pk){
 		if(pk instanceof RSAPrivateKey){
 			return JWSAlgorithm.RS256;
@@ -122,10 +125,15 @@ public class JWTUtils {
 		else if(pk instanceof ECPrivateKey){
 			signer = new ECDSASigner((ECPrivateKey)pk);
 		}
-		else if(pk instanceof EdDSAPrivateKey) {
-			EdDSAPrivateKey epk = (EdDSAPrivateKey)pk;
-			OctetKeyPair key = new OctetKeyPair.Builder(Curve.Ed25519, Base64URL.encode(epk.getAbyte()))
-					.d(Base64URL.encode(epk.getSeed())).algorithm(JWSAlgorithm.EdDSA)
+		else if(pk instanceof BCEdDSAPrivateKey) {
+			BCEdDSAPrivateKey epk = (BCEdDSAPrivateKey)pk;
+			PrivateKeyInfo pkinfo = PrivateKeyInfo.getInstance(
+					ASN1Primitive.fromByteArray(epk.getEncoded()));
+			byte[] privbytes = new byte[32];
+			System.arraycopy(pkinfo.getPrivateKey().getOctets(), 2, privbytes, 0, 32);
+			byte[] pubbytes  = epk.getPublicKey().getPointEncoding();
+			OctetKeyPair key = new OctetKeyPair.Builder(Curve.Ed25519, Base64URL.encode(pubbytes))
+					.d(Base64URL.encode(privbytes)).algorithm(JWSAlgorithm.EdDSA)
 					.keyID("1").build();
 			signer = new Ed25519Signer(key);
 		}
@@ -133,7 +141,7 @@ public class JWTUtils {
 		signer.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
 		return signer;
 	}
-	
+
 	public static JWSVerifier getVerifier(PublicKey pk) throws Exception {
 		JWSVerifier verifier = null;
 		if(pk instanceof RSAPublicKey){
@@ -144,7 +152,7 @@ public class JWTUtils {
 		}
 		else if(pk instanceof EdDSAPublicKey){
 			EdDSAPublicKey edKey = (EdDSAPublicKey)pk;
-			OctetKeyPair key = new OctetKeyPair.Builder(Curve.Ed25519, Base64URL.encode(edKey.getAbyte()))
+			OctetKeyPair key = new OctetKeyPair.Builder(Curve.Ed25519, Base64URL.encode(edKey.getPointEncoding()))
 					.d(null).algorithm(JWSAlgorithm.EdDSA).keyID("1").build();
 			verifier = new Ed25519Verifier(key);
 		}
@@ -164,11 +172,11 @@ public class JWTUtils {
 			throw new AuthenticationException("JWT verification failed", ex);
 		}
 	}
-	
+
 	public static String createETDToken(String user, long lifetime, String issuer, String hmacSecret) throws Exception {
 		return createJWTToken(user, lifetime, issuer, hmacSecret, etd);
 	}
-	
+
 	public static String createJWTToken(String user, long lifetime, String issuer, String hmacSecret, Map<String,String>claims) throws Exception {
 		JWTClaimsSet claimsSet = buildClaimsSet(user, lifetime, issuer, claims);
 		JWSSigner signer = new MACSigner(hmacSecret);
@@ -177,7 +185,7 @@ public class JWTUtils {
 		sig.sign(signer);
 		return sig.serialize();
 	}
-	
+
 	public static void verifyJWTToken(String token, String hmacSecret, String allowedAudience) throws AuthenticationException {
 		try{
 			SignedJWT sig = SignedJWT.parse(token);
@@ -189,7 +197,7 @@ public class JWTUtils {
 			throw new AuthenticationException("JWT verification failed", ex);
 		}
 	}
-	
+
 	public static boolean isHMAC(String token) throws AuthenticationException {
 		try {
 			JSONObject headers = JWTUtils.getHeaders(token);
@@ -198,7 +206,7 @@ public class JWTUtils {
 			throw new AuthenticationException("Invalid token", e);
 		}
 	}
-	
+
 	public static void verifyClaims(JWTClaimsSet claims, String serverDN) throws BadJWTException {
 		Set<String>requiredClaims = new HashSet<>();
 		requiredClaims.add("exp");
@@ -210,5 +218,5 @@ public class JWTUtils {
 		new DefaultJWTClaimsVerifier<SecurityContext>(requiredAudience, null, requiredClaims)
 			.verify(claims, null);
 	}
-	
+
 }
