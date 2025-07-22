@@ -43,19 +43,6 @@ public class InstanceInfoBean implements Serializable {
 		}
 	}
 	
-	/**
-	 * get the termination time
-	 * @return Calendar or <code>null</code> if TT is infinite
-	 */
-	public Calendar getTerminationTime(){
-		Calendar tt=null;
-		if(date>0){
-			tt=Calendar.getInstance();
-			tt.setTimeInMillis(date);
-		}
-		return tt;
-	}
-	
 	//needed by persistence lib
 	
 	public String getUniqueID(){

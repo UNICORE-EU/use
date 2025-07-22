@@ -17,12 +17,15 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
-	
+
 import eu.unicore.security.Client;
+import eu.unicore.security.OperationType;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.Xlogin;
 import eu.unicore.services.Kernel;
+import eu.unicore.services.security.pdp.ActionDescriptor;
+import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.util.configuration.ConfigurationException;
 
 public class TestSecurityManager {
@@ -159,7 +162,12 @@ public class TestSecurityManager {
 		st.setConsignorTrusted(true);
 		Client c = secMan.createSecureClient(st);
 		assertEquals("cn=foo", c.getDistinguishedName());
+
+		ActionDescriptor ad = new ActionDescriptor("test", OperationType.read);
+		ResourceDescriptor rd = new ResourceDescriptor("mock", "1", "cn=foo");
+		secMan.checkAuthorisation(c, ad, rd);
 	}
+
 	private void addDefaultConfig(Properties props) {
 		props.put("container.security.sslEnabled", "false");
 		props.put("container.security.gateway.enable", "false");

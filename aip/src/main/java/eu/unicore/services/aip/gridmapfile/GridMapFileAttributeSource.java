@@ -47,11 +47,9 @@ public class GridMapFileAttributeSource implements IAttributeSource
 		this.name = name;
 		parse();
 		try {
-			FileWatcher modifiedWatcher = new FileWatcher(mapFile, new Runnable(){
-				@Override
-				public void run() {
-					parse();
-				}});
+			FileWatcher modifiedWatcher = new FileWatcher(mapFile, ()->{
+				parse();
+			});
 			ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
 			ts.getScheduledExecutorService().scheduleWithFixedDelay(modifiedWatcher, 2, 2, TimeUnit.MINUTES);
 		}catch(FileNotFoundException ffe) {
@@ -77,7 +75,6 @@ public class GridMapFileAttributeSource implements IAttributeSource
 			retFirst.put(IAttributeSource.ATTRIBUTE_ROLE,new String[]{"user"});	
 			retAll.put(IAttributeSource.ATTRIBUTE_ROLE,new String[]{"user"});
 		}
-
 		return new SubjectAttributesHolder(retXACML, retFirst, retAll);
 	}
 

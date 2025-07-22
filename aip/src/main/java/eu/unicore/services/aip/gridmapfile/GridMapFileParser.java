@@ -26,13 +26,13 @@ import eu.unicore.util.Pair;
  */
 public class GridMapFileParser
 {
-	
+
 	private static final Logger logger = Log.getLogger(Log.SECURITY, GridMapFileAttributeSource.class);
-	
+
 	private final File gridMapFile;
 
 	private static final String COMMENT_CHARS = "#";
-	
+
 	private int numDuplicates;
 	private int numEmpty;
 	private int numError;
@@ -44,13 +44,10 @@ public class GridMapFileParser
 
 	public Map<String,List<String>> parse()
 	{
-		
 		Map<String,List<String>> result = new HashMap<>();
-	
 		try(BufferedReader br = new BufferedReader(new InputStreamReader(new DataInputStream(new FileInputStream(gridMapFile)))))
 				{
 			String line;
-			
 			while ((line = br.readLine()) != null)   {
 				try {
 					line = line.trim();
@@ -59,12 +56,10 @@ public class GridMapFileParser
 							numEmpty++;
 						continue;
 					}
-
 					Pair<String, String[]> mapping = parseLine(line);
 					if(mapping != null)
 					{
 						String key = mapping.getM1();
-
 						List<String> logins = result.get(key);
 						if(logins == null)
 						{
@@ -88,13 +83,11 @@ public class GridMapFileParser
 					{
 						numError ++;
 					}
-					
 				} catch (Exception e) {
 					logger.warn("Problem while parsing line "+line+" from grid-mapfile "+gridMapFile.getAbsolutePath()+": "+e.getMessage(),e);
-					numError ++;
+					numError++;
 				}
 			}
-
 		} catch (Exception e){
 			logger.warn("Problem while parsing grid-mapfile "+gridMapFile.getAbsolutePath()+": "+e.getMessage(),e);
 		}
@@ -103,37 +96,25 @@ public class GridMapFileParser
 
 	public static Pair<String, String[]> parseLine(String line) throws IOException
 	{
-
-		QuotedStringTokenizer tokenizer;
-		StringTokenizer idTokenizer;
-
-		tokenizer = new QuotedStringTokenizer(line);
-
+		QuotedStringTokenizer tokenizer = new QuotedStringTokenizer(line);
 		String dn = null;
-
 		if (tokenizer.hasMoreTokens()) {
-			dn = tokenizer.nextToken();
+			dn = tokenizer.nextElement();
 		} else {
 			throw new IOException("Line does not contain user DN!");
-
 		}
-
 		String xlogins = null;
-
 		if (tokenizer.hasMoreTokens()) {
-			xlogins = tokenizer.nextToken();
+			xlogins = tokenizer.nextElement();
 		} else {
 			throw new IOException("Line does not contain xlogin!");
-
 		}
-
-		idTokenizer = new StringTokenizer(xlogins, ",");
+		StringTokenizer idTokenizer = new StringTokenizer(xlogins, ",");
 		String [] ids = new String [ idTokenizer.countTokens() ];
 		int i = 0;
 		while(idTokenizer.hasMoreTokens()) {
 			ids[i++] = idTokenizer.nextToken();
 		}
-
 		String normalizedDN = OpensslNameUtils.normalize(dn);
 		if(normalizedDN == null) throw new IOException("Invalid distinguished name: "+dn);
 		return new Pair<String,String[]>(normalizedDN,ids);
@@ -150,8 +131,4 @@ public class GridMapFileParser
 	public int getNumError() {
 		return numError;
 	}
-
-
-	
-
 }

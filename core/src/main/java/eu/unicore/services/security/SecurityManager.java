@@ -52,12 +52,10 @@ import eu.unicore.util.configuration.ConfigurationException;
 public final class SecurityManager {
 
 	private static final Logger logger=Log.getLogger(Log.SECURITY,SecurityManager.class);
-	
+
 	public static final String UNKNOWN_ACTION = "___ANY_ACTION___";
 
 	private final Set<AttributeHandlingCallback> attribHandlingCallbacks=new HashSet<>();
-	
-	private final OperationTypesUtil operationTypesUtil;
 
 	private final Kernel kernel;
 
@@ -65,11 +63,10 @@ public final class SecurityManager {
 	private IAttributeSource aip;
 	private IDynamicAttributeSource dap;
 	private UnicoreXPDP pdp;
-	
+
 	public SecurityManager(Kernel kernel) {
 		this.kernel = kernel;
 		this.securityConfig = kernel.getContainerSecurityConfiguration();
-		this.operationTypesUtil = new OperationTypesUtil();
 	}
 
 	public void start() {
@@ -107,8 +104,7 @@ public final class SecurityManager {
 	 * @param tokens
 	 * @return attributes
 	 */
-	public SubjectAttributesHolder establishAttributes(final SecurityTokens tokens) 
-			throws Exception {
+	public SubjectAttributesHolder establishAttributes(final SecurityTokens tokens) throws Exception {
 		//get the list of user preferences from the User assertion
 		Map<String, String[]> preferences = tokens.getUserPreferences();
 		String preferedVos[] = null;
@@ -117,8 +113,7 @@ public final class SecurityManager {
 		} else {
 			preferedVos = securityConfig.getDefaultVOs();
 		}
-		SubjectAttributesHolder initial = new SubjectAttributesHolder(preferedVos);
-		return aip.getAttributes(tokens, initial);
+		return aip.getAttributes(tokens, new SubjectAttributesHolder(preferedVos));
 	}
 
 	/**
@@ -128,38 +123,38 @@ public final class SecurityManager {
 	 * @param validAttributes
 	 * @param defaultAttributes
 	 */
-	private static void handleXlogin(Client client, Map<String, String[]> preferences, 
+	private static void handleXlogin(Client client, Map<String, String[]> preferences,
 			Map<String, String[]> validAttributes, Map<String, String[]> defaultAttributes) {
 		String[] validXlogins = validAttributes.get(IAttributeSource.ATTRIBUTE_XLOGIN);
 		String[] defaultXlogin = defaultAttributes.get(IAttributeSource.ATTRIBUTE_XLOGIN);
-		
+
 		String[] validPGroups = validAttributes.get(IAttributeSource.ATTRIBUTE_GROUP);
 		if (validPGroups == null)
 			validPGroups = new String[0];
 		String[] defaultPGroup = defaultAttributes.get(IAttributeSource.ATTRIBUTE_GROUP);
 		if (defaultPGroup == null)
 			defaultPGroup = new String[0];
-		
+
 		String[] validSupGroups = validAttributes.get(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS);
 		if (validSupGroups == null)
 			validSupGroups = new String[0];
 		String[] defaultSupGroups = defaultAttributes.get(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS);
 		if (defaultSupGroups == null)
 			defaultSupGroups = new String[0];
-		
+
 		Set<String> validGroups = new HashSet<>();
 		Collections.addAll(validGroups, validPGroups);
 		Collections.addAll(validGroups, validSupGroups);
 		String[] pAddDefaultGids = defaultAttributes.get(IAttributeSource.ATTRIBUTE_ADD_DEFAULT_GROUPS);		
 		if (pAddDefaultGids == null || pAddDefaultGids.length == 0)
 			pAddDefaultGids = validAttributes.get(IAttributeSource.ATTRIBUTE_ADD_DEFAULT_GROUPS);
-		
+
 		//uid must be always set. XLogin object wraps uid, gid and supp. gids.
 		if (validXlogins!=null && validXlogins.length > 0){
 			//create XLogin with valid values
 			Xlogin xlogin = new Xlogin(validXlogins, 
 				validGroups.toArray(new String[validGroups.size()]));
-			
+
 			//set defaults from AS
 			if (defaultXlogin != null && defaultXlogin.length > 0) {
 				xlogin.setSelectedLogin(defaultXlogin[0]);
@@ -168,20 +163,20 @@ public final class SecurityManager {
 				xlogin.setSelectedGroup(defaultPGroup[0]);
 			if (defaultSupGroups.length > 0)
 				xlogin.setSelectedSupplementaryGroups(defaultSupGroups);
-			
+
 			//handle user preferences
 			String[] reqXlogin = preferences.get(IAttributeSource.ATTRIBUTE_XLOGIN);
 			if (reqXlogin!=null && reqXlogin.length > 0)
 				xlogin.setSelectedLogin(reqXlogin[0]);
-			
+	
 			String[] reqGroup = preferences.get(IAttributeSource.ATTRIBUTE_GROUP);
 			if (reqGroup!=null && reqGroup.length > 0)
 				xlogin.setSelectedGroup(reqGroup[0]);
-			
+
 			String[] reqSupGroups = preferences.get(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS);
 			if (reqSupGroups != null && reqSupGroups.length > 0)
 				xlogin.setSelectedSupplementaryGroups(reqSupGroups);
-			
+
 			//This is special - we always allow for changing this by the user.
 			String[] reqAddDefaultGroups = preferences.get(IAttributeSource.ATTRIBUTE_ADD_DEFAULT_GROUPS);
 			if (reqAddDefaultGroups != null && reqAddDefaultGroups.length > 0) {
@@ -199,11 +194,10 @@ public final class SecurityManager {
 				else if (pAddDefaultGids[0].equalsIgnoreCase("false"))
 					xlogin.setAddDefaultGroups(false);
 			}
-			
 			client.setXlogin(xlogin);
 		}
 	}
-	
+
 	/**
 	 * Sets up the role object in the Client.
 	 * @param client
@@ -235,7 +229,6 @@ public final class SecurityManager {
 				r.setDescription("default role from attribute source");
 			}
 		}
-		
 		client.setRole(r);
 	}
 
@@ -283,8 +276,7 @@ public final class SecurityManager {
 			client.setVo(selectedVo);
 		}
 	}
-	
-	
+
 	/**
 	 * Sets up static authorisation attributes: VOs and role.
 	 * @param client
@@ -303,18 +295,15 @@ public final class SecurityManager {
 				throw new SecurityException("Exception when getting " +
 						"attributes for the client.", e);
 			}
-			
 			client.setSubjectAttributes(subAttributes);
 			//get the list of user preferences from the User assertion
-			
 			Map<String, String[]> preferences = tokens.getUserPreferences();
-			
 			Map<String, String[]> validAttributes = client.getSubjectAttributes().getValidIncarnationAttributes();
 			Map<String, String[]> defaultAttributes = client.getSubjectAttributes().getIncarnationAttributes();
-			
+
 			handleRole(client, preferences, validAttributes, defaultAttributes);
 			handleVo(subAttributes.getSelectedVo(), client, validAttributes);
-			
+
 			//handle additional attributes
 			for(AttributeHandlingCallback a: attribHandlingCallbacks){
 				Map<String, String> attribs=a.extractAttributes(tokens);
@@ -342,7 +331,7 @@ public final class SecurityManager {
 		}
 		return client;
 	}
-	
+
 	/**
 	 * Create an Client object. This will use the supplied
 	 * security tokens to make a call to an attribute information point (such as the XUUDB)
@@ -376,7 +365,6 @@ public final class SecurityManager {
 		} catch(Exception e) {
 			throw new AuthorisationException("Access denied due to PDP error: " + e, e);
 		}
-
 		if (res.getDecision().equals(PDPResult.Decision.UNCLEAR)) {
 			logger.warn("The UNICORE/X PDP was unable to make a definitive decision, " +
 					"check your policy files and consult other log messages. "
@@ -390,7 +378,7 @@ public final class SecurityManager {
 		}
 		return res.getDecision();
 	}
-	
+
 	/**
 	 * Check access by evaluating the XACML policies. 
 	 * If access is DENIED or UNCLEAR then {@link AuthorisationException} is thrown. 
@@ -445,7 +433,7 @@ public final class SecurityManager {
 		rd.setAclCheckOK(aclCheckPassed);
 		return rd;
 	}
-	
+
 	/**
 	 * Provides an approximate answer to the question whether the given 
 	 * can client access the given (server-local) endpoint?
@@ -459,28 +447,26 @@ public final class SecurityManager {
 	 * 
 	 * @param client - the client
 	 * @param serviceName - can be <code>null</code>
-	 * @param wsResourceID - can be <code>null</code>
+	 * @param resourceID - can be <code>null</code>
 	 * @param owner - the owner DN
 	 * @param acl - ACL entries for the resource
 	 * @return true if the resource/endpoint can be accessed
 	 */
-	public boolean isAccessible(Client client, String serviceName, String wsResourceID, String owner, List<ACLEntry> acl) throws Exception{
+	public boolean isAccessible(Client client, String serviceName, String resourceID, String owner, List<ACLEntry> acl) throws Exception{
 		if(!securityConfig.isAccessControlEnabled())
 			return true;
 		if(isServer(client))
 			return true;
-		ResourceDescriptor resource=new ResourceDescriptor(serviceName, wsResourceID, owner);
+		ResourceDescriptor resource = new ResourceDescriptor(serviceName, resourceID, owner);
 		boolean aclCheckPassed = checkAcl(acl, OperationType.read, client);
 		resource.setAclCheckOK(aclCheckPassed);
-		Decision decision = checkAuthzInternal(client, new ActionDescriptor(UNKNOWN_ACTION, 
-				OperationType.read), resource);
-		
+		Decision decision = checkAuthzInternal(client, new ActionDescriptor(UNKNOWN_ACTION, OperationType.read), resource);
 		if (!decision.equals(PDPResult.Decision.PERMIT))
 			return false;
 		else
 			return true;
 	}
-	
+
 	/**
 	 * Should be invoked only for previously authorised clients, to collect their dynamic, incarnation related
 	 * attributes.
@@ -489,7 +475,6 @@ public final class SecurityManager {
 		if (isServer(client))
 			return;
 		SecurityTokens tokens = client.getSecurityTokens();
-		
 		//setup client with authorisation attributes
 		SubjectAttributesHolder dynamicSubAttributes;
 		SubjectAttributesHolder staticSubAttributes = client.getSubjectAttributes();
@@ -506,16 +491,13 @@ public final class SecurityManager {
 		}
 		//get the list of user preferences from the User assertion
 		Map<String, String[]> preferences = tokens.getUserPreferences(); 
-		
 		Map<String, String[]> validAttributes = client.getSubjectAttributes().getValidIncarnationAttributes();
 		Map<String, String[]> defaultAttributes = client.getSubjectAttributes().getIncarnationAttributes();
-		
 		handleXlogin(client, preferences, validAttributes, defaultAttributes);
 		handleQueue(client, preferences, validAttributes, defaultAttributes);
-		
-		logger.debug("Client info (final):\n{}", ()-> client.toString());
+		logger.debug("Client info (final): {}", client);
 	}
-	
+
 	/**
 	 * check that the given ACL allows the requested operation
 	 * 
@@ -543,7 +525,7 @@ public final class SecurityManager {
 		return securityConfig.getCredential() != null ?
 			securityConfig.getCredential().getCertificate() : null;
 	}
-	
+
 	/**
 	 * helper method to get the server DN (RFC2253) from the Kernel security config
 	 * @return X509Certificate or <code>null</code> if not available
@@ -553,7 +535,7 @@ public final class SecurityManager {
 			return getServerCert().getSubjectX500Principal().getName();
 		return null;
 	}
-	
+
 	/**
 	 * checks whether the given client has the server identity
 	 */
@@ -591,15 +573,11 @@ public final class SecurityManager {
 		}catch(Exception e){}
 		return false;
 	}
-	
-	public OperationTypesUtil getOperationTypesUtil() {
-		return operationTypesUtil;
-	}	
-	
+
 	public void setConfiguration(ContainerSecurityProperties sp) {
 		this.securityConfig = sp;
 	}
-	
+
 	private static IAttributeSource createAttributeSource(Kernel kernel) 
 			throws ConfigurationException {
 		ContainerSecurityProperties sp = kernel.getContainerSecurityConfiguration();
@@ -611,7 +589,7 @@ public final class SecurityManager {
 		}
 		return new AttributeSourcesChain(kernel);
 	}
-	
+
 	private static IDynamicAttributeSource createDynamicAttributeSource(Kernel kernel) 
 			throws ConfigurationException {
 		ContainerSecurityProperties sp = kernel.getContainerSecurityConfiguration();

@@ -12,7 +12,7 @@
   <parent>
     <groupId>eu.unicore</groupId>
     <artifactId>unicore-parent</artifactId>
-    <version>3.0.4</version>
+    <version>3.1.1</version>
   </parent>
 
   <developers>
@@ -58,17 +58,17 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>1.2.5</persistence.version>
-    <secutils.version>4.2.0</secutils.version>
-    <seclib.version>7.2.0</seclib.version>
+    <persistence.version>1.2.6</persistence.version>
+    <secutils.version>4.2.1</secutils.version>
+    <seclib.version>7.2.1</seclib.version>
     <herasaf.version>3.0.2</herasaf.version>
     <json.version>20250517</json.version>
     <gson.version>2.13.1</gson.version>
     <xuudb.version>2.11.0</xuudb.version>
     <cxf.version>4.0.6</cxf.version>
     <jetty.version>11.0.25</jetty.version>
-    <metrics.version>4.2.30</metrics.version>
-    <jwt.version>10.3.1</jwt.version>
+    <metrics.version>4.2.33</metrics.version>
+    <jwt.version>10.4</jwt.version>
     <tink.version>1.18.0</tink.version>
     <sshj.version>0.40.0</sshj.version>
     <jna.version>5.17.0</jna.version>
