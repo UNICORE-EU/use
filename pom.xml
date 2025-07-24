@@ -6,7 +6,7 @@
   <packaging>pom</packaging>
   <description>UNICORE service container</description>
   <inceptionYear>2010</inceptionYear>
-  <version>5.3.1-SNAPSHOT</version>
+  <version>5.4.0-SNAPSHOT</version>
   <name>UNICORE Services Environment</name>
  
   <parent>
@@ -64,7 +64,7 @@
     <herasaf.version>3.0.2</herasaf.version>
     <json.version>20250517</json.version>
     <gson.version>2.13.1</gson.version>
-    <xuudb.version>2.11.0</xuudb.version>
+    <xuudb.version>2.12.0</xuudb.version>
     <cxf.version>4.0.6</cxf.version>
     <jetty.version>11.0.25</jetty.version>
     <metrics.version>4.2.33</metrics.version>

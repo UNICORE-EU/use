@@ -54,7 +54,8 @@ public class ServiceConfigurator implements IServiceConfigurator {
 		this.kernel=kernel;
 		this.configFile=config;
 	}
-	
+
+	@Override
 	public Properties loadProperties() throws IOException, ConfigurationException {
 		properties=new Properties();
 		try(FileInputStream fis=new FileInputStream(configFile)){
@@ -63,7 +64,8 @@ public class ServiceConfigurator implements IServiceConfigurator {
 		}
 		return properties;
 	}
-	
+
+	@Override
 	public void configureServices() {
 		if (properties == null)
 			throw new IllegalStateException("loadProperties() must be invoked prior to this method");
@@ -154,7 +156,7 @@ public class ServiceConfigurator implements IServiceConfigurator {
 	}
 
 	/**
-	 * return the list of {@link Runnable} that were defined in the 
+	 * return the list of StartupTasks that were defined in the 
 	 * configuration as service init tasks
 	 */
 	@Override
@@ -162,6 +164,7 @@ public class ServiceConfigurator implements IServiceConfigurator {
 		return startupTasks;
 	}
 
+	@Override
 	public void startConfigWatcher() {
 		try {
 			configFileWatcher = new FileWatcher(configFile, ()->{

@@ -56,7 +56,6 @@ public class UserPublicKeyCache {
 		return Collections.unmodifiableMap(db);
 	}
 
-
 	public void setFile(String fileName) {
 		if(fileName!=null)this.dbFile = new File(fileName);
 	}

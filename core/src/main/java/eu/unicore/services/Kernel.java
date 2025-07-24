@@ -562,19 +562,13 @@ public final class Kernel {
 		isShutdown = false;
 		state = State.initializing;
 		jetty.start();
-
 		List<StartupTask> startupTasks = new ArrayList<>();
 		startupTasks.addAll(deployServices());
 		ServiceLoader.load(StartupTask.class).forEach((x)->startupTasks.add(x));
-		new StartupTasksRunner(this, startupTasks).run();
-
 		homes.values().forEach( h -> h.run() );
 		state = State.running;
 		// run startup tasks after basic setup is complete
-		startupTasks.forEach( task -> {
-			logger.info("Running startup task <{}>", task.getClass().getName());
-			task.run();
-		});
+		new StartupTasksRunner(this, startupTasks).run();
 		addShutDownHook();
 		if(getContainerProperties().
 				getBooleanValue(ContainerProperties.RUNTIME_CONFIG_REFRESH)) {
