@@ -2,7 +2,6 @@ package eu.unicore.services.rest.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -15,12 +14,10 @@ import org.json.JSONObject;
 
 import eu.unicore.persist.PersistenceException;
 import eu.unicore.security.Client;
-import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExtendedResourceStatus;
 import eu.unicore.services.Home;
 import eu.unicore.services.Model;
 import eu.unicore.services.Resource;
-import eu.unicore.services.impl.BaseModel;
 import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.services.impl.SecuredResourceImpl;
 import eu.unicore.services.impl.SecuredResourceModel;
@@ -260,13 +257,6 @@ public abstract class BaseRESTController extends RESTRendererBase {
 			if(tt!=null){
 				props.put("terminationTime", getISODateFormatter().format(tt.getTime()));
 			}
-			props.put("currentTime", getISODateFormatter().format(new Date()));
-		}
-		if(model instanceof BaseModel){
-			BaseModel bm = (BaseModel)model;
-			props.put("resourceStatus", String.valueOf(bm.getResourceStatus()));
-			props.put("resourceStatusMessage", String.valueOf(bm.getResourceStatusDetails()));
-
 		}
 		if(resource!=null && resource instanceof ExtendedResourceStatus){
 			ExtendedResourceStatus esr = (ExtendedResourceStatus)resource;
@@ -274,10 +264,6 @@ public abstract class BaseRESTController extends RESTRendererBase {
 			props.put("resourceStatusMessage", esr.getResourceStatusMessage());
 		}
 		props.put("tags", model.getTags());
-		try {
-			String name = kernel.getContainerProperties().getValue(ContainerProperties.VSITE_NAME_PROPERTY);
-			if(name!=null)props.put("siteName", name);	
-		}catch(Exception ex) {}
 		return props;
 	}
 

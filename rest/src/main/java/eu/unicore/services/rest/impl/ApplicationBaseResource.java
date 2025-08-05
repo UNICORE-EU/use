@@ -3,6 +3,7 @@ package eu.unicore.services.rest.impl;
 import java.io.ByteArrayOutputStream;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import eu.unicore.security.Queue;
 import eu.unicore.security.Role;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.Xlogin;
+import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.ISubSystem;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
@@ -161,6 +163,10 @@ public class ApplicationBaseResource extends RESTRendererBase {
 	 */
 	protected Map<String, Object> renderServerProperties() throws Exception {
 		Map<String,Object>props = new HashMap<>();
+		try {
+			String name = kernel.getContainerProperties().getValue(ContainerProperties.VSITE_NAME_PROPERTY);
+			if(name!=null)props.put("siteName", name);
+		}catch(Exception ex) {}
 		if(kernel.getContainerSecurityConfiguration().getCredential()!=null){
 			Map<String,Object>cred = new HashMap<>();
 			try{
@@ -201,7 +207,9 @@ public class ApplicationBaseResource extends RESTRendererBase {
 		try {
 			props.put("upSince", getISODateFormatter().format(kernel.getUpSince().getTime()));
 		}catch(Exception ex){}
-		
+		try {
+			props.put("currentTime", getISODateFormatter().format(new Date()));
+		}catch(Exception ex) {}
 		return props;
 	}
 

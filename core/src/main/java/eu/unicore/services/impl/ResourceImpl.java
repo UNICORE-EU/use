@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExtendedResourceStatus;
+import eu.unicore.services.ExtendedResourceStatus.ResourceStatus;
 import eu.unicore.services.Home;
 import eu.unicore.services.InitParameters;
 import eu.unicore.services.InitParameters.TerminationMode;
@@ -21,12 +22,12 @@ import eu.unicore.util.Log;
  * Handles termination time. The initial termination time is defined when the resource is
  * created.
  * 
- * Extended state: this class supports the {@link ExtendedResourceStatus} interface which allows
+ * Extended state: subclasses can declare the {@link ExtendedResourceStatus} interface which allows
  * to have more complex lifecycle, especially supporting an asynchronous initialisation phase
  * 
  * @author schuller
  */
-public abstract class ResourceImpl extends SecuredResourceImpl implements ExtendedResourceStatus {
+public abstract class ResourceImpl extends SecuredResourceImpl {
 
 	private static final Logger logger=Log.getLogger(Log.UNICORE, ResourceImpl.class);
 
@@ -139,37 +140,32 @@ public abstract class ResourceImpl extends SecuredResourceImpl implements Extend
 	public void postRestart()throws Exception{}
 
 	@Override
-	public boolean isReady(){
-		return ResourceStatus.READY==getResourceStatus();
-	}
-
-	@Override
-	public String getResourceStatusMessage() {
-		return getModel().getResourceStatusDetails();
-	}
-
-	@Override
-	public ResourceStatus getResourceStatus() {
-		return getModel().getResourceStatus();
-	}
-
-	@Override
-	public void setResourceStatusMessage(String message) {
-		getModel().setResourceStatusDetails(message);
-	}
-
-	@Override
-	public void setResourceStatus(ResourceStatus status) {
-		getModel().setResourceStatus(status);
-	}
-
-	@Override
 	public void close() {
 		try{
 			home.persist(this);
 		}catch(Exception e) {
 			Log.logException("Could not persist <"+home+" "+getUniqueID()+">" , e);
 		}
+	}
+
+	public boolean isReady(){
+		return ResourceStatus.READY==getResourceStatus();
+	}
+
+	public String getResourceStatusMessage() {
+		return getModel().getResourceStatusDetails();
+	}
+
+	public ResourceStatus getResourceStatus() {
+		return getModel().getResourceStatus();
+	}
+
+	public void setResourceStatusMessage(String message) {
+		getModel().setResourceStatusDetails(message);
+	}
+
+	public void setResourceStatus(ResourceStatus status) {
+		getModel().setResourceStatus(status);
 	}
 
 }
