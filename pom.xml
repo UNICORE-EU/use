@@ -74,7 +74,8 @@
     <jna.version>5.17.0</jna.version>
     <mvel.version>2.5.2.Final</mvel.version>
     <junit.version>5.12.0</junit.version>
-    <junit.p.version>1.12.0</junit.p.version>	
+    <junit.p.version>1.12.0</junit.p.version>
+    <jmock.version>2.13.1</jmock.version>
   </properties>
 
   <modules>
@@ -99,6 +100,18 @@
       <artifactId>junit-platform-launcher</artifactId>
       <version>${junit.p.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.jmock</groupId>
+        <artifactId>jmock-junit5</artifactId>
+        <version>${jmock.version}</version>
+        <scope>test</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+          </exclusion>
+        </exclusions>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>

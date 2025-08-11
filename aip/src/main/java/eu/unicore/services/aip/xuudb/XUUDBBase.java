@@ -169,8 +169,7 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 						getXUUDBUrl(), 5000, logger);
 			}
 		};
-		ThreadingServices ts = kernel.getContainerProperties()
-				.getThreadingServices();
+		ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
 		try{
 			return TimeoutRunner.compute(getCert, ts, 2000) != null ? 
 				"connected to " + getXUUDBUrl() : null;

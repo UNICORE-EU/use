@@ -17,6 +17,10 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.jmock</groupId>
+      <artifactId>jmock-junit5</artifactId>
+    </dependency>
+    <dependency>
       <groupId>eu.unicore.services</groupId>
       <artifactId>use-core</artifactId>
       <version>${project.parent.version}</version>

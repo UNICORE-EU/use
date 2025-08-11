@@ -34,17 +34,14 @@ public class TestCombiningAlgorithms {
 		ret.setProperty(PREFIX+ContainerSecurityProperties.PROP_CHECKACCESS_PDP, "eu.unicore.services.aip.integration.MockPDP");
 
 		ret.setProperty(PREFIX+PROP_AIP_ORDER, "LDAP VO-PULL XUUDB FILE");
-		//ret.setProperty(PREFIX+PROP_AIP_ORDER, "FILE");
 		ret.setProperty(PREFIX+PROP_AIP_COMBINING_POLICY, "FIRST_ACCESSIBLE");
 
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".LDAP.class", LDAPAttributeSource.class.getName());
-		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".LDAP.ldapPort", "12345");
-		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".LDAP.ldapHost", "ldap://localhost");
+		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".LDAP.ldapURL", "ldap://localhost:12345");
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".LDAP.ldapRootDn", "DC=foo");
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".LDAP.ldapAuthentication", "simple");
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".LDAP.ldapPrincipal", "fooUser");
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".LDAP.ldapCredential", "bar");
-		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".LDAP.ldapMaxConnectionsRetry", "1");
 
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".VO-PULL.class", SAMLAttributeSource.class.getName());
 		ret.setProperty(PREFIX+PROP_AIP_PREFIX+".VO-PULL.configurationFile", "src/test/resources/vo-pull.config");

@@ -10,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.samly2.exceptions.SAMLErrorResponseException;
-import eu.unicore.samly2.exceptions.SAMLValidationException;
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
@@ -38,20 +37,20 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 {
 	private static final Logger log = Log.getLogger(IPullConfiguration.LOG_PFX, SAMLAttributeSource.class);
 
-	protected PropertiesBasedConfiguration conf;
-	protected UnicoreAttributesHandler specialAttrsHandler;
-	protected String configFile;
-	protected String name;
-	protected boolean isEnabled = false;
-	protected Kernel kernel;
+	private PropertiesBasedConfiguration conf;
+	private UnicoreAttributesHandler specialAttrsHandler;
+	private String configFile;
+	private String name;
+	private boolean isEnabled = false;
+	private Kernel kernel;
 	
 	private SAMLAttributeFetcher fetcher;
 
-	protected Status status = Status.UNKNOWN;	
+	private Status status = Status.UNKNOWN;
 
-	protected String statusMessage = "N/A";
+	private String statusMessage = "N/A";
 
-	protected final CircuitBreaker cb = new CircuitBreaker();
+	private final CircuitBreaker cb = new CircuitBreaker();
 
 	@Override
 	public void configure(String name, Kernel kernel) throws ConfigurationException {
@@ -66,7 +65,7 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 					dcc.setHttpAuthn(true);
 					dcc.setHttpUser(conf.getValue(PropertiesBasedConfiguration.CFG_SERVER_USERNAME));
 					dcc.setHttpPassword(conf.getValue(PropertiesBasedConfiguration.CFG_SERVER_PASSWORD));
-					log.debug("Authenticating to Unity with username/password.");
+					log.debug("Authenticating to SAML attribute server with username/password.");
 			}
 			fetcher = new SAMLAttributeFetcher(conf, cc);
 			isEnabled = true;
@@ -74,7 +73,6 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 		{
 			log.error("Error in VO subsystem configuration (PULL mode): {}. PULL MODE WILL BE DISABLED", e.toString());
 		}
-
 		initFinal(log, SAMLAttributeFetcher.ALL_PULLED_ATTRS_KEY, false);
 	}
 
@@ -85,24 +83,22 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 	{
 		if (!isEnabled)
 			throw new SubsystemUnavailableException("Attribute source "+name+" is disabled");
-		
 		if(!cb.isOK())
 			throw new SubsystemUnavailableException("Attribute source "+name+" is temporarily unavailable");
-		
 		try {
 			fetcher.authorise(tokens);
-		}catch(SAMLValidationException sve) {}
-		
+		}catch(Exception sve) {
+			cb.notOK();
+			throw new IOException(sve);
+		}
 		@SuppressWarnings("unchecked")
 		Map<String, List<ParsedAttribute>> allAttributes = (Map<String, List<ParsedAttribute>>) 
 				tokens.getContext().get(SAMLAttributeFetcher.ALL_PULLED_ATTRS_KEY);
 		List<ParsedAttribute> serviceAttributesOrig = allAttributes.get(conf.getAttributeQueryServiceURL());
-		List<ParsedAttribute> serviceAttributes;
-		if (serviceAttributesOrig != null)
-			serviceAttributes = new ArrayList<>(serviceAttributesOrig);
-		else
-			serviceAttributes = new ArrayList<>();
-		
+		List<ParsedAttribute> serviceAttributes = new ArrayList<>();
+		if (serviceAttributesOrig != null) {
+			serviceAttributes.addAll(serviceAttributesOrig);
+		}
 		return assembleAttributesHolder(serviceAttributes, otherAuthoriserInfo, 
 				conf.isPulledGenericAttributesEnabled());
 	}
@@ -172,7 +168,7 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 		return name +" Attribute Source " + fetcher.getSimpleAddress();
 	}
 
-	protected void initConfig(Logger log, String name)
+	private void initConfig(Logger log, String name)
 	{
 		this.name = name;
 		try
@@ -186,7 +182,7 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 		isEnabled = true;
 	}
 	
-	protected void initFinal(Logger log, String key, boolean pushMode)
+	private void initFinal(Logger log, String key, boolean pushMode)
 	{
 		log.info("Adding SAML attributes callbacks");
 		AttributesCallback callback = new AttributesCallback(key, name);
@@ -199,7 +195,7 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 		specialAttrsHandler = new UnicoreAttributesHandler(conf, initializedMappings, pushMode);
 	}
 	
-	protected SubjectAttributesHolder assembleAttributesHolder(List<ParsedAttribute> serviceAttributes, 
+	private SubjectAttributesHolder assembleAttributesHolder(List<ParsedAttribute> serviceAttributes,
 			SubjectAttributesHolder otherAuthoriserInfo, boolean addGeneric)
 	{
 		SubjectAttributesHolder ret = new SubjectAttributesHolder(otherAuthoriserInfo.getPreferredVos());
@@ -241,11 +237,6 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 	public void setConfigurationFile(String configFile)
 	{
 		this.configFile = configFile;
-	}
-	
-	public String getConfigurationFile()
-	{
-		return configFile;
 	}
 
 	@Override

@@ -38,7 +38,6 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException {
 		if (!isEnabled)
 			throw new SubsystemUnavailableException("Attribute source "+name+" is disabled");
-		
 		if(!cb.isOK())
 			throw new SubsystemUnavailableException("Attribute source "+name+" unavailable");
 		
@@ -73,8 +72,7 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 			return new WSClientFactory(sec).createPlainWSProxy(
 					IPublic.class, getXUUDBUrl() + IPublic.SERVICE_NAME);
 		} catch (Exception e) {
-			Log.logException("Can't make connection to " + name,
-					e, logger);
+			Log.logException("Can't make connection to " + name, e, logger);
 			return null;
 		}
 	}
