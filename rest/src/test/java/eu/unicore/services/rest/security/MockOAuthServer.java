@@ -15,9 +15,9 @@ import org.apache.logging.log4j.Logger;
 
 import eu.unicore.util.Log;
 
-public class MockIDPServer implements Runnable {
+public class MockOAuthServer implements Runnable {
 
-	private static final Logger log = Log.getLogger(Log.SECURITY, MockIDPServer.class);
+	private static final Logger log = Log.getLogger(Log.SECURITY, MockOAuthServer.class);
 
 	private final int port;
 
@@ -31,22 +31,12 @@ public class MockIDPServer implements Runnable {
 	private String contenttype = "application/json";
 
 	/**
-	 * creates a FakeServer listening on the given port
-	 * @param port
-	 * @throws IOException
+	 * creates a mock IDP listening on a free port
 	 */
-	public MockIDPServer(int port)throws IOException{
-		serverSocket=new ServerSocket(port);
+	public MockOAuthServer()throws IOException{
+		serverSocket=new ServerSocket(0);
 		serverSocket.setSoTimeout(5000);
 		this.port=serverSocket.getLocalPort();
-	}
-
-	/**
-	 * creates a FakeServer listening on a free port
-	 * @see getPort()
-	 */
-	public MockIDPServer()throws IOException{
-		this(0);
 	}
 
 	public String getURI(){

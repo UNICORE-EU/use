@@ -33,14 +33,14 @@ import jakarta.ws.rs.core.Application;
 
 public class TestOAuthAuthenticator {
 
-	static MockIDPServer server;
+	static MockOAuthServer server;
 	static Kernel kernel;
 	static String sName="test";
 	static String url;
 
 	@BeforeAll
 	public static void startServer()throws Exception{
-		server = new MockIDPServer();
+		server = new MockOAuthServer();
 		server.start();
 		FileUtils.deleteQuietly(new File("target/data"));
 		Properties p = new Properties();

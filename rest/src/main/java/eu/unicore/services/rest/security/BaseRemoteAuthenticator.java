@@ -230,7 +230,6 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	 * assign attributes based on the configured attribute assignment scripts
 	 */
 	protected BasicAttributeHolder assignAttributes(Map<String, Object> attr) {
-		if(attr==null || attr.size()==0)return null;
 		if(uidAssign==null&&roleAssign==null&&groupsAssign==null)return null;
 		BasicAttributeHolder bah = new BasicAttributeHolder();
 		if(uidAssign!=null) {

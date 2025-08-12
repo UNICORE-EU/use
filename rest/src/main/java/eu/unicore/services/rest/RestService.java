@@ -15,6 +15,7 @@ import eu.unicore.services.rest.impl.PostInvokeHandler;
 import eu.unicore.services.rest.impl.USERestInvoker;
 import eu.unicore.services.rest.security.AuthNHandler;
 import eu.unicore.services.rest.security.AuthenticatorChain;
+import jakarta.annotation.security.PermitAll;
 import jakarta.ws.rs.core.Application;
 
 /**
@@ -38,7 +39,8 @@ public class RestService implements Service {
 	private Application application;
 
 	private Server cxfServer;
-
+	private JAXRSServerFactoryBean bean;
+	
 	private final Kernel kernel;
 
 	public RestService(String name, Kernel kernel){
@@ -116,10 +118,11 @@ public class RestService implements Service {
 	}
 
 	public Server deploy(){
-		JAXRSServerFactoryBean bean = ResourceUtils.createApplication(application, true, false, false, null);
+		bean = ResourceUtils.createApplication(application, true, false, false, null);
 		bean.setBus(new RestServiceFactory().getServlet().getBus());
 		bean.setAddress("/"+name);
-		bean.setProvider(new AuthNHandler(kernel, kernel.getOrCreateSecuritySessionStore()));
+		boolean auth = application.getClass().getAnnotation(PermitAll.class)==null;
+		if(auth)bean.setProvider(new AuthNHandler(kernel, kernel.getOrCreateSecuritySessionStore()));
 		ContainerProperties sp = kernel.getContainerProperties();
 		boolean enableLogging = sp.getBooleanValue(ContainerProperties.LOGGING_KEY+name);
 		if(enableLogging) {
@@ -133,4 +136,7 @@ public class RestService implements Service {
 		return bean.create();
 	}
 
+	public JAXRSServerFactoryBean getCXFServer() {
+		return bean;
+	}
 }

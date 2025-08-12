@@ -11,10 +11,8 @@ import eu.unicore.security.wsutil.CXFUtils;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 
 /**
- * Authenticate to Unity via its SAML interface 
+ * Authenticate to Unity's SAML interface 
  * using HTTP Basic auth username and password.
- * Assertions are validated using the container's 
- * configured trusted assertion issuers
  *
  * @author schuller 
  */

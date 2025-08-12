@@ -44,14 +44,13 @@ public class TestServicesBase {
 		p.setProperty("container.port", "55333");
 		k=new Kernel(p);
 		k.start();
-		
+
 		DeploymentDescriptorImpl dd = new DeploymentDescriptorImpl();
 		dd.setType(RestService.TYPE);
 		dd.setImplementation(HomeApplication.class);
 		dd.setName(sName);
 		dd.setKernel(k);
 		k.getDeploymentManager().deployService(dd);
-		
 	}
 
 	@AfterAll

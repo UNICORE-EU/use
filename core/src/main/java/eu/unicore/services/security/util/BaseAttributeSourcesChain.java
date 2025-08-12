@@ -123,21 +123,18 @@ implements IAttributeSourceBase, ISubSystem {
 	protected Pair<List<T>, List<String>> createChain(String cspPrefix, Kernel kernel) throws ConfigurationException {
 		List<T> newChain = new ArrayList<>();
 		List<String> newNames = new ArrayList<>();
-		if (orderString == null) {			
-			String nn = name == null ? "" : "." + name;
-			throw new ConfigurationException("Configuration inconsistent, " +
-					"need to define <" + cspPrefix + nn + ".order>");
-		}
-		String[] authzNames=orderString.split(" +");
-		for(String auth: authzNames){
-			T aip = (T)AttributeSourceConfigurator.configureAS(auth, 
-					cspPrefix, properties);
-			aip.configure(auth, kernel);
-			if(aip instanceof ExternalSystemConnector) {
-				externalConnections.add((ExternalSystemConnector)aip);
+		if(orderString!=null && orderString.length()>0) {
+			String[] authzNames=orderString.split(" +");
+			for(String auth: authzNames){
+				T aip = (T)AttributeSourceConfigurator.configureAS(auth, 
+						cspPrefix, properties);
+				aip.configure(auth, kernel);
+				if(aip instanceof ExternalSystemConnector) {
+					externalConnections.add((ExternalSystemConnector)aip);
+				}
+				newChain.add(aip);
+				newNames.add(auth);
 			}
-			newChain.add(aip);
-			newNames.add(auth);
 		}
 		return new Pair<>(newChain, newNames);
 	}

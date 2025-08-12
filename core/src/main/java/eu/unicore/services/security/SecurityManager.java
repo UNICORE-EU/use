@@ -583,9 +583,8 @@ public final class SecurityManager {
 		ContainerSecurityProperties sp = kernel.getContainerSecurityConfiguration();
 		String order = sp.getAIPOrder(); 
 		if (order == null) {
-			logger.info("No attribute source is defined in the configuration, " +
-					"users won't have any authorisation attributes assigned");
-			return new NullAttributeSource();
+			logger.info("No attribute source(s) defined in the configuration, " +
+					"users will only have authorisation attributes from authentication");
 		}
 		return new AttributeSourcesChain(kernel);
 	}

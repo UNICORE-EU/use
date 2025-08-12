@@ -15,8 +15,9 @@ import eu.unicore.services.security.util.AttributeHandlingCallback;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 
 /**
- * Authenticate to Unity via its SAML interface, using the OAuth Bearer token.
- * 
+ * Authenticate to Unity's SAML interface
+ * using the OAuth Bearer token.
+ *
  * @author schuller 
  */
 public class UnityOAuthAuthenticator extends UnityBaseSAMLAuthenticator {

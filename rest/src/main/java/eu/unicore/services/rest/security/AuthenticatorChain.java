@@ -123,6 +123,7 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 			return auth;
 		}
 		catch(Exception e){
+			e.printStackTrace();
 			throw new ConfigurationException("Cannot create IAuthenticator instance  <"+clazz+">",e);
 		}
 	}
