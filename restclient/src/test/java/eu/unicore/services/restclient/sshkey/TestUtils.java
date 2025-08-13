@@ -79,5 +79,10 @@ public class TestUtils {
 		File pub = new File("src/test/resources/ssh/id_ed25519.pub");
 		SSHKeyUC auth = SSHUtils.createAuthData(key, "test123".toCharArray(), "thisisatesttoken");
 		assertTrue(SSHUtils.validateAuthData(auth, FileUtils.readFileToString(pub, "UTF-8")));
+
+		key = new File("src/test/resources/ssh/id_ecdsa");
+		pub = new File("src/test/resources/ssh/id_ecdsa.pub");
+		auth = SSHUtils.createAuthData(key, "test123".toCharArray(), "thisisatesttoken");
+		assertTrue(SSHUtils.validateAuthData(auth, FileUtils.readFileToString(pub, "UTF-8")));
 	}
 }

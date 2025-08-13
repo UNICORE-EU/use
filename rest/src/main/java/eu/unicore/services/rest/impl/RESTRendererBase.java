@@ -219,7 +219,7 @@ public abstract class RESTRendererBase implements KernelInjectable {
 				b.td();
 				b.text("<form action='").text(href).text("' method='post'>");
 				b.text("<input type='submit'");
-				b.text(" value='").text(link.getDescription()).text("'>");
+				b.text(" value='").text(link.getDescription()).text("'/>");
 				b.text("</form>");
 				b.end();
 			}

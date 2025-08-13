@@ -3,7 +3,6 @@ package eu.unicore.services.rest.registry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -75,6 +74,8 @@ public class TestSharedRegistryService {
 
 	private ExternalRegistryClient getExtClient() throws Exception {
 		String url = kernel.getContainerProperties().getContainerURL()+"/rest/registries/default_registry";
-		return ExternalRegistryClient.getExternalRegistryClient(Arrays.asList(url), kernel.getClientConfiguration());
+		ExternalRegistryClient erc = new ExternalRegistryClient();
+		erc.addClient(new RegistryClient(url, kernel.getClientConfiguration()));
+		return erc;
 	}
 }

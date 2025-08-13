@@ -1,44 +1,71 @@
 package eu.unicore.services.rest.registry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.emi.security.authn.x509.X509Credential;
+import eu.emi.security.authn.x509.impl.CertificateUtils;
+import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.services.registry.RegistryImpl;
 import eu.unicore.services.rest.registry.RegistryHandler.RConnector;
 import eu.unicore.services.restclient.BaseClient;
 import eu.unicore.services.restclient.RegistryClient;
-import eu.unicore.services.security.TestConfigUtil;
+import eu.unicore.services.security.util.PubkeyCache;
 
 public class TestRegistryService {
 
 	private static Kernel kernel;
 
-	@BeforeAll
-	public static void startServer()throws Exception{
+	private static Properties getProperties(){
+		Properties p = new Properties();
+		p.put("container.security.credential.path", "src/test/resources/keystore.jks");
+		p.put("container.security.credential.password", "the!njs");
+		p.put("container.security.truststore.type", "directory");
+		p.put("container.security.truststore.directoryLocations.1", "src/test/resources/cacert.pem");
+		p.put("container.security.accesscontrol", "false");
+		p.put("container.host", "localhost");
+		p.put("container.port", "55333");
+		p.put("container.security.sslEnabled", "true");
+		p.put("container.httpServer.fastRandom", "true");
+		p.put("container.security.gateway.enable", "false");
+		p.put("container.client.serverHostnameChecking", "NONE");
+		p.put("persistence.directory", "target/data");
+		// this makes sense only for testing: set self as external registry
+		p.put("container.externalregistry.use", "true");
+		p.put("container.externalregistry.url", "https://localhost:55333/rest/registries/default_registry");
+		return p;
+	}
+
+	@BeforeEach
+	public void startServer()throws Exception{
 		FileUtils.deleteDirectory(new File("target/data"));
-		Properties p = TestConfigUtil.getInsecureProperties();
-		p.setProperty("container.host", "localhost");
-		p.setProperty("container.port", "55333");
-		p.setProperty("persistence.directory", "target/data");
+		Properties p = getProperties();
 		kernel = new Kernel(p);
 		kernel.startSynchronous();
 		kernel.getDeploymentManager().deployFeature(kernel.load(RegistryFeature.class));
 	}
 
-	@AfterAll
-	public static void stopServer()throws Exception{
+	@AfterEach
+	public void stopServer()throws Exception{
 		kernel.getAttribute(RegistryHandler.class).getRegistryClient().invalidateCache();
 		kernel.shutdown();
 		FileUtils.deleteDirectory(new File("target/data"));
@@ -67,6 +94,7 @@ public class TestRegistryService {
 		content.put(RegistryClient.INTERFACE_NAME, "http://spam2");
 		content.put(RegistryClient.INTERFACE_NAMESPACE, "http://ham2");
 		content.put(RegistryClient.ENDPOINT, "http://foo2");
+		content.put(RegistryImpl.MARK_ENTRY_AS_INTERNAL, "true");
 		registryClient.addEntry(content);
 		o = client.getJSON();
 		System.out.println("*** registry properties ***\n"+o.toString(2));
@@ -84,6 +112,7 @@ public class TestRegistryService {
 		System.out.println("Registry handler status: '" +rh.getStatusDescription()+"'");
 		registryClient = getRegistryClient();
 		assertEquals(1, registryClient.listEntries().size());
+		System.out.println(registryClient.listEntries());
 	}
 
 	@Test
@@ -103,19 +132,65 @@ public class TestRegistryService {
 		Map<String,String> content = new HashMap<>();
 		content.put(RegistryImpl.INTERFACE_NAME, "http://spam");
 		content.put(RegistryImpl.INTERFACE_NAMESPACE, "http://ham");
-		content.put(RegistryImpl.ENDPOINT, "http://foo");	
+		content.put(RegistryImpl.ENDPOINT, "http://foo");
+		content.put(RegistryImpl.MARK_ENTRY_AS_INTERNAL, "true");
 		registryClient.addEntry(content);
 		content = new HashMap<>();
 		content.put(RegistryImpl.INTERFACE_NAME, "http://spam2");
 		content.put(RegistryImpl.INTERFACE_NAMESPACE, "http://ham2");
 		content.put(RegistryImpl.ENDPOINT, "http://foo2");	
+		content.put(RegistryImpl.MARK_ENTRY_AS_INTERNAL, "true");
 		registryClient.addEntry(content);
 		JSONObject o = client.getJSON();
 		assertEquals(2, o.getJSONArray("entries").length());
-		// run expire check manually - entry should be removed as it's not valid
+		// add valid entry
+		content.put(RegistryImpl.INTERFACE_NAME, "http://bar");
+		content.put(RegistryImpl.INTERFACE_NAMESPACE, "http://foo");
+		content.put(RegistryImpl.ENDPOINT, "https://localhost:55333/rest/registries/default_registry");	
+		X509Credential cred = kernel.getContainerSecurityConfiguration().getCredential();
+		content.put(RegistryImpl.SERVER_IDENTITY, cred.getSubjectName());	
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		CertificateUtils.saveCertificate(os, 
+				kernel.getContainerSecurityConfiguration().getCredential().getCertificate(), 
+				Encoding.PEM);
+		content.put(RegistryImpl.SERVER_PUBKEY, os.toString("UTF-8"));
+		content.put(RegistryImpl.MARK_ENTRY_AS_INTERNAL, "true");
+		registryClient.addEntry(content);
+		// run expire check manually to remove invalid entries
 		((DefaultHome)kernel.getHome("ServiceGroupEntry")).runExpiryCheckNow();
 		rh.getRegistryClient().invalidateCache();
-		assertEquals(0, registryClient.listEntries().size());
+		// valid entry should still be there
+		assertEquals(1, registryClient.listEntries().size());
+	}
+	
+	@Test
+	public void testRegistryHandler() throws Exception {
+		RegistryHandler rh = kernel.getAttribute(RegistryHandler.class);
+		assertFalse(rh.isSharedRegistry());
+		System.out.println(kernel.getConnectionStatus());
+		final List<Map<String,String>> entries = new ArrayList<>();
+		ExternalRegistryClient erc = new ExternalRegistryClient() {
+			@Override
+			public List<Map<String,String>> listEntries() throws IOException {
+				return entries;
+			}
+		};
+		Map<String,String>e = new HashMap<>();
+		e.put("InternalEntry", "true");
+		e.put(RegistryClient.SERVER_IDENTITY, "CN=Test");
+		String pem = FileUtils.readFileToString(new File("src/test/resources/cacert.pem"), "UTF-8");
+		e.put(RegistryClient.SERVER_PUBKEY, pem);
+		entries.add(e);
+		Map<String,String>e2 = new HashMap<>();
+		e2.put(RegistryClient.SERVER_IDENTITY, "CN=Wrong");
+		String pem2 = "not a pem";
+		e2.put(RegistryClient.SERVER_PUBKEY, pem2);
+		e.put("InternalEntry", "true");
+		entries.add(e2);
+		rh.doUpdateKeys(erc);
+		PubkeyCache pc = PubkeyCache.get(kernel);
+		assertNotNull(pc.getPublicKey("CN=Test"));
+		assertNull(pc.getPublicKey("CN=Wrong"));
 	}
 
 	private BaseClient getClient() throws Exception {

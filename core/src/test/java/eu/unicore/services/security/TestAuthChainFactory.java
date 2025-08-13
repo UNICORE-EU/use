@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.bouncycastle.dvcs.TargetChain;
 import org.junit.jupiter.api.Test;
 
 import eu.unicore.security.AuthorisationException;
@@ -29,7 +28,6 @@ import eu.unicore.security.XACMLAttribute.Type;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.util.AttributeSourceConfigurator;
 import eu.unicore.services.security.util.AttributeSourcesChain;
-import eu.unicore.services.security.util.BaseAttributeSourcesChain;
 import eu.unicore.services.security.util.BaseAttributeSourcesChain.CombiningPolicy;
 import eu.unicore.util.configuration.ConfigurationException;
 

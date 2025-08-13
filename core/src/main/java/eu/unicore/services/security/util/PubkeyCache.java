@@ -11,7 +11,7 @@ import eu.unicore.services.Kernel;
 public class PubkeyCache {
 
 	private final Map<String, PublicKey>map = new ConcurrentHashMap<>();
-	
+
 	public PublicKey getPublicKey(String subject){
 		return map.get(X500NameUtils.getComparableForm(subject));
 	}
@@ -25,7 +25,7 @@ public class PubkeyCache {
 		PublicKey pk = credential.getCertificate().getPublicKey();
 		update(subject, pk);
 	}
-	
+
 	public static synchronized PubkeyCache get(Kernel kernel){
 		PubkeyCache pc = kernel.getAttribute(PubkeyCache.class);
 		if(pc==null){

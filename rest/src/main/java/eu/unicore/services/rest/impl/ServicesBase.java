@@ -12,6 +12,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
@@ -184,6 +185,6 @@ public abstract class ServicesBase extends BaseRESTController {
 	 * @return a reply (can be null) to return to the client
 	 */
 	protected JSONObject doHandleAction(String name, JSONObject o) throws Exception {
-		throw new IllegalArgumentException("Undefined!");
+		throw new WebApplicationException(404);
 	}
 }

@@ -192,7 +192,7 @@ public class RESTUtils {
 		}
 
 		public HtmlBuilder table(){
-			sb.append("<table border=1 width='100%'>");
+			sb.append("<table border='1' width='100%'>");
 			stack.push("table");
 			return this;
 		}

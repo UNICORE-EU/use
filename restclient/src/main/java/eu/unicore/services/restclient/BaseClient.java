@@ -22,6 +22,7 @@ import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpMessage;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.InputStreamEntity;
@@ -51,7 +52,7 @@ import eu.unicore.util.httpclient.SessionIDProviderImpl;
 public class BaseClient {
 
 	protected static final Logger logger = Log.getLogger(Log.CLIENT, BaseClient.class);
-	
+
 	protected final HttpClient client;
 
 	protected StatusLine status;
@@ -59,19 +60,19 @@ public class BaseClient {
 	protected IAuthCallback authCallback;
 
 	protected SessionIDProvider sessionIDProvider;
-	
+
 	protected IClientConfiguration security;
 
 	protected boolean useSessions;
-	
+
 	protected String url;
-	
+
 	private final Deque<String>urlStack = new ArrayDeque<>();
-	
+
 	protected UserPreferences userPreferences = new UserPreferences();
-	
+
 	protected boolean errorChecking = true;
-	
+
 	public BaseClient(String url, IClientConfiguration security){
 		this(url,security,null);
 	}
@@ -109,7 +110,7 @@ public class BaseClient {
 			Log.logException("Cannot configure user preferences.", ex);
 		}
 	}
-	
+
 	/**
 	 * set the URL of the resource to access - can be reverted to the previous state using pop()
 	 */
@@ -117,14 +118,14 @@ public class BaseClient {
 		urlStack.push(this.url);
 		this.url = url;
 	}
-	
+
 	/**
 	 * revert to the previous URL
 	 */
 	public void popURL() {
 		this.url = urlStack.pop();
 	}
-	
+
 	/**
 	 * set the URL of the resource to access (also clears url "history")
 	 */
@@ -132,15 +133,15 @@ public class BaseClient {
 		this.url = url;
 		urlStack.clear();
 	}
-	
+
 	public String getURL(){
 		return url;
 	}
-	
+
 	public UserPreferences getUserPreferences() {
 		return userPreferences;
 	}
-	
+
 	public IAuthCallback getAuthCallback() {
 		return authCallback;
 	}
@@ -164,7 +165,7 @@ public class BaseClient {
 			userPreferences.addUserPreferencesHeader(message);
 		}
 	}
-	
+
 	/**
 	 * get the JSON representation of this resource
 	 *  
@@ -185,7 +186,7 @@ public class BaseClient {
 		ClassicHttpResponse response = get(accept==null ? ContentType.APPLICATION_JSON : accept);
 		return asJSON(response);
 	}
-	
+
 	public ClassicHttpResponse get(ContentType accept) throws Exception {
 		return get(accept, null);
 	}
@@ -205,7 +206,7 @@ public class BaseClient {
 		}
 		return execute(get);
 	}
-	
+
 	/**
 	 * put content to this resource, returning the response. The caller must deal with
 	 * the response to avoid resource leaks and blocked connections!
@@ -220,7 +221,7 @@ public class BaseClient {
 		put.setEntity(new InputStreamEntity(content, type));
 		return execute(put);
 	}
-	
+
 	/**
 	 * put content to this resource, discarding any response
 	 */
@@ -264,13 +265,15 @@ public class BaseClient {
 	public String create(JSONObject content) throws Exception {
 		HttpPost post=new HttpPost(url);
 		post.setHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
-		if(content!=null)post.setEntity(new StringEntity(content.toString(), ContentType.APPLICATION_JSON));
+		if(content!=null) {
+			post.setEntity(new StringEntity(content.toString(), ContentType.APPLICATION_JSON));
+		}
 		try(ClassicHttpResponse response = execute(post)){
 			Header l = response.getFirstHeader("Location");
 			return l!=null? l.getValue():null;
 		}
 	}
-	
+
 	/**
 	 * post the JSON to this resource and return the response. 
 	 * NOTE: the caller is responsible for reading content and closing the response!
@@ -278,7 +281,9 @@ public class BaseClient {
 	public ClassicHttpResponse post(JSONObject content) throws Exception {
 		HttpPost post=new HttpPost(url);
 		post.setHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
-		if(content!=null)post.setEntity(new StringEntity(content.toString(), ContentType.APPLICATION_JSON));
+		if(content!=null) {
+			post.setEntity(new StringEntity(content.toString(), ContentType.APPLICATION_JSON));
+		}
 		return execute(post);
 	}
 
@@ -289,6 +294,18 @@ public class BaseClient {
 		try(ClassicHttpResponse response = post(content)){
 			EntityUtils.consume(response.getEntity());
 		}
+	}
+
+	/**
+	 * post the content to this resource and return the response. 
+	 * NOTE: the caller is responsible for reading content and closing the response!
+	 * 
+	 */
+	public ClassicHttpResponse post(HttpEntity content, ContentType contentType) throws Exception {
+		HttpPost post=new HttpPost(url);
+		if(contentType!=null)post.setHeader("Content-Type", contentType.getMimeType());
+		if(content!=null)post.setEntity(content);
+		return execute(post);
 	}
 
 	/**
@@ -311,7 +328,7 @@ public class BaseClient {
 	public String getLink(String linkName) throws Exception {
 		return getLink(getJSON(), linkName);
 	}
-	
+
 	/**
 	 * get the named link
 	 * 
@@ -346,7 +363,7 @@ public class BaseClient {
 			response.close();
 		}
 	}
-	
+
 	public String getSessionKey() {
 		String key = authCallback!=null? authCallback.getSessionKey() : null;
 		String prefsKey = userPreferences!=null? userPreferences.getEncoded() : null;
@@ -356,7 +373,11 @@ public class BaseClient {
 		return key;
 	}
 
-	protected ClassicHttpResponse execute(HttpUriRequestBase method) throws Exception {
+	/**
+	 * low-level method to execute a HTTP request - if possible use one of the more high-level methods.
+	 * Handles sessions and authentication
+	 */
+	public ClassicHttpResponse execute(HttpUriRequestBase method) throws Exception {
 		ClassicHttpResponse response = null;
 		boolean execWithAuth = !useSessions;
 		String sessionKey = null;
@@ -444,7 +465,7 @@ public class BaseClient {
 	}
 
 	private static final Pattern errorPattern = Pattern.compile("<title>(.*)</title>");
-	
+
 	public static String extractHTMLError(String html) {
 		Matcher m = errorPattern.matcher(html);
 		if(m.find())return m.group(1).trim();
@@ -458,7 +479,7 @@ public class BaseClient {
 	public void setSessionIDProvider(SessionIDProvider sessionIDProvider) {
 		this.sessionIDProvider = sessionIDProvider;
 	}
-	
+
 	/**
 	 * Enable/disable automatic error checking after every request.
 	 * Enabled by default - usually the best option.
@@ -468,9 +489,8 @@ public class BaseClient {
 		this.errorChecking = errorChecking;
 	}
 
-
 	public static Map<String,String> asMap(JSONObject o){
-		Map<String,String>result=new HashMap<>();
+		Map<String,String>result = new HashMap<>();
 		if(o!=null){
 			Iterator<String>i = o.keys();
 			while(i.hasNext()){
@@ -482,7 +502,7 @@ public class BaseClient {
 		}
 		return result;
 	}
-	
+
 	public static JSONObject asJSON(Map<String,String>map){
 		JSONObject o=new JSONObject();
 		if(map!=null){

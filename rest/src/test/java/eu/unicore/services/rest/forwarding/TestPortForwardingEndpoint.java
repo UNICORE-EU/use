@@ -7,9 +7,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.HashSet;
 import java.util.Properties;
@@ -30,7 +31,6 @@ import eu.unicore.services.restclient.ForwardingHelper;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.server.JettyServer;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
-import eu.unicore.util.ChannelUtils;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
@@ -62,8 +62,10 @@ public class TestPortForwardingEndpoint {
 		echo.shutdown();
 	}
 
+    static int localPort;
+
     @Test
-	public void testInvokeForwardingService() throws Exception {
+	public void testForwardingHelper() throws Exception {
     	String sName="test";
 		kernel.getContainerProperties().setProperty("messageLogging.test", "true");
 		DeploymentDescriptorImpl dd = new DeploymentDescriptorImpl();
@@ -72,24 +74,46 @@ public class TestPortForwardingEndpoint {
 		dd.setImplementation(MyApplication.class);
 		dd.setName(sName);
 		kernel.getDeploymentManager().deployService(dd);
-
 		JettyServer server=kernel.getServer();
 		String _url = server.getUrls()[0].toExternalForm()+"/rest/test/ports/test";
 		BaseClient baseClient = new BaseClient(_url, kernel.getClientConfiguration());
-		ForwardingHelper fh = new ForwardingHelper(baseClient);
-		SocketChannel s = fh.connect(_url);
-		PrintWriter w = new PrintWriter(new OutputStreamWriter(ChannelUtils.newOutputStream(s, 65536)), true);
-		Reader r = new InputStreamReader(ChannelUtils.newInputStream(s, 65536));
-		BufferedReader br = new BufferedReader(r);
-		System.out.println("Forwarding established");
+		final ForwardingHelper fh = new ForwardingHelper(baseClient);
+		Thread t = new Thread( ()->{
+			try {
+				try(ServerSocketChannel sc = ServerSocketChannel.open()){
+					sc.configureBlocking(false);
+					sc.bind(new InetSocketAddress("localhost", 0), 1);
+					localPort = ((InetSocketAddress)sc.getLocalAddress()).getPort();
+					System.out.println("Listening on local port "+localPort);
+					fh.accept(sc, (client)->{
+						try {
+							SocketChannel s = fh.connect(_url);
+							System.out.println("Forwarding established");
+							fh.startForwarding(client, s);
+						}catch(Exception ex) {
+							throw new RuntimeException(ex);
+						}
+					});
+					fh.run();
+				}
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		});
+		t.start();
+		Thread.sleep(1000);
+		Socket localSocket = new Socket("localhost", localPort);
+		PrintWriter w = new PrintWriter(new OutputStreamWriter(localSocket.getOutputStream()),
+				true);
+		BufferedReader br = new BufferedReader(new InputStreamReader(localSocket.getInputStream()));
 		String line = "this is a test";
 		System.out.println("--> "+line);
 		w.println(line);
 		String reply = br.readLine();
 		System.out.println("<-- "+reply);
 		assertEquals(line, reply);
+		localSocket.close();
 	}
-
 
 	public static class MyApplication extends Application {
 		@Override
@@ -108,7 +132,6 @@ public class TestPortForwardingEndpoint {
 		
 		@GET
 		@Path("/ports/{name}")
-		//@Produces("application/octet-stream")
 		public Response forwardingEndpoint(@PathParam("name") String name, @HeaderParam("Upgrade") String upgrade){
 			System.out.println("Incoming header: Upgrade: "+upgrade);
 			ResponseBuilderImpl res = new ResponseBuilderImpl();
