@@ -206,19 +206,12 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		this.file = fileName;
 	}
 
-	public String getFile() {
-		return file;
-	}
-
 	public void setUseAuthorizedKeys(boolean useAuthorizedKeys) {
 		this.useAuthorizedKeys = useAuthorizedKeys;
 	}
 
 	public void setUpdateInterval(String update) {
-		try{
-			updateInterval = Long.valueOf(update);
-		}
-		catch(Exception ex){}
+		updateInterval = Long.valueOf(update);
 	}
 
 	public void setDnTemplate(String dnTemplate) {

@@ -130,7 +130,6 @@ public abstract class SecuredResourceImpl implements Resource {
 
 	protected void setServerAsOwner(){
 		String owner = Client.ANONYMOUS_CLIENT_DN;
-		// set server as owner
 		X509Credential kernelIdentity = getKernel().getContainerSecurityConfiguration().getCredential();
 		if (kernelIdentity != null) {
 			owner = kernelIdentity.getSubjectName();
@@ -138,6 +137,7 @@ public abstract class SecuredResourceImpl implements Resource {
 		}
 		setOwner(owner);
 	}
+
 	/**
 	 * get the security tokens that were extracted from the request.
 	 * This method is here for backwards compatibility. It is suggested to use 
@@ -185,7 +185,7 @@ public abstract class SecuredResourceImpl implements Resource {
 		String ownerDn = model.getOwnerDN();
 		return ownerDn!=null ? ownerDn : Client.ANONYMOUS_CLIENT_DN;
 	}
-		
+	
 	public boolean isOwnerLevelAccess() {
 		Client c = getClient();
 		if(!getKernel().getContainerSecurityConfiguration().isAccessControlEnabled())return true;
@@ -194,7 +194,6 @@ public abstract class SecuredResourceImpl implements Resource {
 		boolean server = getKernel().getSecurityManager().isServer(c);
 		return owner || admin || server;
 	}
-	
 
 	/**
 	 * Delete the given children. Deletion includes removal from the 

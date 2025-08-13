@@ -40,14 +40,14 @@ public class SAMLAttributeFetcher
 	 * all Attributes received. It is combined with a SAML server URL.
 	 */
 	public static final String ALL_PULLED_ATTRS_KEY = "SAMLAttributeFetcher_ALLpulledattrs";
-	
+
 	private static final Logger log = Log.getLogger(IPullConfiguration.LOG_PFX, SAMLAttributeFetcher.class);
-	
+
 	private final IPullConfiguration pullConfiguration;
 	private final IClientConfiguration clientConfiguration;
 	private final int cacheTtl;
 	private final Cache<String, List<ParsedAttribute>> cache;
-	
+
 	public static final int MAX_ELEMS = 128;
 
 	// SAML service host without full endpoint
@@ -60,7 +60,7 @@ public class SAMLAttributeFetcher
 		this.cacheTtl = pullConfiguration.getCacheTtl();
 		this.cache = initCache();
 	}
-	
+
 	private Cache<String, List<ParsedAttribute>> initCache()
 	{
 		if (cacheTtl > 0)
@@ -73,7 +73,7 @@ public class SAMLAttributeFetcher
 		}
 		else return null;
 	}
-	
+
 	public String getServerURL() {
 		return pullConfiguration.getAttributeQueryServiceURL();
 	}
@@ -89,16 +89,17 @@ public class SAMLAttributeFetcher
 		}
 		return simpleAddress;
 	}
+
 	/**
 	 * Gets attributes for effective user (as returned by tokens parameter).
 	 * Attributes are inserted into {@link SecurityTokens} context 
 	 * (under a key ALL_PULLED_ATTRS_KEY+serverURL) as a {@link List} 
 	 * of {@link ParsedAttribute} objects. 
-	 *  
+	 *
 	 * @param tokens
 	 * @throws IOException communication errors
 	 */
-	public void authorise(SecurityTokens tokens) throws SAMLValidationException
+	public void fetchAttributes(SecurityTokens tokens) throws SAMLValidationException
 	{
 		String dn = tokens.getEffectiveUserName();
 		if (dn == null)
@@ -175,8 +176,8 @@ public class SAMLAttributeFetcher
 
 		allAttributes.put(voServerAddress, attrs);
 	}
-	
-	protected List<ParsedAttribute> doRealReceive(NameID subject) throws SAMLValidationException 
+
+	private List<ParsedAttribute> doRealReceive(NameID subject) throws SAMLValidationException 
 	{
 		SAMLAttributeQueryClient client;
 		try
@@ -201,4 +202,3 @@ public class SAMLAttributeFetcher
 		return client.getAssertion(subject, myID).getAttributes();
 	}
 }
-

@@ -14,5 +14,5 @@ public class AcceptingPdp implements UnicoreXPDP {
 	public PDPResult checkAuthorisation(Client c, ActionDescriptor action, ResourceDescriptor d) throws Exception {
 		return new PDPResult(Decision.PERMIT, "This PDP always grants access");
 	}
-	
+
 }

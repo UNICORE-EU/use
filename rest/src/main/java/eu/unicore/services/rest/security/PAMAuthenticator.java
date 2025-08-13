@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.cxf.message.Message;
 import org.apache.logging.log4j.Logger;
 import org.jvnet.libpam.PAM;
+import org.jvnet.libpam.PAMException;
 import org.jvnet.libpam.UnixUser;
 
 import eu.unicore.security.HTTPAuthNTokens;
@@ -49,9 +50,11 @@ public class PAMAuthenticator implements IAuthenticator {
 
 	@Override
 	public final boolean authenticate(Message message, SecurityTokens tokens) {
-		HTTPAuthNTokens http = CXFUtils.getHTTPCredentials(message);
-		if(http == null)return false;
-
+		HTTPAuthNTokens http = (HTTPAuthNTokens)tokens.getContext().get(SecurityTokens.CTX_LOGIN_HTTP);
+		if(http == null){
+			http = CXFUtils.getHTTPCredentials(message);
+			tokens.getContext().put(SecurityTokens.CTX_LOGIN_HTTP,http);
+		}
 		String username=http.getUserName();
 		String password=http.getPasswd();
 		String cacheKey = username+":"+password;
@@ -65,15 +68,14 @@ public class PAMAuthenticator implements IAuthenticator {
 				unixUser = pam.authenticate(username, password);
 				cache.put(cacheKey, new CacheEntry<>(unixUser,cacheTime));
 			}
-			
 			String dn = String.format(dnTemplate, unixUser.getUserName());
 			tokens.setUserName(dn);
 			tokens.setConsignorTrusted(true);
 			storePAMInfo(unixUser, tokens);
 			tokens.getContext().put(AuthNHandler.USER_AUTHN_METHOD, "PAM");
 			logger.debug("Successfully authenticated (cached: {}) via {}: <{}>", cacheHit, this, dn);
-		}catch(Exception ex){
-			Log.logException("Error authenticating using PAM", ex, logger);
+		}catch(PAMException pe) {
+			logger.debug(pe.getMessage());
 		}
 		return true;
 	}

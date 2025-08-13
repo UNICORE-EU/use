@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -75,6 +74,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	protected String roleAssign;
 	protected String groupsAssign;
 
+	@Override
 	public void setKernel(Kernel kernel){
 		this.kernel = kernel;
 		createCache();
@@ -145,7 +145,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 		clientCfg.setSslAuthn(doTLSAuthN);
 		Object cacheKey = extractCredentials(clientCfg, message, tokens);
 		if(cacheKey == null)return false;
-		
+
 		CacheEntry<T> ce = cache.getIfPresent(cacheKey);
 		boolean cacheHit = ce!=null && !ce.expired();
 		T auth = cacheHit? ce.auth : null;
@@ -306,27 +306,23 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	}
 
 	private Callable<Pair<Boolean,String>> getCheckConnectionTask(final String url) {
-		return new Callable<>(){
-			public Pair<Boolean, String> call() {
-				try {
-					DefaultClientConfiguration clientCfg = kernel.getClientConfiguration();
-					if(!url.toLowerCase().startsWith("https")) {
-						clientCfg.setSslEnabled(false);
-						URL u = new URL(url);
-						String host = u.getHost();
-						int port = u.getPort();
-						if(port==-1)port = u.getDefaultPort();
-						try(Socket s = new Socket(host,port)){}
-					}
-					else {
-						ConnectionUtil.getPeerCertificate(clientCfg, url, 2000, logger);
-					}
-					return new Pair<>(Boolean.TRUE, "OK");
-				} catch (UnknownHostException e) {
-					return new Pair<>(Boolean.FALSE, "Host is unknown: " + e);
-				} catch (IOException e) {
-					return new Pair<>(Boolean.FALSE, String.format("Can't contact %s: %s", url, e));
+		return ()->{
+			try {
+				DefaultClientConfiguration clientCfg = kernel.getClientConfiguration();
+				if(!url.toLowerCase().startsWith("https")) {
+					clientCfg.setSslEnabled(false);
+					URL u = new URL(url);
+					String host = u.getHost();
+					int port = u.getPort();
+					if(port==-1)port = u.getDefaultPort();
+					try(Socket s = new Socket(host,port)){}
 				}
+				else {
+					ConnectionUtil.getPeerCertificate(clientCfg, url, 2000, logger);
+				}
+				return new Pair<>(Boolean.TRUE, "OK");
+			} catch (IOException e) {
+				return new Pair<>(Boolean.FALSE, String.format("Can't contact %s: %s", url, e));
 			}
 		};
 	}

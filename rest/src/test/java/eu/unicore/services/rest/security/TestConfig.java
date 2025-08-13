@@ -2,6 +2,7 @@ package eu.unicore.services.rest.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Properties;
 
@@ -21,7 +22,10 @@ public class TestConfig {
 	public void testAuthNConfig() throws Exception {
 		Properties p = TestConfigUtil.getInsecureProperties();
 		String file = "src/test/resources/users.txt";
-		p.setProperty("container.security.rest.authentication.order", "FILE");
+		p.setProperty("container.security.rest.authentication.order", "PAM FILE");
+		p.setProperty("container.security.rest.authentication.PAM.dnTemplate", "CN=%s,OU=local-users");
+		p.setProperty("container.security.rest.authentication.PAM.moduleName", "unicore");
+
 		p.setProperty("container.security.rest.authentication.FILE.class", FilebasedAuthenticator.class.getName());
 		p.setProperty("container.security.rest.authentication.FILE.file", file);
 		Kernel k = new Kernel(p);
@@ -29,10 +33,13 @@ public class TestConfig {
 		assertNotNull(auth);
 		assertEquals(AuthenticatorChain.class, auth.getClass());
 		AuthenticatorChain chain = (AuthenticatorChain)auth;
-		assertEquals(1, chain.getChain().size());
-		FilebasedAuthenticator fba = (FilebasedAuthenticator)chain.getChain().get(0);
+		assertEquals(2, chain.getChain().size());
+
+		assertTrue(chain.getChain().get(0) instanceof PAMAuthenticator);
+		FilebasedAuthenticator fba = (FilebasedAuthenticator)chain.getChain().get(1);
+		System.out.println(fba);
 		assertEquals(file,fba.getFile());
-		
+
 		// and finally test that authn works
 		SecurityTokens tokens = new SecurityTokens();
 		HTTPAuthNTokens http = new HTTPAuthNTokens("demouser", "test123");

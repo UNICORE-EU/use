@@ -48,6 +48,7 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 	private String clientID;
 	private String clientSecret;
 
+	@Deprecated
 	public void setDnTemplate(String dnTemplate) {
 		logger.warn("DEPRECATION - instead of dnTemplate, use identityAssign - see documentation.");
 		this.dnTemplate = dnTemplate;

@@ -342,18 +342,15 @@ public final class SecurityManager {
 	 * @return authorised Client object 
 	 */
 	public Client createClientWithAttributes(final SecurityTokens tokens) {
-		Client client = securityConfig.isAccessControlEnabled() ?
-			createSecureClient(tokens) : new Client();
+		Client client = createSecureClient(tokens);
 		if (isTrustedAgent(client)) {
 			if(logger.isDebugEnabled()) {
-				String consignor = tokens.getConsignorName(); 
 				logger.debug("Accept trusted-agent {} to work for selected user {}",
-						X500NameUtils.getReadableForm(consignor),
+						X500NameUtils.getReadableForm( tokens.getConsignorName()),
 						X500NameUtils.getReadableForm(tokens.getUserName()));
 			}
 			tokens.setConsignorTrusted(true);
 		}
-		//now we know the client name we can put it into the log context
 		ThreadContext.put("clientName", client.getDistinguishedName());
 		return client;
 	}

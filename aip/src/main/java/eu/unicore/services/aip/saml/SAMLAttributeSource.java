@@ -86,7 +86,7 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 		if(!cb.isOK())
 			throw new SubsystemUnavailableException("Attribute source "+name+" is temporarily unavailable");
 		try {
-			fetcher.authorise(tokens);
+			fetcher.fetchAttributes(tokens);
 		}catch(Exception sve) {
 			cb.notOK();
 			throw new IOException(sve);
@@ -121,7 +121,7 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 			Callable<String> check = new Callable<>() {
 				public String call() throws Exception {
 					try {
-						fetcher.authorise(st);
+						fetcher.fetchAttributes(st);
 						return "OK";
 					}catch(SAMLErrorResponseException sre) {
 						return "OK";
@@ -245,6 +245,7 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 		return name;
 	}
 
+	@Override
 	public String toString() {
 		return getName()+" "+fetcher.getSimpleAddress();
 	}

@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.xmlbeans.XmlObject;
+import org.apache.xmlbeans.XmlString;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,6 +38,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Application;
 import xmlbeans.org.oasis.saml2.assertion.AssertionType;
+import xmlbeans.org.oasis.saml2.assertion.AttributeStatementType;
+import xmlbeans.org.oasis.saml2.assertion.AttributeType;
 import xmlbeans.org.oasis.saml2.assertion.AudienceRestrictionType;
 import xmlbeans.org.oasis.saml2.assertion.AuthnStatementType;
 import xmlbeans.org.oasis.saml2.assertion.NameIDType;
@@ -59,16 +62,16 @@ public class TestSAMLAuthenticator {
 		p.setProperty("container.host", "localhost");
 		p.setProperty("container.port", "55333");
 		p.setProperty("persistence.directory", "target/data");
-		p.setProperty("container.security.accesscontrol", "true");
-		p.setProperty("container.security.accesscontrol.pdp",
-				"eu.unicore.services.security.pdp.AcceptingPdp");
-
 		p.setProperty("container.security.rest.authentication.order", "SAML SAML2");
 		p.setProperty("container.security.rest.authentication.SAML.class",
 				UnitySAMLAuthenticator.class.getName());
 		p.setProperty("container.security.rest.authentication.SAML.address",
 				"http://localhost:55333/rest/idp/saml");
 		p.setProperty("container.security.rest.authentication.SAML.validate","false");
+		p.setProperty("container.security.rest.authentication.SAML.roleAssign",
+				"'user'");
+		p.setProperty("container.security.rest.authentication.SAML.uidAssign",
+				"preferredUsername[0]");
 
 		p.setProperty("container.security.rest.authentication.SAML2.class",
 				UnityOAuthAuthenticator.class.getName());
@@ -77,7 +80,8 @@ public class TestSAMLAuthenticator {
 		p.setProperty("container.security.rest.authentication.SAML2.validate","false");
 		p.setProperty("container.security.rest.authentication.SAML2.roleAssign",
 				"'user'");
-
+		p.setProperty("container.security.rest.authentication.SAML2.uidAssign",
+				"preferredUsername[0]");
 		kernel=new Kernel(p);
 		kernel.start();			
 		DeploymentDescriptorImpl dd = new DeploymentDescriptorImpl();
@@ -96,6 +100,8 @@ public class TestSAMLAuthenticator {
 
 		JettyServer server=kernel.getServer();
 		url = server.getUrls()[0].toExternalForm()+"/rest";
+
+		System.out.println(kernel.getConnectionStatus());
 	}
 
 	@AfterAll
@@ -115,6 +121,10 @@ public class TestSAMLAuthenticator {
 				reply.getJSONObject("client").getString("dn"));
 		assertEquals("UNITY-SAML",
 				reply.getJSONObject("client").getString("authenticationMethod"));
+		assertEquals("user",
+				reply.getJSONObject("client").getJSONObject("role").getString("selected"));
+		assertEquals("demouser",
+				reply.getJSONObject("client").getJSONObject("xlogin").getString("UID"));
 	}
 
 	@Test
@@ -133,6 +143,8 @@ public class TestSAMLAuthenticator {
 				reply.getJSONObject("client").getString("authenticationMethod"));
 		assertEquals("user",
 				reply.getJSONObject("client").getJSONObject("role").getString("selected"));
+		assertEquals("demouser",
+				reply.getJSONObject("client").getJSONObject("xlogin").getString("UID"));
 	}
 
 	@PermitAll
@@ -147,14 +159,12 @@ public class TestSAMLAuthenticator {
 
 	@Path("/")
 	public static class MockIDP extends ApplicationBaseResource {
-		static final AtomicInteger invocationCounter=new AtomicInteger(0);
 
 		@POST
 		@Path("/saml")
 		@Consumes("*/*")
 		@Produces("application/xml")
 		public String getRepresentation(String xml) throws Exception {
-			invocationCounter.incrementAndGet();
 			Document soapenv = (Document)XmlObject.Factory.parse(xml).newDomNode();
 			NodeList nl = soapenv.getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:protocol", "AuthnRequest");
 			AuthnRequestDocument ard = AuthnRequestDocument.Factory.parse(nl.item(0));
@@ -167,33 +177,50 @@ public class TestSAMLAuthenticator {
 			rt.setDestination(ard.getAuthnRequest().getAssertionConsumerServiceURL());
 			rt.addNewStatus().addNewStatusCode().setValue(SAMLConstants.Status.STATUS_OK.toString());
 
-			Calendar notOnOrAfter = Calendar.getInstance();
-			notOnOrAfter.setTimeInMillis(System.currentTimeMillis()+100000);
 			AssertionType ass1 = rt.addNewAssertion();
-			ass1.setID("foo_123");
+			ass1.setID("foo_"+System.currentTimeMillis());
 			ass1.setIssueInstant(Calendar.getInstance());
 			ass1.setVersion(SAMLConstants.SAML2_VERSION);
 			NameIDType issuer = NameIDType.Factory.newInstance();
 			issuer.setStringValue("bar@foo");
 			ass1.setIssuer(issuer);
+
+			addAuthnStatement(ass1, ard.getAuthnRequest().getID(), "CN=demouser,OU=saml");
+
+			addAttributeStatement(ass1);
 			
-			AuthnStatementType at = ass1.addNewAuthnStatement();
+			return idpReply(rd);
+		}
+		
+		private void addAuthnStatement(AssertionType assertion, String responseTo, String userDN) throws Exception {
+			AuthnStatementType at = assertion.addNewAuthnStatement();
 			at.setAuthnInstant(Calendar.getInstance());
+
+			AudienceRestrictionType aud = assertion.addNewConditions().addNewAudienceRestriction();
+			aud.addAudience("http://localhost:55333");
+			Calendar notOnOrAfter = Calendar.getInstance();
+			notOnOrAfter.setTimeInMillis(System.currentTimeMillis()+100000);
+			assertion.getConditions().setNotOnOrAfter(notOnOrAfter);
+
 			NameIDType subj = NameIDType.Factory.newInstance();
 			subj.setFormat(SAMLConstants.NFORMAT_DN);
-			subj.setStringValue("CN=demouser,OU=saml");
-			ass1.addNewSubject().setNameID(subj);
-			SubjectConfirmationType sct = ass1.getSubject().addNewSubjectConfirmation();
+			subj.setStringValue(userDN);
+			assertion.addNewSubject().setNameID(subj);
+			SubjectConfirmationType sct = assertion.getSubject().addNewSubjectConfirmation();
 			sct.setMethod(SAMLConstants.CONFIRMATION_BEARER);
 			SubjectConfirmationDataType confData = sct.addNewSubjectConfirmationData();
 			confData.setRecipient("http://localhost:55333");
 			confData.setNotOnOrAfter(notOnOrAfter);
-			confData.setInResponseTo(ard.getAuthnRequest().getID());
-			AudienceRestrictionType aud = ass1.addNewConditions().addNewAudienceRestriction();
-			aud.addAudience("http://localhost:55333");
-			ass1.getConditions().setNotOnOrAfter(notOnOrAfter);
+			confData.setInResponseTo(responseTo);
+		}
 
-			return idpReply(rd);
+		private void addAttributeStatement(AssertionType assertion) throws Exception {
+			AttributeStatementType ast = assertion.addNewAttributeStatement();
+			AttributeType at = ast.addNewAttribute();
+			at.setName("preferredUsername");
+			XmlString p = XmlString.Factory.newInstance();
+			p.setStringValue("demouser");
+			at.addNewAttributeValue().set(p);
 		}
 
 		public String idpReply(ResponseDocument rd) throws Exception {

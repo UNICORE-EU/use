@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.FileUtils;
@@ -34,11 +33,8 @@ public class TestUserPublicKeyCache {
 	public void testExternalKeySource() throws Exception {
 		String key = FileUtils.readFileToString(new File("src/test/resources/id_ed25519.pub"), "UTF-8");
 		final AtomicBoolean haveKey = new AtomicBoolean(true);
-		UserInfoSource uis = new UserInfoSource() {
-			@Override
-			public Collection<String> getAcceptedKeys(String userName) {
-				return haveKey.get() ? Lists.newArrayList(key) : new ArrayList<>();
-			}
+		UserInfoSource uis = (username) -> {
+			return haveKey.get() ? Lists.newArrayList(key) : new ArrayList<>();
 		};
 		UserPublicKeyCache  upkc = new UserPublicKeyCache();
 		upkc.getUserInfoSources().add(uis);
