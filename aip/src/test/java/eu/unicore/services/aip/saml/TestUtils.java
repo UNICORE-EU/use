@@ -1,11 +1,9 @@
-package eu.unicore.services.aip.saml.basic;
+package eu.unicore.services.aip.saml;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
-
-import eu.unicore.services.aip.saml.Utils;
 
 /**
  * @author K. Benedyczak

@@ -1,5 +1,7 @@
 package eu.unicore.services.aip.xuudb;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
+import eu.unicore.services.ExternalSystemConnector.Status;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.xuudb.server.HttpsServer;
@@ -19,8 +22,9 @@ import eu.unicore.xuudb.xbeans.AddCertificateDocument;
 import eu.unicore.xuudb.xbeans.LoginDataType;
 
 public class TestXUUDBServer {
-
-	XUUDBJSONAttributeSource xuudb;
+	
+	XUUDBAttributeSource xuudb;
+	XUUDBJSONAttributeSource jxuudb;
 	static HttpsServer xuudbServer = null;
 
 	@BeforeAll
@@ -45,24 +49,44 @@ public class TestXUUDBServer {
 	@BeforeEach
 	public void setupEndpoint() throws Exception{
 		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
-		xuudb = new XUUDBJSONAttributeSource();
+		jxuudb = new XUUDBJSONAttributeSource();
+		jxuudb.setXuudbCache(false);
+		jxuudb.setXuudbGCID("TEST");
+		jxuudb.setXuudbHost("http://localhost");
+		jxuudb.setXuudbPort(14463);
+		jxuudb.configure("XUUDB-JSON", k);
+		jxuudb.updateXUUDBConnectionStatus();
+		System.out.println(jxuudb+": " + jxuudb.getConnectionStatusMessage());
+		assertEquals(Status.OK, jxuudb.getConnectionStatus());
+		
+		xuudb = new XUUDBAttributeSource();
 		xuudb.setXuudbCache(false);
 		xuudb.setXuudbGCID("TEST");
 		xuudb.setXuudbHost("http://localhost");
 		xuudb.setXuudbPort(14463);
-		xuudb.configure("test", k);
+		xuudb.configure("XUUDB", k);
 		xuudb.updateXUUDBConnectionStatus();
-		System.out.println("Status: " + xuudb.getConnectionStatusMessage());
+		System.out.println(xuudb+": " + xuudb.getConnectionStatusMessage());
+		assertEquals(Status.OK, xuudb.getConnectionStatus());
 	}
 
 	@Test
-	public void test1() throws IOException {
-		System.out.println("test1");
+	public void testJSON() throws IOException {
+		SubjectAttributesHolder ah = new SubjectAttributesHolder();
+		SecurityTokens t = new SecurityTokens();
+		t.setUserName("UID=demouser");
+		t.setConsignorTrusted(true);
+		ah = jxuudb.getAttributes(t, ah);
+		System.out.println("Attributes from "+jxuudb.getExternalSystemName()+": "+ah);
+	}
+	
+	@Test
+	public void testXML() throws IOException {
 		SubjectAttributesHolder ah = new SubjectAttributesHolder();
 		SecurityTokens t = new SecurityTokens();
 		t.setUserName("UID=demouser");
 		t.setConsignorTrusted(true);
 		ah = xuudb.getAttributes(t, ah);
-		System.out.println(ah);
+		System.out.println("Attributes from "+xuudb.getExternalSystemName()+": "+ah);
 	}
 }

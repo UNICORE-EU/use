@@ -1,6 +1,8 @@
 package eu.unicore.services.aip.saml;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -58,6 +60,7 @@ public class Utils
 			allKnown.append(mapp.getUnicoreName() + " ");
 		Map<String, UnicoreAttributeMappingDef> result = new HashMap<>();
 		var all = conf.entrySet().iterator();
+		List<String> errors = new ArrayList<>();
 		while (all.hasNext())
 		{
 			Entry<Object, Object> e = all.next();
@@ -68,7 +71,7 @@ public class Utils
 			String key2 = key.substring(PREFIX.length());
 			if (key2.length() == 0)
 			{
-				log.warn("Invalid configuration option: " + key);
+				errors.add("Invalid configuration option: " + key);
 				continue;
 			}
 			
@@ -79,15 +82,15 @@ public class Utils
 					break;
 			if (i == rawList.length)
 			{
-				log.warn("Unknown UNICORE attribute '" + elems[0] + 
-					"' was used. Known are: " + allKnown);
+				errors.add("Unknown UNICORE attribute '" + elems[0] +
+						"' was used. Known are: " + allKnown);
 				continue;
 			}
 			if (elems.length == 1) //vo.unicoreAttribute.key2=...
 			{
 				if (val.isEmpty())
 				{
-					log.warn("Definition of UNICORE attribute '" + elems[0] + 
+					errors.add("Definition of UNICORE attribute '" + elems[0] +
 							"' must have a value (SAML name).");
 					continue;
 				}
@@ -96,14 +99,14 @@ public class Utils
 			}
 			if (elems.length > 2)
 			{
-				log.warn("Invalid configuration entry: " + key);
+				errors.add("Invalid configuration entry: " + key);
 				continue;
 			}
 			if (elems[1].equals("default"))
 			{
 				if (val.isEmpty())
 				{
-					log.warn("Definition of a default for UNICORE attribute '" + elems[0] + 
+					errors.add("Definition of a default for UNICORE attribute '" + elems[0] +
 							"' must have a value (SAML name).");
 					continue;
 				}
@@ -119,7 +122,11 @@ public class Utils
 				continue;
 			}
 		}
-		
+		if(errors.size()>0) {
+			for(String e: errors) {
+				log.warn("Error in SAML mappings: {}", e);
+			}
+		}
 		return result.values().toArray(new UnicoreAttributeMappingDef[result.size()]);
 	}
 

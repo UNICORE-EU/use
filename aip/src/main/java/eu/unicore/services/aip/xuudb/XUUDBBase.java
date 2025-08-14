@@ -1,9 +1,8 @@
 package eu.unicore.services.aip.xuudb;
 
 import java.io.IOException;
-import java.security.cert.X509Certificate;
-import java.util.HashSet;
-import java.util.Set;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.io.IOUtils;
@@ -20,6 +19,7 @@ import eu.unicore.services.security.IAttributeSourceBase;
 import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.services.utils.TimeoutRunner;
 import eu.unicore.util.Log;
+import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.httpclient.ConnectionUtil;
 import eu.unicore.util.httpclient.HttpUtils;
 
@@ -37,7 +37,6 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 	public static final String DEFAULT_HOST = "https://localhost";
 
 	protected String name;
-	protected boolean isEnabled = false;
 	protected Integer port = DEFAULT_PORT;
 	protected String host = DEFAULT_HOST;
 	protected Boolean cacheCredentials = Boolean.TRUE;
@@ -45,18 +44,6 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 	protected T xuudb;
 
 	protected final CircuitBreaker cb = new CircuitBreaker();
-
-	public Integer getPort() {
-		return port;
-	}
-
-	public String getHost() {
-		return host;
-	}
-
-	public String getGcID() {
-		return gcID;
-	}
 
 	protected String xuudbURL = null;
 	protected String gcID;
@@ -66,17 +53,16 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 	protected String statusMessage = "N/A";
 
 	@Override
-	public void configure(String name, Kernel kernel) {
+	public void configure(String name, Kernel kernel) throws ConfigurationException {
 		this.name = name;
 		this.kernel = kernel;
 		setupURL();
 		logger.info("Attribute source '{}': connecting to <{}>", name, getXUUDBUrl());
 		initCache();
 		xuudb = createEndpoint();
-		isEnabled = xuudb!=null;
 	}
 
-	protected abstract T createEndpoint();
+	protected abstract T createEndpoint() throws ConfigurationException;
 
 	protected void setupURL() {
 		xuudbURL = host + ":" + port + "/";
@@ -110,48 +96,14 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 		return s != null && !s.isEmpty();
 	}
 
-
-	// monitoring information and query hooks
-
-	private Set<String> accessorNames = new HashSet<>();
-
-	public String[] getRequestorNames() {
-		return accessorNames.toArray(new String[accessorNames.size()]);
-	}
-
-	public void clearRequestorNames() {
-		accessorNames.clear();
-	}
-
-	public void addAccessorName(String name) {
-		boolean newEntry = accessorNames.add(name);
-		if (newEntry) {
-			logger.info("New client: {}", name);
-		}
-	}
-
-	public void clearCache() {
-		cache.removeAll();
-	}
-
-	public long getCacheSize() {
+	long getCacheSize() {
 		return cache.getCacheSize();
 	}
 
-	public boolean getCachingCredentials() {
-		return cacheCredentials;
-	}
-
 	protected void updateXUUDBConnectionStatus() {
-		if (!isEnabled){
-			statusMessage = "Not enabled";
-			status = Status.NOT_APPLICABLE;
-			return;
-		}
 		String msg = checkXUUDBAlive();
 		if (msg!= null) {
-			statusMessage = "OK [" + name
-					+ " "+msg + "]";
+			statusMessage = "OK [" + name + " " + msg + "]";
 			status = Status.OK;
 			cb.OK();
 		}
@@ -163,15 +115,20 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 	}
 
 	protected String checkXUUDBAlive() {
-		Callable<X509Certificate[]> getCert = new Callable<>() {
-			public X509Certificate[] call() throws Exception {
+		final boolean isSecure = getXUUDBUrl().toLowerCase().startsWith("https");
+		Callable<?> ping = isSecure ?
+				()-> {
 				return ConnectionUtil.getPeerCertificate(kernel.getClientConfiguration(), 
 						getXUUDBUrl(), 5000, logger);
-			}
-		};
+				} :
+				()-> {
+					String h = host.split("://")[1];
+					new Socket(InetAddress.getByName(h), port).close();
+					return "OK";
+				};
 		ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
 		try{
-			return TimeoutRunner.compute(getCert, ts, 2000) != null ? 
+			return TimeoutRunner.compute(ping, ts, 2000) != null ? 
 				"connected to " + getXUUDBUrl() : null;
 		}catch(Exception ex) {
 			return null;

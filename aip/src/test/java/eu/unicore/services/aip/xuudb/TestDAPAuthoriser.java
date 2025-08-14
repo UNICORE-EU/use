@@ -96,7 +96,7 @@ public class TestDAPAuthoriser {
 		xuudb.getAttributes(cl, null);
 
 		assertEquals(0, xuudb.getCacheSize());
-		
+
 		xuudb.setXuudbCache(true);
 		mock.xlogin = "xlogin1";
 		mock.gid = "gid1";

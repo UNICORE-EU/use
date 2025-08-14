@@ -22,9 +22,14 @@
     </dependency>
     <dependency>
       <groupId>eu.unicore.services</groupId>
+      <artifactId>use-rest</artifactId>
+      <version>${project.parent.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>eu.unicore.services</groupId>
       <artifactId>use-core</artifactId>
       <version>${project.parent.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>eu.unicore.xuudb</groupId>

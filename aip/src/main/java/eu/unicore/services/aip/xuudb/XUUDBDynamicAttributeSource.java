@@ -13,7 +13,7 @@ import eu.unicore.security.wsutil.client.WSClientFactory;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.IDynamicAttributeSource;
-import eu.unicore.util.Log;
+import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.httpclient.IClientConfiguration;
 import eu.unicore.xuudb.interfaces.IDynamicAttributesPublic;
 import eu.unicore.xuudb.xbeans.GetAttributesRequestDocument;
@@ -36,9 +36,7 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 					IDynamicAttributesPublic.class, getXUUDBUrl()
 							+ IDynamicAttributesPublic.SERVICE_NAME);
 		} catch (Exception e) {
-			Log.logException("Can't make connection to " + name,
-					e, logger);
-			return null;
+			throw new ConfigurationException("Error setting up client for <"+getXUUDBUrl()+">");
 		}
 	}
 
@@ -89,9 +87,6 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 	@Override
 	public SubjectAttributesHolder getAttributes(Client client,
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException {
-		if (!isEnabled) {
-			throw new SubsystemUnavailableException("The XUUDB attribute source is disabled");
-		}
 		if(!cb.isOK()) {
 			throw new SubsystemUnavailableException("Attribute source "+name+" is unavailable");
 		}

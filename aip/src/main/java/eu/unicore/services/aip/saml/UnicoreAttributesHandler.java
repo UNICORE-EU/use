@@ -78,8 +78,7 @@ public class UnicoreAttributesHandler
 			UnicoreAttributeMappingDef mapping = mappings.get(a.getName());
 			if (mapping == null)
 			{
-				log.debug(a.getName() + 
-						" attribute received but without UNICORE-specific meaning, ignoring.");
+				log.debug("{} attribute received but without UNICORE-specific meaning, ignoring.", a.getName());
 				continue;
 			}
 			if (remove)
@@ -87,18 +86,16 @@ public class UnicoreAttributesHandler
 
 			if (mapping.isNonZeroVal() && a.getStringValues().size() == 0)
 			{
-				log.debug(a.getName() + 
-					" attribute (used for UNICORE " + mapping.getUnicoreName()
-					+ ") received but without a value, ignoring.");
+				log.debug("{} attribute (used for UNICORE {}) received but without a value, ignoring.",
+						a.getName(), mapping.getUnicoreName());
 				continue;
 			}
 
 			boolean isDefault = (mapping.getDefSamlName() != null) && mapping.getDefSamlName().equals(a.getName());
-			if (a.getStringValues().size() > 1 && isDefault && !mapping.isMultiVal())
-				log.warn(a.getName() + " default attribute (used for UNICORE " + 
-					mapping.getUnicoreName()
-					+ ") received with multiple values (it should have one, will use a random one!).");
-
+			if (a.getStringValues().size() > 1 && isDefault && !mapping.isMultiVal()) {
+				log.debug("{} default attribute (used for UNICORE {}) received with multiple values (it should have one, will use a random one!).",
+					a.getName(), mapping.getUnicoreName());
+			}
 			if (mapping.getSamlName() != null && mapping.getSamlName().equals(a.getName())) 
 			{
 				addValid(a, mapping, retValid, false);
@@ -112,8 +109,7 @@ public class UnicoreAttributesHandler
 		updateDefault(retValid, retDefault);
 		updateDefault(retVoValid, retVoDefault);
 		
-		UnicoreIncarnationAttributes ret = new UnicoreIncarnationAttributes();
-		ret.setFromLists(retValid, retDefault, retVoDefault);
+		UnicoreIncarnationAttributes ret = new UnicoreIncarnationAttributes(retValid, retDefault, retVoDefault);
 		return ret;
 	}
 
@@ -196,7 +192,7 @@ public class UnicoreAttributesHandler
 				if (mapping.isMultiVal())
 				{
 					currentDef.addAll(currentValid);
-					log.debug("Using all valid values as default values for attribute " + validAttr);
+					log.debug("Using all valid values as default values for attribute {}", validAttr);
 				} else if (mapping.isNonZeroVal())
 				{
 					String first = currentValid.get(0);
@@ -209,18 +205,23 @@ public class UnicoreAttributesHandler
 							break;
 						}
 					if (different)
-						log.info("Using the first valid attribute value " +
-								"as a default value for attribute " + validAttr + 
-								", all values are: " + currentValid.toString());
+						log.debug("Using the first valid attribute value as a default value for attribute {}, all values are: {}",
+								validAttr, currentValid);
 					 else
-						log.debug("Using the only one valid attribute value " +
-								"as a default value for attribute " + validAttr + 
-								", value is: " + first);
+						log.debug("Using the only one valid attribute value as a default value for attribute {}, value is: {}",
+								validAttr, first);
 				}
 				retDefault.put(validAttr, currentDef);
 			}
 		}
 	}
+
+	@Override
+	public String toString() {
+		UnicoreAttributeMappingDef[] m = new UnicoreAttributeMappingDef[mappingsUnicore.size()];
+		return "SAML-to-UNICORE mappings\n"+Utils.createMappingsDesc(mappingsUnicore.values().toArray(m));
+	}
+
 }
 
 

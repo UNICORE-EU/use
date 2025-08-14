@@ -1,12 +1,10 @@
-package eu.unicore.services.aip.saml.basic;
+package eu.unicore.services.aip.saml;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import eu.unicore.services.aip.saml.UnicoreAttributeMappingDef;
-import eu.unicore.services.aip.saml.Utils;
 import eu.unicore.services.aip.saml.conf.PropertiesBasedConfiguration;
 import eu.unicore.util.Log;
 

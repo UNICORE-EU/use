@@ -37,9 +37,6 @@ public class XUUDBJSONAttributeSource extends XUUDBBase<String> implements
 	@Override
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens,
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException {
-		if (!isEnabled) {
-			throw new SubsystemUnavailableException("Attribute source "+name+" is disabled");
-		}
 		if(!cb.isOK()) {
 			throw new SubsystemUnavailableException("Attribute source "+name+" unavailable");
 		}
@@ -63,7 +60,6 @@ public class XUUDBJSONAttributeSource extends XUUDBBase<String> implements
 	private SubjectAttributesHolder checkDN(final SecurityTokens tokens)
 			throws IOException {
 		String dn = tokens.getEffectiveUserName();
-		addAccessorName(dn);
 		try {
 			URIBuilder ub = new URIBuilder(getXUUDBUrl());
 			ub.addParameter("dn", dn);

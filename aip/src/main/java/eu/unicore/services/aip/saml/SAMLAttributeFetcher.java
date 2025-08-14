@@ -53,7 +53,7 @@ public class SAMLAttributeFetcher
 	// SAML service host without full endpoint
 	private String simpleAddress;
 
-	public SAMLAttributeFetcher(IPullConfiguration cc, IClientConfiguration secProv) throws Exception
+	public SAMLAttributeFetcher(IPullConfiguration cc, IClientConfiguration secProv)
 	{
 		this.pullConfiguration = cc;
 		this.clientConfiguration = secProv;
@@ -102,13 +102,11 @@ public class SAMLAttributeFetcher
 	public void fetchAttributes(SecurityTokens tokens) throws SAMLValidationException
 	{
 		String dn = tokens.getEffectiveUserName();
-		if (dn == null)
-			throw new IllegalStateException("Can't authorize unknown user!");
+		if (dn == null)throw new IllegalStateException("Can't authorize unknown user!");
 		NameID subject = new NameID(dn, SAMLConstants.NFORMAT_DN);
 		getAttributes(subject, tokens);
 	}
-	
-	
+
 	/**
 	 * This works as follows: first it is checked if another attribute fetcher pulled the 
 	 * attributes from our current SAML server. If so then the list is returned.  
@@ -129,16 +127,13 @@ public class SAMLAttributeFetcher
 			allAttributes = new HashMap<>();
 			tokens.getContext().put(ALL_PULLED_ATTRS_KEY, allAttributes);
 		}
-		
-		if (allAttributes.get(voServerAddress) != null)
-			return;
+		if (allAttributes.get(voServerAddress) != null)return;
 		List<ParsedAttribute> attrs;
 		try
 		{
 			String comparableSubjectDN = X500NameUtils.getComparableForm(subject.getXBean().getStringValue());
 			if (cacheTtl > 0)
 			{
-				
 				List<ParsedAttribute> cachedAttrs = cache.getIfPresent(comparableSubjectDN);
 				if (cachedAttrs != null)
 				{
@@ -165,15 +160,10 @@ public class SAMLAttributeFetcher
 			{
 				log.error("Can't authenticate to the SAML " +
 					"server as the local server - probably the local server doesn't " +
-					"have the read access to the SAML server.");
+					"have read access to the SAML server.");
 			}
 			throw e;
 		}
-		if (attrs.size() == 0)
-		{
-			log.debug("Got empty list of attributes from the SAML service");
-		}
-
 		allAttributes.put(voServerAddress, attrs);
 	}
 
@@ -191,13 +181,11 @@ public class SAMLAttributeFetcher
 		log.debug("Performing SAML query for attributes of {}",
 				() -> X500NameUtils.getReadableForm(subject.getXBean().getStringValue()));
 		String samlId = pullConfiguration.getLocalServerURI();
-		NameID myID;
-		if (samlId != null) {
-			myID = new NameID(pullConfiguration.getLocalServerURI(), SAMLConstants.NFORMAT_ENTITY);
-		}
-		else {
-			myID = new NameID(clientConfiguration.getCredential().getSubjectName(), 
-					SAMLConstants.NFORMAT_DN);
+		NameID myID = null;
+		if(samlId!=null) {
+			myID = new NameID(samlId, SAMLConstants.NFORMAT_ENTITY);
+		} else {
+			myID =  new NameID(clientConfiguration.getCredential().getSubjectName(), SAMLConstants.NFORMAT_DN);
 		}
 		return client.getAssertion(subject, myID).getAttributes();
 	}

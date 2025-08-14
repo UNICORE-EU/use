@@ -1,6 +1,7 @@
 package eu.unicore.services.aip.saml;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,12 +39,11 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 	private static final Logger log = Log.getLogger(IPullConfiguration.LOG_PFX, SAMLAttributeSource.class);
 
 	private PropertiesBasedConfiguration conf;
-	private UnicoreAttributesHandler specialAttrsHandler;
+	UnicoreAttributesHandler specialAttrsHandler;
 	private String configFile;
 	private String name;
-	private boolean isEnabled = false;
 	private Kernel kernel;
-	
+
 	private SAMLAttributeFetcher fetcher;
 
 	private Status status = Status.UNKNOWN;
@@ -56,33 +56,24 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 	public void configure(String name, Kernel kernel) throws ConfigurationException {
 		initConfig(log, name);
 		this.kernel=kernel;
-		try
-		{
-			IClientConfiguration cc = kernel.getClientConfiguration();
-			if(cc instanceof DefaultClientConfiguration &&
+		IClientConfiguration cc = kernel.getClientConfiguration();
+		if(cc instanceof DefaultClientConfiguration &&
 				conf.getValue(PropertiesBasedConfiguration.CFG_SERVER_USERNAME)!=null){
-					DefaultClientConfiguration dcc = (DefaultClientConfiguration)cc;
-					dcc.setHttpAuthn(true);
-					dcc.setHttpUser(conf.getValue(PropertiesBasedConfiguration.CFG_SERVER_USERNAME));
-					dcc.setHttpPassword(conf.getValue(PropertiesBasedConfiguration.CFG_SERVER_PASSWORD));
-					log.debug("Authenticating to SAML attribute server with username/password.");
-			}
-			fetcher = new SAMLAttributeFetcher(conf, cc);
-			isEnabled = true;
-		} catch (Exception e)
-		{
-			log.error("Error in VO subsystem configuration (PULL mode): {}. PULL MODE WILL BE DISABLED", e.toString());
+			DefaultClientConfiguration dcc = (DefaultClientConfiguration)cc;
+			dcc.setHttpAuthn(true);
+			dcc.setHttpUser(conf.getValue(PropertiesBasedConfiguration.CFG_SERVER_USERNAME));
+			dcc.setHttpPassword(conf.getValue(PropertiesBasedConfiguration.CFG_SERVER_PASSWORD));
+			log.debug("Authenticating to SAML attribute server with username/password.");
 		}
+		fetcher = new SAMLAttributeFetcher(conf, cc);
 		initFinal(log, SAMLAttributeFetcher.ALL_PULLED_ATTRS_KEY, false);
 	}
 
 	@Override
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens,
 			SubjectAttributesHolder otherAuthoriserInfo)
-			throws IOException
+					throws IOException
 	{
-		if (!isEnabled)
-			throw new SubsystemUnavailableException("Attribute source "+name+" is disabled");
 		if(!cb.isOK())
 			throw new SubsystemUnavailableException("Attribute source "+name+" is temporarily unavailable");
 		try {
@@ -93,61 +84,45 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 		}
 		@SuppressWarnings("unchecked")
 		Map<String, List<ParsedAttribute>> allAttributes = (Map<String, List<ParsedAttribute>>) 
-				tokens.getContext().get(SAMLAttributeFetcher.ALL_PULLED_ATTRS_KEY);
+		tokens.getContext().get(SAMLAttributeFetcher.ALL_PULLED_ATTRS_KEY);
 		List<ParsedAttribute> serviceAttributesOrig = allAttributes.get(conf.getAttributeQueryServiceURL());
 		List<ParsedAttribute> serviceAttributes = new ArrayList<>();
 		if (serviceAttributesOrig != null) {
 			serviceAttributes.addAll(serviceAttributesOrig);
 		}
-		return assembleAttributesHolder(serviceAttributes, otherAuthoriserInfo, 
-				conf.isPulledGenericAttributesEnabled());
+		return assembleAttributesHolder(serviceAttributes, otherAuthoriserInfo, conf.isPulledGenericAttributesEnabled());
 	}
-	
-	private void checkConnection() {
-		if(!isEnabled) {
-			status = Status.NOT_APPLICABLE;
-			statusMessage = "n/a (not enabled)";
-		}
-		else {
-			final SecurityTokens st = new SecurityTokens();
-			String dn = Client.ANONYMOUS_CLIENT_DN;
-			try {
-				dn = kernel.getContainerSecurityConfiguration().getCredential().getSubjectName();
-			}catch(Exception e) {}
-			st.setUserName(dn);
-			st.setConsignorTrusted(true);
 
-			ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
-			Callable<String> check = new Callable<>() {
-				public String call() throws Exception {
-					try {
-						fetcher.fetchAttributes(st);
-						return "OK";
-					}catch(SAMLErrorResponseException sre) {
-						return "OK";
-					}
-					catch(Exception sre) {
-						return Log.createFaultMessage("ERROR", sre);
-					}
-				}
-			};
+	private void checkConnection() {
+		final SecurityTokens st = new SecurityTokens();
+		st.setUserName(Client.ANONYMOUS_CLIENT_DN);
+		st.setConsignorTrusted(true);
+		ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
+		Callable<String> check = ()->{
 			try {
-				String result = TimeoutRunner.compute(check, ts, 3000);
-				if ("OK".equals(result)) {
-					statusMessage = "OK [" + name
-							+ " connected to " + fetcher.getServerURL() + "]";
-					status = Status.OK;
-					cb.OK();
-				}
-				else{
-					statusMessage = "CAN'T CONNECT" + " ["+(result!=null ? result : "")+"]";
-					status = Status.DOWN;
-					cb.notOK();
-				}
-			}catch(Exception e) {
-				statusMessage = Log.createFaultMessage("ERROR checking status",e);
-				status = Status.UNKNOWN;
+				fetcher.fetchAttributes(st);
+			}catch(SAMLErrorResponseException sre) {}
+			catch(Exception e) {
+				return Log.createFaultMessage("ERROR", e);
 			}
+			return "OK";
+		};
+		try {
+			String result = TimeoutRunner.compute(check, ts, 3000);
+			if ("OK".equals(result)) {
+				statusMessage = "OK [" + name
+						+ " connected to " + fetcher.getServerURL() + "]";
+				status = Status.OK;
+				cb.OK();
+			}
+			else{
+				statusMessage = "CAN'T CONNECT" + " ["+(result!=null ? result : "")+"]";
+				status = Status.DOWN;
+				cb.notOK();
+			}
+		}catch(Exception e) {
+			statusMessage = Log.createFaultMessage("ERROR checking status",e);
+			status = Status.UNKNOWN;
 		}
 	}
 
@@ -176,44 +151,41 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 			conf = new PropertiesBasedConfiguration(configFile);
 		} catch (IOException e)
 		{
-			throw new ConfigurationException("Can't read configuration of the SAML subsystem: " +
-					e.getMessage());
+			throw new ConfigurationException("Can't read configuration of the SAML subsystem", e);
 		}
-		isEnabled = true;
 	}
-	
+
 	private void initFinal(Logger log, String key, boolean pushMode)
 	{
-		log.info("Adding SAML attributes callbacks");
-		AttributesCallback callback = new AttributesCallback(key, name);
-		kernel.getSecurityManager().addCallback(callback);
-		
-		UnicoreAttributeMappingDef []initializedMappings = Utils.fillMappings(
+		UnicoreAttributeMappingDef[] initializedMappings = Utils.fillMappings(
 				conf.getSourceProperties(), Utils.mappings, log);
-		if (log.isDebugEnabled())
-			log.debug(Utils.createMappingsDesc(initializedMappings));
+		log.debug("{}",()->Utils.createMappingsDesc(initializedMappings));
 		specialAttrsHandler = new UnicoreAttributesHandler(conf, initializedMappings, pushMode);
 	}
-	
+
 	private SubjectAttributesHolder assembleAttributesHolder(List<ParsedAttribute> serviceAttributes,
 			SubjectAttributesHolder otherAuthoriserInfo, boolean addGeneric)
 	{
-		SubjectAttributesHolder ret = new SubjectAttributesHolder(otherAuthoriserInfo.getPreferredVos());
-		String preferredScope = Utils.handlePreferredVo(otherAuthoriserInfo.getPreferredVos(), 
-				conf.getScope(), otherAuthoriserInfo.getSelectedVo());
+		SubjectAttributesHolder ret = new SubjectAttributesHolder();
+		String preferredScope = null;
+		if(otherAuthoriserInfo!=null) {
+			ret.setPreferredVos(null);
+			preferredScope = Utils.handlePreferredVo(otherAuthoriserInfo.getPreferredVos(), 
+					conf.getScope(), otherAuthoriserInfo.getSelectedVo());
+		}
 		UnicoreIncarnationAttributes uia = specialAttrsHandler.extractUnicoreAttributes(
 				serviceAttributes, preferredScope, true);
-		
+
 		if (addGeneric)
 		{		
-			List<XACMLAttribute> xacmlAttributes = XACMLAttributesExtractor.getSubjectAttributes(
-					serviceAttributes, conf.getScope());
+			List<XACMLAttribute> xacmlAttributes = getSubjectAttributes(serviceAttributes, conf.getScope());
 			if (xacmlAttributes != null)
 				ret.setXacmlAttributes(xacmlAttributes);
 		}
-		if (uia.getDefaultAttributes() != null && uia.getValidAttributes() != null)
+		if (uia.getDefaultAttributes() != null && uia.getValidAttributes() != null) {
 			ret.setAllIncarnationAttributes(uia.getDefaultAttributes(), uia.getValidAttributes());
-		
+		}
+
 		//preferred scope is for sure subscope of our scope or our scope. But we are not sure if the 
 		// user is really a member of the preferred scope. If not we are not setting the preferred VO at all
 		// even as we are sure that the list of attributes is empty (there should be no selected VO at all).
@@ -250,8 +222,31 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 		return getName()+" "+fetcher.getSimpleAddress();
 	}
 
+	private List<XACMLAttribute> getSubjectAttributes(List<ParsedAttribute> authzAttribs, String scope)
+	{
+		List<XACMLAttribute> ret = null;
+		if (authzAttribs != null) {
+			ret = new ArrayList<>();
+			for (ParsedAttribute voAttr: authzAttribs) {
+				try {
+					map2XACMLAttr(ret, voAttr);
+				} catch (URISyntaxException e){}
+			}
+		}
+		return ret;
+	}
+
+	// only string and URI attribute values are supported, others are ignored
+	private void map2XACMLAttr(List<XACMLAttribute> toFill, 
+			ParsedAttribute voAttr) throws URISyntaxException
+	{
+		if (!voAttr.getObjectValues().isEmpty() && voAttr.getDataType().isAssignableFrom(String.class))
+		{
+			for (String value: voAttr.getStringValues())
+			{
+				log.debug("Adding XACML string attribute {} with value {}", voAttr.getName(), value);
+				toFill.add(new XACMLAttribute(voAttr.getName(), value, XACMLAttribute.Type.STRING));
+			}
+		}
+	}
 }
-
-
-
-

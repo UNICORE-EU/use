@@ -77,21 +77,19 @@ public class TestXUUDBAuthoriser {
 		mock.xlogin="test1::test2";
 		mock.role="user:admin";
 		mock.projects="p1:p2:p3";
-		
+
 		SubjectAttributesHolder attr=xuudb.getAttributes(tokens, null);
 		assertNotNull(attr);
 		assertTrue(mock.callCount>0);
 		assertEquals(userName,mock.lastDN);
-		
+
 		assertEquals(2,attr.getValidIncarnationAttributes().get(IAttributeSource.ATTRIBUTE_XLOGIN).length);
 		assertEquals(3,attr.getValidIncarnationAttributes().get(IAttributeSource.ATTRIBUTE_GROUP).length);
 		assertEquals(2,attr.getValidIncarnationAttributes().get(IAttributeSource.ATTRIBUTE_ROLE).length);
 		assertEquals(1,attr.getDefaultIncarnationAttributes().get(IAttributeSource.ATTRIBUTE_XLOGIN).length);
 		assertEquals(1,attr.getDefaultIncarnationAttributes().get(IAttributeSource.ATTRIBUTE_GROUP).length);
 		assertEquals(1,attr.getDefaultIncarnationAttributes().get(IAttributeSource.ATTRIBUTE_ROLE).length);
-		
 		assertEquals("user",attr.getDefaultIncarnationAttributes().get(IAttributeSource.ATTRIBUTE_ROLE)[0]);
-			
 	}
 	
 }
