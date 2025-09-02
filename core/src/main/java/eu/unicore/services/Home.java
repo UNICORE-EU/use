@@ -95,14 +95,6 @@ public interface Home extends Runnable, KernelInjectable {
 	public void persist(Resource instance) throws Exception;
 
 	/**
-	 * Lock the given instance, i.e. upgrade from "read" to "write permission"
-	 * 
-	 * @param instance
-	 * @throws ResourceUnavailableException if the resource cannot be locked within the timeout period
-	 */
-	public void lock(Resource instance) throws ResourceUnavailableException;
-
-	/**
 	 * delete and cleanup the administrative information about a Resource
 	 * (NOTE: this will <b>not</b> call {@link Resource#destroy()}
 	 * (NOTE 2: locks will be cleaned as well}
@@ -111,7 +103,6 @@ public interface Home extends Runnable, KernelInjectable {
 	 * @throws Exception
 	 */
 	public void destroyResource(String resourceId) throws Exception;
-
 
 	/**
 	 * Get the termination time of an WS-Resource
@@ -142,18 +133,6 @@ public interface Home extends Runnable, KernelInjectable {
 	public String getOwner(String resourceID);
 
 	/**
-	 * retrieve the current number of alive instances
-	 * @return long
-	 * @throws PersistenceException 
-	 */
-	public long getNumberOfInstances() throws Exception;
-
-	/**
-	 * Stop the expiry checker for this service
-	 */
-	public abstract void stopExpiryCheckNow();
-
-	/**
 	 * check whether the service is currently shutting down
 	 * 
 	 * @return <code>true</code> if the service is currently shutting down
@@ -166,13 +145,11 @@ public interface Home extends Runnable, KernelInjectable {
 	 */
 	public Store getStore();
 
-
 	/**
 	 * Get child resources accessible to the given client.
 	 * Note: the PDP is invoked for each resource
 	 * 
 	 * @param client - client
-	 * @since 3.1.0
 	 */
 	public List<String> getAccessibleResources(Client client) throws Exception;
 
@@ -187,7 +164,5 @@ public interface Home extends Runnable, KernelInjectable {
 	public List<String> getAccessibleResources(Collection<String> ids, Client client) throws Exception;
 
 	public Kernel getKernel();
-
-	public void setKernel(Kernel kernel);
 
 }

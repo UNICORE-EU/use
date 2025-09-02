@@ -217,15 +217,6 @@ public abstract class DefaultHome implements Home {
 		}
 	}
 
-	@Override
-	public void stopExpiryCheckNow(){
-		try{
-			instanceChecking.removeChecker(expiryChecker);
-		}catch(Exception e){
-			logger.warn("[{}] Uncaught exception occured while stopping expiry check", serviceName, e);
-		}
-	}
-
 	/**
 	 * called when the container shuts down
 	 */
@@ -249,8 +240,6 @@ public abstract class DefaultHome implements Home {
 	@Override
 	public String getServiceName(){return serviceName;}
 
-	public void setServiceName(String serviceName){this.serviceName=serviceName;}
-
 	@Override
 	public Resource get(String id)throws ResourceUnknownException, ResourceUnavailableException{
 		Resource res = null;
@@ -268,25 +257,6 @@ public abstract class DefaultHome implements Home {
 	public Resource refresh(String id) throws ResourceUnknownException, ResourceUnavailableException {
 		try(Resource resource = getForUpdate(id)){
 			return resource;
-		}
-	}
-
-	/**
-	 * lock a resource which was already read from persistence. This is
-	 * effectively upgrading a read to a write operation
-	 *
-	 * @param resource
-	 * @throws ResourceUnavailableException
-	 */
-	@Override
-	public void lock(Resource resource) throws ResourceUnavailableException {
-		try{
-			serviceInstances.lock(resource,locking_timeout,TimeUnit.SECONDS);
-			processMessages(resource);
-		}catch(TimeoutException te){
-			throw new ResourceUnavailableException("Instance with ID <"+_fullID(resource.getUniqueID())+"> is not available.");
-		}catch(Exception pe){
-			throw new ResourceUnavailableException("Instance with ID <"+_fullID(resource.getUniqueID())+"> cannot be accessed",pe);
 		}
 	}
 
@@ -455,11 +425,6 @@ public abstract class DefaultHome implements Home {
 		removeFromStorage(resourceId);
 		instanceChecking.remove(resourceId);
 		secInfoCache.remove(resourceId);
-	}
-
-	@Override
-	public long getNumberOfInstances()throws Exception{
-		return serviceInstances.size();
 	}
 
 	@Override
