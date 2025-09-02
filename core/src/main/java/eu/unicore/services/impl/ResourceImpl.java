@@ -11,7 +11,6 @@ import eu.unicore.services.Home;
 import eu.unicore.services.InitParameters;
 import eu.unicore.services.InitParameters.TerminationMode;
 import eu.unicore.services.Kernel;
-import eu.unicore.services.messaging.PullPoint;
 import eu.unicore.util.Log;
 
 /**
@@ -112,32 +111,18 @@ public abstract class ResourceImpl extends SecuredResourceImpl {
 	}
 
 	/**
-	 * helper method that returns the default lifetime of a 
-	 * ws-resource of the given service in seconds
-	 * 
 	 * @see ContainerProperties#DEFAULT_LIFETIME
-	 * @return lifetime
+	 * @return default lifetime for this service
 	 */
 	protected int getDefaultLifetime(){
 		return getKernel().getContainerProperties().getSubkeyIntValue(
 				ContainerProperties.DEFAULT_LIFETIME, getServiceName());
 	}
-	
+
 	@Override
 	public BaseModel getModel(){
 		return (BaseModel)model;
 	}
-
-	@Override
-	public void activate(){
-	}
-
-	@Override
-	public void processMessages(PullPoint messageIterator){
-	}
-
-	@Override
-	public void postRestart()throws Exception{}
 
 	@Override
 	public void close() {
@@ -167,5 +152,4 @@ public abstract class ResourceImpl extends SecuredResourceImpl {
 	public void setResourceStatus(ResourceStatus status) {
 		getModel().setResourceStatus(status);
 	}
-
 }

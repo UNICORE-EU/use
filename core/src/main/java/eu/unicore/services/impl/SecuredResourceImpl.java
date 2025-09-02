@@ -40,29 +40,24 @@ import eu.unicore.util.Log;
 public abstract class SecuredResourceImpl implements Resource {
 
 	private static final Logger logger=Log.getLogger(Log.UNICORE, SecuredResourceImpl.class);
-	
-	public static enum AccessLevel {
-		NORMAL, OWNER;
-	}
-	
+
 	/**
 	 * used for passing an initial ACL (a List of ACLEntry objects) to a service instance
 	 */
 	public static final String INITPARAM_INITIAL_ACL=SecuredResourceImpl.class.getName()+".init.initialACL";
 
-	
 	protected SecuredResourceModel model;
 
 	@Override
 	public SecuredResourceModel getModel(){
 		return model;
 	}
-	
+
 	@Override
 	public void setModel(Model model){
 		this.model=(SecuredResourceModel)model;
 	}
-	
+
 	@Override
 	public String getUniqueID(){
 		return model.getUniqueID();
@@ -90,42 +85,33 @@ public abstract class SecuredResourceImpl implements Resource {
 	 * and that user preferences were processed. 
 	 * <p>
 	 * Example use case of this method is to provide persisted user preferences if
-	 * this makes sense for the WS-Resource.
+	 * this makes sense for the Resource.
 	 * <p>
 	 * The default implementation does nothing.
-	 *   
+	 *
 	 * @param securityTokens tokens to be updated. It is never null.
 	 */
-	public void updateSecurityTokensBeforeAIP(SecurityTokens securityTokens) {
-	}
-
+	public void updateSecurityTokensBeforeAIP(SecurityTokens securityTokens) {}
 
 	/**
-	 * set the default owner of this resource, which is 
+	 * set the default owner of this resource, which is either
 	 * <ul>
-	 *   <li>the original user if trust delegation info is present, or we have the user cert</li>
-	 *   <li>the consignor, if available</li>
+	 *   <li>the effective user, or/li>
 	 *   <li>the server, if no client security info is available</li>
 	 * </ul>
 	 */
 	protected void setDefaultOwner(){
 		SecurityTokens tokens=getSecurityTokens();
 		if(tokens!=null){
-			String p=tokens.getEffectiveUserName();
+			String p = tokens.getEffectiveUserName();
 			if (p!=null)
 				setOwner(p);
 		}
 		else{
 			setServerAsOwner();
 		}
-		if(logger.isDebugEnabled()){
-			String ownerDN=model.getOwnerDN();
-			if (ownerDN!=null) {
-				logger.debug("Owner: {}", X500NameUtils.getReadableForm(ownerDN));
-			} else {
-				logger.debug("Owner could not be assigned.");
-			}
-		}
+		logger.debug("Owner: {}", ()-> model.getOwnerDN()!=null?
+			X500NameUtils.getReadableForm(model.getOwnerDN()): "n/a" );
 	}
 
 	protected void setServerAsOwner(){
@@ -152,14 +138,14 @@ public abstract class SecuredResourceImpl implements Resource {
 	 * This method is here for backwards compatibility. It is suggested to use 
 	 * {@link AuthZAttributeStore#getClient()} instead
 	 */
-	public synchronized Client getClient() {
+	public Client getClient() {
 		return AuthZAttributeStore.getClient();
 	}
 
 	/**
-	 * set the owner using an {@link X500Principal}
+	 * set the owner
 	 * 
-	 * @param owner - an {@link X500Principal}
+	 * @param owner
 	 */
 	public void setOwner(X500Principal owner){
 		model.setOwnerDN(owner.getName());
@@ -171,7 +157,7 @@ public abstract class SecuredResourceImpl implements Resource {
 	 * @param owner
 	 */
 	public void setOwner(String owner){
-		model.setOwnerDN(owner);
+		setOwner(new X500Principal(owner));
 	}
 
 	/**
@@ -181,11 +167,11 @@ public abstract class SecuredResourceImpl implements Resource {
 	 *
 	 * @return owner's DN
 	 */
-	public synchronized String getOwner(){
+	public String getOwner(){
 		String ownerDn = model.getOwnerDN();
 		return ownerDn!=null ? ownerDn : Client.ANONYMOUS_CLIENT_DN;
 	}
-	
+
 	public boolean isOwnerLevelAccess() {
 		Client c = getClient();
 		if(!getKernel().getContainerSecurityConfiguration().isAccessControlEnabled())return true;
@@ -229,21 +215,21 @@ public abstract class SecuredResourceImpl implements Resource {
 	}
 
 
-
 	public static class AsyncChildDelete implements Runnable{
 
 		private final Collection<String>toRemove;
 
 		private final Home home;
-		
+
 		private final Client client;
-		
+
 		public AsyncChildDelete(Client client, Home home, Collection<String>toRemove){
 			this.toRemove = toRemove;
 			this.home = home;
 			this.client = client;
 		}
-		
+
+		@Override
 		public void run(){
 			for(String j: toRemove){
 				try{

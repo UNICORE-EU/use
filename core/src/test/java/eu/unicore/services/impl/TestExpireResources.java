@@ -57,6 +57,11 @@ public class TestExpireResources {
 		
 		home=new DefaultHome(){
 
+			@Override
+			protected Integer getMaxLifetime() {
+				return null;
+			}
+
 			public String getServiceName(){return "test123";}
 
 			@Override

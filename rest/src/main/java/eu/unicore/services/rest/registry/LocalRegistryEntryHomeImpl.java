@@ -15,7 +15,7 @@ public class LocalRegistryEntryHomeImpl extends DefaultHome {
 	 * their termination time.
 	 */
 	@Override
-	protected void initExpiryCheck(Collection<String> uniqueIDs)throws Exception{
+	protected void initExpiryCheck(Collection<String> uniqueIDs) {
 		super.initExpiryCheck(uniqueIDs);
 		instanceChecking.removeChecker(expiryChecker);
 		expiryChecker = new RegistryEntryUpdater();
@@ -30,7 +30,7 @@ public class LocalRegistryEntryHomeImpl extends DefaultHome {
 	@Override
 	public void runExpiryCheckNow(){
 		super.runExpiryCheckNow();
-		try{
+		try {
 			for(String id: serviceInstances.getUniqueIDs()){
 				try{
 					//forces refresh of registry entry in global registry

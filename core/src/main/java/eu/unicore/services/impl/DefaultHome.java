@@ -101,68 +101,51 @@ public abstract class DefaultHome implements Home {
 
 	@Override
 	public void start(String serviceName)throws Exception{
-		if(serviceName==null || "".equals(serviceName)){
-			throw new IllegalArgumentException("Must specify a service name.");
-		}
-		if(kernel==null){
-			throw new IllegalStateException("The kernel field has not been initialized");
-		}
-		this.serviceName=serviceName;
-		if(serviceInstances==null){
-			serviceInstances=kernel.getPersistenceManager().getPersist(serviceName);
-		}
-		Collection<String> uniqueIDs=serviceInstances.getUniqueIDs();
+		this.serviceName = serviceName;
+		serviceInstances = kernel.getPersistenceManager().getPersist(serviceName);
+		Collection<String> uniqueIDs = serviceInstances.getUniqueIDs();
 		logger.info("[{}] Have {} instances from permanent storage.", serviceName, uniqueIDs.size());
 		asyncInit(uniqueIDs);
-		initNotification();
 		locking_timeout = kernel.getContainerProperties().
 				getSubkeyIntValue(ContainerProperties.INSTANCE_LOCKING_TIMEOUT, serviceName);
 	}
 
 	protected void asyncInit(Collection<String> uniqueIDs) throws Exception {
-		Runnable r = new Runnable() {
-			public void run() {
-				boolean logIt = true;
-				Iterator<String>iter = uniqueIDs.iterator();
-				while(iter.hasNext()){
-					String id = iter.next();
-					try{
-						doPerInstanceActivation(id);
-					}
-					catch(Exception e){
-						recoverInstanceActivationError(e, id, logIt);
-						logIt = true;			
-						iter.remove();
-					}
-				}
+		kernel.getContainerProperties().getThreadingServices().getExecutorService().submit(
+		()->{
+			Iterator<String>iter = uniqueIDs.iterator();
+			int errors = 0;
+			while(iter.hasNext()){
+				String id = iter.next();
 				try{
-					initExpiryCheck(uniqueIDs);
-				}catch(Exception ex) {
-					throw new RuntimeException(ex);
+					doPerInstanceActivation(id);
 				}
-				logger.info("[{}] Initialisation done.", serviceName);
+				catch(Exception e){
+					recoverInstanceActivationError(e, id);
+					errors++;
+					iter.remove();
+				}
 			}
-		};
-		kernel.getContainerProperties().getThreadingServices().getExecutorService().submit(r);
+			if(errors>0)logger.warn("There were <{}> errors during service activation!", errors);
+			initExpiryCheck(uniqueIDs);
+			logger.info("[{}] Initialisation done.", serviceName);
+		});
 	}
 
 	/**
 	 * Called when checking the stored data on server start runs into an error.
 	 */
-	protected void recoverInstanceActivationError(Exception e, String id, boolean logIt){
+	protected void recoverInstanceActivationError(Exception e, String id){
 		Throwable cause=e;
 		while(cause.getCause()!=null){
 			cause=cause.getCause();
 		}
-		if(logIt){
-			Log.logException("Problem reading stored data for <"+serviceName+">", e, logger);
-		}
-		try{
-			if(ClassNotFoundException.class.isAssignableFrom(cause.getClass())){
-				if(logIt)logger.info("Deleting stored data due to incompatible class change (server update?) for <{}>", serviceName);
+		if(ClassNotFoundException.class.isAssignableFrom(cause.getClass())){
+			try{
 				serviceInstances.remove(id);
-			}
-		}catch(Exception ex){}
+				logger.info("Deleted incompatible stored data (server update?) <{}/{}>", serviceName, id);
+			}catch(Exception ex){}
+		}
 	}
 
 	/**
@@ -173,7 +156,7 @@ public abstract class DefaultHome implements Home {
 	 * @param id
 	 */
 	protected void doPerInstanceActivation(String id) throws Exception {
-		Pair<String, List<ACLEntry>> secInfo = readSecurityInfo(id);
+		var secInfo = readSecurityInfo(id);
 		if(secInfo!=null)secInfoCache.put(id, secInfo);
 	}
 
@@ -203,13 +186,9 @@ public abstract class DefaultHome implements Home {
 		return null;
 	}
 
-
-
-
 	protected boolean shouldCountForResourceLimit(Resource r) {
 		return true;
 	}
-
 
 	/**
 	 * setup the expiry check
@@ -218,7 +197,7 @@ public abstract class DefaultHome implements Home {
 	 * @see ContainerProperties#EXPIRYCHECK_INITIAL
 	 * @see ContainerProperties#EXPIRYCHECK_PERIOD
 	 */
-	protected void initExpiryCheck(Collection<String> uniqueIDs)throws Exception{
+	protected void initExpiryCheck(Collection<String> uniqueIDs) {
 		instanceChecking.addAll(uniqueIDs);
 		int initial = kernel.getContainerProperties().getSubkeyIntValue(
 				ContainerProperties.EXPIRYCHECK_INITIAL, serviceName);
@@ -234,7 +213,7 @@ public abstract class DefaultHome implements Home {
 		try{
 			instanceChecking.run();
 		}catch(Exception e){
-			logger.warn("["+serviceName+"] Uncaught exception occured while running expiry check",e);
+			logger.warn("[{}] Uncaught exception occured while running expiry check", serviceName, e);
 		}
 	}
 
@@ -243,7 +222,7 @@ public abstract class DefaultHome implements Home {
 		try{
 			instanceChecking.removeChecker(expiryChecker);
 		}catch(Exception e){
-			logger.warn("["+serviceName+"] Uncaught exception occured while stopping expiry check",e);
+			logger.warn("[{}] Uncaught exception occured while stopping expiry check", serviceName, e);
 		}
 	}
 
@@ -364,8 +343,7 @@ public abstract class DefaultHome implements Home {
 			return uniqueID;
 		}
 		catch(Exception e){
-			String msg=Log.createFaultMessage("Resource not created.", e);
-			throw new ResourceNotCreatedException(msg,e);
+			throw new ResourceNotCreatedException(Log.createFaultMessage("Resource not created.", e), e);
 		}
 	}
 
@@ -401,13 +379,15 @@ public abstract class DefaultHome implements Home {
 		}
 	}
 
+	protected Integer getMaxLifetime() {
+		return kernel.getContainerProperties().getSubkeyIntValue(ContainerProperties.MAXIMUM_LIFETIME,
+				serviceName);
+	}
+
 	@Override
 	public void setTerminationTime(String uniqueID, Calendar c) throws Exception {
 		//check if maximum termination time is exceeded
-		Integer maxLifetime=null;
-		if(kernel!=null){ // TODO can be null in unit tests -> should refactor
-			maxLifetime=getKernel().getContainerProperties().getSubkeyIntValue(ContainerProperties.MAXIMUM_LIFETIME, serviceName);
-		}
+		Integer maxLifetime = getMaxLifetime();
 		if(maxLifetime!=null){
 			boolean exceeded=false;
 			if(c==null){
@@ -442,9 +422,8 @@ public abstract class DefaultHome implements Home {
 	}
 
 	/**
-	 * You must override this in subclasses to actually create the instance.
-	 * In case you need to access the init parameters, override the
-	 * {@link #doCreateInstance(InitParameters initParams)} method
+	 * Perform resource creation. In case access to the init parameters is needed,
+	 * override the {@link #doCreateInstance(InitParameters initParams)} method
 	 */
 	protected abstract Resource doCreateInstance()throws Exception;
 
@@ -488,23 +467,10 @@ public abstract class DefaultHome implements Home {
 		return serviceInstances;
 	}
 
-	public void setStore(Store serviceInstances) {
-		this.serviceInstances = serviceInstances;
-	}
-
 	@Override
 	public boolean isShuttingDown(){
 		return isShuttingDown;
 	}
-
-	public boolean supportsNotification(){
-		return supportsNotification;
-	}
-
-	/**
-	 * Initialise notification support. This default implementation does nothing.
-	 */
-	protected void initNotification() {}
 
 	/**
 	 * check whether the current user's limit of service instances has not yet been exceeded

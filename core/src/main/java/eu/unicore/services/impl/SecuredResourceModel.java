@@ -17,24 +17,24 @@ public class SecuredResourceModel implements Model {
 	private static final long serialVersionUID = 1L;
 
 	private String uniqueID;
-	
+
 	private String ownerDN;
-	
+
 	private List<ACLEntry> acl = new ArrayList<>();
-	
+
 	private Boolean publishServerCert = Boolean.FALSE;
-			
+
 	protected transient boolean dirty=false;
-	
+
 	// this map holds children keyed by service name
 	private Map<String, List<String>> children = new HashMap<>();
-	
+
 	private String parentServiceName;
-	
+
 	private String parentUID;
-	
+
 	private Set<String> tags = new HashSet<>();
-	
+
 	@Override
 	public String getUniqueID() {
 		return uniqueID;
@@ -49,7 +49,7 @@ public class SecuredResourceModel implements Model {
 	public String getParentUID() {
 		return parentUID;
 	}
-	
+
 	public void setParentUID(String parentUID) {
 		this.parentUID = parentUID;
 	}
@@ -111,7 +111,7 @@ public class SecuredResourceModel implements Model {
 		}
 		return res;
 	}
-	
+
 	@Override
 	public List<String> getChildren(String serviceName) {
 		List<String>res = children.get(serviceName);
@@ -121,7 +121,7 @@ public class SecuredResourceModel implements Model {
 		}
 		return res;
 	}
-	
+
 	public String getOwnerDN() {
 		return ownerDN;
 	}

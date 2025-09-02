@@ -19,7 +19,6 @@
         <configuration>
           <excludes>
             <exclude>**/performancetests/**</exclude>
-            <exclude>**/deployment/**</exclude>
             <exclude>**/*Mock*</exclude>
             <exclude>**/*$*</exclude>
           </excludes>
