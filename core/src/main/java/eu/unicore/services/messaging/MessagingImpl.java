@@ -121,19 +121,11 @@ public class MessagingImpl implements IMessaging{
 		if(provider!=null){
 			return provider.getChannel();
 		}
-		
+
 		//fallback to internal messaging
 		return new IMessagingChannel(){
 			public void publish(Message message) throws Exception{
 				queue.offer(new MessageBean(message.getMessageId(),name,message));
-			}
-			
-			public void flush() throws Exception {
-				while(queue.size()>0) {
-					try{
-						Thread.sleep(1000);
-					}catch(InterruptedException te) {}
-				}
 			}
 		};
 

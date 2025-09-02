@@ -125,14 +125,12 @@ public class TestResourceImpl {
 		Properties p = TestConfigUtil.getInsecureProperties();
 		p.setProperty(ContainerProperties.PREFIX+ContainerProperties.MAX_INSTANCES+".test", "2");
 		Kernel kernel = new Kernel(p);
-
 		h.setKernel(kernel);
 		h.start("test");
-
 		InitParameters initobjs=new InitParameters();
-
+		String user = "cn=test";
 		SecurityTokens secTokens=new SecurityTokens();
-		secTokens.setUserName("cn=test");
+		secTokens.setUserName(user);
 		secTokens.setConsignorTrusted(true);
 		Client c = new Client();
 		c.setAuthenticatedClient(secTokens);
@@ -143,6 +141,8 @@ public class TestResourceImpl {
 		assertNotNull(id);
 		id=h.createResource(initobjs);
 		assertNotNull(id);
+		
+		assertEquals(2, h.getInstancesPerUser().get(user).get());
 		assertThrows(ResourceNotCreatedException.class, ()->{
 			h.createResource(initobjs);
 		});

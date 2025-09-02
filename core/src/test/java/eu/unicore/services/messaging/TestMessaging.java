@@ -46,12 +46,9 @@ public class TestMessaging {
 		sm.cleanup();
 		IMessagingChannel p=sm.getChannel("test123");
 
-		Message m1=new Message("message1");
-		Message m2=new Message("message2");
-
-		p.publish(m1);
-		p.publish(m2);
-		p.flush();
+		p.publish(new Message("message1"));
+		p.publish(new Message("message2"));
+		Thread.sleep(50);
 		assertEquals(2, sm.getStoredMessages());
 
 		PullPoint pull=sm.getPullPoint("test123");
@@ -63,22 +60,13 @@ public class TestMessaging {
 		}
 		assertEquals(sm.getStoredMessages(),0);
 
-		m1=new Message("message1");
-		m2=new Message("message2");
-
-		p.publish(m1);
-		p.publish(m2);
-		p.flush();
-
+		p.publish(new Message("message1"));
+		p.publish(new Message("message2"));
+		Thread.sleep(50);
 		IMessagingChannel p2=sm.getChannel("test123");
-
-		m1=new Message("message3");
-		m2=new Message("message4");
-
-		p2.publish(m1);
-		p2.publish(m2);
-		p2.flush();
-
+		p2.publish(new Message("message3"));
+		p2.publish(new Message("message4"));
+		Thread.sleep(50);
 		assertEquals(sm.getStoredMessages(),4);
 	}
 
@@ -94,11 +82,10 @@ public class TestMessaging {
 		MessagingImpl sm=getMessaging();
 		sm.cleanup();
 		IMessagingChannel p=sm.getChannel("test123");
-
 		p.publish(new Message("message1"));
 		p.publish(new Message("message2"));
 		p.publish(new Message("message3"));
-		p.flush();
+		Thread.sleep(50);
 		assertTrue(sm.hasMessages("test123"));
 		PullPoint pp=sm.getPullPoint("test123");
 		assertFalse(sm.hasMessages("test123"));

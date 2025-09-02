@@ -549,11 +549,4 @@ public abstract class DefaultHome implements Home {
 		return accessible;
 	}
 
-	public List<String>getTaggedResources(String...tags) throws Exception {
-		return getStore().getTaggedResources(tags);
-	}
-	
-	public String toString() {
-		return "Home["+serviceName+"]";
-	}
 }
