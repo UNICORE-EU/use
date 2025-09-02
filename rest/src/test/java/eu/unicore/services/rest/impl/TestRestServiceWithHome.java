@@ -151,7 +151,7 @@ public class TestRestServiceWithHome {
 		IMessagingChannel ch = k.getMessaging().getChannel("my_counter");
 		ch.publish(new Message());
 		ch.publish(new Message());
-		ch.flush();
+		Thread.sleep(50);
 		client.getJSON();
 		assertEquals(2, CounterResource.processedMessages);
 		CounterResource.processedMessages=0;
