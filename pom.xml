@@ -6,7 +6,7 @@
   <packaging>pom</packaging>
   <description>UNICORE service container</description>
   <inceptionYear>2010</inceptionYear>
-  <version>5.4.1-SNAPSHOT</version>
+  <version>5.5.0-rc</version>
   <name>UNICORE Services Environment</name>
  
   <parent>
@@ -53,7 +53,7 @@
     <url>https://github.com/UNICORE-EU/use</url>
     <connection>scm:git:git://github.com/UNICORE-EU/use.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/UNICORE-EU/use.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>5.5.0-rc</tag>
   </scm>
 
   <properties>
