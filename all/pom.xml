@@ -4,7 +4,7 @@
   <parent>
     <groupId>eu.unicore.services</groupId>
     <artifactId>use</artifactId>
-    <version>5.5.0-rc</version>
+    <version>5.5.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>use-all</artifactId>
