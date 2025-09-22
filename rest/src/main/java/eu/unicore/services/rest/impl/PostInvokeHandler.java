@@ -51,15 +51,19 @@ public final class PostInvokeHandler extends AbstractPhaseInterceptor<Message> {
 		Resource res = (Resource)message.getExchange().get(USERestInvoker.LOCKEDKEY);
 		if(res != null){
 			Home home = (Home)message.getExchange().get(USERestInvoker.HOME);
-			if(storeChanges && !res.isDestroyed()) {
+			if(storeChanges) {
 				try{
-					home.persist(res);
+					home.done(res);
 				}catch(Exception ex){
 					throw new RuntimeException(ex);
 				}
 			}
 			else{
-				home.getStore().unlock(res);
+				try{
+					home.getStore().unlock(res);
+				}catch(Exception ex){
+					throw new RuntimeException(ex);
+				}
 			}
 			message.getExchange().remove(USERestInvoker.LOCKEDKEY);
 		}

@@ -17,13 +17,13 @@ public interface AdminAction {
 	 * gets the name of this action
 	 */
 	public String getName();
-	
+
 	/**
 	 * gets the single line summary (including at least the accepted parameter names) 
 	 * of this admin action
 	 */
 	public String getDescription();
-	
+
 	/**
 	 * invoke this action
 	 * 

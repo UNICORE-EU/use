@@ -4,7 +4,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
-import eu.unicore.persist.PersistenceException;
 import eu.unicore.security.Client;
 import eu.unicore.services.exceptions.ResourceNotCreatedException;
 import eu.unicore.services.exceptions.ResourceUnavailableException;
@@ -52,9 +51,9 @@ public interface Home extends Runnable, KernelInjectable {
 	public String getServiceName();
 
 	/**
-	 * Get a wsrf instance for read access (i.e. without aquiring a lock)
+	 * Get a Resource for read access (i.e. without acquiring a lock)
 	 *  
-	 * @param id the ID of the resource
+	 * @param id the ID of the Resource
 	 * @throws ResourceUnknownException if no such resource exists
 	 * @throws ResourceUnavailableException  if other errors occur
 	 */
@@ -62,18 +61,25 @@ public interface Home extends Runnable, KernelInjectable {
 
 
 	/**
-	 * update and get a wsrf instance for read access (i.e. without aquiring a long-term lock)
+	 * update and get a Resource for read access (i.e. without acquiring a long-term lock)
 	 *  
 	 * @param id the ID of the resource
 	 * @throws ResourceUnknownException if no such resource exists
-	 * @throws PersistenceException  if database/persistence problems occur
+	 * @throws ResourceUnavailableException if resource cannot be locked
+	 * @throws Exception - if database/persistence problems occur
 	 */
-	public Resource refresh(String id)throws ResourceUnknownException, ResourceUnavailableException;
+	public Resource refresh(String id)throws ResourceUnknownException, ResourceUnavailableException, Exception;
 
 	/**
-	 * Get a wsrf instance for update (i.e. aquire a lock)
+	 * Get a Resource for update (i.e. acquire a lock). Should be used in a try-with-resources clause<br/>
+	 * 
+	 * <code>
+	 * try(Resource r=home.getForUpdate(id)){
+	 *   .. do something with the resource ...
+	 * }
+	 * </code>
 	 *  
-	 * @param id the ID of the resource
+	 * @param id the ID of the Resource
 	 * @throws ResourceUnknownException if no such resource exists
 	 * @throws ResourceUnavailableException if the resource cannot be locked within the timeout period
 	 */
@@ -88,24 +94,17 @@ public interface Home extends Runnable, KernelInjectable {
 	public String createResource(InitParameters init) throws ResourceNotCreatedException;
 
 	/**
-	 * persist the given instance
+	 * Called after handling the Resource. Usually there is no need to call this manually.
+	 * If the Resource was not destroyed, it will be written to storage. Otherwise, 
+	 * clean-up is performed.
+	 * 
 	 * @param instance
 	 * @throws Exception 
 	 */
-	public void persist(Resource instance) throws Exception;
+	public void done(Resource instance) throws Exception;
 
 	/**
-	 * delete and cleanup the administrative information about a Resource
-	 * (NOTE: this will <b>not</b> call {@link Resource#destroy()}
-	 * (NOTE 2: locks will be cleaned as well}
-	 * 
-	 * @param resourceId - the ID of the resource to destroy
-	 * @throws Exception
-	 */
-	public void destroyResource(String resourceId) throws Exception;
-
-	/**
-	 * Get the termination time of an WS-Resource
+	 * Get the termination time of a Resource
 	 * 
 	 * @param resourceId
 	 * @return Calendar (null if instance does not expire)
@@ -115,7 +114,7 @@ public interface Home extends Runnable, KernelInjectable {
 	public Calendar getTerminationTime(String resourceId) throws ResourceUnknownException, Exception;
 
 	/**
-	 * Set the termination time of an WS-Resource
+	 * Set the termination time of a Resource
 	 * 
 	 * @param resourceId
 	 * @param newTT - new termination time
@@ -125,7 +124,7 @@ public interface Home extends Runnable, KernelInjectable {
 			throws ResourceUnknownException, Exception;
 
 	/**
-	 * get the owner of a resource
+	 * get the owner of a Resource
 	 * 
 	 * @param resourceID
 	 * @return the DN of the owner
@@ -146,7 +145,7 @@ public interface Home extends Runnable, KernelInjectable {
 	public Store getStore();
 
 	/**
-	 * Get child resources accessible to the given client.
+	 * Get the ids of all Resources accessible to the given client.
 	 * Note: the PDP is invoked for each resource
 	 * 
 	 * @param client - client
@@ -154,12 +153,11 @@ public interface Home extends Runnable, KernelInjectable {
 	public List<String> getAccessibleResources(Client client) throws Exception;
 
 	/**
-	 * Return the resources that are accessible for the given client.
+	 * Return the Resources that are accessible for the given client.
 	 * Note: the PDP is invoked for each resource
 	 * 
 	 * @param ids - a list of IDs for which accessibility should be checked
 	 * @param client - client
-	 * @since 3.1.0
 	 */
 	public List<String> getAccessibleResources(Collection<String> ids, Client client) throws Exception;
 

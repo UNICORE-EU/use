@@ -232,14 +232,12 @@ public abstract class SecuredResourceImpl implements Resource {
 		@Override
 		public void run(){
 			for(String j: toRemove){
-				try{
-					Resource r = home.getForUpdate(j);
+				try(Resource r = home.getForUpdate(j)){
 					if(r instanceof SecuredResourceImpl){
 						ActionDescriptor action =  new ActionDescriptor("Destroy", OperationType.modify);
 						r.getKernel().getSecurityManager().checkAuthorisation(client,action,(SecuredResourceImpl)r);
 					}
 					r.destroy();
-					home.destroyResource(j);
 				}catch(ResourceUnknownException r){
 					// ignore
 				}catch(AuthorisationException ae){

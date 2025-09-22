@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 import eu.unicore.persist.impl.LockSupport;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.Kernel;
-import eu.unicore.services.Resource;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 
@@ -32,7 +31,7 @@ public class PersistenceManager {
 	public PersistenceManager(Kernel kernel){
 		this.kernel=kernel;
 	}
-	
+
 	/**
 	 * initialise persistence manager: load persistence class configured via 
 	 * container property {@link ContainerProperties#PERSIST_CLASSNAME}
@@ -56,15 +55,6 @@ public class PersistenceManager {
 	}
 
 	/**
-	 * persist an instance and clear its "dirty" status
-	 * @param inst
-	 */
-	public void persist(Resource inst)throws Exception{
-		getPersist(inst.getServiceName()).persist(inst);
-	}
-
-
-	/**
 	 * gets the {@link Store} instance for the given service
 	 * 
 	 * @param serviceName - the name of the service
@@ -86,7 +76,6 @@ public class PersistenceManager {
 		}
 		return p;	
 	}
-
 
 	/**
 	 * retrieve the persistence settings for a given service class

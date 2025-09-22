@@ -13,8 +13,8 @@ import eu.unicore.services.exceptions.ResourceUnknownException;
 import eu.unicore.util.Log;
 
 /**
- * Run checks on all wsrf instances of a given service
- * 
+ * Run checks on all instances of a given service
+ *
  * @author schuller
  */
 public class InstanceChecking implements Runnable {
@@ -22,13 +22,12 @@ public class InstanceChecking implements Runnable {
 	private static final Logger logger=Log.getLogger(Log.UNICORE,InstanceChecking.class);
 
 	private final Home home;
-	
+
 	//list of uniqueIDs
 	protected final List<String> list = Collections.synchronizedList(new ArrayList<>());
-	
+
 	protected final List<InstanceChecker> checkers = Collections.synchronizedList(new ArrayList<>());
-	
-	
+
 	public InstanceChecking(Home home){
 		this.home=home;
 	}
@@ -40,20 +39,19 @@ public class InstanceChecking implements Runnable {
 	public boolean add(String itemId){
 		return list.add(itemId);
 	}
-	
+
 	public boolean remove(String item){
 		return list.remove(item);
 	}
-	
-	
+
 	public boolean addChecker(InstanceChecker c){
 		return checkers.add(c);
 	}
-	
+
 	public boolean removeChecker(InstanceChecker c){
 		return checkers.remove(c);
 	}
-	
+
 	/**
 	 * checks the condition on each instance, performs some action, 
 	 * and removes the instance from the list if it is not valid anymore

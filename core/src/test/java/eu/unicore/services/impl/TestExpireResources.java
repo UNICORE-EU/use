@@ -21,7 +21,7 @@ import eu.unicore.services.persistence.Store;
 
 public class TestExpireResources {
 	private Home home;
-	private Resource item;
+	private Resource item1;
 	private Resource item2;
 	private boolean destroyed=false;
 	private boolean destroyed2=false;
@@ -29,33 +29,34 @@ public class TestExpireResources {
 	@BeforeEach
 	public void setUp()throws Exception{
 		
-		item=new ResourceImpl(){
-			
+		item1 = new ResourceImpl(){
+	
 			public String getUniqueID() {
 				return "testid";
 			}
-		
+
 			@Override
 			public void destroy() {
 				destroyed=true;
+				super.destroy();
 			}
 
 		};
 
-		item2=new ResourceImpl(){
+		item2 = new ResourceImpl(){
 
-			
 			public String getUniqueID() {
 				return "testid2";
 			}
-	
+
 			public void destroy() {
 				destroyed2=true;
+				super.destroy();
 			}
 
 		};
 		
-		home=new DefaultHome(){
+		home = new DefaultHome(){
 
 			@Override
 			protected Integer getMaxLifetime() {
@@ -84,13 +85,14 @@ public class TestExpireResources {
 				return null;
 			}
 
-			public void destroyResource(String resourceId)throws Exception {
-				if(!resourceId.equals("testid")) throw new RuntimeException();
-				super.destroyResource(resourceId);
+			@Override
+			protected void cleanupResource(String resourceId, String owner)throws Exception {
+				super.cleanupResource(resourceId, owner);
 			}
+
 			@Override
 			public Resource get(String resourceId) {
-				if(resourceId.equals(item.getUniqueID()))return item;
+				if(resourceId.equals(item1.getUniqueID()))return item1;
 				if(resourceId.equals(item2.getUniqueID()))return item2;
 				throw new ResourceUnknownException("Unknown: "+resourceId);
 			}
@@ -99,13 +101,15 @@ public class TestExpireResources {
 			public Resource getForUpdate(String id)
 			throws ResourceUnknownException,
 			ResourceUnavailableException {
-				if(id.equals(item.getUniqueID()))return item;
+				if(id.equals(item1.getUniqueID()))return item1;
 				if(id.equals(item2.getUniqueID()))return item2;
 				throw new ResourceUnknownException("Unknown: "+id);
 			}
 
 		};
 		home.start("test");
+		item1.setHome(home);
+		item2.setHome(home);
 	}
 
 	protected Store createStore() throws Exception{
@@ -115,39 +119,39 @@ public class TestExpireResources {
 	@Test
 	public void testRemoveExpiredInstance()throws Exception{
 		InstanceChecking ic = new InstanceChecking(home);
-		assertTrue(ic.add(item.getUniqueID()));
+		assertTrue(ic.add(item1.getUniqueID()));
 		assertTrue(ic.addChecker(new ExpiryChecker()));
 		ic.run();
-		assertFalse(ic.remove(item.getUniqueID()));
-		Calendar tt=home.getTerminationTime(item.getUniqueID());
+		assertFalse(ic.remove(item1.getUniqueID()));
+		Calendar tt=home.getTerminationTime(item1.getUniqueID());
 		assertNull(tt);
 	}
 
 	@Test
 	public void testScheduled() throws Exception{
 		InstanceChecking ic = new InstanceChecking(home);
-		assertTrue(ic.add(item.getUniqueID()));
+		assertTrue(ic.add(item1.getUniqueID()));
 		assertTrue(ic.addChecker(new ExpiryChecker()));
 		ScheduledExecutorService reaper = Executors.newScheduledThreadPool(1);
 		//check instances for expiry every 10 milliseconds
 		reaper.scheduleAtFixedRate(ic,10,10,TimeUnit.MILLISECONDS);
 		Thread.sleep(500);
-		assertFalse(ic.list.contains(item.getUniqueID()));
+		assertFalse(ic.list.contains(item1.getUniqueID()));
 		assertTrue(destroyed);
-		Calendar tt=home.getTerminationTime(item.getUniqueID());
+		Calendar tt=home.getTerminationTime(item1.getUniqueID());
 		assertNull(tt);
 	}
 	
 	@Test
 	public void testScheduled2() throws Exception{
 		InstanceChecking ic = new InstanceChecking(home);
-		assertTrue(ic.add(item.getUniqueID()));
+		assertTrue(ic.add(item1.getUniqueID()));
 		assertTrue(ic.add(item2.getUniqueID()));
 		assertTrue(ic.addChecker(new ExpiryChecker()));
 		ic.run();
-		assertFalse(ic.list.contains(item.getUniqueID()));
+		assertFalse(ic.list.contains(item1.getUniqueID()));
 		assertTrue(destroyed);
-		Calendar tt=home.getTerminationTime(item.getUniqueID());
+		Calendar tt=home.getTerminationTime(item1.getUniqueID());
 		assertNull(tt);
 		assertFalse(ic.list.contains(item2.getUniqueID()));
 		assertTrue(destroyed2);

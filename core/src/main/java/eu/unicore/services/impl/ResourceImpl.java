@@ -46,16 +46,11 @@ public abstract class ResourceImpl extends SecuredResourceImpl {
 
 	/**
 	 * perform resource cleanup
-	 * If you overwrite this method to perform specific clean-up, remember to invoke
+	 * If you overwrite this method to perform specific clean-up, you MUST invoke
 	 * super.destroy() at the end of your code
 	 */
 	public void destroy() {
-		try{
-			((DefaultHome)home).instanceDestroyed(getOwner());
-		}catch(Exception ex){
-			Log.logException("Error decreasing number of service instances.", ex, logger);
-		}
-		isDestroyed=true;
+		isDestroyed = true;
 	}
 
 	public final boolean isDestroyed(){
@@ -124,13 +119,12 @@ public abstract class ResourceImpl extends SecuredResourceImpl {
 		return (BaseModel)model;
 	}
 
+	/**
+	 * usually invoked automatically from a try-with-resources statement
+	 */
 	@Override
-	public void close() {
-		try{
-			home.persist(this);
-		}catch(Exception e) {
-			Log.logException("Could not persist <"+home+" "+getUniqueID()+">" , e);
-		}
+	public void close() throws Exception {
+		home.done(this);
 	}
 
 	public boolean isReady(){

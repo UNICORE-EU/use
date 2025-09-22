@@ -20,7 +20,7 @@ public class AdminActionLoader {
 	private static final Logger logger = Log.getLogger(Log.UNICORE, AdminActionLoader.class);
 
 	private AdminActionLoader(){}
-	
+
 	/**
 	 * returns an immutable map of {@link AdminAction} instances found
 	 * on the classpath via the service loader mechanism
@@ -29,10 +29,10 @@ public class AdminActionLoader {
 	 */
 	public static Map<String, AdminAction>load(){
 		Map<String,AdminAction>result = new HashMap<>();
-		ServiceLoader<AdminAction> sl=ServiceLoader.load(AdminAction.class);
-		Iterator<AdminAction>iter=sl.iterator();
+		ServiceLoader<AdminAction> sl = ServiceLoader.load(AdminAction.class);
+		Iterator<AdminAction>iter = sl.iterator();
 		while(iter.hasNext()){
-			AdminAction a=iter.next();
+			AdminAction a = iter.next();
 			result.put(a.getName(),a);
 			logger.debug("Loaded admin action {} {}", a.getName(), a.getClass().getName());
 		}

@@ -18,7 +18,6 @@ import eu.unicore.services.ExtendedResourceStatus;
 import eu.unicore.services.Home;
 import eu.unicore.services.Model;
 import eu.unicore.services.Resource;
-import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.services.impl.SecuredResourceImpl;
 import eu.unicore.services.impl.SecuredResourceModel;
 import eu.unicore.services.restclient.utils.UnitParser;
@@ -140,11 +139,6 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	public void destroy(@PathParam("uniqueID") String id) throws Exception {
 		assertOwnerLevelAccess();
 		resource.destroy();
-		home.destroyResource(id);
-		try{
-			String owner = ((SecuredResourceModel)model).getOwnerDN();
-			((DefaultHome)home).instanceDestroyed(owner);
-		}catch(Exception ex){}
 	}
 
 	/**

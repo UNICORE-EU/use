@@ -4,8 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
@@ -32,9 +30,9 @@ public class ModelWrapper implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private String className;
-	
+
 	private Model model;
-	
+
 	public ModelWrapper(Model model){
 		this.model = model;
 		this.className  = model!=null ? model.getClass().getName() : null;
@@ -47,7 +45,7 @@ public class ModelWrapper implements Serializable {
 	public Model getModel() {
 		return model;
 	}
-	
+
 	public static class Adapter implements GSONConverter{
 
 		@Override
@@ -59,13 +57,13 @@ public class ModelWrapper implements Serializable {
 		public Object[] getAdapters() {
 			return new Object[]{adapter};
 		}
-		
+
 		@Override
 		public boolean isHierarchy(){
 			return true;
 		}
 	}
-	
+
 	public static class XBeanAdapter implements GSONConverter{
 
 		@Override
@@ -77,23 +75,14 @@ public class ModelWrapper implements Serializable {
 		public Object[] getAdapters() {
 			return new Object[]{xBeanAdapter};
 		}
-		
+
 		@Override
 		public boolean isHierarchy(){
 			return true;
 		}
 	}
-	
+
 	private static final ModelAdapter adapter=new ModelAdapter();
-	
-	// TODO remove for U9
-	private final static Map<String,String> _classname_updates = new HashMap<>();
-	static {
-		_classname_updates.put("de.fzj.unicore.wsrflite.registry.ServiceRegistryModel", 
-				"eu.unicore.services.registry.RegistryModel");
-		_classname_updates.put("de.fzj.unicore.wsrflite.registry.ServiceRegistryEntryModel", 
-				"eu.unicore.services.registry.RegistryEntryModel");
-	}
 
 	public static class ModelAdapter implements JsonDeserializer<ModelWrapper>{
 
@@ -114,11 +103,10 @@ public class ModelWrapper implements Serializable {
 				throw new JsonParseException("Unknown model class "+className, cne);
 			}
 		}
-
 	}
 
 	private static final XmlBeansAdapter xBeanAdapter=new XmlBeansAdapter();
-	
+
 	public static class XmlBeansAdapter implements JsonSerializer<XmlObject>, JsonDeserializer<XmlObject>{
 
 		@Override

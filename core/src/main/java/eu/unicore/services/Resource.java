@@ -90,9 +90,4 @@ public interface Resource extends AutoCloseable {
 	 */
 	public Collection<String> deleteChildren(Collection<String>children);
 
-	/**
-	 * auto-close for try-with-resources statements
-	 */
-	@Override
-	public void close();
 }

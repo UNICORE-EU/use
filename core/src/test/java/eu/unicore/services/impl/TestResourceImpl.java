@@ -118,7 +118,7 @@ public class TestResourceImpl {
 	public void testLimitServiceInstancesPerUser()throws Exception{
 		MockHome h=new MockHome(){
 			@Override
-			protected Resource doCreateInstance(){
+			protected ResourceImpl doCreateInstance(){
 				return new _ResourceImpl();
 			}
 		};
@@ -178,7 +178,7 @@ public class TestResourceImpl {
 	@Test
 	public void testAsyncCallback() throws Exception {
 		ResourceImpl r = makeResource(null);
-		r.getHome().persist(r);
+		r.getHome().done(r);
 		String id = r.getUniqueID();
 		AsyncCallback<ResourceImpl> ac = new AsyncCallback<>(r.getHome(), r.getUniqueID()) {
 			@Override

@@ -29,12 +29,12 @@ public class ResourceAvailability implements AdminAction {
 
 	@Override
 	public AdminActionResult invoke(Map<String, String> params, Kernel kernel) {
-		StringBuilder msg=new StringBuilder();
-		String idKey=params.get("resources");
+		StringBuilder msg = new StringBuilder();
+		String idKey = params.get("resources");
 		if(idKey!=null){
-			String[] ids=idKey.split(",");
+			String[] ids = idKey.split(",");
 			for(String id: ids){
-				boolean available=resources.remove(id);
+				boolean available = resources.remove(id);
 				if(!available){
 					resources.add(id.trim());
 				}

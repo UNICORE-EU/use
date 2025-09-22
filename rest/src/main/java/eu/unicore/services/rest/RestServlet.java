@@ -31,7 +31,6 @@ public class RestServlet extends CXFNonSpringServlet {
 	protected void invoke(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		super.invoke(request, response);
 		if(response.getStatus()==101) {
-			logger.info("Handling 101 Switching Protocols");
 			SocketChannel backend = backends.get();
 			if(backend==null)throw new ServletException("No back-end for forwarding found.");
 			backends.remove();
@@ -57,7 +56,7 @@ public class RestServlet extends CXFNonSpringServlet {
 		new UpgradeHttpServletRequest(request).upgrade();
 		new UpgradeHttpServletResponse(response).upgrade();
 		Forwarder.get().attach(toClient);		
-		logger.info("Forwarding from backend {}, client={}", backend, toClient.getEndPoint().getRemoteSocketAddress());
+		logger.debug("Forwarding from backend {}, client={}", backend, toClient.getEndPoint().getRemoteSocketAddress());
 	}
 
 	private ForwardingConnection createForwardingConnection(Request baseRequest, SocketChannel backend) {

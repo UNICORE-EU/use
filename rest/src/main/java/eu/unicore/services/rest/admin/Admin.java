@@ -136,15 +136,14 @@ public class Admin extends BaseRESTController {
 		logger.info("Invoking administrative action <{}> : client='{}' role={} parameters={}",
 				action, client.getDistinguishedName(), client.getRole().getName(), params);
 		AdminActionResult admResult = adm.invoke(params, kernel);
-		logger.info("Administrative action <{}> success={} message='{}' results={} resultReferences={}",
-				action, admResult.successful(), admResult.getMessage(), admResult.getResults(),
-				admResult.getResultReferences());
+		logger.info("Administrative action <{}> success={} message='{}' results={}",
+				action, admResult.successful(), admResult.getMessage(), admResult.getResults());
 		reply.put("success", admResult.successful());
 		reply.put("message", admResult.getMessage());
 		JSONObject results = new JSONObject();
 		reply.put("results", results);
 		for(Map.Entry<String, String> res: admResult.getResults().entrySet()){
-			results.put(res.getKey(), res.getValue());
+			results.put(res.getKey(),  getJSONObject(res.getValue()));
 		}
 		return reply;
 	}

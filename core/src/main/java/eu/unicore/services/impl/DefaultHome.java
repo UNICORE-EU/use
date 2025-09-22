@@ -70,7 +70,7 @@ public abstract class DefaultHome implements Home {
 	private volatile boolean isShuttingDown=false;
 
 	/**
-	 * this takes care of removing expired WS-Resources etc.
+	 * this takes care of removing expired Resources etc.
 	 */
 	protected InstanceChecking instanceChecking;
 	protected InstanceChecker expiryChecker;
@@ -249,12 +249,12 @@ public abstract class DefaultHome implements Home {
 			throw new ResourceUnavailableException("Instance with ID <"+_fullID(id)+"> cannot be accessed",e);
 		}
 		if(res==null)throw new ResourceUnknownException("Instance with ID <"+_fullID(id)+"> does not exist");
-		res.setHome(kernel.getHome(serviceName));
+		res.setHome(this);
 		return res;
 	}
 
 	@Override
-	public Resource refresh(String id) throws ResourceUnknownException, ResourceUnavailableException {
+	public Resource refresh(String id) throws Exception {
 		try(Resource resource = getForUpdate(id)){
 			return resource;
 		}
@@ -276,17 +276,17 @@ public abstract class DefaultHome implements Home {
 	}
 
 	private void processMessages(Resource r){
-		PullPoint pp=null;
+		PullPoint pp = null;
 		try{
 			if(kernel.getMessaging().hasMessages(r.getUniqueID())){
-				pp=kernel.getMessaging().getPullPoint(r.getUniqueID());
+				pp = kernel.getMessaging().getPullPoint(r.getUniqueID());
 				if(pp.hasNext()){
 					r.processMessages(pp);
 				}
 			}
 		}
-		catch(Exception e){
-		}finally{
+		catch(Exception e){}
+		finally{
 			if(pp!=null)pp.dispose();
 		}
 	}
@@ -301,13 +301,11 @@ public abstract class DefaultHome implements Home {
 		if(owner!=null) {
 			getInstancesPerUser(owner).incrementAndGet();
 		}
-		try{
-			Resource newInstance=doCreateInstance(initParams);
+		try(Resource newInstance = doCreateInstance(initParams)){
 			newInstance.setHome(this);
 			newInstance.setKernel(kernel);
 			newInstance.initialise(initParams);
 			postInitialise(newInstance);
-			persist(newInstance);
 			String uniqueID = newInstance.getUniqueID();
 			instanceChecking.add(uniqueID);
 			return uniqueID;
@@ -324,11 +322,21 @@ public abstract class DefaultHome implements Home {
 	protected void postInitialise(Resource instance){}
 
 	@Override
-	public void persist(Resource instance)throws Exception{
-		serviceInstances.persist(instance);
+	public void done(Resource instance)throws Exception{
+		String owner = null;
 		if(instance.getModel() instanceof SecuredResourceModel){
 			SecuredResourceModel srm = (SecuredResourceModel)instance.getModel();
-			secInfoCache.put(instance.getUniqueID(), new Pair<>(srm.getOwnerDN(), srm.getAcl()));
+			owner = srm.getOwnerDN();
+		}	
+		if(instance.isDestroyed()) {
+			cleanupResource(instance.getUniqueID(), owner);
+		}
+		else {
+			serviceInstances.persist(instance);
+			if(instance.getModel() instanceof SecuredResourceModel){
+				SecuredResourceModel srm = (SecuredResourceModel)instance.getModel();
+				secInfoCache.put(instance.getUniqueID(), new Pair<>(srm.getOwnerDN(), srm.getAcl()));
+			}
 		}
 	}
 
@@ -406,25 +414,20 @@ public abstract class DefaultHome implements Home {
 	}
 
 	/**
-	 * remove resource from persistent storage
-	 *
-	 * @param resourceId - the ID of the resource to remove
-	 */
-	public void removeFromStorage(String resourceId) throws Exception{
-		serviceInstances.remove(resourceId);
-		terminationTimes.remove(resourceId);
-	}
-
-	/**
-	 * remove resource from all internal data structures
+	 * remove resource from all data structures
 	 * 
 	 * @param resourceId - the ID of the resource to remove
+	 * @param owner - the owner DN of the resource
 	 */
-	@Override
-	public void destroyResource(String resourceId) throws Exception{
-		removeFromStorage(resourceId);
+	protected void cleanupResource(String resourceId, String owner) throws Exception{
+		serviceInstances.remove(resourceId);
+		terminationTimes.remove(resourceId);
 		instanceChecking.remove(resourceId);
 		secInfoCache.remove(resourceId);
+		if(owner!=null){
+			AtomicInteger num = getInstancesPerUser(owner);
+			if(num.intValue()>0)num.decrementAndGet();
+		}
 	}
 
 	@Override
@@ -468,13 +471,6 @@ public abstract class DefaultHome implements Home {
 	protected int getInstanceLimit(String owner){
 		return kernel.getContainerProperties().getSubkeyIntValue(
 				ContainerProperties.MAX_INSTANCES, serviceName);
-	}
-
-	public void instanceDestroyed(String owner){
-		if(owner!=null){
-			AtomicInteger num=getInstancesPerUser(owner);
-			if(num.intValue()>0)num.decrementAndGet();
-		}
 	}
 
 	private AtomicInteger getInstancesPerUser(String owner){
