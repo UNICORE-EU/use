@@ -1,8 +1,5 @@
 package eu.unicore.services.utils;
 
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
 import eu.unicore.services.Home;
 import eu.unicore.services.Resource;
 
@@ -17,18 +14,11 @@ public abstract class AsyncCallback<T extends Resource> implements Runnable{
 
 	private final String resourceID;
 
-	private final int delay;
-
 	private Exception exception;
 
-	public AsyncCallback(Home home, String resourceID, int delay){
+	public AsyncCallback(Home home, String resourceID){
 		this.home=home;
 		this.resourceID=resourceID;
-		this.delay = delay;
-	}
-
-	public AsyncCallback(Home home, String resourceID){
-		this(home, resourceID, 200);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -46,11 +36,6 @@ public abstract class AsyncCallback<T extends Resource> implements Runnable{
 	 * @param resource - the resource
 	 */
 	public abstract void callback(T resource);
-
-	public ScheduledFuture<?> submit() {
-		return home.getKernel().getContainerProperties().getThreadingServices().
-		getScheduledExecutorService().schedule(this, delay, TimeUnit.MILLISECONDS);
-	}
 
 	public Exception getException() {
 		return exception;

@@ -44,7 +44,11 @@ public interface Home extends Runnable, KernelInjectable {
 	 */
 	public void notifyConfigurationRefresh();
 
-
+	/**
+	 * "manually" trigger expiry checks
+	 */
+	public void runExpiryCheckNow();
+	
 	/**
 	 * get the service name controlled by this Home
 	 */
@@ -53,22 +57,22 @@ public interface Home extends Runnable, KernelInjectable {
 	/**
 	 * Get a Resource for read access (i.e. without acquiring a lock)
 	 *  
-	 * @param id the ID of the Resource
+	 * @param resourceID the ID of the Resource
 	 * @throws ResourceUnknownException if no such resource exists
 	 * @throws ResourceUnavailableException  if other errors occur
 	 */
-	public Resource get(String id)throws ResourceUnknownException, ResourceUnavailableException;
+	public Resource get(String resourceID)throws ResourceUnknownException, ResourceUnavailableException;
 
 
 	/**
 	 * update and get a Resource for read access (i.e. without acquiring a long-term lock)
 	 *  
-	 * @param id the ID of the resource
+	 * @param resourceID the ID of the resource
 	 * @throws ResourceUnknownException if no such resource exists
 	 * @throws ResourceUnavailableException if resource cannot be locked
 	 * @throws Exception - if database/persistence problems occur
 	 */
-	public Resource refresh(String id)throws ResourceUnknownException, ResourceUnavailableException, Exception;
+	public Resource refresh(String resourceID)throws ResourceUnknownException, ResourceUnavailableException, Exception;
 
 	/**
 	 * Get a Resource for update (i.e. acquire a lock). Should be used in a try-with-resources clause<br/>
@@ -79,11 +83,11 @@ public interface Home extends Runnable, KernelInjectable {
 	 * }
 	 * </code>
 	 *  
-	 * @param id the ID of the Resource
+	 * @param resourceID the ID of the Resource
 	 * @throws ResourceUnknownException if no such resource exists
 	 * @throws ResourceUnavailableException if the resource cannot be locked within the timeout period
 	 */
-	public Resource getForUpdate(String id)throws ResourceUnknownException, ResourceUnavailableException;
+	public Resource getForUpdate(String resourceID)throws ResourceUnknownException, ResourceUnavailableException;
 
 	/**
 	 * create a new Resource and persist it
@@ -94,9 +98,10 @@ public interface Home extends Runnable, KernelInjectable {
 	public String createResource(InitParameters init) throws ResourceNotCreatedException;
 
 	/**
-	 * Called after handling the Resource. Usually there is no need to call this manually.
-	 * If the Resource was not destroyed, it will be written to storage. Otherwise, 
-	 * clean-up is performed.
+	 * Called after the Resource was in use by getForUpdate().
+	 * Usually there is no need to call this manually. If the Resource
+	 * was not destroy()-ed, it will be written to storage. Otherwise,
+	 * a clean-up is performed.
 	 * 
 	 * @param instance
 	 * @throws Exception 
@@ -156,11 +161,11 @@ public interface Home extends Runnable, KernelInjectable {
 	 * Return the Resources that are accessible for the given client.
 	 * Note: the PDP is invoked for each resource
 	 * 
-	 * @param ids - a list of IDs for which accessibility should be checked
+	 * @param resourceIDs - a list of IDs for which accessibility should be checked
 	 * @param client - client
 	 */
-	public List<String> getAccessibleResources(Collection<String> ids, Client client) throws Exception;
+	public List<String> getAccessibleResources(Collection<String> resourceIDs, Client client) throws Exception;
 
-	public Kernel getKernel();
+	//public Kernel getKernel();
 
 }

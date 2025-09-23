@@ -18,7 +18,7 @@ public class LocalRegistryEntryHomeImpl extends DefaultHome {
 	protected void initExpiryCheck(Collection<String> uniqueIDs) {
 		super.initExpiryCheck(uniqueIDs);
 		instanceChecking.removeChecker(expiryChecker);
-		expiryChecker = new RegistryEntryUpdater();
+		expiryChecker = new RegistryEntryUpdater(kernel);
 		instanceChecking.addChecker(expiryChecker);
 	}
 

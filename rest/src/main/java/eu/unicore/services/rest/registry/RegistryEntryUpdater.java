@@ -23,6 +23,12 @@ public class RegistryEntryUpdater implements InstanceChecker {
 
 	private static final Logger logger = Log.getLogger(Log.SERVICES + ".registry", RegistryEntryUpdater.class);
 
+	private final Kernel kernel;
+	
+	public RegistryEntryUpdater(Kernel kernel) {
+		this.kernel = kernel;
+	}
+
 	@Override
 	public boolean check(Home home, String id) throws Exception {
 		Calendar c = home.getTerminationTime(id);
@@ -52,7 +58,6 @@ public class RegistryEntryUpdater implements InstanceChecker {
 	public boolean process(Home home, String id) {
 		if (home.isShuttingDown())
 			return true;
-		Kernel kernel = home.getKernel();
 		String serviceName = home.getServiceName();
 		try (RegistryEntryImpl entry = (RegistryEntryImpl) home.getForUpdate(id)) {
 			String memberAddress = entry.getModel().getEndpoint();

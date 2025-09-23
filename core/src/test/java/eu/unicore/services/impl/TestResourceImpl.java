@@ -35,7 +35,7 @@ public class TestResourceImpl {
 	private ResourceImpl makeResource(InitParameters initMap)throws Exception{
 		return makeResource(null, initMap);
 	}
-	
+
 	private ResourceImpl makeResource(Properties p, InitParameters initMap)throws Exception{
 		if (p == null) {
 			p = TestConfigUtil.getInsecureProperties();
@@ -186,7 +186,8 @@ public class TestResourceImpl {
 				r.getModel().addChild("foo", "123");
 			};
 		};
-		Future<?> f = ac.submit();
+		Future<?> f = r.getKernel().getContainerProperties().
+				getThreadingServices().getExecutorService().submit(ac);
 		f.get(10, TimeUnit.SECONDS);
 		ResourceImpl r2 = (ResourceImpl)r.getHome().get(id);
 		assertEquals("123", r2.getModel().getChildren("foo").get(0));

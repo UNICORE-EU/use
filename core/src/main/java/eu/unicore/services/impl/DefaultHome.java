@@ -63,7 +63,7 @@ public abstract class DefaultHome implements Home {
 
 	private static long tt_update_interval=10000; //millis
 
-	private Kernel kernel;
+	protected Kernel kernel;
 
 	protected final Map<String, AtomicInteger> instancesPerUser = new ConcurrentHashMap<>();
 
@@ -171,7 +171,7 @@ public abstract class DefaultHome implements Home {
 				}
 				else{
 					// set server as owner
-					X509Credential kernelIdentity = getKernel().getContainerSecurityConfiguration().getCredential();
+					X509Credential kernelIdentity = kernel.getContainerSecurityConfiguration().getCredential();
 					if (kernelIdentity != null) {
 						owner = kernelIdentity.getSubjectName();
 						logger.debug("Setting server as owner of {}/{}", serviceName, id);
@@ -209,6 +209,7 @@ public abstract class DefaultHome implements Home {
 				initial,period,TimeUnit.SECONDS);
 	}
 
+	@Override
 	public void runExpiryCheckNow(){
 		try{
 			instanceChecking.run();
@@ -504,10 +505,10 @@ public abstract class DefaultHome implements Home {
 		//NOP
 	}
 
-	@Override
-	public Kernel getKernel(){
-		return kernel;
-	}
+//	@Override
+//	public Kernel getKernel(){
+//		return kernel;
+//	}
 
 	@Override
 	public void setKernel(Kernel kernel){
