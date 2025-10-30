@@ -31,7 +31,11 @@ public interface ISubSystem {
 	/**
 	 * reload configuration
 	 */
-	default public void reloadConfig(Kernel kernel) throws Exception {}
+	default public void reloadConfig(Kernel kernel) throws Exception {
+		for(ExternalSystemConnector esc: getExternalConnections()) {
+			esc.reloadConfig(kernel);
+		}
+	}
 	
 	/**
 	 * shutdown - will be called on kernel shutdown

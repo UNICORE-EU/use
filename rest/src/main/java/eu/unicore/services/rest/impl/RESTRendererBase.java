@@ -111,9 +111,11 @@ public abstract class RESTRendererBase implements KernelInjectable {
 		return o;
 	}
 
+	static String _splitRegexp = "[ +,]";
+
 	protected void parsePropertySpec(String fields) {
 		if(fields!=null){
-			for(String f: fields.split("[ +,]")) {
+			for(String f: fields.split(_splitRegexp)) {
 				if(f.startsWith("!")) {
 					excludedProperties.add(f.substring(1));
 				} else { 

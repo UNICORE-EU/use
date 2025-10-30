@@ -44,6 +44,8 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 
 	private String dnTemplate = "CN=%s, OU=ssh-local-users";
 
+	private String identityAssign;
+
 	private String file;
 	private long updateInterval = 600;
 	private boolean useAuthorizedKeys = true;
@@ -65,6 +67,7 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		keyCache.setUseAuthorizedKeys(useAuthorizedKeys);
 		keyCache.setUpdateInterval(updateInterval);
 		keyCache.setDnTemplate(dnTemplate);
+		keyCache.setIdentityAssign(identityAssign);
 		if(useAuthorizedKeys && userInfo!=null) {
 			try {
 				@SuppressWarnings("unchecked")
@@ -146,12 +149,14 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		List<AttributesHolder>coll = attr.get();
 		if(coll != null){
 			for(AttributesHolder af : coll){
-				if(af.sshkey==null || af.sshkey.isEmpty()){
+				if(af.getPublicKeys().isEmpty()){
 					logger.error("Server config error: No public key stored for {}", username);
 					continue;
 				}
-				if(SSHUtils.validateAuthData(authData,af.sshkey)){
-					return af.dn;
+				for(String sshKey: af.getPublicKeys()) {
+					if(SSHUtils.validateAuthData(authData, sshKey)){
+						return af.getDN();
+					}
 				}
 			}
 		}
@@ -189,14 +194,16 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		List<AttributesHolder>coll = attr.get();
 		if(coll != null){
 			for(AttributesHolder af : coll){
-				if(af.sshkey==null || af.sshkey.isEmpty()){
+				if(af.getPublicKeys().isEmpty()){
 					logger.error("Server config error: No public key stored for {}", username);
 					continue;
 				}
-				try {
-					JWTUtils.verifyJWTToken(jwtToken, SSHUtils.readPubkey(af.sshkey), serverDN);
-					return af.dn;
-				}catch(Exception ae) {}
+				for(String sshKey: af.getPublicKeys()) {
+					try {
+						JWTUtils.verifyJWTToken(jwtToken, SSHUtils.readPubkey(sshKey), serverDN);
+						return af.getDN();
+					}catch(Exception ae) {}
+				}
 			}
 		}
 		return null;
@@ -215,6 +222,10 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 	}
 
 	public void setDnTemplate(String dnTemplate) {
+		this.dnTemplate = dnTemplate;
+	}
+
+	public void setIdentityAssign(String dnTemplate) {
 		this.dnTemplate = dnTemplate;
 	}
 

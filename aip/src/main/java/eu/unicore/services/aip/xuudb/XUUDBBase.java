@@ -170,4 +170,10 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 	public String toString() {
 		return getName()+" ["+getXUUDBUrl()+"]";
 	}
+
+	@Override
+	public void reloadConfig(Kernel kernel) throws Exception {
+		xuudb = createEndpoint();
+	}
+
 }

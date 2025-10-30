@@ -34,12 +34,10 @@ public class TestKernel {
 			assertNotNull(sp);
 			GatewayHandler gw=k.getGatewayHandler();
 			assertNotNull(gw);
-			String status=gw.getConnectionStatusMessage();
+			String status = gw.getStatusDescription();
 			System.out.println(status);
 			assertNotNull(status);
 			assertTrue(status.contains("N/A"));
-			assertEquals(ExternalSystemConnector.Status.NOT_APPLICABLE,gw.getConnectionStatus());
-
 			Service mock=k.getService("test");
 			assertNotNull(mock);
 			assertTrue(MockHome.startupTaskWasRun);

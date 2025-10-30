@@ -76,10 +76,8 @@ public class TestGatewayHandler {
 		assertNull(csp.getGatewayCertificate());
 		gwh.enableGatewayCertificateRefresh();
 		gwh.waitForGateway();
-		System.out.println(String.format("%s / %s / %s / %s / %s",
-				gwh.getName(), gwh.getExternalSystemName(),
-				gwh.getConnectionStatus(),
-				gwh.getConnectionStatusMessage(),
+		System.out.println(String.format("%s / %s",
+				gwh.getName(),
 				gwh.getStatusDescription()));
 		assertNotNull(csp.getGatewayCertificate());
 		assertTrue(gwh.getStatusDescription().startsWith("["));

@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -24,8 +25,6 @@ import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
-
-import com.google.common.collect.Lists;
 
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.services.ContainerProperties;
@@ -47,16 +46,15 @@ import eu.unicore.util.httpclient.IClientConfiguration;
  *
  * @author schuller
  */
-public class GatewayHandler implements ISubSystem, ExternalSystemConnector {
+public class GatewayHandler implements ISubSystem {
 
-	private static final Logger logger=Log.getLogger(Log.UNICORE, GatewayHandler.class);
+	private static final Logger logger = Log.getLogger(Log.UNICORE, GatewayHandler.class);
 
 	private final ContainerProperties containerConfiguration;
 	private final IClientConfiguration clientConfiguration;
 	private final DefaultContainerSecurityConfiguration secConfiguration;
 	private final ThreadingServices threadingSrv;
 
-	private Status status=Status.UNKNOWN;
 	private String statusMessage;
 	private long lastChecked;
 	private String gwURL;
@@ -82,9 +80,7 @@ public class GatewayHandler implements ISubSystem, ExternalSystemConnector {
 	 * wait until a connection to the Gateway has been established
 	 */
 	public void waitForGateway() throws Exception {
-		if (!secConfiguration.isGatewayWaitingEnabled())
-			return;
-		
+		if (!secConfiguration.isGatewayWaitingEnabled())return;
 		Integer timeout = secConfiguration.getGatewayWaitTime();
 		timeout *= 1000;
 		long start = System.currentTimeMillis();
@@ -124,35 +120,20 @@ public class GatewayHandler implements ISubSystem, ExternalSystemConnector {
 	}
 
 	@Override
-	public String getExternalSystemName(){
-		return getName();
-	}
-
-	@Override
 	public String getStatusDescription(){
+		checkConnection();
 		if(gwURL.contains(myHost)) {
 			return "N/A (no gateway used)";
 		}
 		else {
-			return "["+gwURL+"]";
+			return "["+gwURL+": "+statusMessage+"]";
 		}
-	}
-
-	public Status getConnectionStatus(){
-		checkConnection();
-		return status;
-	}
-
-	public String getConnectionStatusMessage(){
-		checkConnection();
-		return statusMessage;
 	}
 
 	private void checkConnection(){
 		if (lastChecked+2000>System.currentTimeMillis())
 			return;
 		if(gwURL.contains(myHost)){
-			status=Status.NOT_APPLICABLE;
 			statusMessage="N/A (no gateway used)";
 		}
 		else{
@@ -162,34 +143,29 @@ public class GatewayHandler implements ISubSystem, ExternalSystemConnector {
 				if(res!=null){
 					X509Certificate gwCert = res.getM1();
 					if(gwCert!=null) {
-						status=Status.OK;
 						statusMessage = "OK";
 						if(!secConfiguration.haveFixedGatewayCertificate()) {
 							secConfiguration.setGatewayCertificate(gwCert);
 						}
 					}
 					else {
-						status=Status.DOWN;
 						statusMessage = res.getM2();
 					}
 				}
 				else {
-					status=Status.DOWN;
 					statusMessage = "Timeout error";
 				}
 			}
 			catch(Exception e) {
-				status=Status.UNKNOWN;
 				statusMessage = Log.createFaultMessage("ERROR checking GW status", e);
 			}
 		}
 		lastChecked=System.currentTimeMillis();
 	}
-	
-	private final Collection<ExternalSystemConnector> l = Lists.newArrayList(this);
+
 	@Override
 	public Collection<ExternalSystemConnector> getExternalConnections(){
-		return l;
+		return Collections.emptyList();
 	}
 
 	/**

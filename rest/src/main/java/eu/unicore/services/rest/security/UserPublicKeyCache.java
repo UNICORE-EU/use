@@ -16,23 +16,28 @@ import java.util.Map;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.services.Kernel;
+import eu.unicore.services.rest.RESTUtils;
 import eu.unicore.services.restclient.sshkey.SSHUtils;
 import eu.unicore.util.Log;
 
 /**
- * stores user public keys read from file and/or some external system (such as UFTPD or TSI)
+ * stores user public keys and associated user attributes read from a file
+ * and/or some external system (such as UFTPD or TSI)
+ *
  * @author schuller
  */
 public class UserPublicKeyCache {
 
 	private static final Logger logger = Log.getLogger(Log.SECURITY, UserPublicKeyCache.class);
-			
+
 	private final Map<String,AttributeHolders>db = new HashMap<>();
 
 	private File dbFile = null;
 	private boolean useAuthorizedKeys = true;
 	private static long updateInterval = 600;
 	private long lastUpdated;
+	private String identityAssign;
+
 	private String dnTemplate = "CN=%s, OU=ssh-local-users";
 
 	private final Collection <UserInfoSource>sources = new HashSet<>();
@@ -50,7 +55,7 @@ public class UserPublicKeyCache {
 		readKeysFromServer(username);
 		return getMappings().get(username);
 	}
-	
+
 	private Map<String,AttributeHolders>getMappings() throws IOException {
 		updateDB();
 		return Collections.unmodifiableMap(db);
@@ -59,26 +64,27 @@ public class UserPublicKeyCache {
 	public void setFile(String fileName) {
 		if(fileName!=null)this.dbFile = new File(fileName);
 	}
-	
+
 	public void setUseAuthorizedKeys(boolean useAuthorizedKeys) {
 		this.useAuthorizedKeys = useAuthorizedKeys;
 	}
-	
+
 	public void setUpdateInterval(long update) {
-		try{
-			updateInterval = update;
-		}
-		catch(Exception ex){}
+		updateInterval = update;
 	}
 
 	public void setDnTemplate(String dnTemplate) {
 		this.dnTemplate = dnTemplate;
 	}
 
+	public void setIdentityAssign(String identityAssign) {
+		this.identityAssign = identityAssign;
+	}
+
 	public Collection <UserInfoSource> getUserInfoSources() {
 		return sources;
 	}
-	
+
 	protected synchronized void updateDB() throws IOException {
 		if(dbFile==null)return;
 		if(lastUpdated == 0 || dbFile.lastModified() > lastUpdated){
@@ -92,7 +98,7 @@ public class UserPublicKeyCache {
 						continue;
 					}
 					try{
-						AttributesHolder af = new AttributesHolder(line);
+						AttributesHolder af = AttributesHolder.fromFileEntry(line);
 						getOrCreateAttributes(af.user).add(af);
 					}
 					catch(IllegalArgumentException ex){
@@ -108,15 +114,19 @@ public class UserPublicKeyCache {
 		AttributeHolders attrs = getOrCreateAttributes(requestedUserName);
 		if(!attrs.wantUpdate())return;
 		Collection<AttributesHolder> updatedKeys = new ArrayList<>();
-		String dn = String.format(dnTemplate, requestedUserName);
 		boolean ok = true;
 		for(UserInfoSource lServer: sources){
 			try{
-				Collection<String> response = lServer.getAcceptedKeys(requestedUserName);
+				AttributesHolder ah = lServer.getAttributes(requestedUserName, identityAssign);
+				Collection<String> response = ah.getPublicKeys();
+				String dn = ah.getDN();
+				if(dn==null) {
+					dn = String.format(dnTemplate, requestedUserName);
+				}
 				if(response!=null)parseUserInfo(response, requestedUserName, dn, updatedKeys);
 			}
 			catch(Exception ex){
-				Log.logException("Could not get info for user <"+requestedUserName+">", ex, logger);
+				logger.debug("Could not get info for user <{}>: {}", requestedUserName, ex);
 				ok = false;
 			}
 		}
@@ -144,7 +154,7 @@ public class UserPublicKeyCache {
 					AttributesHolder ah = new AttributesHolder(user,key,dn);
 					ah.fromFile = false;
 					attrs.add(ah);
-					logger.info("Added SSH pub key for <{}>", user);
+					logger.info("Added SSH pub key for userID '{}' mapped to <{}>", user, dn);
 				}
 			}
 		}
@@ -152,7 +162,7 @@ public class UserPublicKeyCache {
 
 	private boolean hasEntry(Collection<AttributesHolder> attrs, String key){
 		for(AttributesHolder ah: attrs){
-			if(ah.sshkey.equals(key))return true;
+			if(ah.getPublicKeys().contains(key))return true;
 		}
 		return false;
 	}
@@ -166,26 +176,47 @@ public class UserPublicKeyCache {
 	public static class AttributesHolder {
 
 		public final String user;
-		public final String sshkey;
-		public final String dn;
+		public final List<String> publicKeys = new ArrayList<>();
+		private String dn;
 		public boolean fromFile = true;
 
-		public AttributesHolder(String user, String sshkey, String dn){
+		public AttributesHolder(String user){
 			this.user = user;
-			this.sshkey = sshkey;
+		}
+
+		private AttributesHolder(String user, String sshkey, String dn){
+			this(user);
+			publicKeys.add(sshkey);
 			this.dn = dn;
 		}
 
-		public AttributesHolder(String line) throws IllegalArgumentException {
+		public List<String> getPublicKeys(){
+			return publicKeys;
+		}
+
+		public String getDN() {
+			return dn;
+		}
+
+		public static AttributesHolder fromFileEntry(String line) throws IllegalArgumentException {
 			String[] fields = line.split(":");
 			//#user:sshkey:dn
 			if (fields.length!=3) {
 				logger.error("Invalid line: {}", line);
 				throw new IllegalArgumentException();
 			}
-			user=fields[0];
-			sshkey=fields[1];
-			dn=fields[2];
+			String user=fields[0];
+			String key= fields[1];
+			String dn=fields[2];
+			return new AttributesHolder(user, key, dn);
+		}
+
+		public static AttributesHolder fromAttributes(String userName, String dnAssign, Map<String,Object> attributes) {
+			AttributesHolder ah = new AttributesHolder(userName);
+			if(dnAssign!=null && attributes!=null && attributes.size()>0) {
+				ah.dn = RESTUtils.evaluateToString(dnAssign, attributes);
+			}
+			return ah;
 		}
 	}
 
@@ -210,7 +241,7 @@ public class UserPublicKeyCache {
 		public synchronized void removeFileEntries(){
 			filterEntries(true);
 		}
-		
+
 		private void filterEntries(boolean fromFile){
 			Iterator<AttributesHolder>attrs = coll.iterator();
 			while(attrs.hasNext()){
@@ -245,13 +276,16 @@ public class UserPublicKeyCache {
 			return false;
 		}
 	}
-	
-	public interface UserInfoSource {
+
+	public static interface UserInfoSource {
+
 		/**
-		 * retrieve accepted keys
+		 * retrieve public keys and other attributes
+		 *
 		 * @param userName
-		 * @return
+		 * @param identityAssign - optional mapping expression for assigning the user identity (DN) 
 		 */
-		public Collection<String> getAcceptedKeys(String userName);
+		public AttributesHolder getAttributes(String userName, String identityAssign);
+
 	}
 }

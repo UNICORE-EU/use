@@ -8,25 +8,30 @@ package eu.unicore.services;
  */
 public interface ExternalSystemConnector {
 
-	public enum Status {
-		
+	public enum Status {		
 		OK, DOWN, UNKNOWN, NOT_APPLICABLE 
-		
 	};
-	
+
 	/**
 	 * get a human readable connection status
 	 */
 	public String getConnectionStatusMessage();
-	
+
 	/**
 	 * get the status
 	 */
 	public Status getConnectionStatus();
-	
+
 	/**
 	 * simple name of the external system, e.g. "TSI"
 	 */
 	public String getExternalSystemName();
-	
+
+	/**
+	 * trigger config refresh
+	 * @param kernel
+	 * @throws Exception
+	 */
+	default public void reloadConfig(Kernel kernel) throws Exception {}
+
 }
