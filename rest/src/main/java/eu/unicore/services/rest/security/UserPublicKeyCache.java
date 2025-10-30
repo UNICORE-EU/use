@@ -152,7 +152,6 @@ public class UserPublicKeyCache {
 			if(!hasEntry(attrs,key)){
 				if(isValidKey(key)){
 					AttributesHolder ah = new AttributesHolder(user,key,dn);
-					ah.fromFile = false;
 					attrs.add(ah);
 					logger.info("Added SSH pub key for userID '{}' mapped to <{}>", user, dn);
 				}
@@ -178,16 +177,18 @@ public class UserPublicKeyCache {
 		public final String user;
 		public final List<String> publicKeys = new ArrayList<>();
 		private String dn;
-		public boolean fromFile = true;
+		public final boolean fromFile;
 
 		public AttributesHolder(String user){
 			this.user = user;
+			this.fromFile = false;
 		}
 
 		private AttributesHolder(String user, String sshkey, String dn){
-			this(user);
+			this.user = user;
 			publicKeys.add(sshkey);
 			this.dn = dn;
+			this.fromFile = true;
 		}
 
 		public List<String> getPublicKeys(){
@@ -196,6 +197,10 @@ public class UserPublicKeyCache {
 
 		public String getDN() {
 			return dn;
+		}
+
+		public void setDN(String dn) {
+			this.dn = dn;
 		}
 
 		public static AttributesHolder fromFileEntry(String line) throws IllegalArgumentException {

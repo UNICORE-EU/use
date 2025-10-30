@@ -225,8 +225,8 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 		this.dnTemplate = dnTemplate;
 	}
 
-	public void setIdentityAssign(String dnTemplate) {
-		this.dnTemplate = dnTemplate;
+	public void setIdentityAssign(String identityAssign) {
+		this.identityAssign = identityAssign;
 	}
 
 	public void setUserInfo(String userInfo) {
