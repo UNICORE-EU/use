@@ -124,6 +124,9 @@ public class ApplicationBaseResource extends RESTRendererBase {
 		Map<String,Object>props = new HashMap<>();
 		Client c = AuthZAttributeStore.getClient();
 		props.put("dn", c.getDistinguishedName());
+		String clientIP = AuthZAttributeStore.getTokens()!=null ?
+				AuthZAttributeStore.getTokens().getClientIP() : "n/a";
+		props.put("IPAddress", clientIP);
 		Xlogin xl = c.getXlogin();
 		if(xl!=null){
 			Map<String,Object>xlProps = new HashMap<>();
