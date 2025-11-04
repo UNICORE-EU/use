@@ -60,7 +60,7 @@ public class RESTUtils {
 		return template;
 	}
 
-	public static String evaluateToString(String expression, Map<String, ? extends Object>vars) {
+	public static String evaluateToString(String expression, Map<String, Object>vars) {
 		if(vars==null)vars = new HashMap<>();
 		Object res = MVEL.eval(expression, vars);
 		if(res==null)return null;
@@ -73,7 +73,7 @@ public class RESTUtils {
 		else return String.valueOf(res);
 	}
 
-	public static String[] evaluateToArray(String expression, Map<String, ? extends Object>vars) {
+	public static String[] evaluateToArray(String expression, Map<String, Object>vars) {
 		if(vars==null)vars = new HashMap<>();
 		Object res = MVEL.eval(expression, vars);
 		if(res==null)return null;

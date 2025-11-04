@@ -50,11 +50,11 @@ public class TestUserPublicKeyCache {
 		ahs.invalidate();
 		haveKey.set(false);
 		ahs = upkc.get("testuser");
-		assertEquals(0, ahs.get().size());
+		assertEquals(0, ahs.get().get(0).getPublicKeys().size());
 		ahs.invalidate();
 		haveKey.set(true);
 		ahs = upkc.get("testuser");
-		assertEquals(1, ahs.get().size());
+		assertEquals(1, ahs.get().get(0).getPublicKeys().size());
 	}
 	
 	@Test

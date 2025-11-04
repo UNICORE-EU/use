@@ -118,12 +118,12 @@ public class UserPublicKeyCache {
 		for(UserInfoSource lServer: sources){
 			try{
 				AttributesHolder ah = lServer.getAttributes(requestedUserName, identityAssign);
-				Collection<String> response = ah.getPublicKeys();
 				String dn = ah.getDN();
 				if(dn==null) {
 					dn = String.format(dnTemplate, requestedUserName);
+					ah.setDN(String.format(dnTemplate, requestedUserName));
 				}
-				if(response!=null)parseUserInfo(response, requestedUserName, dn, updatedKeys);
+				updatedKeys.add(ah);
 			}
 			catch(Exception ex){
 				logger.debug("Could not get info for user <{}>: {}", requestedUserName, ex);

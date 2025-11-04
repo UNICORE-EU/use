@@ -3,6 +3,8 @@ package eu.unicore.services.rest.security;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Map;
+
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +27,7 @@ public class TestAttributeExtract {
 				+ "return null";
 
 		var o = new JSONObject(t);
-		var context = RESTUtils.asMap2(o);
+		Map<String, Object> context = RESTUtils.asMap2(o);
 		assertEquals("normal", context.get("account_type"));
 		assertEquals("user1", RESTUtils.evaluateToString(script1, context));
 
