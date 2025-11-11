@@ -1,5 +1,7 @@
 package eu.unicore.services.rest.impl;
 
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -115,6 +117,7 @@ public abstract class RESTRendererBase implements KernelInjectable {
 
 	protected void parsePropertySpec(String fields) {
 		if(fields!=null){
+			fields = URLDecoder.decode(fields, Charset.forName("UTF-8"));
 			for(String f: fields.split(_splitRegexp)) {
 				if(f.startsWith("!")) {
 					excludedProperties.add(f.substring(1));

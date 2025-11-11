@@ -1,5 +1,7 @@
 package eu.unicore.services.rest.impl;
 
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -274,8 +276,7 @@ public abstract class BaseRESTController extends RESTRendererBase {
 			assertOwnerLevelAccess();
 			List<ACLEntry> update = new ArrayList<>();
 			for(String e: acl){
-				ACLEntry x = ACLEntry.parse(e);
-				update.add(x);
+				update.add(ACLEntry.parse(e));
 			}
 			List<ACLEntry>current = ((SecuredResourceModel) model).getAcl();
 			current.clear();
@@ -294,8 +295,8 @@ public abstract class BaseRESTController extends RESTRendererBase {
 	 */
 	protected List<String>getAccessibleResources(String tagSpec) throws Exception { 
 		Client c=AuthZAttributeStore.getClient(); 
-
 		if(tagSpec!=null){
+			tagSpec = URLDecoder.decode(tagSpec, Charset.forName("UTF-8"));
 			String[] tags = tagSpec.split("[ +,]");
 			List<String> tagged = home.getStore().getTaggedResources(tags);
 			return home.getAccessibleResources(tagged, c);
