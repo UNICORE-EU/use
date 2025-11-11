@@ -58,20 +58,20 @@
 
   <properties>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>1.2.7</persistence.version>
+    <persistence.version>1.2.8</persistence.version>
     <secutils.version>4.2.1</secutils.version>
     <seclib.version>7.2.1</seclib.version>
     <herasaf.version>3.0.2</herasaf.version>
     <json.version>20250517</json.version>
     <gson.version>2.13.2</gson.version>
-    <xuudb.version>2.12.0</xuudb.version>
+    <xuudb.version>2.12.1</xuudb.version>
     <cxf.version>4.0.6</cxf.version>
     <jetty.version>11.0.26</jetty.version>
     <metrics.version>4.2.37</metrics.version>
-    <jwt.version>10.5</jwt.version>
-    <tink.version>1.18.0</tink.version>
+    <jwt.version>10.6</jwt.version>
+    <tink.version>1.19.0</tink.version>
     <sshj.version>0.40.0</sshj.version>
-    <jna.version>5.17.0</jna.version>
+    <jna.version>5.18.1</jna.version>
     <mvel.version>2.5.2.Final</mvel.version>
     <junit.version>5.12.0</junit.version>
     <junit.p.version>1.12.0</junit.p.version>
@@ -192,11 +192,6 @@
     <dependency>
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-rt-transports-http</artifactId>
-      <version>${cxf.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-rt-features-clustering</artifactId>
       <version>${cxf.version}</version>
     </dependency>
     <dependency>
