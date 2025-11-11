@@ -7,14 +7,14 @@ import org.apache.hc.core5.http.HttpMessage;
 
 public class UserPreferences {
 
-	protected final Map<String,String> prefs = new HashMap<>();
-	
+	private final Map<String,String> prefs = new HashMap<>();
+
 	public void addUserPreferencesHeader(HttpMessage httpMessage) throws Exception {
 		if(prefs.size()>0){
 			httpMessage.addHeader("X-UNICORE-User-Preferences", getEncoded());
 		}
 	}
-	
+
 	public String getEncoded(){
 		StringBuilder sb = new StringBuilder();
 		for(Map.Entry<String, String> e: prefs.entrySet()){

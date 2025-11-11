@@ -15,11 +15,17 @@ public class TestUtils {
 		UserPreferences p = new UserPreferences();
 		assertEquals("", p.getEncoded());
 		p.setUid("test");
+		assertEquals("test", p.getUid());
 		assertEquals("uid:test", p.getEncoded());
 		p.setRole("admin");
+		assertEquals("admin", p.getRole());
 		assertTrue(p.getEncoded().contains(("uid:test")));
 		assertTrue(p.getEncoded().contains(("role:admin")));
 		assertTrue(p.getEncoded().contains((",")));
+		p.setGroup("hpc");
+		assertEquals("hpc", p.getGroup());
+		p.setSupplementaryGroups("users", "proj1");
+		assertEquals("users+proj1", p.getSupplementaryGroups());
 	}
 	
 	@Test

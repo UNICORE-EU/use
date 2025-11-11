@@ -55,23 +55,23 @@ public class BaseClient {
 
 	protected final HttpClient client;
 
-	protected StatusLine status;
+	protected final IAuthCallback authCallback;
 
-	protected IAuthCallback authCallback;
+	protected final SessionIDProvider sessionIDProvider;
 
-	protected SessionIDProvider sessionIDProvider;
+	protected final IClientConfiguration security;
 
-	protected IClientConfiguration security;
-
-	protected boolean useSessions;
-
-	protected String url;
+	protected final boolean useSessions;
 
 	private final Deque<String>urlStack = new ArrayDeque<>();
 
-	protected UserPreferences userPreferences = new UserPreferences();
+	protected final UserPreferences userPreferences = new UserPreferences();
 
 	protected boolean errorChecking = true;
+
+	protected String url;
+
+	protected StatusLine status;
 
 	public BaseClient(String url, IClientConfiguration security){
 		this(url,security,null);
@@ -81,10 +81,8 @@ public class BaseClient {
 		HttpClient client = HttpUtils.createClient(url, security);
 		this.client = client;
 		this.authCallback = authCallback;
-		this.sessionIDProvider = security.getSessionIDProvider();
-		if(sessionIDProvider==null){
-			sessionIDProvider = new SessionIDProviderImpl();
-		}
+		this.sessionIDProvider = security.getSessionIDProvider()!=null ?
+				security.getSessionIDProvider() : new SessionIDProviderImpl();
 		this.security = security;
 		this.useSessions = security.useSecuritySessions();
 		this.url = url;
@@ -148,10 +146,6 @@ public class BaseClient {
 
 	public IClientConfiguration getSecurityConfiguration() {
 		return security;
-	}
-
-	public void setAuthCallback(IAuthCallback authCallback){
-		this.authCallback = authCallback;
 	}
 
 	protected void addAuth(HttpMessage message) throws Exception {
@@ -474,10 +468,6 @@ public class BaseClient {
 
 	public SessionIDProvider getSessionIDProvider() {
 		return sessionIDProvider;
-	}
-
-	public void setSessionIDProvider(SessionIDProvider sessionIDProvider) {
-		this.sessionIDProvider = sessionIDProvider;
 	}
 
 	/**

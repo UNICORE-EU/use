@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
@@ -54,6 +55,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 public class TestRestServiceWithHome {
 
@@ -75,9 +77,7 @@ public class TestRestServiceWithHome {
 		dd.setImplementation(HomeApplication.class);
 		dd.setName(sName);
 		dd.setKernel(k);
-		
 		k.getDeploymentManager().deployService(dd);
-		
 		System.out.println(k.getConnectionStatus());
 	}
 
@@ -90,12 +90,10 @@ public class TestRestServiceWithHome {
 	public void testRestServiceWithHome()throws Exception {
 		HomeApplication.createTestInstance(k);
 		String url = k.getContainerProperties().getContainerURL()+"/rest";
-		
 		int invocations = 5;
 		String resource  = url+"/"+sName+"/my_counter";
 		System.out.println("Accessing "+resource);
-		BaseClient client=new BaseClient(resource,k.getClientConfiguration());
-
+		BaseClient client = new BaseClient(resource, k.getClientConfiguration());
 		for(int i=0; i<invocations ; i++){
 			try(ClassicHttpResponse response = client.post(null)){
 				int status = client.getLastHttpStatus();
@@ -106,6 +104,10 @@ public class TestRestServiceWithHome {
 		}
 		CounterModel m = (CounterModel) k.getHome("counter").get("my_counter").getModel();
 		assertEquals(invocations, m.getCounter());
+		client.postQuietly(null);
+		assertEquals(200, client.getLastStatus().getStatusCode());
+		m = (CounterModel) k.getHome("counter").get("my_counter").getModel();
+		assertEquals(invocations+1, m.getCounter());
 
 		resource  = url+"/"+sName+"/my_counter/value";
 		client.setURL(resource);
@@ -133,7 +135,7 @@ public class TestRestServiceWithHome {
 			int status=client.getLastHttpStatus();
 			assertEquals(404, status);
 		}
-
+		
 		// get properties
 		resource  = url+"/"+sName+"/my_counter";
 		client.setURL(resource);
@@ -182,6 +184,16 @@ public class TestRestServiceWithHome {
 		client.delete();
 		// assert that resource is gone
 		assertFalse(k.getHome(sName).getStore().getUniqueIDs().contains("my_counter"));
+		
+		// create instance dynamically
+		client.setURL(url+"/"+sName);
+		String loc = client.create(new JSONObject());
+		System.out.println("Created new instance "+loc);
+		client.setURL(loc);
+		client.delete();
+		client.setURL(url+"/"+sName);
+		// just to check the quiet method
+		client.postQuietly(new JSONObject());
 	}
 
 	@Test
@@ -226,6 +238,8 @@ public class TestRestServiceWithHome {
 			JSONObject replyJ = new JSONObject(reply);
 			assertTrue(replyJ.getString("acl").contains("Error setting property"));
 		}
+		// same with ignoring error checking
+		client.putQuietly(setP);
 		client.delete();
 	}
 
@@ -271,12 +285,13 @@ public class TestRestServiceWithHome {
 			createTestInstance(k,false);
 		}
 	
-		public static void createTestInstance(Kernel k, boolean random) throws Exception {
+		public static String createTestInstance(Kernel k, boolean random) throws Exception {
 			Home home = k.getHome("counter");
 			String uid = random ? null : "my_counter";
 			InitParameters initParams = new InitParameters(uid);
 			String id = home.createResource(initParams);
 			System.out.println("Created test instance <"+id+">");
+			return id;
 		}
 
 	}
@@ -343,6 +358,14 @@ public class TestRestServiceWithHome {
 			throw new WebApplicationException(500);
 		}
 
+		@POST
+		@Consumes("application/json")
+		@Path("/")
+		public Response createNew() throws Exception {
+			String id = HomeApplication.createTestInstance(k, true);
+			return Response.created(new URI(getBaseURL()+"/"+id)).build();
+		}
+
 		public static boolean fail_on_getproperties = false;
 
 		@Override
@@ -357,6 +380,5 @@ public class TestRestServiceWithHome {
 		}
 
 	}
-
 
 }

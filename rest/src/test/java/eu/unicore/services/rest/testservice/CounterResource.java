@@ -10,7 +10,7 @@ import eu.unicore.services.security.ACLEntry.MatchType;
 public class CounterResource extends ResourceImpl {
 
 	public static volatile int processedMessages = 0;
-	
+
 	@Override
 	public CounterModel getModel() {
 		return (CounterModel)super.getModel();
@@ -37,6 +37,5 @@ public class CounterResource extends ResourceImpl {
 			processedMessages++;
 		}
 	}
-
 	
 }
