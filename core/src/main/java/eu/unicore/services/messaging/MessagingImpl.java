@@ -37,8 +37,8 @@ public class MessagingImpl implements IMessaging{
 	final BlockingQueue<MessageBean> queue;
 	
 	public MessagingImpl(PersistenceProperties kernelCfg)throws Exception{
-		this.persistenceProperties=kernelCfg;
-		this.store=createStore();
+		this.persistenceProperties = kernelCfg;
+		this.store = createStore();
 		this.queue = new BlockingArrayQueue<>(256, 16, 1024);
 		this.messagingWriteThread = new MessageWriteThread(queue,store);
 		this.messagingWriteThread.start();
@@ -85,21 +85,21 @@ public class MessagingImpl implements IMessaging{
 				store.remove(messageID);
 			}
 		}
-		
+
 		return new PullPoint(){
 
-			Iterator<Message> messageIterator=messages.iterator();
+			Iterator<Message> messageIterator = messages.iterator();
 
 			public boolean hasNext() {
 				return messageIterator.hasNext();
 			}
 
 			public Message next() {
-				Message m=messageIterator.next();
+				Message m = messageIterator.next();
 				messageIterator.remove();
 				return m;
 			}
-			
+
 			public void dispose(){
 				synchronized(store){
 					while(hasNext()){
@@ -115,9 +115,11 @@ public class MessagingImpl implements IMessaging{
 		};
 
 	}
-	
+
 	public IMessagingChannel getChannel(final String name) throws Exception {
-		IMessagingProvider provider=providers.get(name);
+
+		IMessagingProvider provider = providers.get(name);
+
 		if(provider!=null){
 			return provider.getChannel();
 		}
@@ -128,13 +130,8 @@ public class MessagingImpl implements IMessaging{
 				queue.offer(new MessageBean(message.getMessageId(),name,message));
 			}
 		};
-
 	}
 
-	/**
-	 * remove all content
-	 * @throws PersistenceException
-	 */
 	public void cleanup() {
 		try {
 			store.removeAll();
@@ -144,7 +141,7 @@ public class MessagingImpl implements IMessaging{
 	}
 
 	public static class MessageWriteThread extends Thread {
-		
+
 		private final BlockingQueue<MessageBean> queue;
 
 		private final Persist<MessageBean> store;
