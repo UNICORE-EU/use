@@ -3,6 +3,7 @@ package eu.unicore.services.rest.registry;
 import java.util.concurrent.TimeUnit;
 
 import eu.unicore.services.Kernel;
+import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.services.registry.RegistryCreator;
 import eu.unicore.util.Log;
 
@@ -30,6 +31,7 @@ public class RegistryStartupTask implements Runnable {
 				registryCreator.refreshRegistryEntries();
 			}
 			setupRegistryCrawler();
+			kernel.getHome(RegistryCreator.SERVICE_NAME).addPublicResourceID(RegistryCreator.DEFAULT_REGISTRY_ID);
 		}catch(Exception ex) {
 			throw new RuntimeException(ex);
 		}

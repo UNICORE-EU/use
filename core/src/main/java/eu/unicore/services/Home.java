@@ -48,7 +48,7 @@ public interface Home extends Runnable, KernelInjectable {
 	 * "manually" trigger expiry checks
 	 */
 	public void runExpiryCheckNow();
-	
+
 	/**
 	 * get the service name controlled by this Home
 	 */
@@ -166,6 +166,11 @@ public interface Home extends Runnable, KernelInjectable {
 	 */
 	public List<String> getAccessibleResources(Collection<String> resourceIDs, Client client) throws Exception;
 
-	//public Kernel getKernel();
+	/**
+	 * some services may have public resources that should be in the
+	 * list of accessible resources, but would not be handled correctly
+	 * by the default way of getting the accessible resources
+	 */
+	public default void addPublicResourceID(String id) {}
 
 }

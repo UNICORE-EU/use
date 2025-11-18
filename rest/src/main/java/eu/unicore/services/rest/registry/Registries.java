@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.hc.core5.http.HttpStatus;
 import org.json.JSONException;
@@ -17,6 +15,7 @@ import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.registry.LocalRegistryClient;
 import eu.unicore.services.registry.RegistryImpl;
 import eu.unicore.services.rest.USEResource;
+import eu.unicore.services.rest.impl.ApplicationBaseResource;
 import eu.unicore.services.rest.impl.ServicesBase;
 import eu.unicore.services.restclient.BaseClient;
 import eu.unicore.services.restclient.RegistryClient;
@@ -86,13 +85,15 @@ public class Registries extends ServicesBase {
 	@Override
 	protected Map<String,Object>getProperties() throws Exception {
 		Map<String,Object> status = super.getProperties();
-		LocalRegistryClient lrc = new LocalRegistryClient(home.getServiceName(), resource.getUniqueID(), kernel);
-		List<Object>entries = new ArrayList<>();
-		for(Map<String,String> e: lrc.listEntries()){
-			Map<String,Object> restEntry = renderEntry(e);
-			if(restEntry!=null)entries.add(restEntry);
+		if(wantProperty("entries")) {
+			LocalRegistryClient lrc = new LocalRegistryClient(home.getServiceName(), resource.getUniqueID(), kernel);
+			List<Object>entries = new ArrayList<>();
+			for(Map<String,String> e: lrc.listEntries()){
+				Map<String,Object> restEntry = renderEntry(e);
+				if(restEntry!=null)entries.add(restEntry);
+			}
+			status.put("entries", entries);
 		}
-		status.put("entries", entries);
 		return status;
 	}
 
@@ -100,12 +101,6 @@ public class Registries extends ServicesBase {
 		Map<String,Object> map = new HashMap<>();
 		String endpoint = value.get(RegistryClient.ENDPOINT);
 		map.put("href",endpoint);
-		String href = convertToREST(endpoint);
-		if(href!=null){
-			// old wsrf link
-			map.put("href",href);
-			map.put("wsrf",endpoint);
-		}
 		map.putAll(value);
 		String interfaceName = value.get("InterfaceName");
 		if(interfaceName!=null) {
@@ -116,36 +111,10 @@ public class Registries extends ServicesBase {
 		return map;
 	}
 
-	private static final Pattern wsrfURLPattern = Pattern.compile("(https||http)://(.*)/services/([^?]*)\\?res=(.*)");
-
-	private static final Map<String,String>conv = new HashMap<>();
-
-	static{
-		conv.put("StorageManagement", "core/storages");
-		conv.put("TargetSystemFactoryService", "core/factories");
-		conv.put("StorageFactory", "core/storagefactories");
-		conv.put("WorkflowFactory", "workflows");
-		conv.put("Registry", "registries");	
+	@Override
+	protected void customizeBaseProperties(JSONObject props) throws Exception {
+		if(wantProperty("client"))props.put("client", ApplicationBaseResource.getBaseClientProperties());
+		if(wantProperty("server"))props.put("server", ApplicationBaseResource.getBaseServerProperties(kernel));
 	}
 
-	/**
-	 * Converts a UNICORE WSRF URL to a UNICORE REST URL
-	 * (heuristically, i.e. using pattern matching)
-	 */
-	public static String convertToREST(String wsrfURL){
-		Matcher m = wsrfURLPattern.matcher(wsrfURL);
-		if(!m.matches())return null;
-		String scheme=m.group(1);
-		String base=m.group(2);
-		String restPathElement=conv.get(m.group(3));
-		if(restPathElement==null)return null;
-		String resID=m.group(4);
-		String restURL = scheme+"://"+base+"/rest/"+restPathElement+"/"+resID;
-		return restURL;
-	}
-
-	public static boolean isWSRFEndpoint(String endpoint){
-		Matcher m = wsrfURLPattern.matcher(endpoint);
-		return m.matches();
-	}
 }

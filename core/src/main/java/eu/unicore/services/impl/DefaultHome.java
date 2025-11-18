@@ -543,7 +543,16 @@ public abstract class DefaultHome implements Home {
 				Log.logException("["+serviceName+"] Error checking accessibility", ex, Log.getLogger(Log.SERVICES, DefaultHome.class));
 			}
 		}
+		for(String pub: publicResources) {
+			if(!accessible.contains(pub))accessible.add(pub);
+		}
 		return accessible;
 	}
 
+	private final List<String> publicResources = new ArrayList<>();
+
+	@Override
+	public void addPublicResourceID(String id) {
+		if(!publicResources.contains(id))publicResources.add(id);
+	}
 }

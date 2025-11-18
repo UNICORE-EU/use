@@ -2,6 +2,7 @@ package eu.unicore.services.rest.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.security.cert.X509Certificate;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -22,12 +23,14 @@ import eu.unicore.security.Xlogin;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.ISubSystem;
+import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.AuthNHandler;
 import eu.unicore.services.restclient.jwt.JWTUtils;
 import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.security.util.AuthZAttributeStore;
+import eu.unicore.services.utils.Utilities;
 import eu.unicore.util.Log;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -117,10 +120,18 @@ public class ApplicationBaseResource extends RESTRendererBase {
 		return props;
 	}
 
+	protected Map<String, Object> renderClientProperties() throws Exception {
+		return getBaseClientProperties();
+	}
+
+	protected Map<String, Object> renderServerProperties() throws Exception {
+		return getBaseServerProperties(kernel);
+	}
+
 	/**
 	 * info about the current client
 	 */
-	protected Map<String, Object> renderClientProperties() throws Exception {
+	public static Map<String, Object> getBaseClientProperties() throws Exception {
 		Map<String,Object>props = new HashMap<>();
 		Client c = AuthZAttributeStore.getClient();
 		props.put("dn", c.getDistinguishedName());
@@ -164,8 +175,9 @@ public class ApplicationBaseResource extends RESTRendererBase {
 	/**
 	 * info about the server
 	 */
-	protected Map<String, Object> renderServerProperties() throws Exception {
+	public static Map<String, Object> getBaseServerProperties(Kernel kernel) throws Exception {
 		Map<String,Object>props = new HashMap<>();
+		DateFormat df = Utilities.getISO8601();
 		try {
 			String name = kernel.getContainerProperties().getValue(ContainerProperties.VSITE_NAME_PROPERTY);
 			if(name!=null)props.put("siteName", name);
@@ -176,7 +188,7 @@ public class ApplicationBaseResource extends RESTRendererBase {
 				X509Certificate cert = kernel.getContainerSecurityConfiguration().getCredential().getCertificate();
 				cred.put("dn", cert.getSubjectX500Principal().getName());
 				cred.put("issuer", cert.getIssuerX500Principal().getName());
-				cred.put("expires", getISODateFormatter().format(cert.getNotAfter()));
+				cred.put("expires", df.format(cert.getNotAfter()));
 			}catch(Exception ex) {}
 			props.put("credential", cred);
 		}
@@ -204,14 +216,14 @@ public class ApplicationBaseResource extends RESTRendererBase {
 		}
 		props.put("externalConnections", connectors);
 		try {
-			String v = getClass().getPackage().getSpecificationVersion();
+			String v = ApplicationBaseResource.class.getPackage().getSpecificationVersion();
 			props.put("version", v!=null? v : "DEVELOPMENT");
 		}catch(Exception ex){}
 		try {
-			props.put("upSince", getISODateFormatter().format(kernel.getUpSince().getTime()));
+			props.put("upSince", df.format(kernel.getUpSince().getTime()));
 		}catch(Exception ex){}
 		try {
-			props.put("currentTime", getISODateFormatter().format(new Date()));
+			props.put("currentTime", df.format(new Date()));
 		}catch(Exception ex) {}
 		return props;
 	}

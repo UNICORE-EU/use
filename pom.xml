@@ -57,6 +57,7 @@
   </scm>
 
   <properties>
+    <specification.version>10.3.0</specification.version>
     <compiler.fork>false</compiler.fork>
     <persistence.version>1.2.8</persistence.version>
     <secutils.version>4.2.1</secutils.version>
