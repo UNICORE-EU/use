@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -257,43 +256,30 @@ public class RegistryHandler implements ISubSystem {
 		}
 
 		private void checkConnection() {
-			switch(status) {
-			case NOT_APPLICABLE:
-			case OK:
-				if (lastChecked+60000<System.currentTimeMillis()) {
-					lastChecked = System.currentTimeMillis();
-					final RegistryClient rc = createClient();
-					Callable<String>task = () -> {
-						try {
-							rc.getJSON();
-							return "OK";
-						}catch(RESTException re) {
-							return re.getErrorMessage();
-						}catch(Exception e) {
-							return Log.createFaultMessage("Error ", e);
-						}
-					};
-					String res = compute(task, 5000);
-					if(!"OK".equals(res)){
-						statusMessage=res;
-						status = Status.DOWN;
+			if (lastChecked+60000<System.currentTimeMillis()) {
+				lastChecked = System.currentTimeMillis();
+				final RegistryClient rc = createClient();
+				Callable<String>task = () -> {
+					try {
+						rc.getJSON();
+						return "OK";
+					}catch(RESTException re) {
+						return re.getErrorMessage();
+					}catch(Exception e) {
+						return Log.createFaultMessage("Error ", e);
 					}
-					else {
-						status = Status.OK;
-					}
-				}
-				break;
-			default:
-				break;
+				};
+				String res = compute(task, 10000);
+				statusMessage = res;
+				status = "OK".equals(res) ? Status.OK : Status.DOWN;
 			}
 		}
 
 		private String compute(Callable<String>task, int timeout){
 			try{
-				Future<String> f = Resources.getExecutorService().submit(task);
-				return f.get(timeout, TimeUnit.MILLISECONDS);
+				return Resources.getExecutorService().submit(task).get(timeout, TimeUnit.MILLISECONDS);
 			}catch(Exception ex){
-				return "ERROR";
+				return Log.createFaultMessage("Error ", ex);
 			}
 		}
 	}
