@@ -3,6 +3,7 @@ package eu.unicore.services.rest.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -20,6 +21,7 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpStatus;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -35,6 +37,7 @@ import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.AuthNHandler;
 import eu.unicore.services.restclient.BaseClient;
 import eu.unicore.services.restclient.IAuthCallback;
+import eu.unicore.services.restclient.RESTException;
 import eu.unicore.services.restclient.UsernamePassword;
 import eu.unicore.services.restclient.jwt.JWTUtils;
 import eu.unicore.services.restclient.sshkey.PasswordSupplierImpl;
@@ -193,6 +196,10 @@ public class TestRestSecurity {
 	
 	@Test
 	public void testIssueToken() throws Exception {
+		long now = System.currentTimeMillis();
+		long tokenValidity = new JWTServerProperties(kernel.getContainerProperties().getRawProperties())
+				.getTokenValidity();
+		long exp = (long)(now/1000) + tokenValidity;
 		String resource = url+"/"+sName+"/token";
 		IAuthCallback auth = new SSHKey("demouser", new File("src/test/resources/id_ed25519"),
 				new PasswordSupplierImpl("test123".toCharArray()));
@@ -203,7 +210,24 @@ public class TestRestSecurity {
 			JSONObject t = JWTUtils.getPayload(token);
 			System.out.println(t.toString(2));
 			assertEquals("CN=Demo User, O=UNICORE, C=EU", t.get("sub"));
+			assertTrue(t.getLong("exp")>=exp);
 		}
+	}
+
+	@Test
+	public void testIssueTokenLifetimeError() throws Exception {
+		long notAfter = kernel.getContainerSecurityConfiguration().getCredential().
+				getCertificate().getNotAfter().getTime();
+		long remaining = notAfter - System.currentTimeMillis();
+		long request = (long)(1.1 * remaining);
+		String resource = url+"/"+sName+"/token?lifetime="+request;
+		IAuthCallback auth = new SSHKey("demouser", new File("src/test/resources/id_ed25519"),
+				new PasswordSupplierImpl("test123".toCharArray()));
+		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
+		RESTException re = assertThrows(RESTException.class, ()-> bc.get(ContentType.TEXT_PLAIN));
+		assertEquals(HttpStatus.SC_BAD_REQUEST, re.getStatus());
+		System.out.println(re.getErrorMessage());
+		assertTrue(re.getErrorMessage().contains("token lifetime"));
 	}
 
 	@Test
