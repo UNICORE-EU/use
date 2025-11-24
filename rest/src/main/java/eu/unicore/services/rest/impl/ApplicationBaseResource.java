@@ -76,7 +76,7 @@ public class ApplicationBaseResource extends RESTRendererBase {
 				return createErrorResponse(HttpStatus.SC_BAD_REQUEST,
 						"Requested token lifetime is longer than the remaining server certificate validity.");
 			}
-			lifetime= Math.min(lifetime, remainingCredentialLifetime);
+			lifetime = Math.min(lifetime, remainingCredentialLifetime);
 			Map<String,String> claims = new HashMap<>();
 			claims.put("etd", "true");
 			try {
@@ -107,15 +107,14 @@ public class ApplicationBaseResource extends RESTRendererBase {
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getCert() throws Exception {
 		try {
-			String pem = "n/a";
 			if(kernel.getContainerSecurityConfiguration().getCredential()!=null) {
 				ByteArrayOutputStream os = new ByteArrayOutputStream();
 				CertificateUtils.saveCertificate(os, 
 						kernel.getContainerSecurityConfiguration().getCredential().getCertificate(), 
 						Encoding.PEM);
-				pem = os.toString("UTF-8");
+				return Response.ok().entity(os.toString("UTF-8")).build();
 			}
-			return Response.ok().entity(pem).build();
+			return Response.noContent().build();
 		}
 		catch(Exception ex) {
 			return handleError("", ex, logger);
