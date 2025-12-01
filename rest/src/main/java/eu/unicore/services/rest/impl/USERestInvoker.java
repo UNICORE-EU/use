@@ -16,6 +16,7 @@ import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
 import eu.unicore.security.SEIOperationType;
 import eu.unicore.security.SecurityException;
+import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.CXFUtils;
 import eu.unicore.services.Home;
 import eu.unicore.services.Kernel;
@@ -25,6 +26,7 @@ import eu.unicore.services.Resource;
 import eu.unicore.services.admin.ResourceAvailability;
 import eu.unicore.services.exceptions.ResourceUnavailableException;
 import eu.unicore.services.exceptions.ResourceUnknownException;
+import eu.unicore.services.impl.SecuredResourceImpl;
 import eu.unicore.services.impl.SecuredResourceModel;
 import eu.unicore.services.persistence.PersistenceSettings;
 import eu.unicore.services.rest.RestService;
@@ -118,7 +120,7 @@ public final class USERestInvoker extends JAXRSInvoker {
 		// is this a sub-resource resolution? 
 		// TODO is there a safer way in CXF to decide this?
 		boolean isSubresource = action == null;
-		
+
 		OperationType opType = null;
 		if("GET".equals(action)) {
 			opType = OperationType.read;
@@ -133,13 +135,13 @@ public final class USERestInvoker extends JAXRSInvoker {
 		if(opAnnotation!=null){
 			opType = opAnnotation.value();
 		}
-		
+
 		if(o instanceof RESTRendererBase){
 			RESTRendererBase rrb = (RESTRendererBase)o;
 			rrb.setKernel(kernel);
 			rrb.setBaseURL(getBaseURL(exchange, serviceName));
 		}
-		
+
 		if(o instanceof BaseRESTController){
 			BaseRESTController br = (BaseRESTController)o;
 			br.setHome(home);
@@ -180,7 +182,12 @@ public final class USERestInvoker extends JAXRSInvoker {
 				throw new WebApplicationException(resp);
 			}
 		}
-		
+		if(r instanceof SecuredResourceImpl) {
+			try{
+				((SecuredResourceImpl)r).updateSecurityTokensBeforeAIP(AuthZAttributeStore.getTokens());
+			}catch(Exception e){}
+		}
+		createClient();
 		if(!isSubresource){
 			accessControl(serviceName, home, resourceID, action, opType, r, exchange);
 		}
@@ -189,7 +196,18 @@ public final class USERestInvoker extends JAXRSInvoker {
 		}
 		callFrequency.mark();
 	}
-	
+
+	private void createClient() {
+		SecurityTokens tokens = AuthZAttributeStore.getTokens();
+		if(tokens!=null) {
+			Client client = kernel.getSecurityManager().createClientWithAttributes(tokens);
+			if(client!=null && client.getSecurityTokens()!=null){
+				kernel.getSecurityManager().collectDynamicAttributes(client);
+				AuthZAttributeStore.setClient(client);
+			}
+		}
+	}
+
 	private void accessControl(String serviceName, Home home, String resourceID, String action, OperationType opType, Resource r, Exchange exchange)
 	throws WebApplicationException {
 		String accessControlOnService = serviceName;
@@ -203,6 +221,7 @@ public final class USERestInvoker extends JAXRSInvoker {
 			Response resp = Response.status(Status.FORBIDDEN).build();
 			throw new WebApplicationException(resp);
 		}
+
 	}
 
 	private String extractUniqueID(Exchange exchange){

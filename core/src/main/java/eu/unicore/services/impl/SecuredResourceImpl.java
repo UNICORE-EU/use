@@ -207,8 +207,11 @@ public abstract class SecuredResourceImpl implements Resource {
 			final Collection<String>ids = toRemove.get(serviceName);
 			final Client client = getClient();
 			Runnable r = new AsyncChildDelete(client, h, ids);
-			logger.info("Deleting instances of <{}> for <{}> : {}", 
-					serviceName, getClient().getDistinguishedName(), ids);
+			if(logger.isDebugEnabled()) {
+				String dn = client!=null? client.getDistinguishedName():"n/a";
+				logger.debug("Deleting instances of <{}> for <{}> : {}", 
+						serviceName, dn, ids);
+			}
 			getKernel().getContainerProperties().getThreadingServices().getExecutorService().execute(r);
 		}
 		return getModel().removeChildren(children);

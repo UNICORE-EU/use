@@ -19,29 +19,31 @@ public class AuthZAttributeStore {
 
 	private AuthZAttributeStore (){}
 
-	private static ThreadLocal<Client> client = new ThreadLocal<>();
-
-	private static ThreadLocal<TimeProfile> timeProfile = new ThreadLocal<>();
+	private static final ThreadLocal<Client> client = new ThreadLocal<>();
+	private static final ThreadLocal<SecurityTokens> secTokens = new ThreadLocal<>();
+	private static final ThreadLocal<TimeProfile> timeProfile = new ThreadLocal<>();
 
 	public static Client getClient(){
-		Client ret = client.get();
-		if (ret == null) {
-			ret = new Client();
-			client.set(ret);
-		}
-		return ret;
+		return client.get();
 	}
 
 	public static void setClient(Client c){
 		client.set(c);
+		secTokens.remove();
 	}
 
 	public static void removeClient(){
 		client.remove();
+		secTokens.remove();
 	}
 
 	public static SecurityTokens getTokens(){
-		return getClient().getSecurityTokens();
+		Client client = getClient();
+		return client!=null ? client.getSecurityTokens() : secTokens.get();
+	}
+
+	public static void setTokens(SecurityTokens tokens){
+		secTokens.set(tokens);
 	}
 
 	public static TimeProfile getTimeProfile(){
@@ -55,6 +57,7 @@ public class AuthZAttributeStore {
 
 	public static void clear(){
 		client.remove();
+		secTokens.remove();
 		timeProfile.remove();
 	}
 }

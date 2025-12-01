@@ -161,7 +161,7 @@ public class TestResourceImpl {
 
 	@Test
 	public void testRemoveChildren() throws Exception {
-		ResourceImpl r=makeResource(null);
+		ResourceImpl r = makeResource(null);
 		r.getModel().addChild("foo", "123");
 		r.getModel().addChild("bar", "456");
 		r.getModel().addChild("bar", "789");

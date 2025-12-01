@@ -2,7 +2,6 @@ package eu.unicore.services.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -15,30 +14,19 @@ public class TestAuthZAttributeStore {
 
 	@Test
 	public void test1()throws InterruptedException{
-		final Client c=new Client();
-		final SecurityTokens t=new SecurityTokens();
+		final Client c = new Client();
+		final SecurityTokens t = new SecurityTokens();
+		AuthZAttributeStore.setTokens(t);
 		t.setUserName("CN=dummy");
 		t.setConsignorTrusted(true);
 		c.setAuthenticatedClient(t);
 		assertEquals(Client.Type.AUTHENTICATED, c.getType());
-
+		assertEquals(t, AuthZAttributeStore.getTokens());
 		AuthZAttributeStore.setClient(c);
 		assertEquals(c, AuthZAttributeStore.getClient());
 		assertEquals(t, AuthZAttributeStore.getTokens());
-
-		Thread thr=new Thread(new Runnable(){
-			public void run(){
-				assertEquals(Client.Type.ANONYMOUS, 
-					AuthZAttributeStore.getClient().getType());
-				ok = true;
-			}
-		});
-		thr.start();
-		thr.join();
-		assertTrue(ok);
 		AuthZAttributeStore.clear();
-		assertEquals(Client.Type.ANONYMOUS, AuthZAttributeStore.getClient().getType());
-		assertEquals("anonymous", AuthZAttributeStore.getClient().getRole().getName());
+		assertNull(AuthZAttributeStore.getClient());
 		assertNull(AuthZAttributeStore.getTokens());
 	}
 

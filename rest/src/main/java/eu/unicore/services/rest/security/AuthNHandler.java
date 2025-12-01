@@ -15,7 +15,7 @@ import org.json.JSONObject;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.AuthorisationException;
-import eu.unicore.security.Client;
+import eu.unicore.security.SecurityException;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.CXFUtils;
 import eu.unicore.security.wsutil.SecuritySession;
@@ -30,7 +30,6 @@ import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.IContainerSecurityConfiguration;
-import eu.unicore.security.SecurityException;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.services.security.util.PubkeyCache;
 import eu.unicore.util.Log;
@@ -128,11 +127,9 @@ public class AuthNHandler implements ContainerRequestFilter {
 			token.getContext().put(SecuritySessionUtils.REUSED_MARKER_KEY, Boolean.TRUE);
 			logger.debug("Re-using session {} for <{}>", sessionID, session.getUserKey());
 		}
+		AuthZAttributeStore.setTokens(token);
 		if(response == null){
 			handleUserPreferences(message, token);
-			Client c = createClient(token);
-			logger.debug("Client: {}", c);
-			AuthZAttributeStore.setClient(c);
 			// make sure session info goes to the client
 			PostInvokeHandler.setSession(session);
 		}
@@ -223,14 +220,6 @@ public class AuthNHandler implements ContainerRequestFilter {
 		String clientIP = CXFUtils.getServletRequest(message).getHeader(CONSIGNOR_IP_HEADER);
 		if(clientIP == null) clientIP = CXFUtils.getClientIP(message);
 		return clientIP;
-	}
-
-	private Client createClient(SecurityTokens tokens) {
-		Client client = kernel.getSecurityManager().createClientWithAttributes(tokens);
-		if(client!=null && client.getSecurityTokens()!=null){
-			kernel.getSecurityManager().collectDynamicAttributes(client);
-		}
-		return client;
 	}
 
 	/**

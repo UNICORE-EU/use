@@ -284,7 +284,7 @@ public final class SecurityManager {
 	 */
 	private void assembleClientAttributes(Client client, SecurityTokens tokens) {
 		if (isServer(client)) {
-			Role r=new Role("server", "Server self access pseudo-role");
+			Role r = new Role("server", "Server self access pseudo-role");
 			client.setRole(r);
 		} else {
 			//setup client with authorisation attributes
@@ -323,7 +323,7 @@ public final class SecurityManager {
 	 * @return fully initialized Client object 
 	 */
 	Client createSecureClient(final SecurityTokens tokens) {
-		Client client=new Client();
+		Client client = new Client();
 		client.setAuthenticatedClient(tokens);
 		if (client.getType() != Client.Type.ANONYMOUS) {
 			assembleClientAttributes(client, tokens);
