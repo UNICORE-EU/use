@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.AuthorisationException;
+import eu.unicore.security.Client;
 import eu.unicore.security.SecurityException;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.CXFUtils;
@@ -130,6 +131,9 @@ public class AuthNHandler implements ContainerRequestFilter {
 		AuthZAttributeStore.setTokens(token);
 		if(response == null){
 			handleUserPreferences(message, token);
+			if(AuthZAttributeStore.getClient()==null) {
+				createClient(token);
+			}
 			// make sure session info goes to the client
 			PostInvokeHandler.setSession(session);
 		}
@@ -220,6 +224,16 @@ public class AuthNHandler implements ContainerRequestFilter {
 		String clientIP = CXFUtils.getServletRequest(message).getHeader(CONSIGNOR_IP_HEADER);
 		if(clientIP == null) clientIP = CXFUtils.getClientIP(message);
 		return clientIP;
+	}
+
+	private void createClient(SecurityTokens tokens) {
+		if(tokens!=null) {
+			Client client = kernel.getSecurityManager().createClientWithAttributes(tokens);
+			if(client!=null && client.getSecurityTokens()!=null){
+				kernel.getSecurityManager().collectDynamicAttributes(client);
+				AuthZAttributeStore.setClient(client);
+			}
+		}
 	}
 
 	/**

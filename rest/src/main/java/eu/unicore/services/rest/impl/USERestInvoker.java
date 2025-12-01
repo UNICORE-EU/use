@@ -182,13 +182,13 @@ public final class USERestInvoker extends JAXRSInvoker {
 				throw new WebApplicationException(resp);
 			}
 		}
-		if(r instanceof SecuredResourceImpl) {
-			try{
-				((SecuredResourceImpl)r).updateSecurityTokensBeforeAIP(AuthZAttributeStore.getTokens());
-			}catch(Exception e){}
-		}
-		createClient();
 		if(!isSubresource){
+			if(r instanceof SecuredResourceImpl) {
+				try{
+					((SecuredResourceImpl)r).updateSecurityTokensBeforeAIP(AuthZAttributeStore.getTokens());
+				}catch(Exception e){}
+			}
+			createClient();
 			accessControl(serviceName, home, resourceID, action, opType, r, exchange);
 		}
 		if(r!=null){

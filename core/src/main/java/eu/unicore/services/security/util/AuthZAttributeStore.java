@@ -29,12 +29,6 @@ public class AuthZAttributeStore {
 
 	public static void setClient(Client c){
 		client.set(c);
-		secTokens.remove();
-	}
-
-	public static void removeClient(){
-		client.remove();
-		secTokens.remove();
 	}
 
 	public static SecurityTokens getTokens(){
