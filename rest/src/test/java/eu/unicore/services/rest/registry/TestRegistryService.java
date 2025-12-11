@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -177,7 +178,8 @@ public class TestRegistryService {
 		};
 		Map<String,String>e = new HashMap<>();
 		e.put("InternalEntry", "true");
-		e.put(RegistryClient.SERVER_IDENTITY, "CN=Test");
+		String subj = "CN=Demo CA,O=UNICORE,C=EU";
+		e.put(RegistryClient.SERVER_IDENTITY, subj);
 		String pem = FileUtils.readFileToString(new File("src/test/resources/cacert.pem"), "UTF-8");
 		e.put(RegistryClient.SERVER_PUBKEY, pem);
 		entries.add(e);
@@ -189,8 +191,8 @@ public class TestRegistryService {
 		entries.add(e2);
 		rh.doUpdateKeys(erc);
 		PubkeyCache pc = PubkeyCache.get(kernel);
-		assertNotNull(pc.getPublicKey("CN=Test"));
-		assertNull(pc.getPublicKey("CN=Wrong"));
+		assertTrue(pc.getPublicKeys(subj).size()>0);
+		assertEquals(0, pc.getPublicKeys("CN=Wrong").size());
 	}
 
 	private BaseClient getClient() throws Exception {

@@ -1,9 +1,12 @@
 package eu.unicore.services.rest.jwt;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Properties;
 import java.util.Random;
 
@@ -79,8 +82,8 @@ public class TestJWTUtils {
 		final RSAPublicKey key = (RSAPublicKey)cp.getCredential().getCertificate().getPublicKey();
 		return new PubkeyCache() {
 			@Override
-			public RSAPublicKey getPublicKey(String subject) {
-				return key;
+			public Collection<PublicKey> getPublicKeys(String subject) {
+				return Collections.singletonList(key);
 			}
 		};
 	}
@@ -104,6 +107,6 @@ public class TestJWTUtils {
 		jwtProps = new JWTServerProperties(p);
 		pc = new PubkeyCache();
 		new JWTHelper(jwtProps, cp, pc);
-		assertNotNull(pc.getPublicKey("CN=Demo CA,O=UNICORE,C=EU"));
+		assertTrue(pc.getPublicKeys("CN=Demo CA,O=UNICORE,C=EU").size()>0);
 	}
 }

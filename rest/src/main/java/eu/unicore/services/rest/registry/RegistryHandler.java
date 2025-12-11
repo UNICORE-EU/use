@@ -1,6 +1,5 @@
 package eu.unicore.services.rest.registry;
 
-import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -205,17 +204,16 @@ public class RegistryHandler implements ISubSystem {
 				String pem = entry.get(RegistryClient.SERVER_PUBKEY);
 				if(pem!=null){
 					String serverDN = entry.get(RegistryClient.SERVER_IDENTITY);
-					keyCache.update(serverDN, parsePEM(pem));
+					keyCache.update(parsePEM(pem));
 					logger.debug("Read public key for <{}>", serverDN);
 				}
 			}catch(Exception ex){}
 		}
 	}
 
-	private PublicKey parsePEM(String pem) throws Exception {
-		X509Certificate cert = CertificateUtils.loadCertificate(
-				IOUtils.toInputStream(pem, "UTF-8"), Encoding.PEM);
-		return cert.getPublicKey();
+	private X509Certificate parsePEM(String pem) throws Exception {
+		return CertificateUtils.loadCertificate(IOUtils.toInputStream(pem, "UTF-8"),
+				Encoding.PEM);
 	}
 
 	static class RConnector implements ExternalSystemConnector {

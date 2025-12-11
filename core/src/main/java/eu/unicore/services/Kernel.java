@@ -462,7 +462,7 @@ public final class Kernel {
 	 */
 	public void credentialReloaded() {
 		clientConfiguration.setCredential(containerSecurityConfiguration.getCredential());
-		PubkeyCache.get(this).update(containerSecurityConfiguration.getCredential());
+		PubkeyCache.get(this).update(containerSecurityConfiguration.getCredential().getCertificate());
 		RegistryCreator rc = RegistryCreator.get(this);
 		if(rc.haveRegistry() && !rc.isGlobalRegistry()) {
 			rc.refreshRegistryEntries();

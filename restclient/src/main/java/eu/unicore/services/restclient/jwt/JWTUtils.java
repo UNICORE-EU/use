@@ -6,6 +6,7 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -168,6 +169,22 @@ public class JWTUtils {
 			if(!sig.verify(getVerifier(pk))){
 				throw new BadJWTException("Signature verification failed!");
 			}
+		}catch(Exception ex){
+			throw new AuthenticationException("JWT verification failed", ex);
+		}
+	}
+
+	public static void verifyJWTToken(String token, Collection<PublicKey> pks, String allowedAudience) throws AuthenticationException {
+		try{
+			SignedJWT sig = SignedJWT.parse(token);
+			verifyClaims(sig.getJWTClaimsSet(), allowedAudience);
+			for(PublicKey pk: pks) {
+				if(sig.verify(getVerifier(pk))){
+					return;
+				}
+			}
+			throw new AuthenticationException("JWT token could not "
+					+ "be verified with the available keys");
 		}catch(Exception ex){
 			throw new AuthenticationException("JWT verification failed", ex);
 		}

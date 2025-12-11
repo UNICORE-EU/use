@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.logging.log4j.Logger;
@@ -22,13 +23,13 @@ public class JWTHelper {
 	private static final Logger logger = Log.getLogger(Log.SECURITY, JWTHelper.class);
 
 	private final JWTServerProperties preferences;
-	
+
 	private final IContainerSecurityConfiguration securityProperties;
-	
+
 	private final String serverDN;
-	
+
 	private final PubkeyCache keyCache;
-	
+
 	public JWTHelper(JWTServerProperties preferences, IContainerSecurityConfiguration securityProperties, PubkeyCache keyCache){
 		this.preferences = preferences;
 		this.securityProperties = securityProperties;
@@ -37,11 +38,11 @@ public class JWTHelper {
 		this.keyCache = keyCache;
 		loadLocalTrustedIssuers();
 	}
-	
+
 	public String createETDToken(String user) throws Exception {
 		return createETDToken(user,preferences.getTokenValidity());
 	}
-	
+
 	public String createETDToken(String user, long lifetime) throws Exception {
 		if(preferences.getHMACSecret()!=null){
 			return JWTUtils.createETDToken(user, lifetime, serverDN, 
@@ -61,11 +62,13 @@ public class JWTHelper {
 			}catch(Exception ex) {}
 		}
 		String issuer = JWTUtils.getIssuer(token);
-		PublicKey pk = keyCache.getPublicKey(issuer);
-		if(pk==null) throw new AuthenticationException("No public key is available for <"+issuer+">");
-		JWTUtils.verifyJWTToken(token, pk, requiredAudience);
+		Collection<PublicKey> pks = keyCache.getPublicKeys(issuer);
+		if(pks==null || pks.size()==0) {
+			throw new AuthenticationException("No public key is available for <"+issuer+">");
+		}
+		JWTUtils.verifyJWTToken(token, pks, requiredAudience);
 	}
-	
+
 	private void loadLocalTrustedIssuers() {
 		if(keyCache==null)return;
 		List<String> localTrusted = preferences.getListOfValues(JWTServerProperties.TRUSTED_ISSUER_CERT_LOCATIONS);
@@ -74,7 +77,7 @@ public class JWTHelper {
 				X509Certificate cert = CertificateUtils.loadCertificate(is, Encoding.PEM);
 				String dn = cert.getSubjectX500Principal().getName();
 				logger.info("Loading trusted JWT issuer <{}> from '{}'", dn, location);
-				keyCache.update(dn, cert.getPublicKey());
+				keyCache.update(cert);
 			}catch(Exception e) {
 				Log.logException("Could not load trusted JWT issuer from '"+location+"'", e);
 			}

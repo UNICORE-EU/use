@@ -23,7 +23,7 @@ import eu.unicore.util.configuration.PropertyGroupHelper;
 public class AttributeSourceConfigurator {
 
 	private static final Logger logger=Log.getLogger(Log.SECURITY,AttributeSourceConfigurator.class);
-	
+
 	final static Map<String,String> DEFAULTS = new HashMap<>();
 
 	static {
@@ -33,7 +33,7 @@ public class AttributeSourceConfigurator {
 		DEFAULTS.put("GRIDMAP-FILE", "eu.unicore.services.aip.gridmapfile.GridMapFileAttributeSource");
 		DEFAULTS.put("LDAP", "eu.unicore.services.aip.ldap.LDAPAttributeSource");
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static <T extends IAttributeSourceBase> T configureAS(String name, String subPrefix, 
 			Properties properties) {
@@ -67,7 +67,7 @@ public class AttributeSourceConfigurator {
 					clazz + ">: " + e.toString(), e);
 		}
 	}
-	
+
 	// accept older attribute source class names
 	private static String handleOldOrMissingClass(String clazz, String name) {
 		if(clazz==null) {

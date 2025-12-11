@@ -1,29 +1,61 @@
 package eu.unicore.services.security.util;
 
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import eu.emi.security.authn.x509.X509Credential;
+import org.apache.logging.log4j.Logger;
+
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.services.Kernel;
+import eu.unicore.util.Log;
 
+/**
+ * stores public keys by subject, used for validating JWT assertions
+ */
 public class PubkeyCache {
 
-	private final Map<String, PublicKey>map = new ConcurrentHashMap<>();
+	private static final Logger logger = Log.getLogger(Log.SECURITY,PubkeyCache.class);
 
-	public PublicKey getPublicKey(String subject){
-		return map.get(X500NameUtils.getComparableForm(subject));
+	private final Map<String, Collection<PublicKey>>map = new ConcurrentHashMap<>();
+
+	public synchronized Collection<PublicKey> getPublicKeys(String subject){
+		subject = X500NameUtils.getComparableForm(subject);
+		Collection<PublicKey> keys = map.get(subject);
+		if(keys==null) {
+			keys = new HashSet<PublicKey>();
+			map.put(subject, keys);
+		}
+		return keys;
 	}
 
-	public void update(String subject, PublicKey pubkey){
-		map.put(X500NameUtils.getComparableForm(subject), pubkey);
+	private void add(String subject, PublicKey pubkey){
+		getPublicKeys(subject).add(pubkey);
 	}
 
-	public void update(X509Credential credential){
-		String subject = credential.getSubjectName();
-		PublicKey pk = credential.getCertificate().getPublicKey();
-		update(subject, pk);
+	// 10 days of grace period added to certificate's NotAfter date
+	private static long gracePeriod = 10*24*3600;
+
+	/**
+	 * stores the public key, if the certificate is not expired
+	 * @param credential
+	 * @return true if certificate was added, false if not (it is expired)
+	 */
+	public boolean update(X509Certificate certificate){
+		long notAfter = certificate.getNotAfter().getTime();
+		String subject = certificate.getSubjectX500Principal().getName();
+		if(System.currentTimeMillis()<notAfter+gracePeriod) {
+			add(subject, certificate.getPublicKey());
+			logger.debug("Added trusted certificate for <{}> for validating authentication assertions.",
+					subject);
+			return true;
+		}
+		logger.warn("Expired certificate for <{}>, no longer trusted for validating authentication assertions.",
+				subject);
+		return false;
 	}
 
 	public static synchronized PubkeyCache get(Kernel kernel){
