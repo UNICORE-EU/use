@@ -1,9 +1,17 @@
 package eu.unicore.services.rest.registry;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import eu.unicore.security.OperationType;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.registry.RegistryCreator;
+import eu.unicore.services.security.pdp.DefaultPDP;
+import eu.unicore.services.security.pdp.DefaultPDP.Rule;
+import eu.unicore.services.security.pdp.PDPResult.Decision;
+import eu.unicore.services.security.pdp.UnicoreXPDP;
 import eu.unicore.util.Log;
 
 
@@ -30,9 +38,47 @@ public class RegistryStartupTask implements Runnable {
 				registryCreator.refreshRegistryEntries();
 			}
 			setupRegistryCrawler();
+			setupAccessPolicy(registryCreator.isGlobalRegistry());
 			kernel.getHome(RegistryCreator.SERVICE_NAME).addPublicResourceID(RegistryCreator.DEFAULT_REGISTRY_ID);
 		}catch(Exception ex) {
 			throw new RuntimeException(ex);
+		}
+	}
+
+	private void setupAccessPolicy(boolean isGlobal){
+		UnicoreXPDP pdp = kernel.getSecurityManager().getPdp();
+		if(pdp!=null && pdp instanceof DefaultPDP) {
+			DefaultPDP dPDP = (DefaultPDP)pdp;
+
+			dPDP.setServiceRules("registries", Collections.singletonList(DefaultPDP.PERMIT_READ));
+			
+			final List<Rule> rRules = new ArrayList<>();
+			dPDP.setServiceRules("Registry", rRules);
+			rRules.add(
+					(client, action, resource) -> {
+						if(RegistryCreator.DEFAULT_REGISTRY_ID.equals(resource.getResourceID())
+								&& OperationType.read==action.getActionType())
+						{
+							return Decision.PERMIT;
+						}
+						return Decision.UNCLEAR;
+					}
+			);
+
+			if (isGlobal) {
+				rRules.add(
+						(client, action, resource) -> {
+							if(RegistryCreator.DEFAULT_REGISTRY_ID.equals(resource.getResourceID())
+									&& client!=null 
+									&& client.getRole()!=null 
+									&& "server"==client.getRole().getName())
+							{
+								return Decision.PERMIT;
+							}
+							return Decision.UNCLEAR;
+						}
+				);		
+			}
 		}
 	}
 
