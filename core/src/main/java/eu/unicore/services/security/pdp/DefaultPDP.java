@@ -44,9 +44,7 @@ public class DefaultPDP implements UnicoreXPDP {
 	@Override
 	public PDPResult checkAuthorisation(Client c, ActionDescriptor a, ResourceDescriptor d) throws Exception
 	{
-		if(logger.isDebugEnabled()) {
-			logger.debug("Policy check for client={} action={} resource={}", c, a, d);
-		}
+		logger.debug("Policy check for client={} action={} resource={}", c, a, d);
 		for(Rule r: basicRules) {
 			Decision decision = r.apply(c, a, d);
 			if(Decision.UNCLEAR!=decision) {

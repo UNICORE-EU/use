@@ -4,11 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 
+import org.apache.cxf.common.security.SecurityToken;
 import org.junit.jupiter.api.Test;
 
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
 import eu.unicore.security.Role;
+import eu.unicore.security.SecurityTokens;
 import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.pdp.DefaultPDP;
 import eu.unicore.services.security.pdp.PDPResult.Decision;
@@ -23,7 +25,7 @@ public class TestDefaultPDP {
 		c.setRole(new Role("admin",""));
 		assertEquals(Decision.PERMIT, pdp.checkAuthorisation(c, null, null).getDecision());
 	}
-	
+
 	@Test
 	public void testBan() throws Exception {
 		DefaultPDP pdp = new DefaultPDP();
@@ -48,12 +50,34 @@ public class TestDefaultPDP {
 	}
 
 	@Test
+	public void testOwner() throws Exception {
+		DefaultPDP pdp = new DefaultPDP();
+		Client c = new Client();
+		SecurityTokens t = new SecurityTokens();
+		t.setUserName("CN=someone");
+		c.setAuthenticatedClient(t);
+		ResourceDescriptor d = new ResourceDescriptor("foo","bar", "CN=someone");
+		d.setAclCheckOK(true);
+		assertEquals(Decision.PERMIT, pdp.checkAuthorisation(c, null, d).getDecision());
+	}
+
+	@Test
 	public void testPerService() throws Exception {
 		DefaultPDP pdp = new DefaultPDP();
 		pdp.setServiceRules("foo", Arrays.asList(DefaultPDP.PERMIT_READ));
 		ActionDescriptor a = new ActionDescriptor("GET", OperationType.read);
 		ResourceDescriptor d = new ResourceDescriptor("foo","bar", "CN=someone");
 		assertEquals(Decision.PERMIT, pdp.checkAuthorisation(null, a, d).getDecision());
+	}
+
+	@Test
+	public void testPerServicePermitUser() throws Exception {
+		DefaultPDP pdp = new DefaultPDP();
+		pdp.setServiceRules("foo", Arrays.asList(DefaultPDP.PERMIT_USER));
+		Client c = new Client();
+		c.setRole(new Role("user",""));
+		ResourceDescriptor d = new ResourceDescriptor("foo","bar", "CN=someone");
+		assertEquals(Decision.PERMIT, pdp.checkAuthorisation(c,null,d).getDecision());
 	}
 
 }
