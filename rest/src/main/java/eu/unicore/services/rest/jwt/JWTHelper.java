@@ -1,5 +1,6 @@
 package eu.unicore.services.rest.jwt;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.PublicKey;
@@ -64,7 +65,7 @@ public class JWTHelper {
 		String issuer = JWTUtils.getIssuer(token);
 		Collection<PublicKey> pks = keyCache.getPublicKeys(issuer);
 		if(pks==null || pks.size()==0) {
-			throw new AuthenticationException("No public key is available for <"+issuer+">");
+			throw new AuthenticationException("Cannot verify token issued by <"+issuer+">, no certificates available.");
 		}
 		JWTUtils.verifyJWTToken(token, pks, requiredAudience);
 	}
@@ -73,13 +74,19 @@ public class JWTHelper {
 		if(keyCache==null)return;
 		List<String> localTrusted = preferences.getListOfValues(JWTServerProperties.TRUSTED_ISSUER_CERT_LOCATIONS);
 		for(String location: localTrusted) {
-			try(InputStream is = new FileInputStream(location)){
-				X509Certificate cert = CertificateUtils.loadCertificate(is, Encoding.PEM);
-				String dn = cert.getSubjectX500Principal().getName();
-				logger.info("Loading trusted JWT issuer <{}> from '{}'", dn, location);
-				keyCache.update(cert);
-			}catch(Exception e) {
-				Log.logException("Could not load trusted JWT issuer from '"+location+"'", e);
+			if(new File(location).exists()) {
+				try(InputStream is = new FileInputStream(location)){
+					X509Certificate cert = CertificateUtils.loadCertificate(is, Encoding.PEM);
+					String dn = cert.getSubjectX500Principal().getName();
+					boolean accepted = keyCache.update(cert);
+					if(accepted) {
+						logger.info("Loaded trusted JWT issuer certificate <{}> from '{}'", dn, location);
+					}else {
+						logger.debug("Ignoring expired certificate '{}'", location);
+					}
+				}catch(Exception e) {
+					Log.logException("Could not load trusted JWT issuer from '"+location+"'", e, logger);
+				}
 			}
 		}
 	}
