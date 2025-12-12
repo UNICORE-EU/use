@@ -54,9 +54,9 @@ public class TestDefaultPDP {
 		Client c = new Client();
 		SecurityTokens t = new SecurityTokens();
 		t.setUserName("CN=someone");
+		t.setConsignorTrusted(true);
 		c.setAuthenticatedClient(t);
 		ResourceDescriptor d = new ResourceDescriptor("foo","bar", "CN=someone");
-		d.setAclCheckOK(true);
 		assertEquals(Decision.PERMIT, pdp.checkAuthorisation(c, null, d).getDecision());
 	}
 

@@ -92,7 +92,7 @@ public class DefaultPDP implements UnicoreXPDP {
 	 */
 	public static Rule DENY_BANNED = (c,a,d) -> {
 		if(c!=null && c.getRole()!=null && "banned".equals(c.getRole().getName())) {
-			logger.debug("DEBY role 'admin'");
+			logger.debug("DENY role 'banned'");
 			return Decision.DENY;
 		}
 		return Decision.UNCLEAR;
