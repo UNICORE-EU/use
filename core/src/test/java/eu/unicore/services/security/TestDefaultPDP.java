@@ -79,4 +79,13 @@ public class TestDefaultPDP {
 		assertEquals(Decision.PERMIT, pdp.checkAuthorisation(c,null,d).getDecision());
 	}
 
+	@Test
+	public void testFinalDeny() throws Exception {
+		DefaultPDP pdp = new DefaultPDP();
+		Client c = new Client();
+		ActionDescriptor a = new ActionDescriptor("GET", OperationType.read);
+		ResourceDescriptor d = new ResourceDescriptor("foo","bar", "CN=someone");
+		assertEquals(Decision.DENY, pdp.checkAuthorisation(c, a, d).getDecision());
+	}
+
 }
