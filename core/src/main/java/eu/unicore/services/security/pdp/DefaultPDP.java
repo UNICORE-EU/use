@@ -122,8 +122,6 @@ public class DefaultPDP implements UnicoreXPDP {
 		return Decision.UNCLEAR;
 	};
 
-	private static final String[] mod = new String[] {"DELETE", "PUT"};
-
 	/**
 	 * forbid delete and modify
 	 */
@@ -134,17 +132,9 @@ public class DefaultPDP implements UnicoreXPDP {
 				logger.debug("DENY modification");
 				return Decision.DENY;
 			}
-			for(String m: mod) {
-				if(m.equalsIgnoreCase(a.getAction())) {
-					logger.debug("DENY modification");
-					return Decision.DENY;
-				}
-			}
 		}
 		return Decision.UNCLEAR;
 	};
-
-	private static final String[] read = new String[] {"GET"};
 
 	/**
 	 * generic read access - useful for public endpoints
@@ -153,12 +143,6 @@ public class DefaultPDP implements UnicoreXPDP {
 		if(OperationType.read==a.getActionType()) {
 			logger.debug("PERMIT read access");
 			return Decision.PERMIT;
-		}
-		for(String m: read) {
-			if(m.equalsIgnoreCase(a.getAction())) {
-				logger.debug("PERMIT read access");
-				return Decision.PERMIT;
-			}
 		}
 		return Decision.UNCLEAR;
 	};

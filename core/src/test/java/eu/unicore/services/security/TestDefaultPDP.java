@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 
-import org.apache.cxf.common.security.SecurityToken;
 import org.junit.jupiter.api.Test;
 
 import eu.unicore.security.Client;
