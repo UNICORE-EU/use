@@ -3,6 +3,7 @@ package eu.unicore.services.rest.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -41,7 +42,10 @@ import eu.unicore.services.rest.USEResource;
 import eu.unicore.services.rest.USERestApplication;
 import eu.unicore.services.rest.testservice.CounterModel;
 import eu.unicore.services.rest.testservice.CounterResource;
+import eu.unicore.services.rest.testservice.CounterResource.CounterInitParams;
 import eu.unicore.services.restclient.BaseClient;
+import eu.unicore.services.restclient.ExtendedResourceStatusClient;
+import eu.unicore.services.restclient.ExtendedResourceStatusClient.ResourceStatus;
 import eu.unicore.services.restclient.RESTException;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
@@ -52,6 +56,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.MediaType;
@@ -102,6 +107,7 @@ public class TestRestServiceWithHome {
 				System.out.println("Service reply: "+reply);
 			}
 		}
+
 		CounterModel m = (CounterModel) k.getHome("counter").get("my_counter").getModel();
 		assertEquals(invocations, m.getCounter());
 		client.postQuietly(null);
@@ -194,6 +200,32 @@ public class TestRestServiceWithHome {
 		client.setURL(url+"/"+sName);
 		// just to check the quiet method
 		client.postQuietly(new JSONObject());
+	}
+	
+	@Test
+	public void testResourceStatusClient()throws Exception {
+		HomeApplication.createTestInstance(k, false, 3);
+		String url = k.getContainerProperties().getContainerURL()+"/rest";
+		String resource  = url+"/"+sName+"/my_counter";
+		System.out.println("Accessing "+resource);
+		BaseClient client = new BaseClient(resource, k.getClientConfiguration());
+		// test basic resource status
+		Client cc = new Client(client);
+		assertEquals(ResourceStatus.INITIALIZING, cc.getResourceStatus());
+		cc.assertReady(6);
+		assertEquals(ResourceStatus.READY, cc.getResourceStatus());
+		client.delete();	
+		// test client timeout
+		HomeApplication.createTestInstance(k, false, 20);
+		assertEquals(ResourceStatus.INITIALIZING, cc.getResourceStatus());
+		TimeoutException te = assertThrows(TimeoutException.class, ()->cc.assertReady(1));
+		assertTrue(te.getMessage().contains("Timeout waiting for resource"));
+		client.delete();
+		// test initialisation error
+		HomeApplication.createTestInstance(k, false, 666);
+		Exception e = assertThrows(Exception.class, ()->cc.assertReady(1));
+		assertTrue(e.getMessage().contains("ERROR"));
+		client.delete();
 	}
 
 	@Test
@@ -288,12 +320,21 @@ public class TestRestServiceWithHome {
 		public static String createTestInstance(Kernel k, boolean random) throws Exception {
 			Home home = k.getHome("counter");
 			String uid = random ? null : "my_counter";
-			InitParameters initParams = new InitParameters(uid);
+			InitParameters initParams = new CounterInitParams(uid);
 			String id = home.createResource(initParams);
 			System.out.println("Created test instance <"+id+">");
 			return id;
 		}
 
+		public static String createTestInstance(Kernel k, boolean random, long initDelay) throws Exception {
+			Home home = k.getHome("counter");
+			String uid = random ? null : "my_counter";
+			CounterInitParams initParams = new CounterInitParams(uid);
+			initParams.initDelay = initDelay;
+			String id = home.createResource(initParams);
+			System.out.println("Created test instance <"+id+">");
+			return id;
+		}
 	}
 
 	public static class MockHome extends DefaultHome {
@@ -361,8 +402,10 @@ public class TestRestServiceWithHome {
 		@POST
 		@Consumes("application/json")
 		@Path("/")
-		public Response createNew() throws Exception {
-			String id = HomeApplication.createTestInstance(k, true);
+		public Response createNew(@QueryParam("initMode") String initDelay) throws Exception {
+			if(initDelay==null)initDelay="0";
+			long delay = Long.parseLong(initDelay);
+			String id = HomeApplication.createTestInstance(k, true, delay);
 			return Response.created(new URI(getBaseURL()+"/"+id)).build();
 		}
 
@@ -381,4 +424,16 @@ public class TestRestServiceWithHome {
 
 	}
 
+	public static class Client implements ExtendedResourceStatusClient {
+		final BaseClient baseClient;
+
+		public Client(BaseClient baseClient) {
+			this.baseClient = baseClient;
+		}
+
+		@Override
+		public ResourceStatus getResourceStatus() throws Exception{
+			return ResourceStatus.valueOf(baseClient.getJSON().getString("resourceStatus"));
+		}
+	}
 }

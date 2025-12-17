@@ -100,7 +100,7 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 	public String getAddress() {
 		return address;
 	}
-	
+
 	public void setDoTLSAuthn(boolean use) {
 		this.doTLSAuthN = use;
 	}
@@ -268,7 +268,11 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 				.build();
 	}
 
-	private Status status=Status.UNKNOWN;
+	public void invalidateCache() {
+		cache.invalidateAll();
+	}
+
+	private Status status = Status.UNKNOWN;
 	private String statusMessage;
 	private long lastChecked;
 

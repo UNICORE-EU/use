@@ -18,10 +18,10 @@ import org.junit.jupiter.api.Test;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 
 public class TestOIDCServerAuthN {
-	
+
 	MockOIDCServer server;
 	File tokenfile = new File("target","test-refresh-tokens-file");
-	
+
 	@BeforeEach
 	public void startServer()throws Exception{
 		server = new MockOIDCServer ();
@@ -68,7 +68,6 @@ public class TestOIDCServerAuthN {
 		HttpGet h = new HttpGet("foo");
 		authn.addAuthenticationHeaders(h);
 		assertEquals("Bearer "+authn.token, h.getHeader("Authorization").getValue());
-		assertEquals("OIDC-SERVER", authn.getType());
 		assertEquals("demouser@"+server.getURI(), authn.getSessionKey());
 		assertFalse(props.queryOTP());
 	}

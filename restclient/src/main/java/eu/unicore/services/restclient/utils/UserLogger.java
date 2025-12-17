@@ -1,5 +1,7 @@
 package eu.unicore.services.restclient.utils;
 
+import org.apache.logging.log4j.message.FormattedMessage;
+
 /**
  * for outputting messages to the user / console
  */
@@ -11,7 +13,9 @@ public interface UserLogger {
 	 * @param msg log4j-style formatted message
 	 * @param params
 	 */
-	public default void info(String msg, Object...params) {}
+	public default void info(String msg, Object...params) {
+		System.out.println(new FormattedMessage(msg, params));
+	}
 
 	/**
 	 * output at VERBOSE level

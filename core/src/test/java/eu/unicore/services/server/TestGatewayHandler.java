@@ -44,7 +44,7 @@ public class TestGatewayHandler {
 			gw.stop();
 		}catch(Exception ex) {}
 	}
-	
+
 	@Test
 	public void test1() throws Exception {
 		Properties sp = new Properties();

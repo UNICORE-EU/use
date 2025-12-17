@@ -1,7 +1,5 @@
 package eu.unicore.services.restclient;
 
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -19,15 +17,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author schuller
  */
 public class Resources {
-	
+
 	private Resources(){}
-	
-	private static boolean isConfigured=false;
-	
+
+	private static boolean isConfigured = false;
+
 	private static ScheduledThreadPoolExecutor scheduler;
-	
+
 	private static ThreadPoolExecutor executor;
-	
+
 	/**
 	 * get a {@link ScheduledExecutorService} for executing tasks at a given schedule
 	 */
@@ -35,7 +33,7 @@ public class Resources {
 		if(!isConfigured)configure();
 		return scheduler;
 	}
-	
+
 	/**
 	 * get a {@link ExecutorService} for executing tasks
 	 * @return ExecutorService
@@ -44,15 +42,7 @@ public class Resources {
 		if(!isConfigured)configure();
 		return executor;
 	}
-	
-	/**
-	 * get an {@link CompletionService} using the Exector service
-	 * @param <V>
-	 */
-	public static synchronized <V> CompletionService<V>getCompletionService(){
-		return new ExecutorCompletionService<V>(getExecutorService());
-	}
-	
+
 	/**
 	 * Configure the pool
 	 */
@@ -61,7 +51,7 @@ public class Resources {
 		configureExecutor();
 		isConfigured=true;
 	}
-	
+
 	protected static void configureScheduler(){
 		int core=2;
 		scheduler=new ScheduledThreadPoolExecutor(core);
@@ -76,12 +66,12 @@ public class Resources {
 		        	}
 				});
 	}
-	
+
 	protected static void configureExecutor(){
 		int min=0;
 		int max=16;
 		int idle=10;
-		
+
 		executor=new ThreadPoolExecutor(min,max,
 				idle,TimeUnit.SECONDS,
 				new LinkedBlockingQueue<Runnable>(),
@@ -93,41 +83,6 @@ public class Resources {
 		        		return t;
 		        	}
 				});
-
-	}
-	
-	/**
-	 * get the current minimum pool size of the scheduler pool
-	 */
-	public static int getScheduledExecutorCorePoolSize(){
-		return scheduler.getCorePoolSize();
-	}
-	
-	/**
-	 * get the current maximum pool size of the scheduler pool
-	 */
-	public static int getScheduledExecutorMaxPoolSize(){
-		return scheduler.getMaximumPoolSize();
-	}
-	
-	/**
-	 * get the number of currently active threads in the scheduler pool
-	 */
-	public static int getScheduledExecutorActiveThreadCount(){
-		return scheduler.getActiveCount();
-	}
-	
-	public static int getExecutorCorePoolSize(){
-		return executor.getCorePoolSize();
-	}
-	
-	public static int getExecutorMaxPoolSize(){
-		return executor.getMaximumPoolSize();
-	}
-	
-	public static int getExecutorActiveThreadCount(){
-		return executor.getActiveCount();
 	}
 
 }
-

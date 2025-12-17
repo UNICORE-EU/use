@@ -183,8 +183,7 @@ public class JWTUtils {
 					return;
 				}
 			}
-			throw new AuthenticationException("JWT token could not "
-					+ "be verified with the available keys");
+			throw new AuthenticationException("JWT token could not be verified with the available keys");
 		}catch(Exception ex){
 			throw new AuthenticationException("JWT verification failed", ex);
 		}

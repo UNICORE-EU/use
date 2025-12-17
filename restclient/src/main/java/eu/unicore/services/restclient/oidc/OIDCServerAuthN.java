@@ -22,7 +22,6 @@ import org.json.JSONObject;
 import eu.unicore.security.wsutil.client.authn.FilePermHelper;
 import eu.unicore.services.restclient.IAuthCallback;
 import eu.unicore.services.restclient.oidc.OIDCProperties.AuthMode;
-import eu.unicore.services.restclient.utils.ConsoleLogger;
 import eu.unicore.services.restclient.utils.UserLogger;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.HttpUtils;
@@ -36,18 +35,22 @@ import eu.unicore.util.httpclient.IClientConfiguration;
 public class OIDCServerAuthN implements IAuthCallback {
 
 	private final OIDCProperties properties;
+
 	private final IClientConfiguration clientConfig;
+
 	String token;
+
 	String refreshToken;
+
 	long lastRefresh;
-	private UserLogger log = new ConsoleLogger();
+
+	private UserLogger log = new UserLogger() {};
 
 	public OIDCServerAuthN(OIDCProperties properties, IClientConfiguration clientConfig) 
 	{
 		this.properties = properties;
 		this.clientConfig = clientConfig;
 		loadRefreshToken();
-		this.log = new UserLogger(){};
 	}
 
 	@Override
@@ -67,10 +70,6 @@ public class OIDCServerAuthN implements IAuthCallback {
 	}
 
 	@Override
-	public String getType() {
-		return "OIDC-SERVER";
-	}
-
 	public String getSessionKey() {
 		return properties.getUsername()+"@"+properties.getTokenEndpoint();
 	}

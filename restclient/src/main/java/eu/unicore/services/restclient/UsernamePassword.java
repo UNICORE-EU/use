@@ -6,9 +6,9 @@ import org.apache.hc.core5.http.HttpMessage;
 public class UsernamePassword implements IAuthCallback {
 
 	private final String user;
-	
+
 	private final String password;
-	
+
 	public UsernamePassword(String user, String password) {
 		this.user = user;
 		this.password = password;
@@ -19,10 +19,10 @@ public class UsernamePassword implements IAuthCallback {
 		httpMessage.addHeader("Authorization", 
 				"Basic "+new String(Base64.encodeBase64((user+":"+password).getBytes())));
 	}
-	
+
 	@Override
 	public String getSessionKey() {
 		return "USERNAME:"+user+":"+password;
 	}
-	
+
 }

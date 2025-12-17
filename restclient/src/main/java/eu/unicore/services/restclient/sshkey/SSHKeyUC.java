@@ -16,8 +16,6 @@ import eu.unicore.services.restclient.IAuthCallback;
 public class SSHKeyUC implements IAuthCallback {
 
 	public static String HEADER_PLAINTEXT_TOKEN = "X-UNICORE-SSHKEY-AUTH-PLAINTEXT";
-	
-	public static final String TYPE="SSHKEY";
 
 	public String username;
 
@@ -31,11 +29,6 @@ public class SSHKeyUC implements IAuthCallback {
 	 */
 	public String signature;
 
-	@Override
-	public String getType() {
-		return TYPE;
-	}
-	
 	@Override
 	public void addAuthenticationHeaders(HttpMessage httpMessage) throws Exception {
 		String basicAuth = "Basic "+new String(Base64.encodeBase64((username+":"+signature).getBytes()));

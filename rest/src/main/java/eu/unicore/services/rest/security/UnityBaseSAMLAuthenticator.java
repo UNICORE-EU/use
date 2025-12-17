@@ -57,15 +57,11 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 
 	@Override
 	protected long getExpiryTime(AuthnResponseAssertions auth){
-		long expires = 0;
+		long expires = System.currentTimeMillis() + defaultCacheTime;
 		if(auth.getAuthNAssertions().size()>0){
 			try{
 				expires = auth.getAuthNAssertions().get(0).getNotOnOrAfter().getTime();
 			}catch(Exception ex){}
-		}
-		if(expires==0){
-			// cache for a short time anyway
-			expires = System.currentTimeMillis() + defaultCacheTime;
 		}
 		return expires;
 	}
@@ -73,13 +69,7 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 	@Override
 	protected String assignIdentity(AuthnResponseAssertions auth, Map<String,Object> attrs){
 		if(auth.getAuthNAssertions().size()>0){
-			if(auth.getAuthNAssertions().size()>1){
-				logger.debug("More than one authn assertion found! Will use first one.");
-			}
 			return auth.getAuthNAssertions().get(0).getSubjectName();
-		}
-		else{
-			logger.debug("No authentication assertion found!");
 		}
 		return null;
 	}

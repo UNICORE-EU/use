@@ -8,8 +8,8 @@ public class BaseModel extends SecuredResourceModel {
 	private static final long serialVersionUID = 1L;
 
 	private String resourceStatusDetails = "N/A";
-	
-	private ExtendedResourceStatus.ResourceStatus resourceStatus=ResourceStatus.UNDEFINED;
+
+	private ExtendedResourceStatus.ResourceStatus resourceStatus = ResourceStatus.UNDEFINED;
 
 	public String getResourceStatusDetails() {
 		return resourceStatusDetails;
@@ -23,8 +23,7 @@ public class BaseModel extends SecuredResourceModel {
 		return resourceStatus;
 	}
 
-	public void setResourceStatus(
-			ExtendedResourceStatus.ResourceStatus resourceStatus) {
+	public void setResourceStatus(ExtendedResourceStatus.ResourceStatus resourceStatus) {
 		this.resourceStatus = resourceStatus;
 	}
 

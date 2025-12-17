@@ -37,7 +37,6 @@ import eu.unicore.util.Log;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
-import jakarta.ws.rs.core.Response;
 
 /**
  * AuthN handler for REST services.
@@ -98,11 +97,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 		ThreadContext.clearAll();
 		Message message = PhaseInterceptorChain.getCurrentMessage();
 		try{
-			Response res = doHandle(message);
-			if(res!=null){
-				// response will be picked up by the JAXRSInvoker
-				message.getExchange().put(Response.class,res);
-			}
+			doHandle(message);
 		}
 		catch(SecurityException ex){
 			logger.debug(()->Log.createFaultMessage("User authentication failed", ex));
@@ -110,14 +105,13 @@ public class AuthNHandler implements ContainerRequestFilter {
 		}
 	}
 
-	private Response doHandle(Message message){
-		Response response = null;
+	private void doHandle(Message message){
 		SecuritySession session = null;
 		SecurityTokens token;
 		String sessionID = getSecuritySessionID(message);
 		if (sessionID==null) {
 			token = new SecurityTokens();
-			response = process(message, token);
+			process(message, token);
 			if(useSessions){
 				session = createSession(token);
 			}
@@ -129,15 +123,12 @@ public class AuthNHandler implements ContainerRequestFilter {
 			logger.debug("Re-using session {} for <{}>", sessionID, session.getUserKey());
 		}
 		AuthZAttributeStore.setTokens(token);
-		if(response == null){
-			handleUserPreferences(message, token);
-			if(AuthZAttributeStore.getClient()==null) {
-				createClient(token);
-			}
-			// make sure session info goes to the client
-			PostInvokeHandler.setSession(session);
+		handleUserPreferences(message, token);
+		if(AuthZAttributeStore.getClient()==null) {
+			createClient(token);
 		}
-		return response;
+		// make sure session info goes to the client
+		PostInvokeHandler.setSession(session);
 	}
 
 	/**
@@ -147,15 +138,15 @@ public class AuthNHandler implements ContainerRequestFilter {
 	 * @param token
 	 * @return null if client is authenticated, a 'forbidden' response otherwise 
 	 */
-	private Response process(Message message, SecurityTokens token) {
+	private void process(Message message, SecurityTokens token) {
 		token.setClientIP(establishClientIP(message));
 		processDelegation(message, token);
 		if(token.getConsignorName()!=null && token.isConsignorTrusted()){
 			// valid delegation - continue with the request
-			return null;
+			return;
 		}
 		// no delegation - invoke direct authentication chain
-		return processNoDelegation(message, token);
+		processNoDelegation(message, token);
 	}
 
 	private void processDelegation(Message message, SecurityTokens tokens){
@@ -205,7 +196,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 		}
 	}
 
-	private Response processNoDelegation(Message message, SecurityTokens token){
+	private void processNoDelegation(Message message, SecurityTokens token){
 		IAuthenticator auth = kernel.getAttribute(IAuthenticator.class);
 		boolean haveCredentials  = auth.authenticate(message, token);
 		if(!haveCredentials
@@ -217,7 +208,6 @@ public class AuthNHandler implements ContainerRequestFilter {
 			throw new AuthenticationException("Authentication failed - credentials could not be verified.");
 		}
 		// OK - continue request processing
-		return null;
 	}
 
 	private String establishClientIP(Message message){
@@ -241,7 +231,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 	 * 
 	 * Attribute names are either as used in UCC
 	 * 
-	 * vo:val|role:val|uid:val|pgid:val|supgids:val1,val2,...|useOSgids:true|false
+	 * vo:val|role:val|uid:val|pgid:val|supgids:val1,val2,...
 	 * 
 	 * or the long ones from {@link IAttributeSource}
 	 *  
@@ -251,7 +241,6 @@ public class AuthNHandler implements ContainerRequestFilter {
 		Map<String, String[]> preferences = tokens.getUserPreferences();
 		while(headers.hasMoreElements()){
 			String header = headers.nextElement();
-			// might have multiple preferences in one header
 			for(String value: header.split(",")){
 				String[]tok = value.split(":");
 				if(tok.length!=2)throw new AuthorisationException("Invalid format for user preference: "+header);
@@ -264,37 +253,28 @@ public class AuthNHandler implements ContainerRequestFilter {
 		if(IAttributeSource.ATTRIBUTE_XLOGIN.equalsIgnoreCase(key)
 				|| "uid".equalsIgnoreCase(key)){
 			preferences.put(IAttributeSource.ATTRIBUTE_XLOGIN, new String[]{value});
-			return;
 		}
-		if(IAttributeSource.ATTRIBUTE_ROLE.equalsIgnoreCase(key)){
+		else if(IAttributeSource.ATTRIBUTE_ROLE.equalsIgnoreCase(key)){
 			preferences.put(IAttributeSource.ATTRIBUTE_ROLE, new String[]{value});
-			return;
 		}
-		if(IAttributeSource.ATTRIBUTE_GROUP.equalsIgnoreCase(key)
+		else if(IAttributeSource.ATTRIBUTE_GROUP.equalsIgnoreCase(key)
 				|| "pgid".equalsIgnoreCase(key)){
 			preferences.put(IAttributeSource.ATTRIBUTE_GROUP, new String[]{value});
-			return;
 		}
-		if(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS.equalsIgnoreCase(key)
+		else if(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS.equalsIgnoreCase(key)
 				|| "supgids".equalsIgnoreCase(key)){
 			preferences.put(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS, value.split("\\+"));
-			return;
-		}
-		if(IAttributeSource.ATTRIBUTE_SELECTED_VO.equalsIgnoreCase(key)
-				|| "vo".equalsIgnoreCase(key)){
-			preferences.put(IAttributeSource.ATTRIBUTE_SELECTED_VO, new String[]{value});
-			return;
 		}
 	}
 
 	private String getSecuritySessionID(Message message){
-		if(!useSessions)return null;
-		return CXFUtils.getServletRequest(message).getHeader(SecuritySessionUtils.SESSION_ID_HEADER);
+		return useSessions ? 
+				CXFUtils.getServletRequest(message).getHeader(SecuritySessionUtils.SESSION_ID_HEADER)
+				: null;
 	}
 
 	private SecuritySession getSession(Message message, String sessionID){
-		SecuritySession session = null;
-		session=sessionStore.getSession(sessionID);
+		SecuritySession session = sessionStore.getSession(sessionID);
 		if (session==null || session.isExpired()){
 			// got a session ID from the client, but no session: fault
 			throw new WebApplicationException(432);
@@ -303,13 +283,11 @@ public class AuthNHandler implements ContainerRequestFilter {
 	}
 
 	private SecuritySession createSession(SecurityTokens securityTokens){
-		SecuritySession session = null;
-		// lifetime in milliseconds
 		long lt = kernel.getContainerSecurityConfiguration().getSessionLifetime()*1000;
-		String sessionID=UUID.randomUUID().toString();
-		securityTokens.getContext().put(SecuritySessionUtils.SESSION_ID_KEY, sessionID);
-		session = new SecuritySession(sessionID, securityTokens, lt);
+		String sessionID = UUID.randomUUID().toString();
+		SecuritySession session = new SecuritySession(sessionID, securityTokens, lt);
 		sessionStore.storeSession(session, securityTokens);
+		securityTokens.getContext().put(SecuritySessionUtils.SESSION_ID_KEY, sessionID);
 		return session;
 	}
 

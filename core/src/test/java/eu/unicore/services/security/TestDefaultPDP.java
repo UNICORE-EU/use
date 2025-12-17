@@ -72,11 +72,15 @@ public class TestDefaultPDP {
 	@Test
 	public void testPerServicePermitUser() throws Exception {
 		DefaultPDP pdp = new DefaultPDP();
-		pdp.setServiceRules("foo", Arrays.asList(DefaultPDP.PERMIT_USER));
+		pdp.addServiceRules("foo", DefaultPDP.PERMIT_READ_FOR_USER);
+		pdp.addServiceRules("foo", DefaultPDP.PERMIT_POST_FOR_USER);
 		Client c = new Client();
 		c.setRole(new Role("user",""));
-		ResourceDescriptor d = new ResourceDescriptor("foo","bar", "CN=someone");
-		assertEquals(Decision.PERMIT, pdp.checkAuthorisation(c,null,d).getDecision());
+		ActionDescriptor a = new ActionDescriptor("GET", OperationType.read);
+		ResourceDescriptor d = new ResourceDescriptor("foo", "bar", "CN=someone");
+		assertEquals(Decision.PERMIT, pdp.checkAuthorisation(c,a,d).getDecision());
+		a = new ActionDescriptor("POST", OperationType.write);
+		assertEquals(Decision.PERMIT, pdp.checkAuthorisation(c,a,d).getDecision());
 	}
 
 	@Test

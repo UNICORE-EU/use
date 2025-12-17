@@ -37,8 +37,15 @@ public class DefaultPDP implements UnicoreXPDP {
 		basicRules.add(DENY_MODIFICATION);
 	}
 
-	public void setServiceRules(String serviceName, List<Rule> rule) {
-		perServiceRules.put(serviceName, rule);
+	public void setServiceRules(String serviceName, List<Rule> rules) {
+		perServiceRules.put(serviceName, new ArrayList<>(rules));
+	}
+
+	public synchronized void addServiceRules(String serviceName, Rule... rules) {
+		List<Rule> rs = perServiceRules.get(serviceName);
+		if(rs==null)rs = new ArrayList<>();
+		for(Rule r: rules)rs.add(r);
+		perServiceRules.put(serviceName, rs);
 	}
 
 	@Override
@@ -64,7 +71,7 @@ public class DefaultPDP implements UnicoreXPDP {
 				}
 			}
 		}
-		logger.debug("No rule match, returning with final DENY");
+		logger.debug("No rule match, final decision DENY");
 		return new PDPResult(Decision.DENY, "Access denied.");
 	}
 
@@ -122,13 +129,15 @@ public class DefaultPDP implements UnicoreXPDP {
 		return Decision.UNCLEAR;
 	};
 
+	private static final String[] mod = new String[]{"DELETE", "PUT"};
+
 	/**
 	 * forbid delete and modify
 	 */
 	public static Rule DENY_MODIFICATION = (c,a,d) -> {
 		if(a!=null) 
 		{
-			if(OperationType.read!=a.getActionType()) {
+			for(String m: mod) if(m.equals(a.getAction())) {
 				logger.debug("DENY modification");
 				return Decision.DENY;
 			}
@@ -148,11 +157,26 @@ public class DefaultPDP implements UnicoreXPDP {
 	};
 
 	/**
-	 * permit role "user"
+	 * generic read access - useful for public endpoints
 	 */
-	public static Rule PERMIT_USER = (c,a,d)-> {
-		if(c!=null && c.getRole()!=null && "user".equals(c.getRole().getName())) {
-			logger.debug("PERMIT role 'user'");
+	public static Rule PERMIT_READ_FOR_USER = (c,a,d)-> {
+		if(a!=null && OperationType.read==a.getActionType()
+				&& c!=null && "user".equals(c.getRole().getName())) {
+			logger.debug("PERMIT read access for role 'user'");
+			return Decision.PERMIT;
+		}
+		return Decision.UNCLEAR;
+	};
+
+	/**
+	 * permit "POST" for role "user"
+	 */
+	public static Rule PERMIT_POST_FOR_USER = (c,a,d)-> {
+		if(c!=null && c.getRole()!=null && "user".equals(c.getRole().getName())
+			&& a!=null && "POST".equals(a.getAction())
+			) 
+		{
+			logger.debug("PERMIT POST for role 'user'");
 			return Decision.PERMIT;
 		}
 		return Decision.UNCLEAR;

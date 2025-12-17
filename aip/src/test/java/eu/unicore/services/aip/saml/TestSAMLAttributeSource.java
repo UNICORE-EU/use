@@ -216,7 +216,7 @@ public class TestSAMLAttributeSource {
 		public String createSoapReply(ResponseDocument rd) throws Exception {
 			return "<?xml version = \"1.0\"?>"+
 			"<se:Envelope xmlns:se =\"http://schemas.xmlsoap.org/soap/envelope/\">"+
-			"<se:Body>"+rd.toString()+"</se:Body></se:Envelope>";
+			"<se:Body>"+rd.xmlText()+"</se:Body></se:Envelope>";
 		}
 	}
 

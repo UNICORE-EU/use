@@ -35,6 +35,7 @@ import eu.unicore.services.rest.USEResource;
 import eu.unicore.services.rest.USERestApplication;
 import eu.unicore.services.rest.testservice.CounterModel;
 import eu.unicore.services.rest.testservice.CounterResource;
+import eu.unicore.services.rest.testservice.CounterResource.CounterInitParams;
 import eu.unicore.services.restclient.BaseClient;
 import eu.unicore.services.restclient.RESTException;
 import eu.unicore.services.security.TestConfigUtil;
@@ -203,7 +204,7 @@ public class TestServicesBase {
 		}
 
 		public static void createTestInstance(Kernel k) throws Exception {
-			k.getHome("counter").createResource(new InitParameters());
+			k.getHome("counter").createResource(new CounterInitParams(null));
 		}
 
 	}

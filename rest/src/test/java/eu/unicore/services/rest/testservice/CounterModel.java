@@ -6,6 +6,8 @@ public class CounterModel extends BaseModel {
 
 	private static final long serialVersionUID = 1L;
 
+	public long readyAt = System.currentTimeMillis();
+
 	private int counter=0;
 
 	public int getCounter() {
@@ -15,6 +17,5 @@ public class CounterModel extends BaseModel {
 	public void setCounter(int counter) {
 		this.counter = counter;
 	}
-	
-	
+
 }

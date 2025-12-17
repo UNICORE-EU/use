@@ -26,7 +26,15 @@ public class MockAttributeSource implements IAttributeSource {
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens, SubjectAttributesHolder otherAuthoriserInfo)
 			throws IOException {
 		Map<String,String[]>attrs = new HashMap<>();
-		if(!Client.ANONYMOUS_CLIENT_DN.equals(tokens.getEffectiveUserName())){
+		if("CN=Preferences Test, O=UNICORE, C=EU".equals(tokens.getEffectiveUserName())) {
+			attrs.put(IAttributeSource.ATTRIBUTE_ROLE, new String[]{"user", "admin"});
+			attrs.put(IAttributeSource.ATTRIBUTE_XLOGIN, new String[]{"nobody", "nobody2"});	
+			attrs.put(IAttributeSource.ATTRIBUTE_GROUP, new String[]{"ham", "spam"});	
+			attrs.put(IAttributeSource.ATTRIBUTE_SUPPLEMENTARY_GROUPS, new String[]{"foo", "bar"});	
+			attrs.put(IAttributeSource.ATTRIBUTE_VOS, new String[]{"hpc", "bio"});	
+		}
+		
+		else if(!Client.ANONYMOUS_CLIENT_DN.equals(tokens.getEffectiveUserName())){
 			attrs.put(IAttributeSource.ATTRIBUTE_ROLE, new String[]{"user"});
 			attrs.put(IAttributeSource.ATTRIBUTE_XLOGIN, new String[]{"nobody"});	
 		}

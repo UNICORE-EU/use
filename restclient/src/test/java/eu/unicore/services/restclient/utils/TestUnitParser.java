@@ -1,6 +1,8 @@
 package eu.unicore.services.restclient.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.text.NumberFormat;
@@ -65,8 +67,14 @@ public class TestUnitParser {
 		assertEquals(1.0,p.getDoubleValue("1 a"),0.1);
 		assertEquals(10.0,p.getDoubleValue("1B"),0.1);
 		assertEquals(200.0,p.getDoubleValue("2c3"),0.1);
-	}	
-	
+	}
+
+	@Test
+	public void testGetLongValue(){
+		UnitParser p = UnitParser.getCapacitiesParser(0);
+		assertEquals(1024, p.getLongValue("1K"));
+	}
+
 	@Test
 	public void testGetHumanReadable(){
 		UnitParser p=new UnitParser(
@@ -134,12 +142,22 @@ public class TestUnitParser {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testDateParsing()throws Exception{
-		String d1="13:22";
+		String d1 = "13:22";
 		Date date=UnitParser.extractDateTime(d1);
 		assertEquals(date.getYear(), new Date().getYear());
 		System.out.println(date);
+
+		assertNotNull(UnitParser.extractDateTime("2025-06-12 13:22"));
+		assertNotNull(UnitParser.extractDateTime("2025-06-12T13:22:00+0100"));
+		assertThrows(IllegalArgumentException.class,
+				()->UnitParser.extractDateTime("not a date"));
 	}
 
+	@Test
+	public void testI() {
+		String d = UnitParser.getISO8601().format(new Date());
+		System.out.println(d);
+	}
 
 	//check that a hh:mm date "before" now is interpreted as "tomorrow"
 	@SuppressWarnings("deprecation")

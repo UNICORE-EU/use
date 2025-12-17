@@ -28,11 +28,11 @@ public interface IAuthCallback {
 	}
 
 	/**
-	 * identifier of the concrete auth implementation
+	 * set an external logger to log to - generally only useful for the more
+	 * complex authentication options like SAML or OAuth
+	 *
+	 * @param log
 	 */
-	public default String getType() {
-		return getClass().getSimpleName();
-	}
-
 	public default void setLogger(UserLogger log) {}
+
 }

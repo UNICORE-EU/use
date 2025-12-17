@@ -58,13 +58,15 @@ import jakarta.ws.rs.core.Application;
 public class TestRestSecurity {
 
 	static Kernel kernel;
-	static String sName="test";
+
+	static String sName = "test";
+
 	static String url;
-	
+
 	@BeforeAll
 	public static void startServer()throws Exception{
 		FileUtils.deleteQuietly(new File("target/data"));
-		kernel=new Kernel("src/test/resources/use.properties");
+		kernel = new Kernel("src/test/resources/use.properties");
 		kernel.start();			
 		DeploymentDescriptorImpl dd = new DeploymentDescriptorImpl();
 		dd.setType(RestService.TYPE);
@@ -121,8 +123,7 @@ public class TestRestSecurity {
 			return false;
 		}
 	}
-	
-	
+
 	@Test
 	public void testJWTDelegationAuth() throws Exception {
 		String dn = "CN=Demo User, O=UNICORE, C=EU";
@@ -193,7 +194,7 @@ public class TestRestSecurity {
 		System.out.println("Service reply: "+reply.toString(2));
 		assertEquals("SSHKEY", reply.getString("auth_method"));
 	}
-	
+
 	@Test
 	public void testIssueToken() throws Exception {
 		long now = System.currentTimeMillis();
@@ -277,6 +278,29 @@ public class TestRestSecurity {
 		
 	}
 
+	@Test
+	public void testUserPreferences()throws Exception {
+		HttpClient client = HttpUtils.createClient(url, kernel.getClientConfiguration());
+		// only show certain fields
+		HttpGet get = new HttpGet(url+"/"+sName+"/User?fields=preferences");
+		IAuthCallback pwd = new UsernamePassword("preftest", "test123");
+		pwd.addAuthenticationHeaders(get);
+		String prefs = "group:spam,xlogin:nobody2,supplementaryGroups:bar,role:admin";
+		get.addHeader(AuthNHandler.USER_PREFERENCES_HEADER, prefs);
+		try(ClassicHttpResponse response = client.executeOpen(null, get, HttpClientContext.create())){
+			assertEquals(200, response.getCode());
+			JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
+			Set<String>keys = reply.keySet();
+			assertEquals(1, keys.size());
+			assertTrue(keys.contains("preferences"));
+			JSONObject active = reply.getJSONObject("preferences");
+			assertEquals("admin", active.getJSONArray("role").get(0));
+			assertEquals("nobody2", active.getJSONArray("xlogin").get(0));
+			assertEquals("spam", active.getJSONArray("group").get(0));
+			assertEquals("bar", active.getJSONArray("supplementaryGroups").get(0));
+		}
+	}
+
 	public static class MyApplication extends Application {
 		@Override
 		public Set<Class<?>> getClasses() {
@@ -314,6 +338,9 @@ public class TestRestSecurity {
 			properties.put("td_consignor", String.valueOf(AuthZAttributeStore.getTokens().getConsignorName()));
 			properties.put("auth_method", String.valueOf(AuthZAttributeStore.getTokens().getContext().
 					get(AuthNHandler.USER_AUTHN_METHOD)));
+			if(wantProperty("preferences")){
+				properties.put("preferences", AuthZAttributeStore.getTokens().getUserPreferences());
+			}
 			return properties;
 		}
 	}
