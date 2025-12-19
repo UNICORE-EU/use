@@ -4,7 +4,7 @@ import org.apache.logging.log4j.Logger;
 
 import eu.unicore.services.InitParameters;
 import eu.unicore.services.impl.ResourceImpl;
-import eu.unicore.services.messaging.ResourceDeletedMessage;
+import eu.unicore.services.messaging.Message;
 import eu.unicore.util.Log;
 
 /**
@@ -13,16 +13,16 @@ import eu.unicore.util.Log;
  * @author schuller
  */
 public class RegistryEntryImpl extends ResourceImpl {
-	
+
 	private static final Logger logger = Log.getLogger(Log.SERVICES+".registry", RegistryEntryImpl.class);
-	
+
 	public static final String SERVICENAME="ServiceGroupEntry";
-	
+
 	@Override
 	public RegistryEntryModel getModel(){
 		return (RegistryEntryModel)model;
 	}
-	
+
 	@Override
 	public void initialise(InitParameters initParams) throws Exception {
 		if(model==null){
@@ -37,12 +37,12 @@ public class RegistryEntryImpl extends ResourceImpl {
 	public void destroy() {
 		try{
 			String parent = getModel().getParentUID();
-			getKernel().getMessaging().getChannel(parent).publish(new ResourceDeletedMessage(getUniqueID()));
+			getKernel().getMessaging().getChannel(parent).publish(new Message(getUniqueID()));
 		}
 		catch(Exception e){
 			Log.logException("Could not send notification.",e,logger);
 		}
 		super.destroy();
 	}
-	
+
 }

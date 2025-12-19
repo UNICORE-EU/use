@@ -28,10 +28,10 @@ import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.AuthNHandler;
 import eu.unicore.services.restclient.jwt.JWTUtils;
+import eu.unicore.services.restclient.utils.UnitParser;
 import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.security.util.AuthZAttributeStore;
-import eu.unicore.services.utils.Utilities;
 import eu.unicore.util.Log;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -183,7 +183,7 @@ public class ApplicationBaseResource extends RESTRendererBase {
 	
 	public static Map<String, Object> getBaseServerProperties(Kernel kernel){
 		Map<String,Object>props = new HashMap<>();
-		DateFormat df = Utilities.getISO8601();
+		DateFormat df = UnitParser.getISO8601();
 		try {
 			String name = kernel.getContainerProperties().getValue(ContainerProperties.VSITE_NAME_PROPERTY);
 			if(name!=null)props.put("siteName", name);

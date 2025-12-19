@@ -23,8 +23,7 @@ import eu.unicore.services.ContainerProperties;
  */
 public class Utilities {
 
-	private Utilities() {
-	}
+	private Utilities() {}
 
 	/**
 	 * returns a new unique identifier that is
@@ -64,7 +63,6 @@ public class Utilities {
 		return true;
 	}
 
-
 	/**
 	 * return the physical server address
 	 * @return a URL of the form scheme://host:port where 'scheme' is http or https
@@ -77,7 +75,6 @@ public class Utilities {
 			proto="https";
 		return proto+"://"+host+":"+port;
 	}
-
 
 	/**
 	 * return the Gateway address, i.e.e the base part of this server's URL
@@ -115,11 +112,11 @@ public class Utilities {
 	 * @param logger - can be null, if non-null, errors and warnings will be logged
 	 */
 	public static void mapParams(Object obj, Map<String,String>params, Logger logger){
-		Class<?> clazz=obj.getClass();
+		Class<?> clazz = obj.getClass();
 		for(Map.Entry<String,String> en: params.entrySet()){
-			String s=en.getKey();
-			String paramName=s.substring(s.lastIndexOf(".")+1);
-			Method m=findSetter(clazz, paramName);
+			String s = en.getKey();
+			String paramName = s.substring(s.lastIndexOf(".")+1);
+			Method m = findSetter(clazz, paramName);
 			if(m==null){
 				if(logger!=null)logger.warn("Can't map parameter <"+s+">");
 				continue;
@@ -167,21 +164,6 @@ public class Utilities {
 			arg=Boolean.valueOf(valueString);
 		}
 		m.invoke(obj, new Object[]{arg});
-	}
-
-
-	/**
-	 * gets a DateFormat instance for the ISO8601 "yyyy-MM-dd'T'HH:mm:ssZ" format
-	 */
-	public static DateFormat getISO8601(){
-		return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-	}
-
-	/**
-	 * get a DateFormat instance for the "yyyy-MM-dd HH:mm" format
-	 */
-	public static DateFormat getSimpleDateFormat(){
-		return new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	}
 
 }

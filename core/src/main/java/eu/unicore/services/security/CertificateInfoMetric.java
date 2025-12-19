@@ -15,11 +15,11 @@ import eu.unicore.util.Log;
 public class CertificateInfoMetric implements Gauge<String> {
 
 	private final SecurityManager secManager;
-	
+
 	public CertificateInfoMetric(SecurityManager secManager){
 		this.secManager=secManager;
 	}
-	
+
 	@Override
 	public String getValue() {
 		StringBuilder sb=new StringBuilder();
@@ -38,7 +38,6 @@ public class CertificateInfoMetric implements Gauge<String> {
 		}catch(Exception e){
 			sb.append("Error: "+Log.createFaultMessage("", e)+">");
 		}
-		
 		return sb.toString();
 	}
 

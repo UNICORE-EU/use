@@ -203,7 +203,7 @@ public abstract class SecuredResourceImpl implements Resource {
 			}
 		}
 		for(String serviceName: toRemove.keySet()){
-			final Home h = getHome();
+			final Home h = getKernel().getHome(serviceName);
 			final Collection<String>ids = toRemove.get(serviceName);
 			final Client client = getClient();
 			Runnable r = new AsyncChildDelete(client, h, ids);
@@ -234,10 +234,11 @@ public abstract class SecuredResourceImpl implements Resource {
 
 		@Override
 		public void run(){
+			if(home==null || toRemove==null || toRemove.size()==0)return;
 			for(String j: toRemove){
 				try(Resource r = home.getForUpdate(j)){
-					if(r instanceof SecuredResourceImpl){
-						ActionDescriptor action =  new ActionDescriptor("Destroy", OperationType.modify);
+					if(r instanceof SecuredResourceImpl && client!=null){
+						ActionDescriptor action =  new ActionDescriptor("DELETE", OperationType.modify);
 						r.getKernel().getSecurityManager().checkAuthorisation(client,action,(SecuredResourceImpl)r);
 					}
 					r.destroy();

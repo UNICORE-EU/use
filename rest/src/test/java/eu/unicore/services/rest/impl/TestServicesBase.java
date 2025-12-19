@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.Home;
-import eu.unicore.services.InitParameters;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.Resource;
 import eu.unicore.services.impl.DefaultHome;

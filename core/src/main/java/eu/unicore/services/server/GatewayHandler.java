@@ -59,7 +59,7 @@ public class GatewayHandler implements ISubSystem {
 	private long lastChecked;
 	private String gwURL;
 	private String myHost;
-	
+
 	public GatewayHandler(ContainerProperties containerConfiguration, 
 			IClientConfiguration clientConfiguration,
 			DefaultContainerSecurityConfiguration secConfiguration){
@@ -187,7 +187,6 @@ public class GatewayHandler implements ISubSystem {
 		return null;
 	}
 
-
 	private Callable<Pair<X509Certificate,String>> getCheckConnectionTask(final String url) {
 		Callable<Pair<X509Certificate,String>> getCert = new Callable<>(){
 			public  Pair<X509Certificate,String> call() {
@@ -207,8 +206,6 @@ public class GatewayHandler implements ISubSystem {
 		};
 		return getCert;
 	}
-	
-	
 
 	public void enableGatewayCertificateRefresh() throws Exception {
 		if(!secConfiguration.haveFixedGatewayCertificate()){
@@ -224,7 +221,7 @@ public class GatewayHandler implements ISubSystem {
 	 */
 	public class GatewayRegistration implements Runnable {
 
-		private HttpClient client;
+		private final HttpClient client;
 		private final String gwAddress;
 		private final ContainerProperties containerConfiguration;
 
@@ -273,4 +270,5 @@ public class GatewayHandler implements ISubSystem {
 			return u.toString().split(u.getPath())[0];
 		}
 	}
+
 }

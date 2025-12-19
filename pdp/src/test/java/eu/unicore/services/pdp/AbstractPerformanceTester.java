@@ -57,9 +57,9 @@ public abstract class AbstractPerformanceTester implements Runnable
 		long endTime = System.currentTimeMillis();
 		double time = (endTime - startTime) / 1000.0;
 		long total = iterationsPerThread*threads;
-		System.out.println("Total time: " + time + "s;\n" +
-				"Performed " + total + " authorizations\n" +
-				"Operations per second: " + total/time);
+		System.out.println(String.format("Total time: %.4fs;\n" +
+				"Performed %d authorizations\n" +
+				"Operations per second: %d" , time, total, (int)(total/time)));
 	}
 	
 	protected void createStandardSetup() throws Exception

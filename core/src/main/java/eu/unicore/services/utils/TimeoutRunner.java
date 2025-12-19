@@ -25,15 +25,15 @@ public class TimeoutRunner<V> implements Callable<V> {
 	private static final Logger logger=Log.getLogger(Log.UNICORE,TimeoutRunner.class);
 
 	private final Callable<V> task;
-	
+
 	private V result;
-	
+
 	private final int timeout;
-	
+
 	private final TimeUnit unit;
-	
+
 	private final ThreadingServices service;
-	
+
 	/**
 	 * @param timeout - milliseconds before timeout
 	 * @param task - the task to execute
@@ -44,7 +44,7 @@ public class TimeoutRunner<V> implements Callable<V> {
 		this.unit=unit;
 		this.service = service;
 	}
-	
+
 	public V call() throws RejectedExecutionException, InterruptedException, ExecutionException {
 		logger.debug("Starting task with timeout of {} {}", timeout, unit);
 		try{
@@ -56,7 +56,7 @@ public class TimeoutRunner<V> implements Callable<V> {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * helper for computing a result using a TimeoutRunner
 	 * 
@@ -70,7 +70,7 @@ public class TimeoutRunner<V> implements Callable<V> {
 	throws Exception {
 		return compute(task, service, timeout, TimeUnit.MILLISECONDS);
 	}
-	
+
 	/**
 	 * helper for computing a result using a TimeoutRunner
 	 * 

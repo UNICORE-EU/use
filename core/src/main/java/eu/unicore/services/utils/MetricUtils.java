@@ -13,13 +13,13 @@ import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 
 public class MetricUtils {
-	
+
 	private static double durationFactor = 1.0/TimeUnit.MILLISECONDS.toNanos(1);
-	
+
 	public static Map<String,String> getValues(MetricRegistry registry){
 		return getValues(registry.getMetrics());
 	}
-	
+
 	public static Map<String,String> getValues(Map<String,Metric> metrics){
 		Map<String,String> res = new HashMap<>();
 		for(Map.Entry<String,Metric>e: metrics.entrySet()){
@@ -27,7 +27,7 @@ public class MetricUtils {
 		}
 		return res;
 	}
-	
+
 	public static String getValue(Metric m){
 		if(m instanceof Gauge)return reportGauge((Gauge<?>)m);
 		else if(m instanceof Counter)return reportCounter((Counter)m);
@@ -35,11 +35,11 @@ public class MetricUtils {
 		else if(m instanceof Meter)return reportMeter((Meter)m);
 		else return "n/a";
 	}
-	
+
     protected double convertDuration(double duration) {
         return duration * durationFactor;
     }
-    
+   
 	private static String reportTimer(Timer timer) {
 		final Snapshot snapshot = timer.getSnapshot();
 
@@ -72,4 +72,5 @@ public class MetricUtils {
     private static String reportGauge(Gauge<?> gauge) {
         return String.valueOf(gauge.getValue());
     }
+
 }

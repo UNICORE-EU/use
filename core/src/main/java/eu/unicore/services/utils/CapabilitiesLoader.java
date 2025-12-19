@@ -24,7 +24,7 @@ public class CapabilitiesLoader {
 	private static final Logger logger = Log.getLogger(Log.UNICORE, CapabilitiesLoader.class);
 
 	private CapabilitiesLoader(){}
-	
+
 	/**
 	 * @return a unmodifiable map of Capability instances keyed with the name
 	 */
@@ -44,4 +44,5 @@ public class CapabilitiesLoader {
 		}
 		return Collections.unmodifiableMap(result);
 	}
+
 }

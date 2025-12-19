@@ -14,14 +14,15 @@ import eu.unicore.util.jetty.HttpServerProperties;
  * @author K. Benedyczak
  */
 public class ContainerHttpServerProperties extends HttpServerProperties {
-	
+
 	@DocumentationReferencePrefix
 	public static final String PREFIX = ContainerProperties.PREFIX + HttpServerProperties.DEFAULT_PREFIX;
-	
+
 	@DocumentationReferenceMeta
 	protected final static Map<String, PropertyMD> defaults=HttpServerProperties.defaults;
 
 	public ContainerHttpServerProperties(Properties source) {
 		super(source, PREFIX, defaults);
 	}
+
 }

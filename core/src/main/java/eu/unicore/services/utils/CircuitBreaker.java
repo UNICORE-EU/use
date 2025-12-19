@@ -33,7 +33,7 @@ public class CircuitBreaker {
 	 * create a new CircuitBreaker with the default waiting period of 60 seconds
 	 */
 	public CircuitBreaker(){
-		this(	60*1000);
+		this(60*1000);
 	}
 
 	/**

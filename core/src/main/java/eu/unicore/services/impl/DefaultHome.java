@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
 import org.apache.logging.log4j.Logger;
 
@@ -67,36 +66,34 @@ public abstract class DefaultHome implements Home {
 
 	protected final Map<String, AtomicInteger> instancesPerUser = new ConcurrentHashMap<>();
 
-	private volatile boolean isShuttingDown=false;
+	private volatile boolean isShuttingDown = false;
 
 	/**
 	 * this takes care of removing expired Resources etc.
 	 */
 	protected InstanceChecking instanceChecking;
+
 	protected InstanceChecker expiryChecker;
 
 	//does this service support notification
-	protected boolean supportsNotification=false;
+	protected boolean supportsNotification = false;
 
-	private long lastRefreshNotificationInstant=System.currentTimeMillis();
+	private long lastRefreshNotificationInstant = System.currentTimeMillis();
 
 	// timeout when locking a resource, e.g. in getForUpdate()
-	private long locking_timeout=30; //seconds
+	private long locking_timeout = 30; //seconds
 
 	public DefaultHome(){
 		instanceChecking = new InstanceChecking(this);
 		expiryChecker = new ExpiryChecker();
 		instanceChecking.addChecker(expiryChecker);
-		secInfoCache = new LoadingMap<>(
-				new Function<>() {
-					public Pair<String,List<ACLEntry>> apply(String id) {
-						try{
-							return readSecurityInfo(id);				
-						}catch(Exception ex) {
-							throw new RuntimeException(ex);
-						}
-					}
-				});
+		secInfoCache = new LoadingMap<>(id -> {
+				try{
+					return readSecurityInfo(id);				
+				}catch(Exception ex) {
+					throw new RuntimeException(ex);
+				}
+		});
 	}
 
 	@Override
@@ -269,10 +266,12 @@ public abstract class DefaultHome implements Home {
 			resource.setHome(this);
 			processMessages(resource);
 			return resource;
+		}catch(ResourceUnknownException re) {
+			throw re;
 		}catch(TimeoutException te){
-			throw new ResourceUnavailableException("Instance with ID <"+_fullID(id)+"> is not available.");
+			throw new ResourceUnavailableException("Instance with ID <"+_fullID(id)+"> is not available.", te);
 		}catch(Exception pe){
-			throw new ResourceUnavailableException("Instance with ID <"+_fullID(id)+"> cannot be accessed",pe);
+			throw new ResourceUnavailableException("Instance with ID <"+_fullID(id)+"> cannot be accessed", pe);
 		}
 	}
 

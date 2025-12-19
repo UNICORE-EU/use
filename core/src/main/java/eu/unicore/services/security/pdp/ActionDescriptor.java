@@ -8,9 +8,11 @@ import eu.unicore.security.OperationType;
  * @author K. Benedyczak
  */
 public class ActionDescriptor {
+
 	private final String action;
+
 	private final OperationType actionType;
-	
+
 	public ActionDescriptor(String action, OperationType actionType) {
 		this.action = action;
 		this.actionType = actionType;
@@ -23,8 +25,9 @@ public class ActionDescriptor {
 	public OperationType getActionType() {
 		return actionType;
 	}
-	
+
 	public String toString() {
 		return action + " [accessType=" + actionType + "]";
 	}
+
 }

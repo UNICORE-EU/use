@@ -12,13 +12,12 @@ import eu.unicore.security.SecurityTokens;
  * @author schuller
  */
 public interface AttributeHandlingCallback {
-	
+
 	/**
 	 * retrieve a map of attributes for adding to the client attributes 
 	 * 
 	 * @param tokens
 	 */
 	public Map<String,String> extractAttributes(SecurityTokens tokens);
-	
-	
+
 }

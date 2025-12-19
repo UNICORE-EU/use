@@ -72,8 +72,8 @@ public class TestDefaultPDP {
 	@Test
 	public void testPerServicePermitUser() throws Exception {
 		DefaultPDP pdp = new DefaultPDP();
-		pdp.addServiceRules("foo", DefaultPDP.PERMIT_READ_FOR_USER);
-		pdp.addServiceRules("foo", DefaultPDP.PERMIT_POST_FOR_USER);
+		pdp.setServiceRules("foo", DefaultPDP.PERMIT_READ_FOR_USER,
+				DefaultPDP.PERMIT_POST_FOR_USER);
 		Client c = new Client();
 		c.setRole(new Role("user",""));
 		ActionDescriptor a = new ActionDescriptor("GET", OperationType.read);

@@ -48,22 +48,23 @@ implements IAttributeSourceBase, ISubSystem {
 	protected String orderString;
 	protected CombiningPolicy combiner = BaseAttributeSourcesChain.MERGE_LAST_OVERRIDES;
 	protected Properties properties = null;
-	
+
 	protected final List<ExternalSystemConnector>externalConnections = new ArrayList<>();
 
 	protected void setup(Kernel kernel) {
 		ContainerSecurityProperties csp = kernel.getContainerSecurityConfiguration();
 		this.properties = csp.getRawProperties();
-	}	
+	}
+
 	/**
-	 * will configure all the aips in the chain
+	 * configure all the aips in the chain
 	 */
 	@Override
 	public void configure(String name, Kernel kernel) throws ConfigurationException {
 		this.name = name;
 		chain = createChain(kernel);
 	}
-	
+
 	@Override
 	public String getStatusDescription() {
 		StringBuilder sb = new StringBuilder();
@@ -88,20 +89,20 @@ implements IAttributeSourceBase, ISubSystem {
 		}
 		return sb.toString();
 	}
-	
+
 	@Override
 	public Collection<ExternalSystemConnector>getExternalConnections(){
 		return externalConnections;
 	}
-	
+
 	public List<T> getChain(){
 		return Collections.unmodifiableList(chain);
 	}
-	
+
 	public CombiningPolicy getCombiningPolicy(){
 		return combiner;
 	}
-	
+
 	/**
 	 * merge info from "slave" map into master map, overriding info already present
 	 */
@@ -165,12 +166,11 @@ implements IAttributeSourceBase, ISubSystem {
 		}
 	}
 
-	
 	/**
 	 * defines how attributes should be combined
 	 */
 	public static interface CombiningPolicy{
-		
+
 		/**
 		 * combines new attributes with the already existing ones
 		 * @param master - the already existing attributes
@@ -179,14 +179,15 @@ implements IAttributeSourceBase, ISubSystem {
 		 */
 		public boolean combineAttributes(SubjectAttributesHolder master, 
 				SubjectAttributesHolder newAttributes);
-		
+
 	}
-	
+
 	/**
 	 * first applicable: only the first not empty map of attributes is used
 	 */
 	public static final CombiningPolicy FIRST_APPLICABLE = new CombiningPolicy() {
 
+		@Override
 		public boolean combineAttributes(SubjectAttributesHolder master, SubjectAttributesHolder newAttributes){
 			//shouldn't happen but check anyway
 			if (master.isPresent()) {
@@ -199,6 +200,7 @@ implements IAttributeSourceBase, ISubSystem {
 			}
 		}
 
+		@Override
 		public String toString(){
 			return "FIRST_APPLICABLE";
 		}
@@ -209,6 +211,8 @@ implements IAttributeSourceBase, ISubSystem {
 	 * assumed that AttributeSource throws an exception when there is communication error.
 	 */
 	public static final CombiningPolicy FIRST_ACCESSIBLE = new CombiningPolicy() {
+
+		@Override
 		public boolean combineAttributes(SubjectAttributesHolder master, SubjectAttributesHolder newAttributes){
 			//shouldn't happen but check anyway
 			if(master.isPresent()) {
@@ -218,28 +222,30 @@ implements IAttributeSourceBase, ISubSystem {
 				return false;
 			}
 		}
-		
+
+		@Override
 		public String toString(){
 			return "FIRST_ACCESSIBLE";
 		}
 	};
 
-	
 	/**
 	 * merge_last_overrides:  new attributes overwrite existing ones
 	 */
 	public static final CombiningPolicy MERGE_LAST_OVERRIDES = new CombiningPolicy() {
 
+		@Override
 		public boolean combineAttributes(SubjectAttributesHolder master, SubjectAttributesHolder newAttributes){
 			master.addAllOverwritting(newAttributes);
 			return true;
 		}
 
+		@Override
 		public String toString(){
 			return "MERGE_LAST_OVERRIDES";
 		}
 	};
-	
+
 	/**
 	 * Merge:  attributes with the same key are combined (values are added).
 	 * This is always OK for XACML attributes (only duplicates are not maintained) and
@@ -250,11 +256,13 @@ implements IAttributeSourceBase, ISubSystem {
 	 */
 	public static final CombiningPolicy MERGE = new CombiningPolicy (){
 
+		@Override
 		public boolean combineAttributes(SubjectAttributesHolder master, SubjectAttributesHolder newAttributes){
 			master.addAllMerging(newAttributes);
 			return true;
 		}
 
+		@Override
 		public String toString(){
 			return "MERGE";
 		}

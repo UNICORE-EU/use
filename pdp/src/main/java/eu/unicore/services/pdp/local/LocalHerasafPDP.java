@@ -48,7 +48,7 @@ import eu.unicore.util.configuration.ConfigurationException;
 public class LocalHerasafPDP implements UnicoreXPDP, PolicyListener, ISubSystem
 {
 
-	private static final Logger log = Log.getLogger(Log.SECURITY, LocalHerasafPDP.class);
+	private static final Logger log = Log.getLogger(Log.SECURITY+".pdp", LocalHerasafPDP.class);
 	private PDP engine;
 	protected HerasafXacml2RequestCreator requestMaker;
 	private final ReadWriteLock lock = new ReentrantReadWriteLock();

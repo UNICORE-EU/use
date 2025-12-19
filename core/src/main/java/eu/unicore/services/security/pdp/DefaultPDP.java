@@ -9,17 +9,20 @@ import org.apache.logging.log4j.Logger;
 
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
+import eu.unicore.services.Kernel;
 import eu.unicore.services.security.pdp.PDPResult.Decision;
 import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.util.Log;
 
+import eu.emi.security.authn.x509.impl.X500NameUtils;
+
 /**
- * a PDP based on hard-coded rules and per-service rules that are registered
+ * a PDP based on hard-coded basic rules and per-service rules that are registered
  * by the service deployment / feature mechanism
  */
 public class DefaultPDP implements UnicoreXPDP {
 
-	private static final Logger logger = Log.getLogger(Log.SECURITY, DefaultPDP.class);
+	private static final Logger logger = Log.getLogger(Log.SECURITY+".pdp", DefaultPDP.class);
 
 	private final List<Rule> basicRules = new ArrayList<>();
 
@@ -27,6 +30,17 @@ public class DefaultPDP implements UnicoreXPDP {
 
 	public DefaultPDP() {
 		configureBasicRules();
+	}
+
+	/**
+	 * get the DefaultPDP for the kernel, or null if not available
+	 */
+	public static DefaultPDP get(Kernel kernel) {
+		UnicoreXPDP pdp = kernel.getSecurityManager().getPdp();
+		if(pdp!=null && pdp instanceof DefaultPDP) {
+			return (DefaultPDP)pdp;
+		}
+		else return null;
 	}
 
 	private void configureBasicRules() {
@@ -41,9 +55,8 @@ public class DefaultPDP implements UnicoreXPDP {
 		perServiceRules.put(serviceName, new ArrayList<>(rules));
 	}
 
-	public synchronized void addServiceRules(String serviceName, Rule... rules) {
-		List<Rule> rs = perServiceRules.get(serviceName);
-		if(rs==null)rs = new ArrayList<>();
+	public void setServiceRules(String serviceName, Rule... rules) {
+		List<Rule> rs = new ArrayList<>();
 		for(Rule r: rules)rs.add(r);
 		perServiceRules.put(serviceName, rs);
 	}
@@ -55,7 +68,8 @@ public class DefaultPDP implements UnicoreXPDP {
 		for(Rule r: basicRules) {
 			Decision decision = r.apply(c, a, d);
 			if(Decision.UNCLEAR!=decision) {
-				return new PDPResult(decision, "");
+				logger.debug("{} access by built-in rule", decision);
+				return new PDPResult(decision, "Decision ny built-in rule");
 			}
 		}
 		String serviceName = d.getServiceName();
@@ -65,14 +79,14 @@ public class DefaultPDP implements UnicoreXPDP {
 				for(Rule r: rules) {
 					Decision decision = r.apply(c, a, d);
 					if(Decision.UNCLEAR!=decision) {
-						logger.debug("Access {} by rule for '{}'", decision, serviceName);
-						return new PDPResult(decision, "");
+						logger.debug("{} access by rule for service <{}>", decision, serviceName);
+						return new PDPResult(decision, "Decision by service rule");
 					}
 				}
 			}
 		}
-		logger.debug("No rule match, final decision DENY");
-		return new PDPResult(Decision.DENY, "Access denied.");
+		logger.debug("DENY access - no rule match.");
+		return new PDPResult(Decision.DENY, "No rule matched");
 	}
 
 	public static interface Rule {
@@ -121,7 +135,7 @@ public class DefaultPDP implements UnicoreXPDP {
 	 */
 	public static Rule PERMIT_OWNER = (c,a,d) -> {
 		if(c!=null && d!=null && c.getDistinguishedName()!=null
-				&& c.getDistinguishedName().equals(d.getOwner())) 
+				&& X500NameUtils.equal(c.getDistinguishedName(), d.getOwner()))
 		{
 			logger.debug("PERMIT for owner");
 			return Decision.PERMIT;
@@ -181,4 +195,5 @@ public class DefaultPDP implements UnicoreXPDP {
 		}
 		return Decision.UNCLEAR;
 	};
+
 }

@@ -15,11 +15,11 @@ import java.util.Set;
 public class FileWatcher implements Runnable{
 
 	private final Set<File> targets = new HashSet<>();
-	
+
 	private final Runnable action;
-	
+
 	private long lastAccessed = System.currentTimeMillis();
-		
+
 	public FileWatcher(File target, Runnable action)throws FileNotFoundException{
 		if(!target.exists() || !target.canRead()){
 			throw new FileNotFoundException("File "+target.getAbsolutePath()+
@@ -28,7 +28,7 @@ public class FileWatcher implements Runnable{
 		this.action = action;
 		addTarget(target);
 	}
-	
+
 	/**
 	 * add a file to be watched
 	 * 
@@ -49,6 +49,7 @@ public class FileWatcher implements Runnable{
 	 * check if one of the target files has been touched and invoke 
 	 * the action if it has
 	 */
+	@Override
 	public void run(){
 		for(File target: targets){
 			if(target.exists() && target.lastModified()>=lastAccessed){

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.xmlbeans.XmlObject;
@@ -88,6 +89,15 @@ public class TestUtilities {
 		Thread.sleep(100);
 		tp.time("some_other_thing");
 		System.out.println(tp.toString());
+	}
+
+	@Test
+	public void testLoadingMap()throws Exception {
+		Map<String,String> map = new LoadingMap<String,String>(
+				(x)-> { return x; }
+		);
+		assertEquals("1", map.get("1"));
+		assertEquals("1", map.get("1"));
 	}
 
 }

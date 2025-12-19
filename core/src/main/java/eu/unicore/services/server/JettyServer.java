@@ -34,10 +34,11 @@ import jakarta.servlet.Servlet;
  * @author schuller
  */
 public class JettyServer extends JettyServerBase {
+
 	private static final Logger logger = Log.getLogger(Log.UNICORE, JettyServer.class);
 
 	private final Kernel kernel;
-	
+
 	protected static final HashMap<String, Integer> defaults = new HashMap<>();
 
 	/**
@@ -76,7 +77,7 @@ public class JettyServer extends JettyServerBase {
 		if ("0".equals(kernel.getContainerProperties().getValue(ContainerProperties.SERVER_PORT)))
 			kernel.getContainerProperties().setProperty(ContainerProperties.SERVER_PORT, 
 				String.valueOf(url.getPort()));
-		
+
 		String baseUrlS = kernel.getContainerProperties().getValue(ContainerProperties.EXTERNAL_URL);
 		URL baseUrl = new URL(baseUrlS);
 		if (baseUrl.getPort() == 0 && baseUrl.getHost().equals(url.getHost())) {
@@ -96,13 +97,13 @@ public class JettyServer extends JettyServerBase {
 			String desc = servlet!=null? String.valueOf(servlet.getClass().getName()) : servletClass;
 			ServletHolder sh = null;
 			if(servlet!=null){
-				sh =new ServletHolder(servlet);
+				sh = new ServletHolder(servlet);
 			}
 			else{
 				Class<?> loadedClazz = Class.forName(servletClass);
 				if (!Servlet.class.isAssignableFrom(loadedClazz))
 					throw new ConfigurationException("Class " + servletClass + " must extend Servlet class");
-				sh=new ServletHolder((Class<? extends Servlet>)loadedClazz);
+				sh = new ServletHolder((Class<? extends Servlet>)loadedClazz);
 			}
 			root.addServlet(sh, path);
 			logger.debug("Added <{}> on {} for service type {}", desc, path, f.getType());
@@ -110,6 +111,7 @@ public class JettyServer extends JettyServerBase {
 	}
 
 	public static class ServletDecorator implements Decorator {
+
 		private final Kernel k;
 
 		public ServletDecorator(Kernel k) {
@@ -128,7 +130,7 @@ public class JettyServer extends JettyServerBase {
 		public void destroy(Object o) {
 			// NOP
 		}
-		
+
 	}
 
 	@Override
@@ -143,7 +145,7 @@ public class JettyServer extends JettyServerBase {
 		}
 		return root;
 	}
-	
+
 	/**
 	 * In USE we have always {@link ServletContextHandler} but it can be wrapped in {@link HandlerCollection}.
 	 * @return the root servlet handler of this Jetty server. 
@@ -178,4 +180,5 @@ public class JettyServer extends JettyServerBase {
 		super.reloadCredential();
 		kernel.credentialReloaded();
 	}
+
 }

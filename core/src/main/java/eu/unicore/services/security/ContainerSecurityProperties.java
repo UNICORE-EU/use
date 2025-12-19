@@ -25,6 +25,7 @@ import eu.unicore.security.canl.CredentialProperties;
 import eu.unicore.security.canl.LoggingStoreUpdateListener;
 import eu.unicore.security.canl.TruststoreProperties;
 import eu.unicore.services.ContainerProperties;
+import eu.unicore.services.security.pdp.DefaultPDP;
 import eu.unicore.services.security.pdp.UnicoreXPDP;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
@@ -63,7 +64,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	public static final String PROP_CHECKACCESS_PDP = "accesscontrol.pdp";
 	
 	/**
-	 * configuration file for the PDP
+	 * configuration file for the PDP, if necessary
 	 */
 	public static final String PROP_CHECKACCESS_PDPCONFIG = "accesscontrol.pdpConfig";
 	
@@ -177,8 +178,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	 * property for defining the max number of sessions per user
 	 */
 	public static final String PROP_SESSIONS_PERUSER = "sessionsPerUser";
-	
-	
+
 	@DocumentationReferenceMeta
 	public final static Map<String, PropertyMD> META = new HashMap<>();
 	static
@@ -187,10 +187,10 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 				setDescription("Controls whether secure SSL mode is enabled."));
 		META.put(PROP_CHECKACCESS, new PropertyMD("true").setUpdateable().setCanHaveSubkeys().
 				setDescription("Controls whether access checking (authorisation) is enabled. Can be used per service after adding dot and service name to the property key."));
-		META.put(PROP_CHECKACCESS_PDP, new PropertyMD().setClass(UnicoreXPDP.class).
-				setDescription("Controls which Policy Decision Point (PDP, the authorisation engine) should be used. Default value is determined as follows: if eu.unicore.uas.pdp.local.LocalHerasafPDP is available then it is used. If not then this option becomes mandatory."));
+		META.put(PROP_CHECKACCESS_PDP, new PropertyMD().setClass(UnicoreXPDP.class).setDefault(DefaultPDP.class.getName()).
+				setDescription("Controls which Policy Decision Point (PDP, the authorisation engine) should be used."));
 		META.put(PROP_CHECKACCESS_PDPCONFIG, new PropertyMD().setPath().
-				setDescription("Path of the PDP configuration file"));
+				setDescription("Path of the PDP configuration file, if required."));
 		META.put(PROP_DEFAULT_VOS, new PropertyMD("").setList(true).
 				setDescription("List of default VOs, which should be assigned for a request without " +
 						"a VO set. The first VO on the list where the user is member will be used."));
@@ -246,7 +246,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 				setDescription("Properties with this prefix are used to configure container's trust settings and certificates validation. See separate documentation for details."));
 		META.put(CredentialProperties.DEFAULT_PREFIX, new PropertyMD().setCanHaveSubkeys().
 				setDescription("Properties with this prefix are used to configure the credential used by the container. See separate documentation for details."));
-		
+
 		META.put(PROP_SESSIONS_ENABLED, new PropertyMD("true").
 				setDescription("Controls whether the server supports security sessions which reduce client/server traffic and load."));
 		META.put(PROP_SESSIONS_LIFETIME, new PropertyMD("28800").setInt().setPositive().
@@ -255,13 +255,11 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 				setDescription("Controls the number of security sessions each user can have. If exceeded, some cleanup will be performed."));
 		META.put("rest", new PropertyMD().setCanHaveSubkeys().
 				setDescription("Prefix used to configure REST subsystem security. See separate docs."));
-		
 	}
-	
+
 	private final PropertiesHelper properties;
 	private final Properties sourceProperties;
 	private final AuthnAndTrustProperties authAndTrustProperties;
-
 
 	public ContainerSecurityProperties(Properties source) throws ConfigurationException {
 		backwardsCompat(source);
@@ -299,10 +297,10 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 					"Validating Unity assertions will not work.");
 			setTrustedAssertionIssuers(new BinaryCertChainValidator(false));
 		}
-		
+
 		List<String> defaultVos = properties.getListOfValues(PROP_DEFAULT_VOS); 
 		setDefaultVOs(defaultVos.toArray(new String[0]));
-		
+
 		if (isGatewayEnabled()) {
 			logger.info("Enabling gateway support");
 			setGatewayRegistrationEnabled(properties.getBooleanValue(PROP_AUTOREGISTER_WITH_GATEWAY));
@@ -325,7 +323,6 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 			setGatewayRegistrationEnabled(false);
 			setGatewayWaitingEnabled(false);
 		}
-		
 		setSessionsEnabled(properties.getBooleanValue(PROP_SESSIONS_ENABLED));
 		setSessionLifetime(properties.getLongValue(PROP_SESSIONS_LIFETIME));
 		setMaxSessionsPerUser(properties.getIntValue(PROP_SESSIONS_PERUSER));
@@ -342,10 +339,10 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 
 	public void reloadCredential() {
 		authAndTrustProperties.reloadCredential();
-		pem=null;
+		pem = null;
 		getServerCertificateAsPEM();
 	}
-	
+
 	public Properties getRawProperties() {
 		return sourceProperties;
 	}
@@ -371,7 +368,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 			}
 		}
 	}
-	
+
 	private X509Certificate loadGatewayCertificate(String certFile) {
 		Encoding encoding = certFile.endsWith(".der") ? Encoding.DER : Encoding.PEM;
 		try (InputStream is = new BufferedInputStream(new FileInputStream(certFile))){
@@ -390,7 +387,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 	public Class<? extends UnicoreXPDP> getPDPClass() {
 		return properties.getClassValue(PROP_CHECKACCESS_PDP, UnicoreXPDP.class);
 	}
-	
+
 	public List<String>getAdditionalSAMLIds(){
 		return properties.getListOfValues(PROP_ADDITIONAL_ACCEPTED_SAML_IDS);
 	}

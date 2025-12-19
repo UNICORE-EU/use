@@ -12,6 +12,7 @@ public abstract class AbstractStartupTask implements StartupTask, KernelInjectab
 
 	private Kernel kernel;
 
+	@Override
 	public void setKernel(Kernel kernel) {
 		this.kernel = kernel;
 	}
@@ -19,4 +20,5 @@ public abstract class AbstractStartupTask implements StartupTask, KernelInjectab
 	public Kernel getKernel() {
 		return this.kernel;
 	}
+
 }

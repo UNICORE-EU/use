@@ -17,10 +17,11 @@ public abstract class AsyncCallback<T extends Resource> implements Runnable{
 	private Exception exception;
 
 	public AsyncCallback(Home home, String resourceID){
-		this.home=home;
-		this.resourceID=resourceID;
+		this.home = home;
+		this.resourceID = resourceID;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void run(){
 		try(T resource = (T)home.getForUpdate(resourceID)){
@@ -40,4 +41,5 @@ public abstract class AsyncCallback<T extends Resource> implements Runnable{
 	public Exception getException() {
 		return exception;
 	}
+
 }

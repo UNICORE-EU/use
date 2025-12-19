@@ -15,7 +15,7 @@ public class TimeProfile {
 
 	private static Logger logger = Log.getLogger(Log.ADMIN, TimeProfile.class);
 
-	private String name;
+	private final String name;
 	private final long start;
 	private final List<String>timestamps = new ArrayList<>();
 
@@ -24,14 +24,11 @@ public class TimeProfile {
 		this.start = System.currentTimeMillis();
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public void time(String description) {
 		timestamps.add((System.currentTimeMillis()-start)+": "+description);
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb=new StringBuffer();
 		sb.append(name).append("::");
@@ -44,8 +41,9 @@ public class TimeProfile {
 			logger.debug(toString());
 		}
 	}
-	
+
 	public boolean isEnabled() {
 		return logger.isDebugEnabled();
 	}
+
 }

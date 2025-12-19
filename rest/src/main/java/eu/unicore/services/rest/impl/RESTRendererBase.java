@@ -18,7 +18,7 @@ import eu.unicore.services.Kernel;
 import eu.unicore.services.KernelInjectable;
 import eu.unicore.services.rest.Link;
 import eu.unicore.services.rest.RESTUtils.HtmlBuilder;
-import eu.unicore.services.utils.Utilities;
+import eu.unicore.services.restclient.utils.UnitParser;
 import eu.unicore.util.Log;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
@@ -285,7 +285,7 @@ public abstract class RESTRendererBase implements KernelInjectable {
 
 	protected synchronized DateFormat getISODateFormatter(){
 		if(iso8601 == null){
-			iso8601 = Utilities.getISO8601();
+			iso8601 = UnitParser.getISO8601();
 		}
 		return iso8601;
 	}

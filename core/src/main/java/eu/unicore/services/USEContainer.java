@@ -14,12 +14,12 @@ import eu.unicore.util.Log;
  */
 public class USEContainer {
 
-	private static final Logger logger = Log.getLogger(Log.UNICORE,
-			USEContainer.class);
+	private static final Logger logger = Log.getLogger(Log.UNICORE, USEContainer.class);
 
 	public final Calendar upSince = Calendar.getInstance();
 
 	protected final String name;
+
 	protected final Kernel kernel;
 
 	public final String getHeader() {
@@ -46,7 +46,7 @@ public class USEContainer {
 	public Kernel getKernel() {
 		return kernel;
 	}
-	
+
 	public String getStatusReport(){
 		StringBuilder report = new StringBuilder();
 		report.append("SERVER STATUS");
@@ -71,7 +71,7 @@ public class USEContainer {
 		System.out.println(msg);
 		logger.info(msg);
 	}
-	
+
 	/**
 	 * start the container
 	 * 
@@ -84,14 +84,13 @@ public class USEContainer {
 					"Server NOT started.");
 			System.exit(1);
 		}
-			
 		try{
 			System.out.println("Reading config from " + args[0]);
 			String name = null;
 			if (args.length > 1)
 				name = args[1];
-			USEContainer uas=new USEContainer(args[0], name);
-			uas.startSynchronous();
+			USEContainer use = new USEContainer(args[0], name);
+			use.startSynchronous();
 		}catch(Throwable ex){
 			ex.printStackTrace();
 			System.err.println("ERROR during server startup, server NOT started.");

@@ -1,7 +1,7 @@
 package eu.unicore.services.exceptions;
 
 /**
- * thrown when the server did create a new resource
+ * thrown when the server did not create a new resource
  * 
  * @author schuller
  */

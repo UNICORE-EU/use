@@ -24,10 +24,10 @@ import eu.unicore.util.configuration.ConfigurationException;
 public class DynamicAttributeSourcesChain extends BaseAttributeSourcesChain<IDynamicAttributeSource> 
 		implements IDynamicAttributeSource {
 
-	private final static Logger logger = Log.getLogger(Log.SECURITY, DynamicAttributeSourcesChain.class);
-	
+	private static final Logger logger = Log.getLogger(Log.SECURITY, DynamicAttributeSourcesChain.class);
+
 	public DynamicAttributeSourcesChain() {}
-	
+
 	public DynamicAttributeSourcesChain(Kernel kernel){
 		setup(kernel);
 	}
@@ -64,7 +64,7 @@ public class DynamicAttributeSourcesChain extends BaseAttributeSourcesChain<IDyn
 			try{
 				SubjectAttributesHolder current = a.getAttributes(client, resultMap);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Dynamic attribute source {} returned the following attributes:\n{}",
+					logger.debug("Dynamic attribute source {} returned the following attributes: {}",
 							a.getName(), current);
 				}
 				if (!combiner.combineAttributes(resultMap, current)) {
@@ -83,6 +83,7 @@ public class DynamicAttributeSourcesChain extends BaseAttributeSourcesChain<IDyn
 		return resultMap;
 	}
 
+	@Override
 	protected List<IDynamicAttributeSource> createChain(Kernel k) throws ConfigurationException {
 		return super.createChain(ContainerSecurityProperties.PROP_DAP_PREFIX, k).getM1();
 	}

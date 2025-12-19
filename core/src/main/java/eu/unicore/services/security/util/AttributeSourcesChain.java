@@ -45,9 +45,9 @@ import eu.unicore.util.configuration.ConfigurationException;
 public class AttributeSourcesChain extends BaseAttributeSourcesChain<IAttributeSource> implements IAttributeSource{
 
 	private final static Logger logger = Log.getLogger(Log.SECURITY, AttributeSourcesChain.class);
-	
+
 	public AttributeSourcesChain() {}
-	
+
 	public AttributeSourcesChain(Kernel kernel){
 		setup(kernel);
 	}

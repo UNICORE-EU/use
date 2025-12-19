@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import eu.unicore.security.OperationType;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.registry.RegistryCreator;
 import eu.unicore.services.security.pdp.DefaultPDP;
@@ -49,29 +48,20 @@ public class RegistryStartupTask implements Runnable {
 		UnicoreXPDP pdp = kernel.getSecurityManager().getPdp();
 		if(pdp!=null && pdp instanceof DefaultPDP) {
 			DefaultPDP dPDP = (DefaultPDP)pdp;
-
 			dPDP.setServiceRules("registries", Collections.singletonList(DefaultPDP.PERMIT_READ));
-			
+			dPDP.setServiceRules("registryentries", Collections.singletonList(DefaultPDP.PERMIT_READ));
+			dPDP.setServiceRules("ServiceGroupEntry", Collections.singletonList(DefaultPDP.PERMIT_READ));
 			final List<Rule> rRules = new ArrayList<>();
-			dPDP.setServiceRules("Registry", rRules);
-			rRules.add(
-					(client, action, resource) -> {
-						if(RegistryCreator.DEFAULT_REGISTRY_ID.equals(resource.getResourceID())
-								&& OperationType.read==action.getActionType())
-						{
-							return Decision.PERMIT;
-						}
-						return Decision.UNCLEAR;
-					}
-			);
-
+			// general read access
+			rRules.add(DefaultPDP.PERMIT_READ);
 			if (isGlobal) {
+				// write access for role "server"
 				rRules.add(
 						(client, action, resource) -> {
 							if(RegistryCreator.DEFAULT_REGISTRY_ID.equals(resource.getResourceID())
 									&& client!=null 
 									&& client.getRole()!=null 
-									&& "server"==client.getRole().getName())
+									&& "server".equals(client.getRole().getName()))
 							{
 								return Decision.PERMIT;
 							}
@@ -79,6 +69,7 @@ public class RegistryStartupTask implements Runnable {
 						}
 				);		
 			}
+			dPDP.setServiceRules("Registry", rRules);
 		}
 	}
 
