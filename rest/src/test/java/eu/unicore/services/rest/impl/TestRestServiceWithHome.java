@@ -35,7 +35,7 @@ import eu.unicore.services.Kernel;
 import eu.unicore.services.Resource;
 import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.services.messaging.IMessagingChannel;
-import eu.unicore.services.messaging.Message;
+import eu.unicore.services.messaging.impl.StringMessage;
 import eu.unicore.services.rest.Link;
 import eu.unicore.services.rest.RestService;
 import eu.unicore.services.rest.USEResource;
@@ -157,8 +157,8 @@ public class TestRestServiceWithHome {
 		// REST interface
 		CounterResource.processedMessages=0;
 		IMessagingChannel ch = k.getMessaging().getChannel("my_counter");
-		ch.publish(new Message());
-		ch.publish(new Message());
+		ch.publish(new StringMessage("test1"));
+		ch.publish(new StringMessage("test2"));
 		Thread.sleep(50);
 		client.getJSON();
 		assertEquals(2, CounterResource.processedMessages);

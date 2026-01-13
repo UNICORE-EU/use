@@ -15,6 +15,9 @@ import org.junit.jupiter.api.Test;
 
 import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.services.Kernel;
+import eu.unicore.services.messaging.impl.ResourceAddedMessage;
+import eu.unicore.services.messaging.impl.ResourceDeletedMessage;
+import eu.unicore.services.messaging.impl.StringMessage;
 import eu.unicore.services.security.TestConfigUtil;
 
 public class TestMessaging {
@@ -45,26 +48,25 @@ public class TestMessaging {
 		sm.cleanup();
 		IMessagingChannel p = sm.getChannel("test123");
 
-		p.publish(new Message("message1"));
-		p.publish(new Message("message2"));
+		p.publish(new StringMessage("message1"));
+		p.publish(new StringMessage("message2"));
 		Thread.sleep(100);
 		assertEquals(2, sm.getStoredMessages());
 
 		PullPoint pull = sm.getPullPoint("test123");
 		assertNotNull(pull);
 		while(pull.hasNext()){
-			Message m = pull.next();
-			String body = String.valueOf(m.getBody());
+			String body = String.valueOf(pull.next().toString());
 			assertTrue(body.contains("message"));
 		}
 		assertEquals(sm.getStoredMessages(),0);
 
-		p.publish(new Message("message1"));
-		p.publish(new Message("message2"));
+		p.publish(new StringMessage("message1"));
+		p.publish(new StringMessage("message2"));
 		Thread.sleep(100);
 		IMessagingChannel p2 = sm.getChannel("test123");
-		p2.publish(new Message("message3"));
-		p2.publish(new Message("message4"));
+		p2.publish(new StringMessage("message3"));
+		p2.publish(new StringMessage("message4"));
 		Thread.sleep(100);
 		assertEquals(sm.getStoredMessages(),4);
 	}
@@ -81,9 +83,9 @@ public class TestMessaging {
 		MessagingImpl sm = getMessaging();
 		sm.cleanup();
 		IMessagingChannel p = sm.getChannel("test123");
-		p.publish(new Message("message1"));
-		p.publish(new Message("message2"));
-		p.publish(new Message("message3"));
+		p.publish(new StringMessage("message1"));
+		p.publish(new StringMessage("message2"));
+		p.publish(new StringMessage("message3"));
 		Thread.sleep(100);
 		assertTrue(sm.hasMessages("test123"));
 		PullPoint pp = sm.getPullPoint("test123");
@@ -98,4 +100,24 @@ public class TestMessaging {
 		assertEquals(2, sm.getStoredMessages());
 	}
 
+	@Test
+	public void test3() throws Exception {
+		MessagingImpl sm = getMessaging();
+		sm.cleanup();
+		IMessagingChannel p = sm.getChannel("test123");
+		p.publish(new ResourceAddedMessage("1", "s1"));
+		p.publish(new ResourceDeletedMessage("2", "s2"));
+		Thread.sleep(100);
+		assertTrue(sm.hasMessages("test123"));
+		PullPoint pp = sm.getPullPoint("test123");
+		var msg1 = (ResourceAddedMessage)pp.next();
+		System.out.println(msg1);
+		assertEquals("1", msg1.getAddedInstance());
+		assertEquals("s1", msg1.getServiceName());
+		var msg2 = (ResourceDeletedMessage)pp.next();
+		System.out.println(msg2);
+		assertEquals("2", msg2.getDeletedInstance());
+		assertEquals("s2", msg2.getServiceName());
+		
+	}
 }

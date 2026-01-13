@@ -9,41 +9,18 @@ import eu.unicore.services.utils.Utilities;
  * 
  * @author schuller
  */
-public class Message implements Serializable{
+public abstract class Message implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String messageId;
-	
-	private String body;
-	
+	private final String messageId;
+
 	public Message(){
-		this(null);
-	}
-	
-	/**
-	 * construct a new message
-	 *
-	 * @param body
-	 */
-	public Message(String body){
-		messageId=Utilities.newUniqueID();
-		this.body=body;
-	}
-	
-	public String getBody() {
-		return body;
+		messageId = Utilities.newUniqueID();
 	}
 
-	public void setBody(String body) {
-		this.body = body;
-	}
 	public String getMessageId() {
 		return messageId;
 	}
 
-	public void setMessageId(String messageId) {
-		this.messageId = messageId;
-	}
-	
 }

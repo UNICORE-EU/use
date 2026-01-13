@@ -3,8 +3,6 @@ package eu.unicore.services.utils;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Map;
 
 import org.apache.logging.log4j.Logger;

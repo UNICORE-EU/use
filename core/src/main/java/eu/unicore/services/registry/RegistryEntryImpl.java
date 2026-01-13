@@ -4,7 +4,7 @@ import org.apache.logging.log4j.Logger;
 
 import eu.unicore.services.InitParameters;
 import eu.unicore.services.impl.ResourceImpl;
-import eu.unicore.services.messaging.Message;
+import eu.unicore.services.messaging.impl.ResourceDeletedMessage;
 import eu.unicore.util.Log;
 
 /**
@@ -37,7 +37,7 @@ public class RegistryEntryImpl extends ResourceImpl {
 	public void destroy() {
 		try{
 			String parent = getModel().getParentUID();
-			getKernel().getMessaging().getChannel(parent).publish(new Message(getUniqueID()));
+			getKernel().getMessaging().getChannel(parent).publish(new ResourceDeletedMessage(getUniqueID(), SERVICENAME));
 		}
 		catch(Exception e){
 			Log.logException("Could not send notification.",e,logger);

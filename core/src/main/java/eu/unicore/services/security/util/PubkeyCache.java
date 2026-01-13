@@ -41,7 +41,7 @@ public class PubkeyCache {
 
 	/**
 	 * stores the public key, if the certificate is not expired
-	 * @param credential
+	 * @param certificate
 	 * @return true if certificate was added, false if not (it is expired)
 	 */
 	public boolean update(X509Certificate certificate){

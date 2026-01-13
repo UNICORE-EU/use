@@ -12,6 +12,7 @@ import eu.unicore.services.exceptions.ResourceNotCreatedException;
 import eu.unicore.services.exceptions.ResourceUnknownException;
 import eu.unicore.services.impl.ResourceImpl;
 import eu.unicore.services.messaging.PullPoint;
+import eu.unicore.services.messaging.impl.ResourceDeletedMessage;
 import eu.unicore.util.Log;
 
 /**
@@ -89,9 +90,14 @@ public class RegistryImpl extends ResourceImpl {
 	public void processMessages(PullPoint p) {
 		try{
 			while(p.hasNext()){
-				String id=(String)p.next().getBody();
-				logger.debug("Removing entry with id={}", id);
-				getModel().removeChild(id);
+				try {
+					var msg = (ResourceDeletedMessage)p.next();
+					String id = msg.getDeletedInstance();
+					logger.debug("Removing entry with id={}", id);
+					getModel().removeChild(id);
+				} catch(Exception e){
+					Log.logException("Could not remove entry.",e,logger);
+				}
 			}
 		}
 		catch(Exception e){
