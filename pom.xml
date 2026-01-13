@@ -6,7 +6,7 @@
   <packaging>pom</packaging>
   <description>UNICORE service container</description>
   <inceptionYear>2010</inceptionYear>
-  <version>5.5.3</version>
+  <version>5.5.4</version>
   <name>UNICORE Services Environment</name>
  
   <parent>
@@ -57,19 +57,19 @@
   </scm>
 
   <properties>
-    <specification.version>10.3.0</specification.version>
+    <specification.version>10.4.0</specification.version>
     <compiler.fork>false</compiler.fork>
     <persistence.version>1.2.9</persistence.version>
-    <secutils.version>4.3.0</secutils.version>
-    <seclib.version>7.3.0</seclib.version>
+    <secutils.version>4.3.1</secutils.version>
+    <seclib.version>7.3.1</seclib.version>
     <herasaf.version>3.0.2</herasaf.version>
-    <json.version>20250517</json.version>
+    <json.version>20251224</json.version>
     <gson.version>2.13.2</gson.version>
     <xuudb.version>2.12.1</xuudb.version>
     <cxf.version>4.0.6</cxf.version>
     <jetty.version>11.0.26</jetty.version>
     <metrics.version>4.2.37</metrics.version>
-    <jwt.version>10.6</jwt.version>
+    <jwt.version>10.7</jwt.version>
     <tink.version>1.20.0</tink.version>
     <sshj.version>0.40.0</sshj.version>
     <jna.version>5.18.1</jna.version>
