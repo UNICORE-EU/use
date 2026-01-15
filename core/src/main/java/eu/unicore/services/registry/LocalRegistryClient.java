@@ -9,6 +9,8 @@ import java.util.Map;
 import eu.unicore.persist.PersistenceException;
 import eu.unicore.services.Home;
 import eu.unicore.services.Kernel;
+import eu.unicore.services.exceptions.ResourceUnknownException;
+import eu.unicore.services.messaging.impl.ResourceDeletedMessage;
 
 /**
  * For accessing a local registry (running in this container), publishing entries
@@ -54,29 +56,29 @@ public class LocalRegistryClient implements IRegistry {
 	
 	public List<Map<String,String>> listEntries() throws Exception {
 		var res = getCached();
-		if(res!=null) {
+		boolean haveUpdates = kernel.getMessaging().hasMessages(resID);
+		if(res!=null && !haveUpdates) {
 			return res;
 		}
 		res = new ArrayList<>();
-		RegistryImpl reg = null;
-		if(kernel.getMessaging().hasMessages(resID)){
-			reg = (RegistryImpl)getHome().refresh(resID);
-		}
-		else{
-			reg = get();
-		}
+		RegistryImpl reg = haveUpdates ? (RegistryImpl)getHome().refresh(resID) : get();
 		for(String entryID: reg.getModel().getEntryIDs()){
-			res.add(getEntry(entryID).getModel().getContent());
+			try {
+				res.add(getEntry(entryID).getModel().getContent());
+			}catch(ResourceUnknownException r) {
+				kernel.getMessaging().getChannel(resID).publish(
+						new ResourceDeletedMessage(entryID, RegistryEntryImpl.SERVICENAME));
+			}
 		}
 		cache(res);
 		return res;
 	}
 
-	private RegistryImpl get() throws PersistenceException {
+	private RegistryImpl get() throws PersistenceException, ResourceUnknownException {
 		return (RegistryImpl)(getHome().get(resID));
 	}
-	
-	private RegistryEntryImpl getEntry(String entryID) throws PersistenceException {
+
+	private RegistryEntryImpl getEntry(String entryID) throws PersistenceException, ResourceUnknownException {
 		return (RegistryEntryImpl)(kernel.getHome(RegistryEntryImpl.SERVICENAME).get(entryID));
 	}
 
@@ -105,7 +107,7 @@ public class LocalRegistryClient implements IRegistry {
 	}
 
 	private static final long cacheTime = 5 * 60 * 1000;
-	private static final Map<String,List<Map<String,String>>>cache = new HashMap<>();
-	private static final Map<String,Long>updated= new HashMap<>();
+	private static final Map<String,List<Map<String,String>>> cache = new HashMap<>();
+	private static final Map<String,Long> updated = new HashMap<>();
 
 }
