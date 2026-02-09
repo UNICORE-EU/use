@@ -10,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import eu.unicore.security.AuthenticationException;
-import eu.unicore.security.HTTPAuthNTokens;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.CXFUtils;
 import eu.unicore.services.Kernel;
@@ -19,14 +18,12 @@ import eu.unicore.services.rest.security.UserPublicKeyCache.AttributeHolders;
 import eu.unicore.services.rest.security.UserPublicKeyCache.AttributesHolder;
 import eu.unicore.services.rest.security.UserPublicKeyCache.UserInfoSource;
 import eu.unicore.services.restclient.jwt.JWTUtils;
-import eu.unicore.services.restclient.sshkey.SSHKeyUC;
 import eu.unicore.services.restclient.sshkey.SSHUtils;
 import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.util.Log;
 import eu.unicore.util.Pair;
 import eu.unicore.util.configuration.ConfigurationException;
-import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Authenticate by checking tokens using the SSH public key(s) 
@@ -89,78 +86,23 @@ public class SSHKeyAuthenticator implements IAuthenticator, KernelInjectable {
 
 	@Override
 	public boolean authenticate(Message message, SecurityTokens tokens){
-		HttpServletRequest request = CXFUtils.getServletRequest(message);
 		Pair<String,String> authInfo = null;
-		boolean jwtMode = true;
 		boolean haveCredentials = false;
-		if(request.getHeader(SSHKeyUC.HEADER_PLAINTEXT_TOKEN)==null){
-			String bearerToken = CXFUtils.getBearerToken(message);
-			if(bearerToken!=null) {
-				haveCredentials = true;
-				authInfo = authenticateJWT(bearerToken, tokens);
-			}
-		}
-		else {
+		String bearerToken = CXFUtils.getBearerToken(message);
+		if(bearerToken!=null) {
 			haveCredentials = true;
-			authInfo = authenticateLegacy(message, tokens);
-			jwtMode = false;
+			authInfo = authenticateJWT(bearerToken, tokens);
 		}
 		if(authInfo!=null){
 			String requestedUserName = authInfo.getM1();
 			String dn = authInfo.getM2();			
-			logger.debug("{} --> <{}> {}", requestedUserName, dn, jwtMode? "(JWT)": "(proprietary token)");
+			logger.debug("{} --> <{}> {} (JWT)", requestedUserName, dn);
 			tokens.setUserName(dn);
 			tokens.setConsignorTrusted(true);
 			tokens.getContext().put(AuthNHandler.USER_AUTHN_METHOD, "SSHKEY");
 			storeAttributes(requestedUserName, tokens);
 		}
 		return haveCredentials;
-	}
-
-	private Pair<String,String> authenticateLegacy(Message message, SecurityTokens tokens) {
-		HTTPAuthNTokens auth = (HTTPAuthNTokens)tokens.getContext().get(SecurityTokens.CTX_LOGIN_HTTP);
-		if(auth == null){
-			auth = CXFUtils.getHTTPCredentials(message);
-			if(auth!=null)tokens.getContext().put(SecurityTokens.CTX_LOGIN_HTTP,auth);
-		}
-		if(auth != null && auth.getUserName()!=null) {
-			SSHKeyUC authData = new SSHKeyUC();
-			authData.username = auth.getUserName();
-			authData.signature = auth.getPasswd();
-			HttpServletRequest request = CXFUtils.getServletRequest(message);
-			authData.token = request.getHeader(SSHKeyUC.HEADER_PLAINTEXT_TOKEN);
-			try{
-				String dn = sshKeyAuth(authData);
-				if(dn!=null)return new Pair<>(authData.username, dn);
-			}catch(IOException e) {
-				throw new AuthenticationException("Could not validate SSH token for "+auth.getUserName());
-			}
-		}
-		else if(auth.getUserName()!=null) {
-				logger.debug("No match found for {}", auth.getUserName());
-		}
-		return null;
-	}
-
-	private String sshKeyAuth(SSHKeyUC authData) throws IOException {
-		String username = authData.username;
-		AttributeHolders attr = keyCache.get(username);
-		if(attr==null)return null;
-		List<AttributesHolder>coll = attr.get();
-		if(coll != null){
-			for(AttributesHolder af : coll){
-				if(af.getPublicKeys().isEmpty()){
-					logger.error("Server config error: No public key stored for {}", username);
-					continue;
-				}
-				for(String sshKey: af.getPublicKeys()) {
-					if(SSHUtils.validateAuthData(authData, sshKey)){
-						return af.getDN();
-					}
-				}
-			}
-		}
-		return null;
 	}
 
 	private Pair<String,String> authenticateJWT(String bearerToken, SecurityTokens tokens) {

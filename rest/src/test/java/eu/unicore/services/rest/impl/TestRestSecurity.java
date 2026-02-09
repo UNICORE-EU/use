@@ -42,8 +42,6 @@ import eu.unicore.services.restclient.UsernamePassword;
 import eu.unicore.services.restclient.jwt.JWTUtils;
 import eu.unicore.services.restclient.sshkey.PasswordSupplierImpl;
 import eu.unicore.services.restclient.sshkey.SSHKey;
-import eu.unicore.services.restclient.sshkey.SSHKeyUC;
-import eu.unicore.services.restclient.sshkey.SSHUtils;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.services.server.JettyServer;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
@@ -181,18 +179,6 @@ public class TestRestSecurity {
 		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
 		JSONObject reply = bc.getJSON();
 		System.out.println("Service reply: "+reply.toString(2));
-	}
-
-	@Test
-	public void testBaseClientWithLegacySSHKey() throws Exception {
-		String resource = url+"/"+sName+"/User";
-		SSHKeyUC auth = SSHUtils.createAuthData(new File("src/test/resources/id_ed25519"),
-				"test123".toCharArray(), String.valueOf(System.currentTimeMillis()));
-		auth.username = "demouser";
-		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
-		JSONObject reply = bc.getJSON();
-		System.out.println("Service reply: "+reply.toString(2));
-		assertEquals("SSHKEY", reply.getString("auth_method"));
 	}
 
 	@Test

@@ -1,7 +1,7 @@
 package eu.unicore.services.rest.registry;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -12,7 +12,6 @@ import eu.unicore.services.security.pdp.DefaultPDP.Rule;
 import eu.unicore.services.security.pdp.PDPResult.Decision;
 import eu.unicore.services.security.pdp.UnicoreXPDP;
 import eu.unicore.util.Log;
-
 
 /**
  * Creates registry instance and sets up Registry-related tasks
@@ -48,9 +47,9 @@ public class RegistryStartupTask implements Runnable {
 		UnicoreXPDP pdp = kernel.getSecurityManager().getPdp();
 		if(pdp!=null && pdp instanceof DefaultPDP) {
 			DefaultPDP dPDP = (DefaultPDP)pdp;
-			dPDP.setServiceRules("registries", Collections.singletonList(DefaultPDP.PERMIT_READ));
-			dPDP.setServiceRules("registryentries", Collections.singletonList(DefaultPDP.PERMIT_READ));
-			dPDP.setServiceRules("ServiceGroupEntry", Collections.singletonList(DefaultPDP.PERMIT_READ));
+			dPDP.setServiceRules("registries", Arrays.asList(DefaultPDP.PERMIT_READ));
+			dPDP.setServiceRules("registryentries", Arrays.asList(DefaultPDP.PERMIT_READ));
+			dPDP.setServiceRules("ServiceGroupEntry", Arrays.asList(DefaultPDP.PERMIT_READ));
 			final List<Rule> rRules = new ArrayList<>();
 			// general read access
 			rRules.add(DefaultPDP.PERMIT_READ);
