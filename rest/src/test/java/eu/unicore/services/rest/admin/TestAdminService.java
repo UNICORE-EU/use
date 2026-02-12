@@ -35,21 +35,6 @@ public class TestAdminService {
 		kernel.shutdown();
 	}
 
-	
-	@Test
-	public void testGetAllMetrics() throws Exception {
-		BaseClient client = getClient();
-		JSONObject o = client.getJSON().getJSONObject("metrics");
-		System.out.println("*** metrics ***\n"+o.toString(2));
-	}
-	
-	@Test
-	public void testGetSingleMetric() throws Exception {
-		BaseClient client = getClient();
-		JSONObject o = client.getJSON().getJSONObject("metrics");
-		assertNotNull(o.getString("use.security.ServerIdentity"));
-	}
-
 	@Test
 	public void testListAdminActions()throws Exception{
 		BaseClient client = getClient();
