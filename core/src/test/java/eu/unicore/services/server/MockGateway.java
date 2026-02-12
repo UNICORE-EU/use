@@ -2,10 +2,10 @@ package eu.unicore.services.server;
 
 import java.net.URL;
 
+import org.eclipse.jetty.ee10.servlet.DefaultServlet;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 
 import eu.unicore.security.canl.AuthnAndTrustProperties;
 import eu.unicore.util.jetty.HttpServerProperties;
@@ -20,7 +20,7 @@ public class MockGateway extends JettyServerBase {
 
 	@Override
 	protected Handler createRootHandler() {
-		ServletContextHandler root = new ServletContextHandler(getServer(), "/", ServletContextHandler.SESSIONS);
+		ServletContextHandler root = new ServletContextHandler("/", ServletContextHandler.SESSIONS);
 		root.addServlet(new ServletHolder(DefaultServlet.class), "/");
 		return root;
 	}

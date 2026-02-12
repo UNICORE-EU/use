@@ -39,7 +39,7 @@ public class MessagingImpl implements IMessaging{
 	public MessagingImpl(PersistenceProperties kernelCfg)throws Exception{
 		this.persistenceProperties = kernelCfg;
 		this.store = createStore();
-		this.queue = new BlockingArrayQueue<>(256, 16, 1024);
+		this.queue = new BlockingArrayQueue<>(8192);
 		this.messagingWriteThread = new MessageWriteThread(queue,store);
 		this.messagingWriteThread.start();
 		this.providers = new HashMap<>();

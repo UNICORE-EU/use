@@ -48,7 +48,6 @@ public class DefaultPDP implements UnicoreXPDP {
 		basicRules.add(PERMIT_ADMIN);
 		basicRules.add(PERMIT_OWNER);
 		basicRules.add(PERMIT_BY_ACL);
-		basicRules.add(DENY_MODIFICATION);
 	}
 
 	public void setServiceRules(String serviceName, List<Rule> rules) {
@@ -69,7 +68,7 @@ public class DefaultPDP implements UnicoreXPDP {
 			Decision decision = r.apply(c, a, d);
 			if(Decision.UNCLEAR!=decision) {
 				logger.debug("{} access by built-in rule", decision);
-				return new PDPResult(decision, "Decision ny built-in rule");
+				return new PDPResult(decision, "Decision by built-in rule");
 			}
 		}
 		String serviceName = d.getServiceName();
@@ -97,21 +96,37 @@ public class DefaultPDP implements UnicoreXPDP {
 
 	// some standard rules
 
+	public static final class PermitByRole implements Rule {
+		private final String role;
+
+		public PermitByRole(String role) {
+			this.role = role;
+		}
+
+		@Override
+		public Decision apply(Client c, ActionDescriptor action, ResourceDescriptor d){
+			if(c!=null && c.getRole()!=null && role.equals(c.getRole().getName())) {
+				logger.debug("PERMIT role '{}'", role);
+				return Decision.PERMIT;
+			}
+			return Decision.UNCLEAR;
+		};
+	}
+
 	/**
 	 * permit role "admin"
 	 */
-	public static Rule PERMIT_ADMIN = (c,a,d)-> {
-		if(c!=null && c.getRole()!=null && "admin".equals(c.getRole().getName())) {
-			logger.debug("PERMIT role 'admin'");
-			return Decision.PERMIT;
-		}
-		return Decision.UNCLEAR;
-	};
+	public static final Rule PERMIT_ADMIN = new PermitByRole("admin");
+
+	/**
+	 * permit role "user"
+	 */
+	public static final Rule PERMIT_USER = new PermitByRole("user");
 
 	/**
 	 * deny role "banned"
 	 */
-	public static Rule DENY_BANNED = (c,a,d) -> {
+	public static final Rule DENY_BANNED = (c,a,d) -> {
 		if(c!=null && c.getRole()!=null && "banned".equals(c.getRole().getName())) {
 			logger.debug("DENY role 'banned'");
 			return Decision.DENY;
@@ -122,7 +137,7 @@ public class DefaultPDP implements UnicoreXPDP {
 	/**
 	 * allow if ACL check has passed
 	 */
-	public static Rule PERMIT_BY_ACL = (c, a, d) -> {
+	public static final Rule PERMIT_BY_ACL = (c, a, d) -> {
 		if(d!=null && d.isAclCheckOK()) {
 			logger.debug("PERMIT by ACL");
 			return Decision.PERMIT;
@@ -133,7 +148,7 @@ public class DefaultPDP implements UnicoreXPDP {
 	/**
 	 * allow for service owner
 	 */
-	public static Rule PERMIT_OWNER = (c,a,d) -> {
+	public static final Rule PERMIT_OWNER = (c,a,d) -> {
 		if(c!=null && d!=null && c.getDistinguishedName()!=null
 				&& X500NameUtils.equal(c.getDistinguishedName(), d.getOwner()))
 		{
@@ -148,7 +163,7 @@ public class DefaultPDP implements UnicoreXPDP {
 	/**
 	 * forbid delete and modify
 	 */
-	public static Rule DENY_MODIFICATION = (c,a,d) -> {
+	public static final Rule DENY_MODIFICATION = (c,a,d) -> {
 		if(a!=null) 
 		{
 			for(String m: mod) if(m.equals(a.getAction())) {
@@ -162,7 +177,7 @@ public class DefaultPDP implements UnicoreXPDP {
 	/**
 	 * generic read access - useful for public endpoints
 	 */
-	public static Rule PERMIT_READ = (c,a,d)-> {
+	public static final Rule PERMIT_READ = (c,a,d)-> {
 		if(OperationType.read==a.getActionType()) {
 			logger.debug("PERMIT read access");
 			return Decision.PERMIT;
@@ -173,7 +188,7 @@ public class DefaultPDP implements UnicoreXPDP {
 	/**
 	 * generic read access - useful for public endpoints
 	 */
-	public static Rule PERMIT_READ_FOR_USER = (c,a,d)-> {
+	public static final Rule PERMIT_READ_FOR_USER = (c,a,d)-> {
 		if(a!=null && OperationType.read==a.getActionType()
 				&& c!=null && "user".equals(c.getRole().getName())) {
 			logger.debug("PERMIT read access for role 'user'");
@@ -185,7 +200,7 @@ public class DefaultPDP implements UnicoreXPDP {
 	/**
 	 * permit "POST" for role "user"
 	 */
-	public static Rule PERMIT_POST_FOR_USER = (c,a,d)-> {
+	public static final Rule PERMIT_POST_FOR_USER = (c,a,d)-> {
 		if(c!=null && c.getRole()!=null && "user".equals(c.getRole().getName())
 			&& a!=null && "POST".equals(a.getAction())
 			) 

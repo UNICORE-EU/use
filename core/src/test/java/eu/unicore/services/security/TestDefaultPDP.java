@@ -34,13 +34,6 @@ public class TestDefaultPDP {
 	}
 
 	@Test
-	public void testDelete() throws Exception {
-		DefaultPDP pdp = new DefaultPDP();
-		ActionDescriptor a = new ActionDescriptor("DELETE", OperationType.modify);
-		assertEquals(Decision.DENY, pdp.checkAuthorisation(null, a, null).getDecision());
-	}
-
-	@Test
 	public void testACL() throws Exception {
 		DefaultPDP pdp = new DefaultPDP();
 		ResourceDescriptor d = new ResourceDescriptor("foo","bar", "CN=someone");

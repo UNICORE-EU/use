@@ -5,16 +5,15 @@ import java.nio.channels.SocketChannel;
 
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.ee10.servlet.ServletCoreRequest;
+import org.eclipse.jetty.io.EndPoint;
 import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.HttpChannel;
-import org.eclipse.jetty.server.HttpTransport;
+import org.eclipse.jetty.server.HttpStream;
 import org.eclipse.jetty.server.Request;
 
 import eu.unicore.util.Log;
 import eu.unicore.util.jetty.forwarding.Forwarder;
 import eu.unicore.util.jetty.forwarding.ForwardingConnection;
-import eu.unicore.util.jetty.forwarding.UpgradeHttpServletRequest;
-import eu.unicore.util.jetty.forwarding.UpgradeHttpServletResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,27 +42,24 @@ public class RestServlet extends CXFNonSpringServlet {
 	}
 
 	private void upgradeConnection(HttpServletRequest request, HttpServletResponse response, SocketChannel backend) throws Exception {
-		Request baseRequest = Request.getBaseRequest(request);
+		Request baseRequest = ServletCoreRequest.wrap(request);
 		ForwardingConnection toClient = createForwardingConnection(baseRequest, backend);
-		if (toClient == null)
+		if (toClient == null) {
 			throw new IOException("not upgraded: no connection");
+		}
 		logger.debug("forwarding-connection {}", toClient);
-		HttpChannel httpChannel = baseRequest.getHttpChannel();
-		httpChannel.getConnector().getEventListeners().forEach(toClient::addEventListener);
-		baseRequest.setHandled(true);
-		baseRequest.setAttribute(HttpTransport.UPGRADE_CONNECTION_ATTRIBUTE, toClient);
-		// Save state from request/response and remove reference to the base request/response.
-		new UpgradeHttpServletRequest(request).upgrade();
-		new UpgradeHttpServletResponse(response).upgrade();
+		Connector connector = baseRequest.getConnectionMetaData().getConnector();
+		connector.getEventListeners().forEach(toClient::addEventListener);
+		baseRequest.setAttribute(HttpStream.UPGRADE_CONNECTION_ATTRIBUTE, toClient);
 		Forwarder.get().attach(toClient);		
 		logger.debug("Forwarding from backend {}, client={}", backend, toClient.getEndPoint().getRemoteSocketAddress());
 	}
-
-	private ForwardingConnection createForwardingConnection(Request baseRequest, SocketChannel backend) {
-		HttpChannel httpChannel = baseRequest.getHttpChannel();
-		Connector connector = httpChannel.getConnector();
-		return new ForwardingConnection(httpChannel.getEndPoint(),
-				connector.getExecutor(),
-				backend);
+	
+	protected ForwardingConnection createForwardingConnection(Request baseRequest, SocketChannel vsiteChannel)
+	{
+		Connector connector = baseRequest.getConnectionMetaData().getConnector();
+		EndPoint ep  = baseRequest.getConnectionMetaData().getConnection().getEndPoint();
+		return new ForwardingConnection(ep, connector.getExecutor(), vsiteChannel);
 	}
+
 }

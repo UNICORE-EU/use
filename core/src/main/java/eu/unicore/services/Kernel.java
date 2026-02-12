@@ -17,10 +17,6 @@ import java.util.ServiceLoader;
 
 import org.apache.logging.log4j.Logger;
 
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.Metric;
-import com.codahale.metrics.MetricRegistry;
-
 import eu.unicore.persist.PersistenceFactory;
 import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.security.wsutil.SecuritySessionStore;
@@ -30,7 +26,6 @@ import eu.unicore.services.messaging.IMessaging;
 import eu.unicore.services.messaging.MessagingImpl;
 import eu.unicore.services.persistence.PersistenceManager;
 import eu.unicore.services.registry.RegistryCreator;
-import eu.unicore.services.security.CertificateInfoMetric;
 import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.SecurityManager;
 import eu.unicore.services.security.util.PubkeyCache;
@@ -64,8 +59,6 @@ public final class Kernel {
 	private SecurityManager securityManager;
 
 	private PersistenceManager persistenceManager;
-
-	private final MetricRegistry metricRegistry = new MetricRegistry();
 
 	private final Map<String, Home> homes = Collections
 			.synchronizedMap(new HashMap<>());
@@ -288,13 +281,6 @@ public final class Kernel {
 		if(!subSystems.contains(sub)) {
 			subSystems.add(sub);
 		}
-		sub.getMetrics().entrySet().forEach(m -> { 
-			try {
-				metricRegistry.register(m.getKey(), m.getValue());
-			}catch(Exception ex) {
-				logger.error(ex);
-			}
-		});
 	}
 
 	public void unregister(Class<?> type) {
@@ -422,10 +408,6 @@ public final class Kernel {
 		return persistenceManager;
 	}
 
-	public Map<String, Metric> getMetrics() {
-		return metricRegistry.getMetrics();
-	}
-
 	public final GatewayHandler getGatewayHandler(){
 		return gwHandler;
 	}
@@ -497,10 +479,7 @@ public final class Kernel {
 		msg = new MessagingImpl(getPersistenceProperties());
 		persistenceManager=new PersistenceManager(this);
 		deploymentManager=new DeploymentManager(this);
-		jetty = new JettyServer(this, jettyConfiguration);
-		metricRegistry.register("use.security.ServerIdentity",new CertificateInfoMetric(securityManager));
-		metricRegistry.register("use.throughput", new Meter());
-		
+		jetty = new JettyServer(this, jettyConfiguration);		
 		adminActions = AdminActionLoader.load();
 		gwHandler = new GatewayHandler(getContainerProperties(), getClientConfiguration(), 
 				containerSecurityConfiguration);

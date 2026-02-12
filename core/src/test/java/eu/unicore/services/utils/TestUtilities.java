@@ -8,27 +8,28 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.xmlbeans.XmlObject;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 
 public class TestUtilities {
-	
-	String gw="http://gwhost:1234";
-	ContainerProperties k;
-	
-	@BeforeEach
-	public void setUp(){
+
+	static String gw="http://gwhost:1234";
+
+	static ContainerProperties k;
+
+	@BeforeAll
+	public static void setUp(){
 		Properties properties = new Properties();
-		String base=gw+"/SITE";
-		k=new ContainerProperties(properties, false);
+		String base = gw + "/SITE";
+		k = new ContainerProperties(properties, false);
 		k.setProperty(ContainerProperties.EXTERNAL_URL, base);
 		k.setProperty(ContainerProperties.SERVER_HOST, "my");
 		k.setProperty(ContainerProperties.SERVER_PORT, "5678");
 	}
-	
+
 	@Test
 	public void testNewUniqueID() {
 		assertTrue(Utilities.newUniqueID().length()>8);

@@ -8,10 +8,9 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.Decorator;
 
 import eu.unicore.security.canl.CredentialProperties;
@@ -135,7 +134,7 @@ public class JettyServer extends JettyServerBase {
 
 	@Override
 	protected Handler createRootHandler() throws ConfigurationException {
-		ServletContextHandler root = new ServletContextHandler(getServer(), "/", ServletContextHandler.SESSIONS);
+		ServletContextHandler root = new ServletContextHandler("/", ServletContextHandler.SESSIONS);
 		root.getObjectFactory().addDecorator(new ServletDecorator(kernel));
 		try {
 			addServlets(root);
@@ -146,10 +145,6 @@ public class JettyServer extends JettyServerBase {
 		return root;
 	}
 
-	/**
-	 * In USE we have always {@link ServletContextHandler} but it can be wrapped in {@link HandlerCollection}.
-	 * @return the root servlet handler of this Jetty server. 
-	 */
 	public ServletContextHandler getRootServletContext() 
 	{
 		return (ServletContextHandler)super.getRootHandler();

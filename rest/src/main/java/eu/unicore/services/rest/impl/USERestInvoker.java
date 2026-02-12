@@ -10,8 +10,6 @@ import org.apache.cxf.message.Exchange;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
-import com.codahale.metrics.Meter;
-
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
 import eu.unicore.security.SEIOperationType;
@@ -51,8 +49,6 @@ public final class USERestInvoker extends JAXRSInvoker {
 
 	private final SecurityManager securityManager;
 
-	private static Meter callFrequency; 
-
 	static final String LOCKEDKEY = USERestInvoker.class.getName()+"LOCKED";
 	static final String HOME = USERestInvoker.class.getName()+"HOME";
 	static final String HAVEMESSAGESKEY = USERestInvoker.class.getName()+"HAVEMESSAGES";
@@ -61,13 +57,6 @@ public final class USERestInvoker extends JAXRSInvoker {
 		super();
 		this.kernel = kernel;
 		this.securityManager = kernel.getSecurityManager();
-		setupMetrics();
-	}
-
-	private synchronized void setupMetrics(){
-		if(callFrequency == null){
-			callFrequency = (Meter)kernel.getMetrics().get("use.throughput");
-		}
 	}
 	
 	@Override
@@ -194,7 +183,6 @@ public final class USERestInvoker extends JAXRSInvoker {
 		if(r!=null){
 			r.activate();
 		}
-		callFrequency.mark();
 	}
 
 	private void createClient() {

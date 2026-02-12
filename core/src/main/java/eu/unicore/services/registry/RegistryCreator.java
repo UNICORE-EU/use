@@ -12,7 +12,6 @@ import eu.unicore.services.InitParameters.TerminationMode;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.exceptions.ResourceNotCreatedException;
 import eu.unicore.services.exceptions.ResourceUnknownException;
-import eu.unicore.services.impl.DefaultHome;
 import eu.unicore.util.Log;
 
 /**
@@ -27,18 +26,17 @@ import eu.unicore.util.Log;
  * @author B. Schuller
  */
 public class RegistryCreator {
-	
-	private static final Logger logger = Log.getLogger(Log.SERVICES+".registry", RegistryCreator.class);
-	
-	public static final String DEFAULT_REGISTRY_ID = "default_registry";
 
+	private static final Logger logger = Log.getLogger(Log.SERVICES+".registry", RegistryCreator.class);
+
+	public static final String DEFAULT_REGISTRY_ID = "default_registry";
 	public static final String SERVICE_NAME = "Registry";
 	public static final String ENTRIES_SERVICE_NAME = "ServiceGroupEntry";
 
 	private final boolean isGlobalRegistry; 
-	
+
 	private final Kernel kernel;
-	
+
 	public RegistryCreator(Kernel kernel) {
 		this.kernel = kernel;
 		Home regHome=kernel.getHome(SERVICE_NAME);
@@ -49,7 +47,7 @@ public class RegistryCreator {
 			isGlobalRegistry = false;
 		}
 	}
-	
+
 	public boolean isGlobalRegistry() {
 		return isGlobalRegistry;
 	}
@@ -59,7 +57,7 @@ public class RegistryCreator {
 	}
 
 	public void createRegistry() throws PersistenceException {
-		Home regHome=kernel.getHome(SERVICE_NAME);
+		Home regHome = kernel.getHome(SERVICE_NAME);
 		if(regHome==null) {
 			logger.info("No Registry service configured for this site.");
 			return;
@@ -84,18 +82,16 @@ public class RegistryCreator {
 			}
 		}
 	}
-	
+
 	private void createRegistryInstance(Home regHome)throws ResourceNotCreatedException{
-		InitParameters init = new InitParameters(DEFAULT_REGISTRY_ID, TerminationMode.NEVER);
-		regHome.createResource(init);
+		regHome.createResource(new InitParameters(DEFAULT_REGISTRY_ID, TerminationMode.NEVER));
 		logger.debug("Added '{}' resource to service '{}'", DEFAULT_REGISTRY_ID, SERVICE_NAME);
 	}
 
 	public void refreshRegistryEntries() {
 		try {
 			logger.info("Refreshing registry entries.");
-			Home regHome=kernel.getHome(ENTRIES_SERVICE_NAME);
-			((DefaultHome)regHome).runExpiryCheckNow();
+			kernel.getHome(ENTRIES_SERVICE_NAME).runExpiryCheckNow();
 		}catch (Exception ex) {
 			Log.logException("Error refreshing <"+ENTRIES_SERVICE_NAME+">", ex, logger);
 		}

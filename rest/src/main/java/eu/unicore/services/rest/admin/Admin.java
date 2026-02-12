@@ -4,19 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.ResponseBuilder;
-import jakarta.ws.rs.core.Response.Status;
-
 import org.apache.cxf.jaxrs.impl.ResponseBuilderImpl;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -31,8 +18,19 @@ import eu.unicore.services.rest.Link;
 import eu.unicore.services.rest.RESTUtils;
 import eu.unicore.services.rest.impl.BaseRESTController;
 import eu.unicore.services.security.util.AuthZAttributeStore;
-import eu.unicore.services.utils.MetricUtils;
 import eu.unicore.util.Log;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
 
 /**
  * REST interface to the admin features of the container
@@ -51,7 +49,6 @@ public class Admin extends BaseRESTController {
 		status.put("containerVersion", String.valueOf(Kernel.getVersion()));
 		status.put("connectionStatus", getConnectionStatus());
 		status.put("subSystemsStatus", getSubsystemsStatus());
-		status.put("metrics",MetricUtils.getValues(kernel.getMetrics()));
 		return status;
 	}
 

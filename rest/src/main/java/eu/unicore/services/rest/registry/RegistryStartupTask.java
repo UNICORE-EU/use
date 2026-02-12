@@ -12,6 +12,7 @@ import eu.unicore.services.security.pdp.DefaultPDP.Rule;
 import eu.unicore.services.security.pdp.PDPResult.Decision;
 import eu.unicore.services.security.pdp.UnicoreXPDP;
 import eu.unicore.util.Log;
+import static eu.unicore.services.security.pdp.DefaultPDP.PERMIT_READ;
 
 /**
  * Creates registry instance and sets up Registry-related tasks
@@ -44,18 +45,19 @@ public class RegistryStartupTask implements Runnable {
 	}
 
 	private void setupAccessPolicy(boolean isGlobal){
-		UnicoreXPDP pdp = kernel.getSecurityManager().getPdp();
-		if(pdp!=null && pdp instanceof DefaultPDP) {
-			DefaultPDP dPDP = (DefaultPDP)pdp;
-			dPDP.setServiceRules("registries", Arrays.asList(DefaultPDP.PERMIT_READ));
-			dPDP.setServiceRules("registryentries", Arrays.asList(DefaultPDP.PERMIT_READ));
-			dPDP.setServiceRules("ServiceGroupEntry", Arrays.asList(DefaultPDP.PERMIT_READ));
-			final List<Rule> rRules = new ArrayList<>();
+		UnicoreXPDP xpdp = kernel.getSecurityManager().getPdp();
+		if(xpdp!=null && xpdp instanceof DefaultPDP) {
+			DefaultPDP pdp = (DefaultPDP)xpdp;
+			pdp.setServiceRules("registries", Arrays.asList(PERMIT_READ));
+			pdp.setServiceRules("registryentries", Arrays.asList(PERMIT_READ));
+			pdp.setServiceRules("ServiceGroupEntry", Arrays.asList(PERMIT_READ));
+			// configure access to the "default_registry" instance
+			final List<Rule> defaultRegistryRules = new ArrayList<>();
 			// general read access
-			rRules.add(DefaultPDP.PERMIT_READ);
+			defaultRegistryRules.add(DefaultPDP.PERMIT_READ);
 			if (isGlobal) {
 				// write access for role "server"
-				rRules.add(
+				defaultRegistryRules.add(
 						(client, action, resource) -> {
 							if(RegistryCreator.DEFAULT_REGISTRY_ID.equals(resource.getResourceID())
 									&& client!=null 
@@ -68,20 +70,20 @@ public class RegistryStartupTask implements Runnable {
 						}
 				);		
 			}
-			dPDP.setServiceRules("Registry", rRules);
+			pdp.setServiceRules("Registry", defaultRegistryRules);
 		}
 	}
 
 	private void setupRegistryCrawler(){
-		Runnable command = ()->{
+		Runnable crawler = ()->{
 			try{
 				kernel.getAttribute(RegistryHandler.class).updatePublicKeys();
 			}catch(Throwable ex){
 				Log.logException("", ex, Log.getLogger(Log.UNICORE, RegistryHandler.class));
 			}
 		};
-		command.run();
+		crawler.run();
 		kernel.getContainerProperties().getThreadingServices().
-		getScheduledExecutorService().scheduleAtFixedRate(command, 60, 60, TimeUnit.SECONDS);
+		getScheduledExecutorService().scheduleAtFixedRate(crawler, 60, 60, TimeUnit.SECONDS);
 	}
 }
