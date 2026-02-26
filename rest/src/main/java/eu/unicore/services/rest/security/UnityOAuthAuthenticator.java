@@ -50,7 +50,7 @@ public class UnityOAuthAuthenticator extends UnityBaseSAMLAuthenticator {
 			clientCfg.setHttpUser("n/a");
 			clientCfg.getExtraSecurityTokens().put(OAuthBearerTokenOutInterceptor.TOKEN_KEY, bearerToken);
 			// store token for later use
-			tokens.getUserPreferences().put("UC_OAUTH_BEARER_TOKEN", new String[]{bearerToken});
+			tokens.getUserPreferences().put(AuthNHandler.UC_BEARER_TOKEN, new String[]{bearerToken});
 		}
 		return bearerToken;
 	}
@@ -72,9 +72,9 @@ public class UnityOAuthAuthenticator extends UnityBaseSAMLAuthenticator {
 		 */
 		public Map<String,String> extractAttributes(SecurityTokens tokens) {
 			Map<String,String> result = new HashMap<>();
-			String[] attr = tokens.getUserPreferences().get("UC_OAUTH_BEARER_TOKEN");
+			String[] attr = tokens.getUserPreferences().get(AuthNHandler.UC_BEARER_TOKEN);
 			if(attr!=null && attr.length>0){
-				result.put("UC_OAUTH_BEARER_TOKEN" , attr[0]);
+				result.put(AuthNHandler.UC_BEARER_TOKEN, attr[0]);
 			}
 			return result;
 		}

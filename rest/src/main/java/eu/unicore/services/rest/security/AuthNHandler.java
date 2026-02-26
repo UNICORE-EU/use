@@ -70,6 +70,9 @@ public class AuthNHandler implements ContainerRequestFilter {
 	// key for storing the "renewable" property of a ETD token in the security tokens
 	public final static String ETD_RENEWABLE = "ETD-Token-Renewable";
 
+	// key for storing a Bearer token in the security tokens
+	public final static String UC_BEARER_TOKEN = "UC_OAUTH_BEARER_TOKEN";
+
 	private final SecuritySessionStore sessionStore;
 
 	private final boolean useSessions;
