@@ -58,7 +58,7 @@ public final class USERestInvoker extends JAXRSInvoker {
 		this.kernel = kernel;
 		this.securityManager = kernel.getSecurityManager();
 	}
-	
+
 	@Override
 	public Object invoke(Exchange exchange, Object request){
 		ThreadContext.clearAll();
@@ -124,13 +124,12 @@ public final class USERestInvoker extends JAXRSInvoker {
 		if(opAnnotation!=null){
 			opType = opAnnotation.value();
 		}
-
-		if(o instanceof RESTRendererBase){
-			RESTRendererBase rrb = (RESTRendererBase)o;
-			rrb.setKernel(kernel);
-			rrb.setBaseURL(getBaseURL(exchange, serviceName));
+		if(o instanceof KernelInjectable){
+			((KernelInjectable)o).setKernel(kernel);
 		}
-
+		if(o instanceof RESTRendererBase){
+			((RESTRendererBase)o).setBaseURL(getBaseURL(exchange, serviceName));
+		}
 		if(o instanceof BaseRESTController){
 			BaseRESTController br = (BaseRESTController)o;
 			br.setHome(home);
