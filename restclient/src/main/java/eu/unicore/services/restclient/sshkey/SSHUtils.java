@@ -2,7 +2,6 @@ package eu.unicore.services.restclient.sshkey;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
@@ -33,18 +32,17 @@ public class SSHUtils {
 	public static PrivateKey readPrivateKey(File priv, PasswordSupplier password) throws IOException {
 		return getFileKeyProvider(priv, password).getPrivate();
 	}
-	
+
 	public static PublicKey readPublicKey(File file) throws IOException, GeneralSecurityException {
 		String pubkey = FileUtils.readFileToString(file, "UTF-8");
 		return readPubkey(pubkey);
 	}
-	
+
 	final static String[] ssh_options = { "from=", "no-", "environment=",
 			"permitopen=", "principals=", "tunnel=",
 			"ssh-rsa", "ssh-ed25519",
 	};
 
-	
 	public static PublicKey readPubkey(String pubkey) throws IOException, GeneralSecurityException {
 		StringTokenizer st = new StringTokenizer(pubkey);
 		outer: while(st.hasMoreTokens()) {
@@ -87,6 +85,5 @@ public class SSHUtils {
 		md.update(data);
 		return md.digest();
 	}
-
 
 }
