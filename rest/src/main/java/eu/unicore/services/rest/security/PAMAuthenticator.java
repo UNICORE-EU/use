@@ -81,7 +81,7 @@ public class PAMAuthenticator implements IAuthenticator {
 	}
 
 	// store PAM attributes for AuthAttributesCollector to pick up
-	private void storePAMInfo(UnixUser unixUser, SecurityTokens tokens){
+	static void storePAMInfo(UnixUser unixUser, SecurityTokens tokens){
 		BasicAttributeHolder attr = new BasicAttributeHolder();
 		attr.uid = unixUser.getUserName();
 		attr.groups = unixUser.getGroups().toArray(new String[unixUser.getGroups().size()]);

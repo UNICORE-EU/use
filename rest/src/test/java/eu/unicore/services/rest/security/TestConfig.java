@@ -7,11 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
+import org.jvnet.libpam.UnixUser;
 
 import eu.unicore.security.HTTPAuthNTokens;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.security.FilebasedAuthenticator.AttributesHolder;
+import eu.unicore.services.security.AuthAttributesCollector;
+import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.security.TestConfigUtil;
 
 public class TestConfig {
@@ -70,5 +73,15 @@ public class TestConfig {
 		assertEquals("hash", ah.hash);
 		assertEquals("salt", ah.salt);
 		assertEquals("CN=a:b", ah.dn);
+	}
+
+	@Test
+	public void testPAMAttributeForward() throws Exception {
+		UnixUser u = new UnixUser("nobody");
+		SecurityTokens t = new SecurityTokens();
+		PAMAuthenticator.storePAMInfo(u, t);
+		BasicAttributeHolder attrs = (BasicAttributeHolder)t.getContext().get(
+				AuthAttributesCollector.ATTRIBUTES);
+		assertEquals("nobody", attrs.uid);
 	}
 }
