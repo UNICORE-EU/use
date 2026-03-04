@@ -155,9 +155,7 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 			}
 			GetAttributesRequestDocument outXml = GetAttributesRequestDocument.Factory.newInstance();
 			outXml.setGetAttributesRequest(req);
-			if (logger.isDebugEnabled()) {
-				logger.debug(name + " request: " + outXml.toString());
-			}
+			logger.debug("{} request: {}", name, outXml);
 			synchronized (xuudb) {
 				resp = xuudb.getAttributes(outXml);
 			}
@@ -166,20 +164,7 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 			throw new IOException("Error contacting "
 					+name + ": " + e.getMessage(),e);
 		}
-		if (logger.isDebugEnabled()) {
-			GetAttributesResponseType data = resp.getGetAttributesResponse();
-			String reply = "[xlogin=" + data.getXlogin() + ", gid="
-					+ data.getGid() + ", SupplementaryGids=";
-			boolean sgt = false;
-			for (String sg : data.getSupplementaryGidsArray()) {
-				reply = reply + sg + ":";
-				sgt = true;
-			}
-			if (sgt)
-				reply = reply.substring(0, reply.length() - 1);
-			reply = reply + "]";
-			logger.debug(name + " reply: " + reply);
-		}
+		logger.debug("{} reply: {}", name, resp);
 		return makeAuthInfo(resp.getGetAttributesResponse());
 	}
 

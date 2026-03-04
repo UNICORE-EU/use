@@ -50,13 +50,12 @@ public class TestXUUDBAuthoriser {
 				"the!user".toCharArray(), "the!user".toCharArray(), "demo user", "jks");
 		ProxyCertificateOptions opts = new ProxyCertificateOptions(cred.getCertificateChain());
 		ProxyCertificate proxy=ProxyGenerator.generate(opts, cred.getKey());
-		
+
 		SecurityTokens tokens=new SecurityTokens();
-		
 		tokens.setUser(new X509Certificate[] {ProxyUtils.getEndUserCertificate(proxy.getCertificateChain())});
 		tokens.setConsignor(proxy.getCertificateChain());
 		tokens.setConsignorTrusted(true);
-		
+
 		String userName = cred.getCertificate().getSubjectX500Principal().getName();
 		mock.expectedDN = userName;
 		SubjectAttributesHolder attr=xuudb.getAttributes(tokens, null);
@@ -64,7 +63,7 @@ public class TestXUUDBAuthoriser {
 		assertTrue(mock.callCount>0);
 		assertEquals(userName,mock.lastDN);
 	}
-	
+
 	@Test
 	public void testCheckDNResult()throws Exception{
 		SecurityTokens tokens=new SecurityTokens();

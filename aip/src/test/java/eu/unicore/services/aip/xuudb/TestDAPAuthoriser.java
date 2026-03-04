@@ -124,10 +124,6 @@ public class TestDAPAuthoriser {
 
 		xuudb.getAttributes(cl3, null);
 		assertEquals(3, xuudb.getCacheSize());
-		
-		
-		
-
 	}
 
 }

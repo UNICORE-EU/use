@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.services.ExternalSystemConnector.Status;
@@ -24,6 +25,7 @@ import eu.unicore.xuudb.xbeans.LoginDataType;
 public class TestXUUDBServer {
 	
 	XUUDBAttributeSource xuudb;
+	XUUDBDynamicAttributeSource dXuudb;
 	XUUDBJSONAttributeSource jxuudb;
 	static HttpsServer xuudbServer = null;
 
@@ -68,6 +70,17 @@ public class TestXUUDBServer {
 		xuudb.updateXUUDBConnectionStatus();
 		System.out.println(xuudb+": " + xuudb.getConnectionStatusMessage());
 		assertEquals(Status.OK, xuudb.getConnectionStatus());
+		
+		dXuudb = new XUUDBDynamicAttributeSource();
+		dXuudb.setXuudbCache(false);
+		dXuudb.setXuudbGCID("TEST");
+		dXuudb.setXuudbHost("http://localhost");
+		dXuudb.setXuudbPort(14463);
+		dXuudb.configure("XUUDB-DYN", k);
+		dXuudb.updateXUUDBConnectionStatus();
+		System.out.println(dXuudb+": " + dXuudb.getConnectionStatusMessage());
+		assertEquals(Status.OK, dXuudb.getConnectionStatus());
+		
 	}
 
 	@Test
@@ -88,5 +101,11 @@ public class TestXUUDBServer {
 		t.setConsignorTrusted(true);
 		ah = xuudb.getAttributes(t, ah);
 		System.out.println("Attributes from "+xuudb.getExternalSystemName()+": "+ah);
+
+		Client c = new Client();
+		c.setAuthenticatedClient(t);
+		SubjectAttributesHolder ah2 = new SubjectAttributesHolder();
+		ah2 = dXuudb.getAttributes(c, ah2);
+		System.out.println("Attributes from "+dXuudb.getExternalSystemName()+": "+ah2);
 	}
 }

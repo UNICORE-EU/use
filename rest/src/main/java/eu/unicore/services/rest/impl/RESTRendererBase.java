@@ -86,7 +86,7 @@ public abstract class RESTRendererBase implements KernelInjectable {
 	}
 
 	protected Map<String,Object>getProperties() throws Exception{
-		return new HashMap<String,Object>() {
+		return new HashMap<>() {
 
 			 public static final long serialVersionUID=1l;
 
