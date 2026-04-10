@@ -13,7 +13,6 @@ import eu.unicore.security.wsutil.client.WSClientFactory;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.util.configuration.ConfigurationException;
-import eu.unicore.util.httpclient.IClientConfiguration;
 import eu.unicore.xuudb.X509Utils;
 import eu.unicore.xuudb.interfaces.IPublic;
 import eu.unicore.xuudb.xbeans.CheckCertificateDocument;
@@ -36,9 +35,9 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 	@Override
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens,
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException {
-		if(!cb.isOK())
+		if(!cb.isOK()) {
 			throw new SubsystemUnavailableException("Attribute source "+name+" unavailable");
-
+		}
 		SubjectAttributesHolder map;
 		X509Certificate cert = (X509Certificate) tokens.getEffectiveUserCertificate();
 		boolean workUsingCertificate = tokens.getUserCertificate() != null;
@@ -66,9 +65,8 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 	@Override
 	protected IPublic createEndpoint() throws ConfigurationException {
 		try {
-			IClientConfiguration sec = kernel.getClientConfiguration();
-			return new WSClientFactory(sec).createPlainWSProxy(
-					IPublic.class, getXUUDBUrl() + IPublic.SERVICE_NAME);
+			return new WSClientFactory(kernel.getClientConfiguration()).
+					createPlainWSProxy(IPublic.class, getXUUDBUrl() + IPublic.SERVICE_NAME);
 		} catch (Exception e) {
 			throw new ConfigurationException("Error setting up client for <"+getXUUDBUrl()+">");	
 		}
@@ -82,34 +80,32 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 	 */
 	private SubjectAttributesHolder checkUserCert(final SecurityTokens tokens)
 			throws IOException {
-
-		CheckCertificateDocument in = CheckCertificateDocument.Factory
-				.newInstance();
+		CheckCertificateDocument in = CheckCertificateDocument.Factory.newInstance();
 		CheckDataType check = in.addNewCheckCertificate();
 		check.setGcID(gcID);
 		X509Certificate cert = tokens.getEffectiveUserCertificate();
 		if (cert == null) {
 			return checkDN(tokens);
 		}
-		CheckCertificateResponseDocument res = null;
 		try {
 			check.setCertInPEM(X509Utils.getPEMStringFromX509(cert));
 			logger.debug("XUUDB request: {}", in);
+			CheckCertificateResponseDocument res = null;
 			synchronized (xuudb) {
 				res = xuudb.checkCertificate(in);
 			}
+			if (logger.isDebugEnabled()) {
+				LoginDataType login = res.getCheckCertificateResponse();
+				String reply = "[xlogin=" + login.getXlogin() + ", role="
+						+ login.getRole() + ", projects=" + login.getProjects()
+						+ "]";
+				logger.debug("XUUDB reply: {}", reply);
+			}
+			return makeAuthInfo(res.getCheckCertificateResponse());
 		} catch (Exception e) {
 			cb.notOK();
 			throw new IOException("Error contacting "+ name, e);
 		}
-		if (logger.isDebugEnabled()) {
-			LoginDataType login = res.getCheckCertificateResponse();
-			String reply = "[xlogin=" + login.getXlogin() + ", role="
-					+ login.getRole() + ", projects=" + login.getProjects()
-					+ "]";
-			logger.debug("XUUDB reply: {}", reply);
-		}
-		return makeAuthInfo(res.getCheckCertificateResponse());
 	}
 
 	/**
@@ -125,24 +121,24 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 		check.setGcID(gcID);
 		String dn = tokens.getEffectiveUserName();
 		check.setDistinguishedName(dn);
-		CheckDNResponseDocument res = null;
 		logger.debug("{} request: {}", name, in);
 		try {
+			CheckDNResponseDocument res = null;
 			synchronized (xuudb) {
 				res = xuudb.checkDN(in);
 			}
+			if (logger.isDebugEnabled()) {
+				LoginDataType login = res.getCheckDNResponse();
+				String reply = "[xlogin=" + login.getXlogin() + ", role="
+						+ login.getRole() + ", projects=" + login.getProjects()
+						+ "]";
+				logger.debug("{} reply: {}", name, reply);
+			}
+			return makeAuthInfo(res.getCheckDNResponse());
 		}catch (Exception e) {
 			cb.notOK();
 			throw new IOException("Error contacting "+name, e);
 		}
-		if (logger.isDebugEnabled()) {
-			LoginDataType login = res.getCheckDNResponse();
-			String reply = "[xlogin=" + login.getXlogin() + ", role="
-					+ login.getRole() + ", projects=" + login.getProjects()
-					+ "]";
-			logger.debug("{} reply: {}", name, reply);
-		}
-		return makeAuthInfo(res.getCheckDNResponse());
 	}
 
 	/**
@@ -173,7 +169,6 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 			mapDef.put(IAttributeSource.ATTRIBUTE_GROUP,
 					new String[] { gids[0] });
 		}
-
 		return new SubjectAttributesHolder(mapDef, map);
 	}
 

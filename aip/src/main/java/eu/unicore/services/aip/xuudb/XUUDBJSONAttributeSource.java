@@ -15,6 +15,7 @@ import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.util.Log;
+import eu.unicore.util.Pair;
 
 /**
  * get user attributes from an XUUDB's REST/JSON interface
@@ -114,16 +115,20 @@ public class XUUDBJSONAttributeSource extends XUUDBBase<String> implements
 	}
 
 	@Override
-	protected String checkXUUDBAlive() {
+	protected Pair<Boolean, String> checkXUUDBAlive() {
+		String msg = null;
+		Boolean success = Boolean.TRUE;
 		try {
 			JSONObject info = new JSONObject(doGet(infoURL));
-			return "connected to XUUDB v"+info.optString("version", "")+
+			msg = "connected to XUUDB v"+info.optString("version", "")+
 					" "+xuudbURL;
 		}catch(IOException e) {
-			return null;
+			msg = Log.getDetailMessage(e);
+			success = Boolean.FALSE;
 		}
 		catch(JSONException je) {
-			return "connected to "+xuudbURL;
+			msg = "connected to "+xuudbURL;
 		}
+		return new Pair<>(success, msg);
 	}
 }

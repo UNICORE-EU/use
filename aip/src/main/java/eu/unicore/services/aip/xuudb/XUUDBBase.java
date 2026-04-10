@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
@@ -19,6 +20,7 @@ import eu.unicore.services.security.IAttributeSourceBase;
 import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.services.utils.TimeoutRunner;
 import eu.unicore.util.Log;
+import eu.unicore.util.Pair;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.httpclient.ConnectionUtil;
 import eu.unicore.util.httpclient.HttpUtils;
@@ -49,8 +51,9 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 	protected String gcID;
 	protected CredentialCache cache;
 
-	protected Status status = Status.UNKNOWN;
-	protected String statusMessage = "N/A";
+	protected volatile Status status = Status.UNKNOWN;
+	protected volatile String statusMessage = "N/A";
+	private volatile long lastChecked;
 
 	@Override
 	public void configure(String name, Kernel kernel) throws ConfigurationException {
@@ -100,26 +103,38 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 		return cache.getCacheSize();
 	}
 
+	final AtomicBoolean pingInProgress = new AtomicBoolean(false);
+
 	protected void updateXUUDBConnectionStatus() {
-		String msg = checkXUUDBAlive();
-		if (msg!= null) {
-			statusMessage = "OK [" + name + " " + msg + "]";
-			status = Status.OK;
-			cb.OK();
-		}
-		else{
-			statusMessage = "CAN'T CONNECT TO XUUDB";
-			status = Status.DOWN;
-			cb.notOK();
+		if (pingInProgress.get() || (lastChecked+60000>System.currentTimeMillis()))
+			return;
+		try {
+			pingInProgress.set(true);
+			Pair<Boolean, String> res = checkXUUDBAlive();
+			if (res.getM1()) {
+				statusMessage = "OK [" + name + " " + res.getM2() + "]";
+				status = Status.OK;
+				cb.OK();
+			}
+			else{
+				statusMessage = "CAN'T CONNECT TO XUUDB: "+res.getM2();
+				status = Status.DOWN;
+				cb.notOK();
+			}
+		} finally {
+			pingInProgress.set(false);
 		}
 	}
 
-	protected String checkXUUDBAlive() {
+	protected Pair<Boolean, String> checkXUUDBAlive() {
 		final boolean isSecure = getXUUDBUrl().toLowerCase().startsWith("https");
-		Callable<?> ping = isSecure ?
+		String msg = "connected to " + getXUUDBUrl();
+		Boolean success = Boolean.TRUE;
+		Callable<String> ping = isSecure ?
 				()-> {
-				return ConnectionUtil.getPeerCertificate(kernel.getClientConfiguration(), 
+						ConnectionUtil.getPeerCertificate(kernel.getClientConfiguration(),
 						getXUUDBUrl(), 5000, logger);
+						return "OK";
 				} :
 				()-> {
 					String h = host.split("://")[1];
@@ -128,11 +143,15 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 				};
 		ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
 		try{
-			return TimeoutRunner.compute(ping, ts, 2000) != null ? 
-				"connected to " + getXUUDBUrl() : null;
-		}catch(Exception ex) {
-			return null;
+			if(TimeoutRunner.compute(ping, ts, 5100)== null) {
+				msg = "timeout";
+				success = Boolean.FALSE;
+			}
+		}catch(Exception e) {
+			msg = Log.getDetailMessage(e);
+			success = Boolean.FALSE;
 		}
+		return new Pair<>(success, msg);
 	}
 
 	@Override
