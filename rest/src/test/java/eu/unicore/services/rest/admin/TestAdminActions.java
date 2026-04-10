@@ -12,12 +12,13 @@ import org.junit.jupiter.api.Test;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.admin.AdminAction;
 import eu.unicore.services.admin.AdminActionResult;
+import eu.unicore.services.restclient.jwt.JWTUtils;
 import eu.unicore.services.security.TestConfigUtil;
 
 public class TestAdminActions {
 
 	@Test
-	public void testAdminActionLoader() throws Exception{
+	public void testAdminActions() throws Exception{
 		Kernel kernel=new Kernel(TestConfigUtil.getInsecureProperties());
 		Map<String,AdminAction> act=kernel.getAdminActions();
 		assertNotNull(act);
@@ -31,5 +32,25 @@ public class TestAdminActions {
 		assertEquals("ok", result.getMessage());
 		assertEquals("echo-foo-value", result.getResults().get("foo"));
 	}
-	
+
+	@Test
+	public void testIssueAPITokenAdminAction() throws Exception{
+		Kernel kernel=new Kernel("src/test/resources/use.properties");
+		Map<String,AdminAction> act=kernel.getAdminActions();
+		assertNotNull(act);
+		AdminAction aAct = act.get("IssueAPIToken");
+		assertNotNull(aAct);
+		assertEquals("IssueAPIToken", aAct.getName());
+		Map<String,String>params = new HashMap<String, String>();
+		params.put("subject", "CN=demouser");
+		params.put("lifetime", "60");
+		params.put("uid", "nobody");
+		AdminActionResult result = aAct.invoke(params, kernel);
+		assertTrue(result.successful());
+		String token = result.getResults().get("token");
+		JWTUtils.verifyJWTToken(token,
+				kernel.getContainerSecurityConfiguration().getCredential().getCertificate().getPublicKey(),
+				null);
+	}
+
 }

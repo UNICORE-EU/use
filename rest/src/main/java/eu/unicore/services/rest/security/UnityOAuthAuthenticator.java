@@ -37,7 +37,7 @@ public class UnityOAuthAuthenticator extends UnityBaseSAMLAuthenticator {
 
 	@Override
 	public String toString(){
-		return "Unity with OAuth Bearer token ["+super.toString()+"]";
+		return "Unity SAML with OAuth Bearer token ["+super.toString()+"]";
 	}
 
 	@Override

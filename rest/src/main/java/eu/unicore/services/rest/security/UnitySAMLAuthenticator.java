@@ -27,7 +27,7 @@ public class UnitySAMLAuthenticator extends UnityBaseSAMLAuthenticator {
 
 	@Override
 	public String toString(){
-		return "Unity with username+password ["+super.toString()+"]";
+		return "Unity SAML with username+password ["+super.toString()+"]";
 	}
 
 	@Override
