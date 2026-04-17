@@ -5,26 +5,23 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
-import eu.unicore.samly2.exceptions.SAMLErrorResponseException;
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.XACMLAttribute;
-import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.Kernel;
-import eu.unicore.services.ThreadingServices;
 import eu.unicore.services.aip.saml.conf.IPullConfiguration;
 import eu.unicore.services.aip.saml.conf.PropertiesBasedConfiguration;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.utils.CircuitBreaker;
-import eu.unicore.services.utils.TimeoutRunner;
+import eu.unicore.services.utils.ExternalConnectorHelper;
 import eu.unicore.util.Log;
+import eu.unicore.util.Pair;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import eu.unicore.util.httpclient.IClientConfiguration;
@@ -34,7 +31,7 @@ import eu.unicore.util.httpclient.IClientConfiguration;
  *  
  * @author K. Benedyczak
  */
-public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConnector
+public class SAMLAttributeSource extends ExternalConnectorHelper implements IAttributeSource
 {
 	private static final Logger log = Log.getLogger(IPullConfiguration.LOG_PFX, SAMLAttributeSource.class);
 
@@ -42,20 +39,14 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 	UnicoreAttributesHandler specialAttrsHandler;
 	private String configFile;
 	private String name;
-	private Kernel kernel;
 
 	private SAMLAttributeFetcher fetcher;
-
-	private Status status = Status.UNKNOWN;
-
-	private String statusMessage = "N/A";
 
 	private final CircuitBreaker cb = new CircuitBreaker();
 
 	@Override
 	public void configure(String name, Kernel kernel) throws ConfigurationException {
 		initConfig(log, name);
-		this.kernel=kernel;
 		IClientConfiguration cc = kernel.getClientConfiguration();
 		if(cc instanceof DefaultClientConfiguration &&
 				conf.getValue(PropertiesBasedConfiguration.CFG_SERVER_USERNAME)!=null){
@@ -67,6 +58,9 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 		}
 		fetcher = new SAMLAttributeFetcher(conf, cc);
 		initFinal(log, SAMLAttributeFetcher.ALL_PULLED_ATTRS_KEY, false);
+		setExternalSystemName(name+" "+fetcher.getSimpleAddress());
+		setCheckService(kernel.getContainerProperties().getThreadingServices().getExecutorService());
+		setCheckSupplier(()->checkConnection());
 	}
 
 	@Override
@@ -93,54 +87,21 @@ public class SAMLAttributeSource implements IAttributeSource, ExternalSystemConn
 		return assembleAttributesHolder(serviceAttributes, otherAuthoriserInfo, conf.isPulledGenericAttributesEnabled());
 	}
 
-	private void checkConnection() {
+	private Pair<Boolean, String> checkConnection() {
 		final SecurityTokens st = new SecurityTokens();
 		st.setUserName(Client.ANONYMOUS_CLIENT_DN);
 		st.setConsignorTrusted(true);
-		ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
-		Callable<String> check = ()->{
-			try {
-				fetcher.fetchAttributes(st);
-			}catch(SAMLErrorResponseException sre) {}
-			catch(Exception e) {
-				return Log.createFaultMessage("ERROR", e);
-			}
-			return "OK";
-		};
+		Boolean ok = Boolean.TRUE;
+		String msg = "connected to " + fetcher.getServerURL();
 		try {
-			String result = TimeoutRunner.compute(check, ts, 3000);
-			if ("OK".equals(result)) {
-				statusMessage = "OK [" + name
-						+ " connected to " + fetcher.getServerURL() + "]";
-				status = Status.OK;
-				cb.OK();
-			}
-			else{
-				statusMessage = "CAN'T CONNECT" + " ["+(result!=null ? result : "")+"]";
-				status = Status.DOWN;
-				cb.notOK();
-			}
+			fetcher.fetchAttributes(st);
+			cb.OK();
 		}catch(Exception e) {
-			statusMessage = Log.createFaultMessage("ERROR checking status",e);
-			status = Status.UNKNOWN;
+			msg = Log.getDetailMessage(e);
+			ok = Boolean.FALSE;
+			cb.notOK();
 		}
-	}
-
-	@Override
-	public String getConnectionStatusMessage(){
-		checkConnection();
-		return statusMessage;
-	}
-
-	@Override
-	public Status getConnectionStatus(){
-		checkConnection();
-		return status;
-	}
-
-	@Override
-	public String getExternalSystemName(){
-		return name +" Attribute Source " + fetcher.getSimpleAddress();
+		return new Pair<>(ok, msg);
 	}
 
 	private void initConfig(Logger log, String name)

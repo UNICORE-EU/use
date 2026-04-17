@@ -27,7 +27,9 @@ import eu.unicore.services.restclient.RESTException;
 import eu.unicore.services.restclient.RegistryClient;
 import eu.unicore.services.restclient.Resources;
 import eu.unicore.services.security.util.PubkeyCache;
+import eu.unicore.services.utils.ExternalConnectorHelper;
 import eu.unicore.util.Log;
+import eu.unicore.util.Pair;
 
 /**
  * It is used to obtain a client for both internal and external <b>default</b> registries, which are
@@ -216,33 +218,17 @@ public class RegistryHandler implements ISubSystem {
 				Encoding.PEM);
 	}
 
-	static class RConnector implements ExternalSystemConnector {
-		private Status status = Status.NOT_APPLICABLE;
-		private String statusMessage = "N/A";
-		private long lastChecked;
+	static class RConnector extends ExternalConnectorHelper {
+
 		private final String url;
 		private final Kernel kernel;
 
 		public RConnector(String url, Kernel kernel) {
 			this.url = url;
 			this.kernel = kernel;
-		}
-
-		@Override
-		public String getConnectionStatusMessage() {
-			checkConnection();
-			return statusMessage;
-		}
-
-		@Override
-		public Status getConnectionStatus() {
-			checkConnection();
-			return status;
-		}
-
-		@Override
-		public String getExternalSystemName() {
-			return "Registry ["+url+"]";
+			setExternalSystemName("Registry ["+url+"]");
+			setCheckService(kernel.getContainerProperties().getThreadingServices().getExecutorService());
+			setCheckSupplier(()->check(url, kernel));
 		}
 
 		public String getURL() {
@@ -253,32 +239,29 @@ public class RegistryHandler implements ISubSystem {
 			return new RegistryClient(url, kernel.getClientConfiguration());
 		}
 
-		private void checkConnection() {
-			if (lastChecked+60000<System.currentTimeMillis()) {
-				lastChecked = System.currentTimeMillis();
-				final RegistryClient rc = createClient();
-				Callable<String>task = () -> {
-					try {
-						rc.getJSON();
-						return "OK";
-					}catch(RESTException re) {
-						return re.getErrorMessage();
-					}catch(Exception e) {
-						return Log.createFaultMessage("Error ", e);
-					}
-				};
-				String res = compute(task, 10000);
-				statusMessage = res;
-				status = "OK".equals(res) ? Status.OK : Status.DOWN;
-			}
+		private static Pair<Boolean, String>check(String url, Kernel kernel) {
+			final RegistryClient rc = new RegistryClient(url, kernel.getClientConfiguration());
+			Callable<String>task = () -> {
+				try {
+					rc.getJSON();
+					return "OK";
+				}catch(RESTException re) {
+					return re.getErrorMessage();
+				}catch(Exception e) {
+					return Log.createFaultMessage("Error ", e);
+				}
+			};
+			String res = compute(task, 10000);
+			boolean ok = "OK".equals(res);
+			return new Pair<>(ok, res);
 		}
+	}
 
-		private String compute(Callable<String>task, int timeout){
-			try{
-				return Resources.getExecutorService().submit(task).get(timeout, TimeUnit.MILLISECONDS);
-			}catch(Exception ex){
-				return Log.createFaultMessage("Error ", ex);
-			}
+	private static String compute(Callable<String>task, int timeout){
+		try{
+			return Resources.getExecutorService().submit(task).get(timeout, TimeUnit.MILLISECONDS);
+		}catch(Exception ex){
+			return Log.getDetailMessage(ex);
 		}
 	}
 }

@@ -2,10 +2,8 @@ package eu.unicore.services.rest.security;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.Socket;
 import java.net.URL;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
@@ -16,19 +14,16 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 import eu.unicore.security.SecurityTokens;
-import eu.unicore.services.ContainerProperties;
-import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.KernelInjectable;
 import eu.unicore.services.rest.RESTUtils;
 import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.utils.CircuitBreaker;
-import eu.unicore.services.utils.TimeoutRunner;
+import eu.unicore.services.utils.ExternalConnectorHelper;
 import eu.unicore.util.Log;
 import eu.unicore.util.Pair;
 import eu.unicore.util.configuration.ConfigurationException;
-import eu.unicore.util.httpclient.ConnectionUtil;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 
 /**
@@ -46,7 +41,8 @@ import eu.unicore.util.httpclient.DefaultClientConfiguration;
  * 
  * @author schuller 
  */
-public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, KernelInjectable, ExternalSystemConnector {
+public abstract class BaseRemoteAuthenticator<T> extends ExternalConnectorHelper
+	implements IAuthenticator, KernelInjectable {
 
 	private static final Logger logger = Log.getLogger(Log.SECURITY, BaseRemoteAuthenticator.class);
 
@@ -79,6 +75,11 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 		this.kernel = kernel;
 		createCache();
 		selfCheck();
+		finalizeInit();
+	}
+
+	protected void finalizeInit(){
+		setCheckSupplier(()->checkConnection());		
 	}
 
 	protected void selfCheck() throws ConfigurationException {
@@ -272,62 +273,22 @@ public abstract class BaseRemoteAuthenticator<T> implements IAuthenticator, Kern
 		cache.invalidateAll();
 	}
 
-	private Status status = Status.UNKNOWN;
-	private String statusMessage;
-	private long lastChecked;
-
-	@Override
-	public String getConnectionStatusMessage(){
-		checkConnection();	
-		return statusMessage;
-	}
-
-	@Override
-	public Status getConnectionStatus(){
-		checkConnection();
-		return status;
-	}
-
-	private void checkConnection(){
-		if (lastChecked+2000>System.currentTimeMillis())
-			return;
-		ContainerProperties conf = kernel.getContainerProperties();
+	private Pair<Boolean,String> checkConnection() {
 		try {
-			Pair<Boolean, String> result = TimeoutRunner.compute(getCheckConnectionTask(address), conf.getThreadingServices(), 2000);
-			if(result!=null && result.getM1()){
-				status=Status.OK;
-				statusMessage="OK [connected to "+simpleAddress+"]";
+			URL u = new URL(address);
+			String host = u.getHost();
+			int port = u.getPort();
+			if(port==-1)port = u.getDefaultPort();
+			if(address.toLowerCase().startsWith("https")) {
+				ExternalConnectorHelper.getSSLPeer(kernel.getClientConfiguration(), host, port, 10000);
 			}
 			else {
-				status=Status.DOWN;
-				statusMessage = result!=null? result.getM2() : "CAN'T CONNECT to "+simpleAddress;
+				ExternalConnectorHelper.checkServerConnect(host, port, 10000);
 			}
-		}catch(Exception e) {
-			status=Status.UNKNOWN;
-			statusMessage = Log.createFaultMessage("ERROR checking status", e);
+			return new Pair<>(Boolean.TRUE, "OK [connected to "+simpleAddress+"]");
+		} catch (Exception e) {
+			return new Pair<>(Boolean.FALSE, String.format("Can't contact %s: %s", address, e));
 		}
-		lastChecked=System.currentTimeMillis();
 	}
-
-	private Callable<Pair<Boolean,String>> getCheckConnectionTask(final String url) {
-		return ()->{
-			try {
-				DefaultClientConfiguration clientCfg = kernel.getClientConfiguration();
-				if(!url.toLowerCase().startsWith("https")) {
-					clientCfg.setSslEnabled(false);
-					URL u = new URL(url);
-					String host = u.getHost();
-					int port = u.getPort();
-					if(port==-1)port = u.getDefaultPort();
-					try(Socket s = new Socket(host,port)){}
-				}
-				else {
-					ConnectionUtil.getPeerCertificate(clientCfg, url, 2000, logger);
-				}
-				return new Pair<>(Boolean.TRUE, "OK");
-			} catch (IOException e) {
-				return new Pair<>(Boolean.FALSE, String.format("Can't contact %s: %s", url, e));
-			}
-		};
-	}
+	
 }

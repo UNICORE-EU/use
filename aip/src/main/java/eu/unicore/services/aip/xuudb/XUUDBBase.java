@@ -1,10 +1,6 @@
 package eu.unicore.services.aip.xuudb;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
@@ -13,16 +9,13 @@ import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.logging.log4j.Logger;
 
-import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.Kernel;
-import eu.unicore.services.ThreadingServices;
 import eu.unicore.services.security.IAttributeSourceBase;
 import eu.unicore.services.utils.CircuitBreaker;
-import eu.unicore.services.utils.TimeoutRunner;
+import eu.unicore.services.utils.ExternalConnectorHelper;
 import eu.unicore.util.Log;
 import eu.unicore.util.Pair;
 import eu.unicore.util.configuration.ConfigurationException;
-import eu.unicore.util.httpclient.ConnectionUtil;
 import eu.unicore.util.httpclient.HttpUtils;
 
 /**
@@ -31,7 +24,7 @@ import eu.unicore.util.httpclient.HttpUtils;
  * @author schuller
  * @author golbi
  */
-public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSystemConnector {
+public abstract class XUUDBBase<T> extends ExternalConnectorHelper implements IAttributeSourceBase {
 
 	protected static final Logger logger = Log.getLogger(Log.SECURITY, XUUDBBase.class);
 
@@ -51,10 +44,6 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 	protected String gcID;
 	protected CredentialCache cache;
 
-	protected volatile Status status = Status.UNKNOWN;
-	protected volatile String statusMessage = "N/A";
-	private volatile long lastChecked;
-
 	@Override
 	public void configure(String name, Kernel kernel) throws ConfigurationException {
 		this.name = name;
@@ -63,6 +52,9 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 		logger.info("Attribute source '{}': connecting to <{}>", name, getXUUDBUrl());
 		initCache();
 		xuudb = createEndpoint();
+		setExternalSystemName(name +" attribute source");
+		setCheckService(kernel.getContainerProperties().getThreadingServices().getExecutorService());
+		setCheckSupplier(()->checkConnection());
 	}
 
 	protected abstract T createEndpoint() throws ConfigurationException;
@@ -103,49 +95,16 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 		return cache.getCacheSize();
 	}
 
-	final AtomicBoolean pingInProgress = new AtomicBoolean(false);
-
-	protected void updateXUUDBConnectionStatus() {
-		if (pingInProgress.get() || (lastChecked+60000>System.currentTimeMillis()))
-			return;
-		try {
-			pingInProgress.set(true);
-			Pair<Boolean, String> res = checkXUUDBAlive();
-			if (res.getM1()) {
-				statusMessage = "OK [" + name + " " + res.getM2() + "]";
-				status = Status.OK;
-				cb.OK();
-			}
-			else{
-				statusMessage = "CAN'T CONNECT TO XUUDB: "+res.getM2();
-				status = Status.DOWN;
-				cb.notOK();
-			}
-		} finally {
-			pingInProgress.set(false);
-		}
-	}
-
-	protected Pair<Boolean, String> checkXUUDBAlive() {
+	protected Pair<Boolean, String> checkConnection() {
 		final boolean isSecure = getXUUDBUrl().toLowerCase().startsWith("https");
 		String msg = "connected to " + getXUUDBUrl();
 		Boolean success = Boolean.TRUE;
-		Callable<String> ping = isSecure ?
-				()-> {
-						ConnectionUtil.getPeerCertificate(kernel.getClientConfiguration(),
-						getXUUDBUrl(), 5000, logger);
-						return "OK";
-				} :
-				()-> {
-					String h = host.split("://")[1];
-					new Socket(InetAddress.getByName(h), port).close();
-					return "OK";
-				};
-		ThreadingServices ts = kernel.getContainerProperties().getThreadingServices();
 		try{
-			if(TimeoutRunner.compute(ping, ts, 5100)== null) {
-				msg = "timeout";
-				success = Boolean.FALSE;
+			if(isSecure) {
+				ExternalConnectorHelper.getSSLPeer(
+						kernel.getClientConfiguration(), getXUUDBUrl(), 10000);
+			}else {
+				ExternalConnectorHelper.checkServerConnect(host.split("://")[1], port, 10000);
 			}
 		}catch(Exception e) {
 			msg = Log.getDetailMessage(e);
@@ -157,17 +116,6 @@ public abstract class XUUDBBase<T> implements IAttributeSourceBase, ExternalSyst
 	@Override
 	public String getName() {
 		return name;
-	}
-
-	@Override
-	public String getConnectionStatusMessage(){
-		updateXUUDBConnectionStatus();
-		return statusMessage;
-	}
-
-	@Override
-	public Status getConnectionStatus(){
-		return status;
 	}
 
 	@Override

@@ -1,8 +1,5 @@
 package eu.unicore.services;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -11,6 +8,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
 
 /**
  * Resource pool providing centralized thread/execution management
@@ -25,16 +23,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @see ScheduledExecutorService
  * 
  * @author schuller
- * @since 2.2.0
  */
 public class ThreadingServices {
 
 	private final ContainerProperties kernelCfg;
-	
+
 	private ScheduledThreadPoolExecutor scheduler;
-	
+
 	private ThreadPoolExecutor executor;
-	
 	
 	/**
 	 * This class instance usually should be an application-level singleton,
@@ -62,14 +58,6 @@ public class ThreadingServices {
 	}
 	
 	/**
-	 * get an {@link CompletionService} using the Exector service
-	 * @param <V>
-	 */
-	public synchronized <V> CompletionService<V>getCompletionService(){
-		return new ExecutorCompletionService<V>(getExecutorService());
-	}
-	
-	/**
 	 * Configure the pool. Properties are read from
 	 * the {@link Kernel} properties.
 	 */
@@ -86,95 +74,53 @@ public class ThreadingServices {
 		scheduler.setThreadFactory(new ThreadFactory(){
         			final AtomicInteger threadNumber = new AtomicInteger(1);
 		        	public Thread newThread(Runnable r) {
-		        		Thread t = new Thread(r);
-		        		t.setName("use-sched-"+threadNumber.getAndIncrement());
-		        		return t;
+		        		return new Thread(r, "use-sched-"+threadNumber.getAndIncrement());
 		        	}
 				});
 	}
 	
 	protected void configureExecutor(){
 		int min = kernelCfg.getIntValue(ContainerProperties.EXEC_CORE_POOL_SIZE);
-		int max = kernelCfg.getIntValue(ContainerProperties.EXEC_MAX_POOL_SIZE);
+		final int max = kernelCfg.getIntValue(ContainerProperties.EXEC_MAX_POOL_SIZE);
 		int idle = kernelCfg.getIntValue(ContainerProperties.EXEC_POOL_TIMEOUT);
-
-		executor = new UseExecutor(min, max,
-				idle, TimeUnit.MILLISECONDS,
-				new LinkedBlockingQueue<>(4*max),
-				new ThreadFactory(){
-        			final AtomicInteger threadNumber = new AtomicInteger(1);
-		        	public Thread newThread(Runnable r) {
-		        		Thread t = new Thread(r);
-		        		t.setName("use-exec-"+threadNumber.getAndIncrement());
-		        		return t;
-		        	}
-				});
+		ConditionalQueue queue = new ConditionalQueue(1024);
+		executor = new ThreadPoolExecutor(min, max, idle, TimeUnit.MILLISECONDS,
+			queue,
+			new ThreadFactory(){
+			final AtomicInteger threadNumber = new AtomicInteger(1);
+			public Thread newThread(Runnable r) {
+				return new Thread(r, "use-exec-"+threadNumber.getAndIncrement());
+			}
+		});
+		// This custom queue makes the ThreadPoolExecutor scale the way we want,
+		// while keeping the core threads alive. The queue will queue the task only if
+		// no more workers can be added - otherwise it will reject, which will cause
+		// the ThreadPoolExecutor to add a new worker.
+		queue.setCondition(()->{
+			return executor.getPoolSize()==max;
+		});
 	}
 
-	/**
-	 * get the current minimum pool size of the scheduler pool
-	 */
-	public int getScheduledExecutorCorePoolSize(){
-		return scheduler.getCorePoolSize();
-	}
+	public static class ConditionalQueue extends LinkedBlockingQueue<Runnable>{
 
-	/**
-	 * get the current maximum pool size of the scheduler pool
-	 */
-	public int getScheduledExecutorMaxPoolSize(){
-		return scheduler.getMaximumPoolSize();
-	}
+		private static final long serialVersionUID = 1L;
 
-	/**
-	 * get the number of currently active threads in the scheduler pool
-	 */
-	public int getScheduledExecutorActiveThreadCount(){
-		return scheduler.getActiveCount();
-	}
+	    private BooleanSupplier condition = ()->{
+	    	return true;
+	    };
 
-	public int getExecutorCorePoolSize(){
-		return executor.getCorePoolSize();
-	}
-
-	public int getExecutorMaxPoolSize(){
-		return executor.getMaximumPoolSize();
-	}
-
-	public int getExecutorActiveThreadCount(){
-		return executor.getActiveCount();
-	}
-
-	/**
-	 * Improves the behaviour of the ThreadPoolExecutor:
-	 * in case there are less than max threads running,
-	 * more threads are be started before filling up the queue
-	 *
-	 * @author schuller
-	 */
-	public static class UseExecutor extends ThreadPoolExecutor {
-
-		private int coreSize;
-
-		public UseExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-				BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
-			super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
-			this.coreSize = corePoolSize;
+	    public ConditionalQueue(int capacity) {
+			super(capacity);
 		}
 
-		@Override
-		public void execute(Runnable command) {
-		    super.execute(command);
-		    final int poolSize = getPoolSize();
-		    if (poolSize < getMaximumPoolSize()) {
-		        if (getQueue().size() > 0) {
-		            synchronized (this) {
-		                setCorePoolSize(poolSize + 1);
-		                setCorePoolSize(coreSize);
-		            }
-		        }
-		    }
-		}
-	}
+	    public void setCondition(BooleanSupplier condition) {
+	    	this.condition = condition;
+	    }
 
+	    @Override
+	    public boolean offer(Runnable r) {
+	    	return condition.getAsBoolean() ? super.offer(r) : false;
+	    }
+
+	}
 }
-

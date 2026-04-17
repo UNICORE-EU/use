@@ -139,7 +139,7 @@ public class GatewayHandler implements ISubSystem {
 		else{
 			try {
 				Pair<X509Certificate, String> res = TimeoutRunner.compute(
-					getCheckConnectionTask(gwURL), threadingSrv, 2000);
+					getCheckConnectionTask(gwURL), threadingSrv.getExecutorService(), 2000);
 				if(res!=null){
 					X509Certificate gwCert = res.getM1();
 					if(gwCert!=null) {

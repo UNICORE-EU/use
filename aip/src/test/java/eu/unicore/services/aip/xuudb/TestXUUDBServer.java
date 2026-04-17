@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
@@ -57,19 +56,15 @@ public class TestXUUDBServer {
 		jxuudb.setXuudbHost("http://localhost");
 		jxuudb.setXuudbPort(14463);
 		jxuudb.configure("XUUDB-JSON", k);
-		jxuudb.updateXUUDBConnectionStatus();
 		System.out.println(jxuudb+": " + jxuudb.getConnectionStatusMessage());
-		assertEquals(Status.OK, jxuudb.getConnectionStatus());
-		
+
 		xuudb = new XUUDBAttributeSource();
 		xuudb.setXuudbCache(false);
 		xuudb.setXuudbGCID("TEST");
 		xuudb.setXuudbHost("http://localhost");
 		xuudb.setXuudbPort(14463);
 		xuudb.configure("XUUDB", k);
-		xuudb.updateXUUDBConnectionStatus();
 		System.out.println(xuudb+": " + xuudb.getConnectionStatusMessage());
-		assertEquals(Status.OK, xuudb.getConnectionStatus());
 		
 		dXuudb = new XUUDBDynamicAttributeSource();
 		dXuudb.setXuudbCache(false);
@@ -77,35 +72,38 @@ public class TestXUUDBServer {
 		dXuudb.setXuudbHost("http://localhost");
 		dXuudb.setXuudbPort(14463);
 		dXuudb.configure("XUUDB-DYN", k);
-		dXuudb.updateXUUDBConnectionStatus();
 		System.out.println(dXuudb+": " + dXuudb.getConnectionStatusMessage());
-		assertEquals(Status.OK, dXuudb.getConnectionStatus());
-		
 	}
 
 	@Test
-	public void testJSON() throws IOException {
+	public void testJSON() throws Exception {
 		SubjectAttributesHolder ah = new SubjectAttributesHolder();
 		SecurityTokens t = new SecurityTokens();
 		t.setUserName("UID=demouser");
 		t.setConsignorTrusted(true);
 		ah = jxuudb.getAttributes(t, ah);
 		System.out.println("Attributes from "+jxuudb.getExternalSystemName()+": "+ah);
+		Thread.sleep(1000);
+		assertEquals(Status.OK, jxuudb.getConnectionStatus());
+		System.out.println(jxuudb.getConnectionStatusMessage());
 	}
 	
 	@Test
-	public void testXML() throws IOException {
+	public void testXML() throws Exception {
 		SubjectAttributesHolder ah = new SubjectAttributesHolder();
 		SecurityTokens t = new SecurityTokens();
 		t.setUserName("UID=demouser");
 		t.setConsignorTrusted(true);
 		ah = xuudb.getAttributes(t, ah);
 		System.out.println("Attributes from "+xuudb.getExternalSystemName()+": "+ah);
-
 		Client c = new Client();
 		c.setAuthenticatedClient(t);
 		SubjectAttributesHolder ah2 = new SubjectAttributesHolder();
 		ah2 = dXuudb.getAttributes(c, ah2);
 		System.out.println("Attributes from "+dXuudb.getExternalSystemName()+": "+ah2);
+		Thread.sleep(1000);
+		assertEquals(Status.OK, dXuudb.getConnectionStatus());
+		System.out.println(dXuudb.getConnectionStatusMessage());
+	
 	}
 }

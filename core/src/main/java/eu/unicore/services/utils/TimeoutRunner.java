@@ -2,14 +2,13 @@ package eu.unicore.services.utils;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.logging.log4j.Logger;
 
-import eu.unicore.services.ThreadingServices;
 import eu.unicore.util.Log;
 
 
@@ -22,7 +21,7 @@ import eu.unicore.util.Log;
  */
 public class TimeoutRunner<V> implements Callable<V> {
 
-	private static final Logger logger=Log.getLogger(Log.UNICORE,TimeoutRunner.class);
+	private static final Logger logger = Log.getLogger(Log.UNICORE, TimeoutRunner.class);
 
 	private final Callable<V> task;
 
@@ -32,24 +31,24 @@ public class TimeoutRunner<V> implements Callable<V> {
 
 	private final TimeUnit unit;
 
-	private final ThreadingServices service;
+	private final ExecutorService service;
 
 	/**
-	 * @param timeout - milliseconds before timeout
 	 * @param task - the task to execute
+	 * @param timeout
+	 * @param unit - time unit
 	 */
-	public TimeoutRunner(Callable<V> task, ThreadingServices service, int timeout, TimeUnit unit){
-		this.task=task;
-		this.timeout=timeout;
-		this.unit=unit;
+	public TimeoutRunner(Callable<V> task, ExecutorService service, int timeout, TimeUnit unit){
+		this.task = task;
+		this.timeout = timeout;
+		this.unit = unit;
 		this.service = service;
 	}
 
 	public V call() throws RejectedExecutionException, InterruptedException, ExecutionException {
 		logger.debug("Starting task with timeout of {} {}", timeout, unit);
 		try{
-			Future<V> res=service.getExecutorService().submit(task);
-			result=res.get(timeout, unit);
+			result = service.submit(task).get(timeout, unit);
 		}
 		catch(TimeoutException ignored){
 			logger.debug("Timeout reached!");
@@ -66,7 +65,7 @@ public class TimeoutRunner<V> implements Callable<V> {
 	 * @return a Result or <code>null</code> if the timeout is reached
 	 * @throws Exception
 	 */
-	public static <Result> Result compute(Callable<Result> task, ThreadingServices service, int timeout)
+	public static <Result> Result compute(Callable<Result> task, ExecutorService service, int timeout)
 	throws Exception {
 		return compute(task, service, timeout, TimeUnit.MILLISECONDS);
 	}
@@ -81,10 +80,9 @@ public class TimeoutRunner<V> implements Callable<V> {
 	 * @return a Result or <code>null</code> if the timeout is reached
 	 * @throws Exception
 	 */
-	public static <Result> Result compute(Callable<Result> task, ThreadingServices service,
+	public static <Result> Result compute(Callable<Result> task, ExecutorService service,
 			int timeout, TimeUnit units) throws Exception {
-		TimeoutRunner<Result> runner=new TimeoutRunner<Result>(task, service, timeout, units);
-		return runner.call();
+		return new TimeoutRunner<Result>(task, service, timeout, units).call();
 	}
 
 }

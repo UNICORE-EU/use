@@ -115,7 +115,7 @@ public class XUUDBJSONAttributeSource extends XUUDBBase<String> implements
 	}
 
 	@Override
-	protected Pair<Boolean, String> checkXUUDBAlive() {
+	protected Pair<Boolean, String> checkConnection() {
 		String msg = null;
 		Boolean success = Boolean.TRUE;
 		try {

@@ -1,7 +1,7 @@
 package eu.unicore.services;
 
 /**
- * components connecting to other systems (like a gateway or a registry) can implement this interface
+ * Components connecting to other systems (like a gateway or a registry) can implement this interface
  * and register with the Kernel
  * 
  * @author schuller

@@ -129,14 +129,12 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 	}
 
 	private void configureAuth(String dotName, Properties properties, IAuthenticator auth, Kernel kernel) {
-		//find parameters for this attribute source
+		// find parameters for this attribute source
 		Map<String,String>params=new PropertyGroupHelper(properties, 
 			new String[]{dotName}).getFilteredMap();
 		params.remove(dotName+"class");
-		Utilities.mapParams(auth,params,RESTSecurityProperties.propsLogger);
-		
-		//if attribute source provides setProperties method, also pass all properties. Useful 
-		//for attribute chains
+		Utilities.mapParams(auth,params,RESTSecurityProperties.propsLogger);		
+		// if attribute source provides a setProperties() method, also pass all properties
 		Method propsSetter = Utilities.findSetter(auth.getClass(), "properties");
 		if (propsSetter != null && propsSetter.getParameterTypes()[0].isAssignableFrom(Properties.class))
 		{
@@ -146,8 +144,6 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 				throw new RuntimeException("Bug: can't set properties on chain: " + e.toString(), e);
 			}
 		}
-		
-		// also inject Kernel
 		if(auth instanceof KernelInjectable){
 			((KernelInjectable)auth).setKernel(kernel);
 		}

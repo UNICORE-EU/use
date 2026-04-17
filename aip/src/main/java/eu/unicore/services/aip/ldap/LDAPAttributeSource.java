@@ -26,14 +26,15 @@ import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.canl.SSLContextCreator;
-import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.aip.saml.UnicoreAttributesHandler;
 import eu.unicore.services.aip.xuudb.CredentialCache;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.utils.CircuitBreaker;
+import eu.unicore.services.utils.ExternalConnectorHelper;
 import eu.unicore.util.Log;
+import eu.unicore.util.Pair;
 import eu.unicore.util.configuration.ConfigurationException;
 
 /**
@@ -52,7 +53,7 @@ import eu.unicore.util.configuration.ConfigurationException;
  * @author valley
  * @author delaruelle
  */
-public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConnector {
+public class LDAPAttributeSource extends ExternalConnectorHelper implements IAttributeSource{
 
 	private static final Logger logger=Log.getLogger(Log.SECURITY,LDAPAttributeSource.class);
 
@@ -75,8 +76,6 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 	private String ctxFactory = "com.sun.jndi.ldap.LdapCtxFactory";
 	private CredentialCache cache;
 
-	private Status status = Status.UNKNOWN;
-	private String statusMessage;
 	private final CircuitBreaker cb = new CircuitBreaker();
 
 	@Override
@@ -92,6 +91,9 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 			cb.notOK();
 		}
 		cache = new CredentialCache();
+		setExternalSystemName(name);
+		setCheckService(kernel.getContainerProperties().getThreadingServices().getExecutorService());
+		setCheckSupplier(()->checkConnection());
 	}
 
 	// --------- configuration injection --------------
@@ -267,38 +269,23 @@ public class LDAPAttributeSource implements IAttributeSource, ExternalSystemConn
 		return new SubjectAttributesHolder(mapDef, map);
 	}
 
-	@Override
-	public Status getConnectionStatus(){
-		return status;
-	}
-
-	@Override
-	public String getExternalSystemName() {
-		return name;
-	}
-
-	@Override
-	public String getConnectionStatusMessage(){
-		checkConnection();	
-		return statusMessage;
-	}
-
-	private void checkConnection() {
+	private Pair<Boolean, String> checkConnection() {
 		//make a small ldap connection test : search for the first level of root DN
 		DirContext testCnx;
 		SearchControls ctls = new SearchControls();
 		ctls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
+		Boolean ok = Boolean.TRUE;
+		String msg = "connected to "+ldapURL;
 		try {
 			testCnx = makeEndpoint();
 			testCnx.search(this.rootdn, "objectClass=*", ctls);
-			status=Status.OK;
-			statusMessage = "OK ["+name+" connected to "+ldapURL+"]";
 			cb.OK();
 		} catch(Exception e){
-			statusMessage = Log.createFaultMessage("ERROR", e);
-			status = Status.DOWN;
+			msg = Log.getDetailMessage(e);
+			ok = Boolean.FALSE;
 			cb.notOK();
 		}
+		return new Pair<>(ok, msg);
 	}
 
 	@Override

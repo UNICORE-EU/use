@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ServiceLoader;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.logging.log4j.Logger;
 
@@ -437,6 +439,14 @@ public final class Kernel {
 			}
 		}
 		return result;
+	}
+
+	public ExecutorService getExecutorService() {
+		return containerConfiguration.getThreadingServices().getExecutorService();
+	}
+
+	public ScheduledExecutorService getScheduledExecutor() {
+		return containerConfiguration.getThreadingServices().getScheduledExecutorService();
 	}
 
 	/**

@@ -49,6 +49,12 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 	}
 
 	@Override
+	protected void finalizeInit(){
+		super.finalizeInit();
+		setExternalSystemName("Unity @ "+simpleAddress);
+	}
+
+	@Override
 	protected AuthnResponseAssertions performAuth(DefaultClientConfiguration clientCfg) throws Exception{
 		AuthnResponseAssertions auth = doAuth(kernel.getContainerProperties().getContainerURL(), clientCfg);
 		if(validate)validate(auth);
@@ -117,11 +123,6 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 			}
 			throw we;
 		}
-	}
-
-	@Override
-	public String getExternalSystemName(){
-		return  "Unity @ "+simpleAddress;
 	}
 
 	@Override

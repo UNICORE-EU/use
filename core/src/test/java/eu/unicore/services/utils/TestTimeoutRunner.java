@@ -6,22 +6,22 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.ContainerProperties;
-import eu.unicore.services.ThreadingServices;
 
 public class TestTimeoutRunner {
 	
-	protected ThreadingServices ts;
+	protected ExecutorService ts;
 	
 	@BeforeEach
 	public void setUp() {
 		ContainerProperties cp = new ContainerProperties(new Properties(), false);
-		ts = cp.getThreadingServices();		
+		ts = cp.getThreadingServices().getExecutorService();		
 	}
 
 	Callable<String>task1 = new Callable<>(){

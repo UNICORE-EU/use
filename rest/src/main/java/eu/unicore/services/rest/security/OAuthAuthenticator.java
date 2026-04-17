@@ -72,6 +72,12 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 	}
 
 	@Override
+	protected void finalizeInit(){
+		super.finalizeInit();
+		setExternalSystemName("OIDC Server "+simpleAddress);
+	}
+
+	@Override
 	protected void selfCheck() throws ConfigurationException{
 		super.selfCheck();
 		if(validate && (clientID==null || clientSecret==null)) {
@@ -170,8 +176,4 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 		return "OAUTH";
 	}
 
-	@Override
-	public String getExternalSystemName(){
-		return  "OIDC Server "+simpleAddress;
-	}
 }

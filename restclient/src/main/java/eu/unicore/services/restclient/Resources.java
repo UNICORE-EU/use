@@ -8,6 +8,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
 
 /**
  * Resource pool providing centralized thread/execution management for Client use<br>
@@ -52,10 +53,10 @@ public class Resources {
 		isConfigured=true;
 	}
 
-	protected static void configureScheduler(){
-		int core=2;
-		scheduler=new ScheduledThreadPoolExecutor(core);
-		int idle=50;
+	private static void configureScheduler(){
+		int core = 2;
+		scheduler = new ScheduledThreadPoolExecutor(core);
+		int idle = 50;
 		scheduler.setKeepAliveTime(idle, TimeUnit.MILLISECONDS);
 		scheduler.setThreadFactory(new ThreadFactory(){
         			final AtomicInteger threadNumber = new AtomicInteger(1);
@@ -67,14 +68,14 @@ public class Resources {
 				});
 	}
 
-	protected static void configureExecutor(){
-		int min=0;
-		int max=16;
-		int idle=10;
-
-		executor=new ThreadPoolExecutor(min,max,
+	private static void configureExecutor(){
+		int min = 1;
+		final int max = 16;
+		int idle = 10;
+		ConditionalQueue queue = new ConditionalQueue();
+		executor = new ThreadPoolExecutor(min,max,
 				idle,TimeUnit.SECONDS,
-				new LinkedBlockingQueue<Runnable>(),
+				queue,
 				new ThreadFactory(){
         			final AtomicInteger threadNumber = new AtomicInteger(1);
 		        	public Thread newThread(Runnable r) {
@@ -83,6 +84,37 @@ public class Resources {
 		        		return t;
 		        	}
 				});
+		
+		// This custom queue makes the ThreadPoolExecutor scale the way we want,
+		// while keeping the core threads alive. The queue will queue the task only if
+		// no more workers can be added - otherwise it will reject, which will cause
+		// the ThreadPoolExecutor to add a new worker.
+		queue.setCondition(()->{
+			return executor.getPoolSize()==max;
+		});
 	}
 
+
+	private static class ConditionalQueue extends LinkedBlockingQueue<Runnable>{
+
+		private static final long serialVersionUID = 1L;
+
+	    private BooleanSupplier condition = ()->{
+	    	return true;
+	    };
+
+	    public ConditionalQueue() {
+			super();
+		}
+
+	    public void setCondition(BooleanSupplier condition) {
+	    	this.condition = condition;
+	    }
+
+	    @Override
+	    public boolean offer(Runnable r) {
+	    	return condition.getAsBoolean() ? super.offer(r) : false;
+	    }
+
+	}
 }
