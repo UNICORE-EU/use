@@ -227,7 +227,7 @@ public class RegistryHandler implements ISubSystem {
 			this.url = url;
 			this.kernel = kernel;
 			setExternalSystemName("Registry ["+url+"]");
-			setCheckService(kernel.getContainerProperties().getThreadingServices().getExecutorService());
+			setCheckService(kernel.getExecutorService());
 			setCheckSupplier(()->check(url, kernel));
 		}
 

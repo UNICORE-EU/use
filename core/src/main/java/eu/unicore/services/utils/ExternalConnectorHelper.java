@@ -101,7 +101,7 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 					checkInProgress.set(false);
 					resultGetter = null;
 				}
-				Level lvl = status!=oldStatus? Level.INFO : Level.DEBUG;
+				Level lvl = status!=oldStatus? Level.INFO : Level.TRACE;
 				logger.log(lvl, "<{}> is <{}> ({})", externalSystemName, status, statusMessage);
 			};
 			if(checkService!=null) {

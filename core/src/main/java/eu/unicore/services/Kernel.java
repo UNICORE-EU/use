@@ -567,6 +567,20 @@ public final class Kernel {
 			serviceConfigurator.startConfigWatcher();
 		}
 		else logger.info("Runtime config update is DISABLED.");
+		// schedule periodic check of external connections
+		Runnable r = ()->{
+			if(state != State.shutting_down) {
+				List<ExternalSystemConnector> ext = new ArrayList<>();
+				for(ISubSystem s: getSubSystems()) {
+					ext.addAll(s.getExternalConnections());
+					s.getStatusDescription();
+				}
+				for(ExternalSystemConnector esc: ext){
+					esc.getConnectionStatus();
+				}
+			}
+		};
+		getScheduledExecutor().scheduleWithFixedDelay(r, 5, 5, TimeUnit.MINUTES);
 	}
 
 	/**
