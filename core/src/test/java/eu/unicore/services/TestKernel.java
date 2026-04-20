@@ -21,7 +21,7 @@ public class TestKernel {
 	public void testHeaders() throws Exception{	
 		Kernel k = new Kernel(TestConfigUtil.getInsecureProperties());
 		System.out.println(k.getHeader());
-		System.out.println(k.getConnectionStatus());
+		System.out.println(k.getSubsystemsReport());
 	}
 
 	@Test

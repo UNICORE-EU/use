@@ -6,12 +6,17 @@ import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.SocketFactoryCreator2;
@@ -24,6 +29,8 @@ import eu.unicore.util.Pair;
  * "best practices" implementation of the ExternalSystemConnector
  */
 public class ExternalConnectorHelper implements ExternalSystemConnector {
+
+	private static final Logger logger = Log.getLogger(Log.SERVICES, ExternalSystemConnector.class);
 
 	private String externalSystemName;
 	protected volatile Status status = Status.UNKNOWN;
@@ -67,6 +74,8 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 		return externalSystemName;
 	}
 
+	private volatile Future<?> resultGetter = null;
+
 	// triggers a status update, if none is in progress and the waiting period
 	// since the last run has passed
 	protected void runConnectionStatusUpdate() {
@@ -77,7 +86,9 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 		try {
 			Runnable r = () ->
 			{
+				Status oldStatus = status;
 				try {
+					logger.trace("Entering status check for <{}>, async={}", externalSystemName, checkService!=null);
 					Pair<Boolean,String>result = checkSupplier.call();
 					statusMessage = result.getM2();
 					status = result.getM1()? Status.OK : Status.DOWN;
@@ -85,25 +96,44 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 					statusMessage = Log.getDetailMessage(e);
 					status = Status.DOWN;
 				}
+				finally {
+					lastChecked = System.currentTimeMillis();
+					checkInProgress.set(false);
+					resultGetter = null;
+				}
+				Level lvl = status!=oldStatus? Level.INFO : Level.DEBUG;
+				logger.log(lvl, "<{}> is <{}> ({})", externalSystemName, status, statusMessage);
 			};
 			if(checkService!=null) {
-				checkService.submit(()->{
+				resultGetter = checkService.submit(()->{
 					r.run();
 				});
 			}
 			else {
-				r.run();
+				FutureTask<String> task = new FutureTask<String>(r, "OK");
+				resultGetter = task;
+				task.run();
 			}
 		}catch(Exception e) {
 			status = Status.DOWN;
 			statusMessage = Log.getDetailMessage(e);
-		}
-		finally {
 			lastChecked = System.currentTimeMillis();
 			checkInProgress.set(false);
+			resultGetter = null;
 		}
 	}
 
+	@Override
+	public void awaitConnectionStatusRefresh(long timeout, TimeUnit units) {
+		runConnectionStatusUpdate();
+		if(checkInProgress.get()) {
+			try{
+				while(resultGetter==null)Thread.sleep(50);
+				if(resultGetter!=null)resultGetter.get(timeout, units);
+			}catch(Exception te) {}
+		}
+	}
+ 
 	public static void checkServerConnect(String host, int port, int timeout) throws Exception {
 		try(Socket s = new Socket()){
 			s.connect(new InetSocketAddress(host, port), timeout);

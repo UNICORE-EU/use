@@ -16,6 +16,7 @@ import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Logger;
 
@@ -159,7 +160,7 @@ public final class Kernel {
 		return s;
 	}
 
-	public String getConnectionStatus(){
+	public String getSubsystemsReport(){
 		StringBuilder report = new StringBuilder();
 		String newline = System.getProperty("line.separator");
 		List<ExternalSystemConnector> ext = new ArrayList<>();
@@ -189,6 +190,7 @@ public final class Kernel {
 		for(ExternalSystemConnector esc: ext){
 			report.append(esc.getExternalSystemName());
 			report.append(": ");
+			esc.awaitConnectionStatusRefresh(10, TimeUnit.SECONDS);
 			report.append(esc.getConnectionStatusMessage());
 			report.append(newline);
 		}
@@ -517,7 +519,7 @@ public final class Kernel {
 			}
 		}
 		credentialReloaded();
-		logger.info(getConnectionStatus());
+		logger.info(getSubsystemsReport());
 	}
 
 	/**

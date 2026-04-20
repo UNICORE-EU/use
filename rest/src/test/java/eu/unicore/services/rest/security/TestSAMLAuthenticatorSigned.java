@@ -86,7 +86,7 @@ public class TestSAMLAuthenticatorSigned {
 		kernel.getDeploymentManager().deployService(dd);
 		JettyServer server=kernel.getServer();
 		url = server.getUrls()[0].toExternalForm()+"/rest";
-		System.out.println(kernel.getConnectionStatus());
+		System.out.println(kernel.getSubsystemsReport());
 	}
 
 	@AfterAll

@@ -79,6 +79,7 @@ public abstract class BaseRemoteAuthenticator<T> extends ExternalConnectorHelper
 	}
 
 	protected void finalizeInit(){
+		setCheckService(kernel.getExecutorService());
 		setCheckSupplier(()->checkConnection());		
 	}
 

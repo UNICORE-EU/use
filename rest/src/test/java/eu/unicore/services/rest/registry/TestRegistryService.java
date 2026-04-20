@@ -167,7 +167,7 @@ public class TestRegistryService {
 	public void testRegistryHandler() throws Exception {
 		RegistryHandler rh = kernel.getAttribute(RegistryHandler.class);
 		assertFalse(rh.isSharedRegistry());
-		System.out.println(kernel.getConnectionStatus());
+		System.out.println(kernel.getSubsystemsReport());
 		final List<Map<String,String>> entries = new ArrayList<>();
 		ExternalRegistryClient erc = new ExternalRegistryClient() {
 			@Override

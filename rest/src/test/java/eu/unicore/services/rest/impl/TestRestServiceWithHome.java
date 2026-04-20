@@ -83,7 +83,7 @@ public class TestRestServiceWithHome {
 		dd.setName(sName);
 		dd.setKernel(k);
 		k.getDeploymentManager().deployService(dd);
-		System.out.println(k.getConnectionStatus());
+		System.out.println(k.getSubsystemsReport());
 	}
 
 	@AfterAll

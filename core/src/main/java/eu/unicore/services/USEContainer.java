@@ -51,7 +51,7 @@ public class USEContainer {
 		StringBuilder report = new StringBuilder();
 		report.append("SERVER STATUS");
 		report.append(System.getProperty("line.separator"));
-		report.append(kernel.getConnectionStatus());
+		report.append(kernel.getSubsystemsReport());
 		return report.toString();
 	}
 
