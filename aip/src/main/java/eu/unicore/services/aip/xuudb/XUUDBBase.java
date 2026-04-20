@@ -106,7 +106,9 @@ public abstract class XUUDBBase<T> extends ExternalConnectorHelper implements IA
 			}else {
 				ExternalConnectorHelper.checkServerConnect(host.split("://")[1], port, 10000);
 			}
+			cb.OK();
 		}catch(Exception e) {
+			cb.notOK();
 			msg = Log.getDetailMessage(e);
 			success = Boolean.FALSE;
 		}

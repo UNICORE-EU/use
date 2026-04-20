@@ -285,8 +285,10 @@ public abstract class BaseRemoteAuthenticator<T> extends ExternalConnectorHelper
 			else {
 				ExternalConnectorHelper.checkServerConnect(host, port, 10000);
 			}
+			cb.OK();
 			return new Pair<>(Boolean.TRUE, "OK [connected to "+simpleAddress+"]");
 		} catch (Exception e) {
+			cb.notOK();
 			return new Pair<>(Boolean.FALSE, String.format("Can't contact %s: %s", address, e));
 		}
 	}
