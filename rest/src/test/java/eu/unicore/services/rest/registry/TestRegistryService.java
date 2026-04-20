@@ -95,6 +95,7 @@ public class TestRegistryService {
 		content.put(RegistryClient.ENDPOINT, "http://foo2");
 		content.put(RegistryImpl.MARK_ENTRY_AS_INTERNAL, "true");
 		registryClient.addEntry(content);
+		rh.getRegistryClient().invalidateCache();
 		o = client.getJSON();
 		System.out.println("*** registry properties ***\n"+o.toString(2));
 		assertEquals(2, o.getJSONArray("entries").length());
@@ -195,14 +196,13 @@ public class TestRegistryService {
 
 	private BaseClient getClient() throws Exception {
 		String url = kernel.getContainerProperties().getContainerURL()+"/rest/registries/default_registry";
-		return new BaseClient(url, kernel.getClientConfiguration());
+		 return new BaseClient(url, kernel.getClientConfiguration());
 	}
 
 	private RegistryClient getRegistryClient() throws Exception {
 		String url = kernel.getContainerProperties().getContainerURL()+"/rest/registries/default_registry";
 		return new RegistryClient(url, kernel.getClientConfiguration());
 	}
-	
 
 	private BaseClient getEntryClient() throws Exception {
 		String url = kernel.getContainerProperties().getContainerURL()+"/rest/registryentries";

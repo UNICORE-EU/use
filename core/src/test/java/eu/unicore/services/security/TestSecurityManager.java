@@ -8,10 +8,12 @@ import static eu.unicore.services.security.ContainerSecurityProperties.PROP_CHEC
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_DAP_ORDER;
 import static eu.unicore.services.security.ContainerSecurityProperties.PROP_DAP_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -24,6 +26,10 @@ import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.Xlogin;
 import eu.unicore.services.Kernel;
+import eu.unicore.services.Resource;
+import eu.unicore.services.impl.BaseModel;
+import eu.unicore.services.impl.ResourceImpl;
+import eu.unicore.services.security.ACLEntry.MatchType;
 import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.util.configuration.ConfigurationException;
@@ -85,6 +91,8 @@ public class TestSecurityManager {
 		addDefaultConfig(p);
 		Kernel k = new Kernel(p);
 		SecurityManager secMan = k.getSecurityManager();
+		assertNotNull(secMan.getAip());
+		assertNotNull(secMan.getDap());
 		SecurityTokens secTokens = new SecurityTokens();
 		SubjectAttributesHolder res = secMan.establishAttributes(secTokens);
 		Client client = new Client();
@@ -162,10 +170,38 @@ public class TestSecurityManager {
 		st.setConsignorTrusted(true);
 		Client c = secMan.createSecureClient(st);
 		assertEquals("cn=foo", c.getDistinguishedName());
-
 		ActionDescriptor ad = new ActionDescriptor("test", OperationType.read);
 		ResourceDescriptor rd = new ResourceDescriptor("mock", "1", "cn=foo");
 		secMan.checkAuthorisation(c, ad, rd);
+	}
+
+	@Test
+	public void testCheckACL()throws Exception {
+		Properties p = TestConfigUtil.getInsecureProperties();
+		p.setProperty(PREFIX+PROP_CHECKACCESS, "false");
+		p.setProperty(PREFIX+PROP_AIP_PREFIX+"."+"A1.class", 
+				SimpleAIP.class.getName());
+		p.setProperty(PREFIX+PROP_AIP_ORDER, "A1");
+		p.setProperty(PREFIX+PROP_AIP_COMBINING_POLICY, "FIRST_ACCESSIBLE");
+		addDefaultConfig(p);
+		Kernel k = new Kernel(p);
+		SecurityManager secMan = k.getSecurityManager();
+		Resource r = new ResourceImpl(){};
+		BaseModel m = new BaseModel();
+		m.setUniqueID("123");
+		m.setOwnerDN("CN=owner");
+		var acl = new ArrayList<ACLEntry>();
+		m.setAcl(acl);
+		r.setModel(m);
+		SecurityTokens st = new SecurityTokens();
+		st.setUserName("cn=someone_else");
+		st.setConsignorTrusted(true);
+		Client c = secMan.createSecureClient(st);
+		ResourceDescriptor rd = secMan.checkACL(c, OperationType.read, r);
+		assertFalse(rd.isAclCheckOK());
+		acl.add(new ACLEntry(OperationType.read, "cn=someone_else", MatchType.DN));
+		rd = secMan.checkACL(c, OperationType.read, r);
+		assertTrue(rd.isAclCheckOK());
 	}
 
 	private void addDefaultConfig(Properties props) {

@@ -73,18 +73,7 @@ public class Resources {
 		final int max = 16;
 		int idle = 10;
 		ConditionalQueue queue = new ConditionalQueue();
-		executor = new ThreadPoolExecutor(min,max,
-				idle,TimeUnit.SECONDS,
-				queue,
-				new ThreadFactory(){
-        			final AtomicInteger threadNumber = new AtomicInteger(1);
-		        	public Thread newThread(Runnable r) {
-		        		Thread t = new Thread(r);
-		        		t.setName("use-client-exec-"+threadNumber.getAndIncrement());
-		        		return t;
-		        	}
-				});
-		
+		executor = new USEExecutor(min, max, idle, TimeUnit.SECONDS, queue);
 		// This custom queue makes the ThreadPoolExecutor scale the way we want,
 		// while keeping the core threads alive. The queue will queue the task only if
 		// no more workers can be added - otherwise it will reject, which will cause
@@ -93,7 +82,6 @@ public class Resources {
 			return executor.getPoolSize()==max;
 		});
 	}
-
 
 	private static class ConditionalQueue extends LinkedBlockingQueue<Runnable>{
 
@@ -115,6 +103,23 @@ public class Resources {
 	    public boolean offer(Runnable r) {
 	    	return condition.getAsBoolean() ? super.offer(r) : false;
 	    }
-
 	}
+
+	public static class USEExecutor extends ThreadPoolExecutor {
+		public USEExecutor(int min, int max, long idle, TimeUnit timeUnit, ConditionalQueue queue) {
+			super(min, max, idle, timeUnit, queue,
+				new ThreadFactory(){
+				final AtomicInteger threadNumber = new AtomicInteger(1);
+				public Thread newThread(Runnable r) {
+					return new Thread(r, "use-client-exec-"+threadNumber.getAndIncrement());
+				}
+			});
+		}
+
+		@Override
+		public synchronized void execute(Runnable r) {
+			super.execute(r);
+		}
+	}
+
 }

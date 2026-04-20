@@ -420,7 +420,7 @@ public final class SecurityManager {
 		String serviceName = resource.getServiceName();
 		String owner = null;
 		boolean aclCheckPassed = false;
-		if(resource instanceof SecuredResourceImpl){
+		if(resource.getModel() instanceof SecuredResourceModel){
 			SecuredResourceModel secureModel = ((SecuredResourceImpl)resource).getModel();
 			owner = secureModel.getOwnerDN();
 			// user ACL

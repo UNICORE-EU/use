@@ -84,14 +84,7 @@ public class ThreadingServices {
 		final int max = kernelCfg.getIntValue(ContainerProperties.EXEC_MAX_POOL_SIZE);
 		int idle = kernelCfg.getIntValue(ContainerProperties.EXEC_POOL_TIMEOUT);
 		ConditionalQueue queue = new ConditionalQueue(1024);
-		executor = new ThreadPoolExecutor(min, max, idle, TimeUnit.MILLISECONDS,
-			queue,
-			new ThreadFactory(){
-			final AtomicInteger threadNumber = new AtomicInteger(1);
-			public Thread newThread(Runnable r) {
-				return new Thread(r, "use-exec-"+threadNumber.getAndIncrement());
-			}
-		});
+		executor = new USEExecutor(min, max, idle, TimeUnit.MILLISECONDS, queue);
 		// This custom queue makes the ThreadPoolExecutor scale the way we want,
 		// while keeping the core threads alive. The queue will queue the task only if
 		// no more workers can be added - otherwise it will reject, which will cause
@@ -109,8 +102,13 @@ public class ThreadingServices {
 	    	return true;
 	    };
 
-	    public ConditionalQueue(int capacity) {
+	    public ConditionalQueue(int capacity, BooleanSupplier condition) {
 			super(capacity);
+			this.condition = condition;
+		}
+
+	    public ConditionalQueue(int capacity) {
+			this(capacity, () -> { return false; } );
 		}
 
 	    public void setCondition(BooleanSupplier condition) {
@@ -121,6 +119,22 @@ public class ThreadingServices {
 	    public boolean offer(Runnable r) {
 	    	return condition.getAsBoolean() ? super.offer(r) : false;
 	    }
+	}
 
+	public static class USEExecutor extends ThreadPoolExecutor {
+		public USEExecutor(int min, int max, long idle, TimeUnit timeUnit, ConditionalQueue queue) {
+			super(min, max, idle, timeUnit, queue,
+				new ThreadFactory(){
+				final AtomicInteger threadNumber = new AtomicInteger(1);
+				public Thread newThread(Runnable r) {
+					return new Thread(r, "use-exec-"+threadNumber.getAndIncrement());
+				}
+			});
+		}
+
+		@Override
+		public synchronized void execute(Runnable r) {
+			super.execute(r);
+		}
 	}
 }
