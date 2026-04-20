@@ -92,7 +92,6 @@ public class TestSAMLAttributeSource {
 		SAMLAttributeSource sas = getSAMLAttributeSource();
 		assertNotNull(sas);
 		System.out.println(sas+": "+sas.getConnectionStatusMessage());
-		assertEquals(Status.OK, sas.getConnectionStatus());
 		SecurityTokens tokens = new SecurityTokens();
 		tokens.setUserName("CN=Stanisław Lem, C=PL");
 		tokens.setConsignorTrusted(true);
@@ -116,6 +115,10 @@ public class TestSAMLAttributeSource {
 
 		// one extra thingy
 		assertEquals(1, holder.getXacmlAttributes().size());
+
+		// status check is async - wait a bit
+		Thread.sleep(500);
+		assertEquals(Status.OK, sas.getConnectionStatus());
 	}
 
 
