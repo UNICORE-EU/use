@@ -8,11 +8,8 @@ import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.apache.logging.log4j.Logger;
-
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
-import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
 import eu.unicore.security.SecurityTokens;
@@ -20,10 +17,8 @@ import eu.unicore.services.Home;
 import eu.unicore.services.InitParameters;
 import eu.unicore.services.Model;
 import eu.unicore.services.Resource;
-import eu.unicore.services.exceptions.ResourceUnknownException;
 import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.util.AuthZAttributeStore;
-import eu.unicore.util.Log;
 
 /**
  * Implements the security aspects of {@link Resource}. 
@@ -38,8 +33,6 @@ import eu.unicore.util.Log;
  * @author golbi
  */
 public abstract class SecuredResourceImpl implements Resource {
-
-	private static final Logger logger=Log.getLogger(Log.UNICORE, SecuredResourceImpl.class);
 
 	/**
 	 * used for passing an initial ACL (a List of ACLEntry objects) to a service instance
@@ -110,8 +103,6 @@ public abstract class SecuredResourceImpl implements Resource {
 		else{
 			setServerAsOwner();
 		}
-		logger.debug("Owner: {}", ()-> model.getOwnerDN()!=null?
-			X500NameUtils.getReadableForm(model.getOwnerDN()): "n/a" );
 	}
 
 	protected void setServerAsOwner(){
@@ -119,7 +110,6 @@ public abstract class SecuredResourceImpl implements Resource {
 		X509Credential kernelIdentity = getKernel().getContainerSecurityConfiguration().getCredential();
 		if (kernelIdentity != null) {
 			owner = kernelIdentity.getSubjectName();
-			logger.debug("Setting server as owner of {}/{}", getServiceName(), getUniqueID());
 		}
 		setOwner(owner);
 	}
@@ -161,15 +151,13 @@ public abstract class SecuredResourceImpl implements Resource {
 	}
 
 	/**
-	 * Get the DN of the owner of this resource.
-	 * If not set in the security context, this is set to be the server.
-	 * If server has no identity (fully insecure mode) it is set to anonymous identity.
-	 *
+	 * Get the DN of the owner of this resource. 
+	 * This will be the client that created the resource or the server itself.
+	 * 
 	 * @return owner's DN
 	 */
 	public String getOwner(){
-		String ownerDn = model.getOwnerDN();
-		return ownerDn!=null ? ownerDn : Client.ANONYMOUS_CLIENT_DN;
+		return model.getOwnerDN();
 	}
 
 	public boolean isOwnerLevelAccess() {
@@ -206,17 +194,13 @@ public abstract class SecuredResourceImpl implements Resource {
 			final Home h = getKernel().getHome(serviceName);
 			final Collection<String>ids = toRemove.get(serviceName);
 			final Client client = getClient();
-			Runnable r = new AsyncChildDelete(client, h, ids);
-			if(logger.isDebugEnabled()) {
-				String dn = client!=null? client.getDistinguishedName():"n/a";
-				logger.debug("Deleting instances of <{}> for <{}> : {}", 
-						serviceName, dn, ids);
+			if(h!=null && ids!=null && toRemove.size()>0) {
+				Runnable r = new AsyncChildDelete(client, h, ids);
+				getKernel().getExecutorService().execute(r);
 			}
-			getKernel().getContainerProperties().getThreadingServices().getExecutorService().execute(r);
 		}
 		return getModel().removeChildren(children);
 	}
-
 
 	public static class AsyncChildDelete implements Runnable{
 
@@ -242,12 +226,8 @@ public abstract class SecuredResourceImpl implements Resource {
 						r.getKernel().getSecurityManager().checkAuthorisation(client,action,(SecuredResourceImpl)r);
 					}
 					r.destroy();
-				}catch(ResourceUnknownException r){
-					// ignore
-				}catch(AuthorisationException ae){
-					// ignore
 				}catch(Exception ex){
-					Log.logException("Could not destroy "+home.getServiceName()+" "+j, ex, logger);
+					home.getLogger().debug("Could not destroy <{}:{}>: {}", home.getServiceName(), j, ex);
 				}
 			}
 		}

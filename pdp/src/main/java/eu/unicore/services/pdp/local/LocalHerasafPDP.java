@@ -24,7 +24,6 @@ import org.herasaf.xacml.core.simplePDP.SimplePDPConfiguration;
 import org.herasaf.xacml.core.simplePDP.SimplePDPFactory;
 
 import eu.unicore.security.Client;
-import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ISubSystem;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.pdp.request.creator.HerasafXacml2RequestCreator;
@@ -112,19 +111,21 @@ public class LocalHerasafPDP implements UnicoreXPDP, PolicyListener, ISubSystem
 			ResourceDescriptor d) throws Exception
 	{
 		RequestType request = requestMaker.createRequest(c, action, d);	
-		if (log.isDebugEnabled())
-		{
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			RequestMarshaller.marshal(request, baos);
-			log.debug("XACML request:" + baos.toString());
-		}
+		log.debug("XACML request: {}", ()->{
+			try {
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				RequestMarshaller.marshal(request, baos);
+				return baos.toString();
+			}catch(Exception e) {return "";}
+		});
 		ResponseType response = authorize(request);
-		if (log.isDebugEnabled())
-		{
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			ResponseMarshaller.marshal(response, baos);
-			log.debug("XACML response:" + baos.toString());
-		}
+		log.debug("XACML response: {}", ()->{
+			try {
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				ResponseMarshaller.marshal(response, baos);
+				return baos.toString();
+			}catch(Exception e) {return "";}
+		});
 		List<ResultType> results = response.getResults();
 		if (results.size() != 1)
 			throw new Exception("XACML herasAF PDP BUG: got " + results.size() +
@@ -194,9 +195,7 @@ public class LocalHerasafPDP implements UnicoreXPDP, PolicyListener, ISubSystem
 			throw new ConfigurationException("For " + LocalHerasafPDP.class.getName() + 
 					" PDP a configuration file must be defined.");
 		}
-		ContainerProperties baseSettings = k.getContainerProperties();
-		String baseUrl = baseSettings.getContainerURL();
-		initialize(configuration, baseUrl);
+		initialize(configuration, k.getContainerProperties().getContainerURL());
 	}
 
 }

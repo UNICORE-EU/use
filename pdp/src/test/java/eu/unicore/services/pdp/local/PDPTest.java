@@ -2,10 +2,8 @@ package eu.unicore.services.pdp.local;
 
 import org.junit.jupiter.api.BeforeEach;
 
-import eu.unicore.services.pdp.AbstractPDPTest;
 
-
-public class PDPTest extends AbstractPDPTest
+public class PDPTest extends LocalPDPTest
 {
 	@BeforeEach
 	public void setUp() throws Exception

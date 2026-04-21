@@ -41,7 +41,7 @@ public interface Resource extends AutoCloseable {
 	 * returns true if the resource was destroyed
 	 */
 	public boolean isDestroyed();
-	
+
 	/**
 	 * Perform resource-specific clean up operations.
 	 * Specifically, this will be executed:
@@ -51,7 +51,7 @@ public interface Resource extends AutoCloseable {
 	 * </ul>
 	 */
 	public void destroy();
-	
+
 	/**
 	 * the model holds the resource's state
 	 */

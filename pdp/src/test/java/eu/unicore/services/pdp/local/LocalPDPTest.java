@@ -1,22 +1,46 @@
-package eu.unicore.services.pdp;
+package eu.unicore.services.pdp.local;
 
+import static eu.unicore.services.security.ContainerSecurityProperties.PREFIX;
+import static eu.unicore.services.security.ContainerSecurityProperties.PROP_CHECKACCESS;
+import static eu.unicore.services.security.ContainerSecurityProperties.PROP_CHECKACCESS_PDP;
+import static eu.unicore.services.security.ContainerSecurityProperties.PROP_CHECKACCESS_PDPCONFIG;
+import static eu.unicore.services.security.ContainerSecurityProperties.PROP_GATEWAY_ENABLE;
+import static eu.unicore.services.security.ContainerSecurityProperties.PROP_SSL_ENABLED;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.File;
+import java.util.Properties;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
+import eu.unicore.services.Kernel;
+import eu.unicore.services.USEClientProperties;
+import eu.unicore.services.pdp.MockAuthZContext;
 import eu.unicore.services.security.pdp.ActionDescriptor;
 import eu.unicore.services.security.pdp.PDPResult;
 import eu.unicore.services.security.pdp.PDPResult.Decision;
 import eu.unicore.services.security.pdp.UnicoreXPDP;
 import eu.unicore.services.security.util.ResourceDescriptor;
+import eu.unicore.util.httpclient.ClientProperties;
 
 
-public abstract class AbstractPDPTest
+public class LocalPDPTest
 {
 	protected UnicoreXPDP pdp;
+
+	@BeforeEach
+	public void setUp() throws Exception
+	{
+		String f = "src/test/resources/local/pdp2.conf";
+		pdp = new LocalHerasafPDP();
+		((LocalHerasafPDP)pdp).initialize(f, "http://test123.local");
+		((LocalHerasafPDP)pdp).lps.reload(f);
+	}
 
 	@Test
 	public void testAdmin() throws Exception
@@ -150,6 +174,25 @@ public abstract class AbstractPDPTest
 				"CN=Testing Owner,C=XX");
 		PDPResult result = pdp.checkAuthorisation(c, action, des);
 		assertTrue(result.getDecision().equals(Decision.DENY));
+	}
+
+	@Test
+	public void testTriggerReload() throws Exception
+	{
+		Properties props = new Properties();
+		props.setProperty(PREFIX+PROP_SSL_ENABLED, "false");
+		props.setProperty(PREFIX+PROP_GATEWAY_ENABLE, "false");
+		props.setProperty(USEClientProperties.PREFIX+ClientProperties.PROP_MESSAGE_SIGNING_ENABLED, "false");
+		props.setProperty(PREFIX+PROP_CHECKACCESS, "true");
+		props.setProperty(PREFIX+PROP_CHECKACCESS_PDP, LocalHerasafPDP.class.getName());
+		props.setProperty(PREFIX+PROP_CHECKACCESS_PDPCONFIG, "src/test/resources/local/pdp2.conf");
+		String dir = "target/kerneldata";
+		FileUtils.deleteQuietly(new File(dir));
+		props.setProperty("persistence.directory", dir);
+		Kernel k = new Kernel(props);
+		pdp.setKernel(k);
+		System.out.println(((LocalHerasafPDP)pdp).getName()+": "+
+				((LocalHerasafPDP)pdp).getStatusDescription());
 	}
 
 }

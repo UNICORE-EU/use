@@ -4,11 +4,14 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.logging.log4j.Logger;
+
 import eu.unicore.security.Client;
 import eu.unicore.services.exceptions.ResourceNotCreatedException;
 import eu.unicore.services.exceptions.ResourceUnavailableException;
 import eu.unicore.services.exceptions.ResourceUnknownException;
 import eu.unicore.services.persistence.Store;
+import eu.unicore.util.Log;
 
 /**
  * the Home interface offers methods to create, 
@@ -173,4 +176,8 @@ public interface Home extends Runnable, KernelInjectable {
 	 */
 	public default void addPublicResourceID(String id) {}
 
+	// fallback logger
+	public default Logger getLogger() {
+		return Log.getLogger(Log.SERVICES);
+	}
 }

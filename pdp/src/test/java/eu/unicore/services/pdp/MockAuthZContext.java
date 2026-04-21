@@ -10,7 +10,6 @@ import eu.unicore.security.Role;
 import eu.unicore.security.SecurityTokens;
 
 
-
 public class MockAuthZContext
 {
 	public static Client createRequest(String role, String name) throws Exception

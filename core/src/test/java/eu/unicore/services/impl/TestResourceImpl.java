@@ -45,12 +45,15 @@ public class TestResourceImpl {
 		}
 		Kernel kernel = new Kernel(p);
 		ResourceImpl r=new _ResourceImpl();
-		MockHome h=new MockHome();
+		MockHome h = new MockHome();
 		h.setKernel(kernel);
 		h.start("test");
+		kernel.putHome(h);
 		r.setHome(h);
 		r.setKernel(kernel);
 		r.initialise(initMap);
+		assertNotNull(r.getOwner());
+		assertNotNull(r.getModel());
 		return r;
 	}
 	
@@ -164,7 +167,7 @@ public class TestResourceImpl {
 		ResourceImpl r = makeResource(null);
 		r.getModel().addChild("foo", "123");
 		r.getModel().addChild("bar", "456");
-		r.getModel().addChild("bar", "789");
+		r.getModel().addChild("test", "789");
 		assertFalse(r.getModel().getChildren().get("foo").isEmpty());
 		assertFalse(r.getModel().getChildren().get("bar").isEmpty());
 		Collection<String>res = r.deleteChildren(Arrays.asList(new String[]{"123","456","789"}));
@@ -172,6 +175,7 @@ public class TestResourceImpl {
 		assertEquals(3,res.size());
 		assertTrue(r.getModel().getChildren().get("foo").isEmpty());
 		assertTrue(r.getModel().getChildren().get("bar").isEmpty());
+		assertTrue(r.getModel().getChildren().get("test").isEmpty());
 	}
 
 

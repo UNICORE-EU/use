@@ -45,7 +45,7 @@ import eu.unicore.util.Pair;
  */
 public abstract class DefaultHome implements Home {
 
-	protected static final Logger logger = Log.getLogger(Log.UNICORE,DefaultHome.class);    
+	protected static final Logger logger = Log.getLogger(Log.SERVICES, DefaultHome.class);    
 
 	protected Store serviceInstances;
 
@@ -553,5 +553,10 @@ public abstract class DefaultHome implements Home {
 	@Override
 	public void addPublicResourceID(String id) {
 		if(!publicResources.contains(id))publicResources.add(id);
+	}
+	
+	@Override
+	public Logger getLogger() {
+		return logger;
 	}
 }
