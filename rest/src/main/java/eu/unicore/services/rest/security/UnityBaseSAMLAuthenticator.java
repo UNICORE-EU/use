@@ -119,7 +119,7 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 			return client.authenticate(SAMLConstants.NFORMAT_DN, requester, targetUrl);
 		}catch(WebServiceException we) {
 			if(we.getCause()!=null && (we.getCause() instanceof IOException)) {
-				cb.notOK();
+				notOK(Log.getDetailMessage(we));
 			}
 			throw we;
 		}

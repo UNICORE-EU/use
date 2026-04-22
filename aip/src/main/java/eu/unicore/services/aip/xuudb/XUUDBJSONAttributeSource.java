@@ -38,7 +38,7 @@ public class XUUDBJSONAttributeSource extends XUUDBBase<String> implements
 	@Override
 	public SubjectAttributesHolder getAttributes(SecurityTokens tokens,
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException {
-		if(!cb.isOK()) {
+		if(!isOK()) {
 			throw new SubsystemUnavailableException("Attribute source "+name+" unavailable");
 		}
 		SubjectAttributesHolder map = cacheCredentials ?
@@ -67,7 +67,7 @@ public class XUUDBJSONAttributeSource extends XUUDBBase<String> implements
 			String url = ub.build().toString();
 			return makeAuthInfo(new JSONObject(doGet(url)));
 		} catch (Exception e) {
-			cb.notOK();
+			notOK(Log.getDetailMessage(e));
 			Log.logException("Error contacting " + name,e, logger);
 			throw new IOException("Error contacting "+name, e);
 		}

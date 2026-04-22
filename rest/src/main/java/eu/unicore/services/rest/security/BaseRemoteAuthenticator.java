@@ -19,7 +19,6 @@ import eu.unicore.services.KernelInjectable;
 import eu.unicore.services.rest.RESTUtils;
 import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
-import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.services.utils.ExternalConnectorHelper;
 import eu.unicore.util.Log;
 import eu.unicore.util.Pair;
@@ -56,8 +55,6 @@ public abstract class BaseRemoteAuthenticator<T> extends ExternalConnectorHelper
 	// usually, we do not want to use the server's certificate for authn calls,
 	// since it might cause to wrongly authenticate the user as the server
 	protected boolean doTLSAuthN = false;
-
-	protected final CircuitBreaker cb = new CircuitBreaker();
 
 	protected Cache<Object,CacheEntry<T>> cache;
 
@@ -153,7 +150,7 @@ public abstract class BaseRemoteAuthenticator<T> extends ExternalConnectorHelper
 		T auth = cacheHit? ce.auth : null;
 		try{
 			if(auth==null){
-				if(!cb.isOK()) {
+				if(!isOK()) {
 					// have credentials, but can't check
 					return true;
 				}
@@ -286,10 +283,8 @@ public abstract class BaseRemoteAuthenticator<T> extends ExternalConnectorHelper
 			else {
 				ExternalConnectorHelper.checkServerConnect(host, port, 10000);
 			}
-			cb.OK();
 			return new Pair<>(Boolean.TRUE, "OK [connected to "+simpleAddress+"]");
 		} catch (Exception e) {
-			cb.notOK();
 			return new Pair<>(Boolean.FALSE, String.format("Can't contact %s: %s", address, e));
 		}
 	}

@@ -11,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.IAttributeSourceBase;
-import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.services.utils.ExternalConnectorHelper;
 import eu.unicore.util.Log;
 import eu.unicore.util.Pair;
@@ -37,8 +36,6 @@ public abstract class XUUDBBase<T> extends ExternalConnectorHelper implements IA
 	protected Boolean cacheCredentials = Boolean.TRUE;
 	protected Kernel kernel;
 	protected T xuudb;
-
-	protected final CircuitBreaker cb = new CircuitBreaker();
 
 	protected String xuudbURL = null;
 	protected String gcID;
@@ -106,9 +103,7 @@ public abstract class XUUDBBase<T> extends ExternalConnectorHelper implements IA
 			}else {
 				ExternalConnectorHelper.checkServerConnect(host.split("://")[1], port, 10000);
 			}
-			cb.OK();
 		}catch(Exception e) {
-			cb.notOK();
 			msg = Log.getDetailMessage(e);
 			success = Boolean.FALSE;
 		}

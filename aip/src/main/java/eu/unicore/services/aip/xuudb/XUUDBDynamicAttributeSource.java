@@ -13,6 +13,7 @@ import eu.unicore.security.wsutil.client.WSClientFactory;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.IDynamicAttributeSource;
+import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.httpclient.IClientConfiguration;
 import eu.unicore.xuudb.interfaces.IDynamicAttributesPublic;
@@ -87,7 +88,7 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 	@Override
 	public SubjectAttributesHolder getAttributes(Client client,
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException {
-		if(!cb.isOK()) {
+		if(!isOK()) {
 			throw new SubsystemUnavailableException("Attribute source "+name+" is unavailable");
 		}
 		SubjectAttributesHolder map = cacheCredentials ? cache.read(getCacheKey(client)) : null;
@@ -160,7 +161,7 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 				resp = xuudb.getAttributes(outXml);
 			}
 		} catch (Exception e) {
-			cb.notOK();
+			notOK(Log.getDetailMessage(e));
 			throw new IOException("Error contacting "
 					+name + ": " + e.getMessage(),e);
 		}

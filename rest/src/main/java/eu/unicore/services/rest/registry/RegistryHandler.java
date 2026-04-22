@@ -141,7 +141,7 @@ public class RegistryHandler implements ISubSystem {
 		ExternalRegistryClient reg = new ExternalRegistryClient();
 		synchronized(connectors){
 			for(RConnector c: connectors){
-				if(Status.OK==c.getConnectionStatus()) {
+				if(c.isOK()) {
 					reg.addClient(c.createClient());
 				}
 			}

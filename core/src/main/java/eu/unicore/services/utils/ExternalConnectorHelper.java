@@ -33,13 +33,14 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 	private static final Logger logger = Log.getLogger(Log.SERVICES, ExternalSystemConnector.class);
 
 	private String externalSystemName;
-	protected volatile Status status = Status.UNKNOWN;
+	protected volatile Status status = Status.OK;
 	protected volatile String statusMessage = "N/A";
 	private volatile long lastChecked;
 	private final AtomicBoolean checkInProgress = new AtomicBoolean(false);
 	private Callable<Pair<Boolean, String>> checkSupplier;
 	private ExecutorService checkService;
-	
+	private long updateInterval = 60000;
+
 	/**
 	 * The checkSupplier provides the actual status checking code. This check
 	 * should take appropriate precautions as to timeouts, and not hang forever.
@@ -74,12 +75,43 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 		return externalSystemName;
 	}
 
+	protected void setUpdateInterval(long interval) {
+		this.updateInterval = interval;
+	}
+
+	/**
+	 * Check if the service is useable, to the best of our knowledge
+	 */
+	public boolean isOK() {
+		if(Status.OK != status){
+			// if waiting period has passed, we reset the state to "OK"
+			if(!checkInProgress.get() && lastChecked+updateInterval<System.currentTimeMillis()) {
+				status = Status.OK;
+				statusMessage = "OK";
+			}
+		}
+		return Status.OK == status;
+	}
+
+	/**
+	 * allows external users of the class to report a problem with the service
+	 * 
+	 * @param errorMessage
+	 */
+	public void notOK(String errorMessage) {
+		if(!checkInProgress.get()) {
+			status = Status.DOWN;
+			statusMessage = errorMessage;
+			lastChecked = System.currentTimeMillis();
+		}
+	}
+
 	private volatile Future<?> resultGetter = null;
 
 	// triggers a status update, if none is in progress and the waiting period
 	// since the last run has passed
 	protected void runConnectionStatusUpdate() {
-		if (checkInProgress.get() || lastChecked+60000>System.currentTimeMillis()) {
+		if (checkInProgress.get() || lastChecked+updateInterval>System.currentTimeMillis()) {
 			return;
 		}
 		checkInProgress.set(true);
@@ -93,8 +125,7 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 					statusMessage = result.getM2();
 					status = result.getM1()? Status.OK : Status.DOWN;
 				}catch(Exception e) {
-					statusMessage = Log.getDetailMessage(e);
-					status = Status.DOWN;
+					notOK(Log.getDetailMessage(e));
 				}
 				finally {
 					lastChecked = System.currentTimeMillis();
@@ -115,9 +146,7 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 				task.run();
 			}
 		}catch(Exception e) {
-			status = Status.DOWN;
-			statusMessage = Log.getDetailMessage(e);
-			lastChecked = System.currentTimeMillis();
+			notOK(Log.getDetailMessage(e));
 			checkInProgress.set(false);
 			resultGetter = null;
 		}

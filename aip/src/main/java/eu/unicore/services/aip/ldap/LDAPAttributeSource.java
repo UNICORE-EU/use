@@ -31,7 +31,6 @@ import eu.unicore.services.aip.saml.UnicoreAttributesHandler;
 import eu.unicore.services.aip.xuudb.CredentialCache;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
-import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.services.utils.ExternalConnectorHelper;
 import eu.unicore.util.Log;
 import eu.unicore.util.Pair;
@@ -76,8 +75,6 @@ public class LDAPAttributeSource extends ExternalConnectorHelper implements IAtt
 	private String ctxFactory = "com.sun.jndi.ldap.LdapCtxFactory";
 	private CredentialCache cache;
 
-	private final CircuitBreaker cb = new CircuitBreaker();
-
 	@Override
 	public void configure(String name, Kernel kernel) throws ConfigurationException
 	{
@@ -88,7 +85,7 @@ public class LDAPAttributeSource extends ExternalConnectorHelper implements IAtt
 			makeEndpoint();
 		} catch (NamingException e) {
 			Log.logException("Error in LDAP connection.",e,logger);
-			cb.notOK();
+			notOK(Log.getDetailMessage(e));
 		}
 		cache = new CredentialCache();
 		setExternalSystemName(name);
@@ -157,7 +154,7 @@ public class LDAPAttributeSource extends ExternalConnectorHelper implements IAtt
 			SubjectAttributesHolder otherAuthoriserInfo) throws IOException
 	{
 		checkConnection();
-		if(!cb.isOK())
+		if(!isOK())
 			throw new SubsystemUnavailableException("Attribute source "+name+" is temporarily unavailable");
 		String cacheKey = X500NameUtils.getComparableForm(tokens.getEffectiveUserName());
 		SubjectAttributesHolder map = cache.read(cacheKey);
@@ -165,7 +162,7 @@ public class LDAPAttributeSource extends ExternalConnectorHelper implements IAtt
 			try{
 				map=checkDN(tokens);
 			}catch(IOException e) {
-				cb.notOK();
+				notOK(Log.getDetailMessage(e));
 				throw e;
 			}
 			cache.put(tokens.toString(),map);
@@ -279,11 +276,9 @@ public class LDAPAttributeSource extends ExternalConnectorHelper implements IAtt
 		try {
 			testCnx = makeEndpoint();
 			testCnx.search(this.rootdn, "objectClass=*", ctls);
-			cb.OK();
 		} catch(Exception e){
 			msg = Log.getDetailMessage(e);
 			ok = Boolean.FALSE;
-			cb.notOK();
 		}
 		return new Pair<>(ok, msg);
 	}

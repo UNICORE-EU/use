@@ -18,7 +18,6 @@ import eu.unicore.services.aip.saml.conf.IPullConfiguration;
 import eu.unicore.services.aip.saml.conf.PropertiesBasedConfiguration;
 import eu.unicore.services.exceptions.SubsystemUnavailableException;
 import eu.unicore.services.security.IAttributeSource;
-import eu.unicore.services.utils.CircuitBreaker;
 import eu.unicore.services.utils.ExternalConnectorHelper;
 import eu.unicore.util.Log;
 import eu.unicore.util.Pair;
@@ -41,8 +40,6 @@ public class SAMLAttributeSource extends ExternalConnectorHelper implements IAtt
 	private String name;
 
 	private SAMLAttributeFetcher fetcher;
-
-	private final CircuitBreaker cb = new CircuitBreaker();
 
 	@Override
 	public void configure(String name, Kernel kernel) throws ConfigurationException {
@@ -68,12 +65,12 @@ public class SAMLAttributeSource extends ExternalConnectorHelper implements IAtt
 			SubjectAttributesHolder otherAuthoriserInfo)
 					throws IOException
 	{
-		if(!cb.isOK())
+		if(!isOK())
 			throw new SubsystemUnavailableException("Attribute source "+name+" is temporarily unavailable");
 		try {
 			fetcher.fetchAttributes(tokens);
 		}catch(Exception sve) {
-			cb.notOK();
+			notOK(Log.getDetailMessage(sve));
 			throw new IOException(sve);
 		}
 		@SuppressWarnings("unchecked")
@@ -95,11 +92,9 @@ public class SAMLAttributeSource extends ExternalConnectorHelper implements IAtt
 		String msg = "connected to " + fetcher.getServerURL();
 		try {
 			fetcher.fetchAttributes(st);
-			cb.OK();
 		}catch(Exception e) {
 			msg = Log.getDetailMessage(e);
 			ok = Boolean.FALSE;
-			cb.notOK();
 		}
 		return new Pair<>(ok, msg);
 	}
