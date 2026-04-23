@@ -49,7 +49,7 @@ public class LocalRegistryImpl extends RegistryImpl {
 				}
 			}
 		} catch (Exception e) {
-			Log.logException("Could not connect to external Registry!",e,logger);
+			logger.debug("Could not connect to external Registry: {}", ()->Log.getDetailMessage(e));
 		}
 		return requestedTT;
 	}

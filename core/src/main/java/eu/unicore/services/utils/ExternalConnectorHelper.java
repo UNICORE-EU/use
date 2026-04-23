@@ -4,18 +4,17 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.security.cert.X509Certificate;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.impl.CertificateUtils;
@@ -34,10 +33,10 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 
 	private String externalSystemName;
 	protected volatile Status status = Status.OK;
-	protected volatile String statusMessage = "N/A";
-	private volatile long lastChecked;
+	protected volatile String statusMessage = "OK";
+	private volatile long lastUpdate;
 	private final AtomicBoolean checkInProgress = new AtomicBoolean(false);
-	private Callable<Pair<Boolean, String>> checkSupplier;
+	private Supplier<Pair<Boolean, String>> checkSupplier;
 	private ExecutorService checkService;
 	private long updateInterval = 60000;
 
@@ -46,7 +45,7 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 	 * should take appropriate precautions as to timeouts, and not hang forever.
 	 * @param checkSupplier
 	 */
-	public void setCheckSupplier(Callable<Pair<Boolean, String>> checkSupplier) {
+	public void setCheckSupplier(Supplier<Pair<Boolean, String>> checkSupplier) {
 		this.checkSupplier = checkSupplier;
 	}
 
@@ -83,14 +82,14 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 	 * Check if the service is useable, to the best of our knowledge
 	 */
 	public boolean isOK() {
-		if(Status.OK != status){
-			// if waiting period has passed, we reset the state to "OK"
-			if(!checkInProgress.get() && lastChecked+updateInterval<System.currentTimeMillis()) {
-				status = Status.OK;
-				statusMessage = "OK";
-			}
-		}
-		return Status.OK == status;
+		return Status.OK==status || lastUpdate+updateInterval<System.currentTimeMillis();
+	}
+
+	/**
+	 * allows external users of the class to confirm that the service works
+	 */
+	public void setOK() {
+		set(Status.OK, "OK");
 	}
 
 	/**
@@ -99,56 +98,55 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 	 * @param errorMessage
 	 */
 	public void notOK(String errorMessage) {
-		if(!checkInProgress.get()) {
-			status = Status.DOWN;
-			statusMessage = errorMessage;
-			lastChecked = System.currentTimeMillis();
+		set(Status.DOWN, errorMessage);
+	}
+
+	private synchronized void set(Status status, String statusMessage) {
+		Status oldStatus = this.status;
+		this.status = status;
+		this.statusMessage = statusMessage;
+		lastUpdate = System.currentTimeMillis();
+		if(status!=oldStatus) {
+			String msg = Status.OK!=status ? ": "+statusMessage : "";
+			logger.info("<{}> is <{}>{}", externalSystemName, status, msg);
 		}
 	}
 
 	private volatile Future<?> resultGetter = null;
 
 	// triggers a status update, if none is in progress and the waiting period
-	// since the last run has passed
+	// since the last status update has passed
 	protected void runConnectionStatusUpdate() {
-		if (checkInProgress.get() || lastChecked+updateInterval>System.currentTimeMillis()) {
+		if (checkInProgress.get() || lastUpdate+updateInterval>System.currentTimeMillis()) {
 			return;
 		}
 		checkInProgress.set(true);
-		try {
-			Runnable r = () ->
-			{
-				Status oldStatus = status;
-				try {
-					logger.trace("Entering status check for <{}>, async={}", externalSystemName, checkService!=null);
-					Pair<Boolean,String>result = checkSupplier.call();
-					statusMessage = result.getM2();
-					status = result.getM1()? Status.OK : Status.DOWN;
-				}catch(Exception e) {
-					notOK(Log.getDetailMessage(e));
-				}
-				finally {
-					lastChecked = System.currentTimeMillis();
-					checkInProgress.set(false);
-					resultGetter = null;
-				}
-				Level lvl = status!=oldStatus? Level.INFO : Level.TRACE;
-				logger.log(lvl, "<{}> is <{}> ({})", externalSystemName, status, statusMessage);
-			};
-			if(checkService!=null) {
-				resultGetter = checkService.submit(()->{
-					r.run();
-				});
+		Runnable r = () ->
+		{
+			try {
+				logger.trace("Entering status check for <{}>, async={}", externalSystemName, checkService!=null);
+				Pair<Boolean,String>result = checkSupplier.get();
+				set(result.getM1()? Status.OK : Status.DOWN, result.getM2());
 			}
-			else {
-				FutureTask<String> task = new FutureTask<String>(r, "OK");
-				resultGetter = task;
+			finally {
+				resultGetter = null;
+				checkInProgress.set(false);
+			}
+		};
+		if(checkService!=null) {
+			resultGetter = checkService.submit(()->{
+				r.run();
+			});
+		}
+		else {
+			FutureTask<String> task = new FutureTask<String>(r, "OK");
+			resultGetter = task;
+			try{
 				task.run();
+			}finally {
+				resultGetter = null;		
+				checkInProgress.set(false);
 			}
-		}catch(Exception e) {
-			notOK(Log.getDetailMessage(e));
-			checkInProgress.set(false);
-			resultGetter = null;
 		}
 	}
 
@@ -158,7 +156,7 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 		if(checkInProgress.get()) {
 			try{
 				while(resultGetter==null)Thread.sleep(50);
-				if(resultGetter!=null)resultGetter.get(timeout, units);
+				resultGetter.get(timeout, units);
 			}catch(Exception te) {}
 		}
 	}
@@ -198,7 +196,7 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 	 *
 	 * @param securityCfg
 	 * @param url
-	 * @param timeout
+	 * @param timeout in milliseconds
 	 * @return
 	 * @throws Exception
 	 */

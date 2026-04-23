@@ -68,19 +68,20 @@ public class TestUtilities {
 
 	@Test
 	public void testGetGatewayAddress()throws Exception{
-		String found=Utilities.getGatewayAddress(k);
-		assertEquals(gw,found);
+		assertEquals(gw, Utilities.getGatewayAddress(k));
 	}
 	
 	@Test
 	public void testCircuitBreaker() throws Exception {
-		CircuitBreaker cb = new CircuitBreaker(200);
+		CircuitBreaker cb = new CircuitBreaker();
+		assertTrue(cb.isOK());
+		cb = new CircuitBreaker(200);
 		cb.notOK();
-		assertEquals(false,cb.isOK());
+		assertFalse(cb.isOK());
 		Thread.sleep(100);
-		assertEquals(false,cb.isOK());
+		assertFalse(cb.isOK());
 		Thread.sleep(2000);
-		assertEquals(true,cb.isOK());
+		assertTrue(cb.isOK());
 	}
 	
 	@Test

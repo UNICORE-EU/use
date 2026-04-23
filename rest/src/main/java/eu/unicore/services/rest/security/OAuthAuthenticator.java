@@ -25,6 +25,7 @@ import eu.unicore.security.wsutil.client.OAuthBearerTokenOutInterceptor;
 import eu.unicore.services.rest.RESTUtils;
 import eu.unicore.services.restclient.BaseClient;
 import eu.unicore.services.restclient.IAuthCallback;
+import eu.unicore.services.restclient.RESTException;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
@@ -122,7 +123,13 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 					httpMessage.addHeader("Authorization", "Bearer "+token);
 				}
 			};
-			userData = new BaseClient(address, clientCfg, cb).getJSON();
+			try{
+				userData = new BaseClient(address, clientCfg, cb).getJSON();
+			}catch(RESTException re) {
+				if(re.getStatus()>=500) {
+					notOK(re.getErrorMessage());
+				}
+			}
 		}
 		logger.debug("User data: {}", userData);
 		return userData;

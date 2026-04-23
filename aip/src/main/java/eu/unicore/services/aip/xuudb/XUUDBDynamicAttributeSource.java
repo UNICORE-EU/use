@@ -100,6 +100,7 @@ public class XUUDBDynamicAttributeSource extends XUUDBBase<IDynamicAttributesPub
 				}
 			}
 		}
+		setOK();
 		return map;
 	}
 

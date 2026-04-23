@@ -60,6 +60,7 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 				}
 			}
 		}
+		setOK();
 		return map;
 	}
 

@@ -49,6 +49,7 @@ public class XUUDBJSONAttributeSource extends XUUDBBase<String> implements
 				cache.put(tokens.getEffectiveUserName(), map);
 			}
 		}
+		setOK();
 		return map;
 	}
 

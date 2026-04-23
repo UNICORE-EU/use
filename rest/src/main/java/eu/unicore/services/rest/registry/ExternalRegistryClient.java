@@ -5,18 +5,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import eu.unicore.services.ExternalSystemConnector.Status;
 import eu.unicore.services.registry.IRegistry;
-import eu.unicore.services.restclient.RESTException;
 import eu.unicore.services.restclient.RegistryClient;
-import eu.unicore.services.restclient.Resources;
 import eu.unicore.util.Log;
 
 /**
@@ -40,6 +34,14 @@ public class ExternalRegistryClient implements IRegistry {
 		clients.add(client);
 	}
 
+	/**
+	 * Adds the entry to all available external registries.
+	 * This method will return the requested refresh instant,
+	 * returned by any of the external registries, or a default
+	 * of 5 minutes from now in case no external registry can be contacted.  
+	 * 
+	 * @return refresh instant
+	 */
 	public Calendar addRegistryEntry(Map<String,String> content){
 		long refreshIn = doAddRegistryEntry(content);
 		Calendar c = Calendar.getInstance();
@@ -47,13 +49,10 @@ public class ExternalRegistryClient implements IRegistry {
 		return c;
 	}
 
-	/**
-	 * calls "add" on all configured external registries<br>
+	/*
 	 * This method will return the requested time until refresh (in seconds)
 	 * returned by any of the external registries, or a default of 5 minutes in case 
 	 * no external registry can be contacted.  
-	 * 
-	 * @return refresh time in seconds
 	 */
 	private long doAddRegistryEntry(Map<String,String> content){
 		long refreshIn = 300;
@@ -85,6 +84,9 @@ public class ExternalRegistryClient implements IRegistry {
 	 * is applied
 	 */
 	public List<Map<String,String>> listEntries() throws IOException {
+		if(clients.size()==0) {
+			throw new IOException("None of the configured registries is available.");
+		}
 		List<Map<String,String>> result = new ArrayList<>();
 		StringBuilder errors = new StringBuilder();
 		for(RegistryClient c: clients){
@@ -102,71 +104,6 @@ public class ExternalRegistryClient implements IRegistry {
 		}
 		if(errors.length()>0)throw new IOException(errors.toString());
 		return result;
-	}
-
-	private String statusMessage = "N/A";
-	private Status status = Status.DOWN;
-	private long lastChecked = 0;
-
-	/**
-	 * check the connection to the services. If no service 
-	 * replies within the given timeout, returns <code>false</code>
-	 */
-	private void checkConnection(){
-		if(lastChecked+60000>System.currentTimeMillis())
-			return;
-
-		final StringBuffer sb = new StringBuffer();
-		boolean result = false;
-		for(final RegistryClient c: clients){
-			Callable<String>task=new Callable<>(){
-				public String call()throws Exception{
-					try {
-						c.getJSON();
-						return "OK";
-					}catch(RESTException e) {
-						return e.getErrorMessage();
-					}catch(Exception e) {
-						return Log.createFaultMessage("", e);
-					}
-				}
-			};
-			String res = compute(task, 5000);
-			boolean currentOK = res!=null && "OK".equals(res);
-			if(!currentOK){
-				sb.append("[").append(c.getURL()+": "+res);
-				sb.append("] ");
-			}
-			result=result || currentOK;
-		}
-		if(result) {
-			status = Status.OK;
-			statusMessage = "OK";
-		}
-		else {
-			status = Status.DOWN;
-			statusMessage = sb.toString();
-		}
-		lastChecked = System.currentTimeMillis();
-	}
-
-	public Status getConnectionStatus(){
-		checkConnection();
-		return status;		
-	}
-
-	public String getConnectionStatusMessage(){
-		checkConnection();
-		return statusMessage;	
-	}
-
-	private String compute(Callable<String>task, int timeout){
-		try{
-			Future<String> f = Resources.getExecutorService().submit(task);
-			return f.get(timeout, TimeUnit.MILLISECONDS);
-		}catch(Exception ex){
-			return "ERROR";
-		}
 	}
 
 }

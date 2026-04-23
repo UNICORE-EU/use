@@ -155,6 +155,7 @@ public abstract class BaseRemoteAuthenticator<T> extends ExternalConnectorHelper
 					return true;
 				}
 				auth = performAuth(clientCfg);
+				setOK();
 				long expires = getExpiryTime(auth);
 				cache.put(cacheKey, new CacheEntry<T>(auth,expires));
 			}
@@ -283,7 +284,7 @@ public abstract class BaseRemoteAuthenticator<T> extends ExternalConnectorHelper
 			else {
 				ExternalConnectorHelper.checkServerConnect(host, port, 10000);
 			}
-			return new Pair<>(Boolean.TRUE, "OK [connected to "+simpleAddress+"]");
+			return new Pair<>(Boolean.TRUE, "OK");
 		} catch (Exception e) {
 			return new Pair<>(Boolean.FALSE, String.format("Can't contact %s: %s", address, e));
 		}

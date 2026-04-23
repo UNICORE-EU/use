@@ -49,7 +49,7 @@ public abstract class XUUDBBase<T> extends ExternalConnectorHelper implements IA
 		logger.info("Attribute source '{}': connecting to <{}>", name, getXUUDBUrl());
 		initCache();
 		xuudb = createEndpoint();
-		setExternalSystemName(name +" attribute source");
+		setExternalSystemName(name);
 		setCheckService(kernel.getContainerProperties().getThreadingServices().getExecutorService());
 		setCheckSupplier(()->checkConnection());
 	}
@@ -94,7 +94,7 @@ public abstract class XUUDBBase<T> extends ExternalConnectorHelper implements IA
 
 	protected Pair<Boolean, String> checkConnection() {
 		final boolean isSecure = getXUUDBUrl().toLowerCase().startsWith("https");
-		String msg = "connected to " + getXUUDBUrl();
+		String msg = "OK";
 		Boolean success = Boolean.TRUE;
 		try{
 			if(isSecure) {
@@ -113,11 +113,6 @@ public abstract class XUUDBBase<T> extends ExternalConnectorHelper implements IA
 	@Override
 	public String getName() {
 		return name;
-	}
-
-	@Override
-	public String getExternalSystemName(){
-		return name +" attribute source";
 	}
 
 	protected String doGet(String url) throws IOException {

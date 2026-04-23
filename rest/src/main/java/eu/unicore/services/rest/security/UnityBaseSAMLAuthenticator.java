@@ -51,7 +51,7 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 	@Override
 	protected void finalizeInit(){
 		super.finalizeInit();
-		setExternalSystemName("Unity @ "+simpleAddress);
+		setExternalSystemName("Unity "+simpleAddress);
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package eu.unicore.services.rest.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -31,6 +32,7 @@ import eu.unicore.services.restclient.IAuthCallback;
 import eu.unicore.services.security.ContainerSecurityProperties;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.services.server.JettyServer;
+import eu.unicore.services.utils.ExternalConnectorHelper;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -96,6 +98,10 @@ public class TestX509Authenticator {
 		assertTrue(t.isConsignorTrusted());
 	}
 
+	@Test
+	public void testGetPeerCert() throws Exception {
+		assertNotNull(ExternalConnectorHelper.getSSLPeer(kernel.getClientConfiguration(), url, 1000));
+	}
 
 	public static class MyApplication extends Application {
 		@Override

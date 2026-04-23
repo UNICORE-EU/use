@@ -136,7 +136,7 @@ public class RegistryHandler implements ISubSystem {
 	 * get a client for talking to the external registries
 	 * @return {@link ExternalRegistryClient}
 	 */ 
-	public ExternalRegistryClient getExternalRegistryClient()throws Exception{
+	public ExternalRegistryClient getExternalRegistryClient(){
 		if(!usesExternalRegistry())return null;
 		ExternalRegistryClient reg = new ExternalRegistryClient();
 		synchronized(connectors){
@@ -185,16 +185,15 @@ public class RegistryHandler implements ISubSystem {
 	}
 
 	public void updatePublicKeys(){
+		ExternalRegistryClient erc = getExternalRegistryClient();
+		if(erc==null)return;
 		Status oldStatus = status;
 		try{
-			ExternalRegistryClient erc = getExternalRegistryClient();
-			if(erc==null)return;
 			doUpdateKeys(erc);
-			status = Status.OK;
 		}catch(Exception ex){
 			status = Status.DOWN;
 			if(status!=oldStatus) {
-				Log.logException("Error updating public keys from external registry", ex, logger);
+				logger.error("Could not read public keys from external registry: {]", Log.getDetailMessage(ex));
 			}
 		}
 	}
@@ -211,6 +210,7 @@ public class RegistryHandler implements ISubSystem {
 				}
 			}catch(Exception ex){}
 		}
+		status = Status.OK;
 	}
 
 	private X509Certificate parsePEM(String pem) throws Exception {
