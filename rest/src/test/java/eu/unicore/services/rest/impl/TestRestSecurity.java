@@ -191,6 +191,7 @@ public class TestRestSecurity {
 		IAuthCallback auth = new SSHKey("demouser", new File("src/test/resources/id_ed25519"),
 				new PasswordSupplierImpl("test123".toCharArray()));
 		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
+		bc.getUserPreferences().put("role", "user");
 		try(ClassicHttpResponse response=bc.get(ContentType.TEXT_PLAIN)){
 			assertEquals(200, response.getCode());
 			String token = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
@@ -198,6 +199,7 @@ public class TestRestSecurity {
 			System.out.println(t.toString(2));
 			assertEquals("CN=Demo User, O=UNICORE, C=EU", t.get("sub"));
 			assertTrue(t.getLong("exp")>=exp);
+			assertNotNull(t.get("preferences"));
 		}
 	}
 

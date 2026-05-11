@@ -27,6 +27,7 @@ import eu.unicore.services.ISubSystem;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.AuthNHandler;
+import eu.unicore.services.restclient.UserPreferences;
 import eu.unicore.services.restclient.jwt.JWTUtils;
 import eu.unicore.services.restclient.utils.UnitParser;
 import eu.unicore.services.security.AuthAttributesCollector;
@@ -82,8 +83,15 @@ public class ApplicationBaseResource extends RESTRendererBase {
 			try {
 				SecurityTokens tokens = AuthZAttributeStore.getTokens();
 				BasicAttributeHolder attr = (BasicAttributeHolder)tokens.getContext().get(AuthAttributesCollector.ATTRIBUTES);
-				if(attr.uid!=null) {
+				if(attr!=null && attr.uid!=null) {
 					claims.put("uid", attr.uid);
+				}
+				Map<String,String[]> prefs = tokens.getUserPreferences();
+				UserPreferences up = new UserPreferences();
+				up.parse(prefs);
+				String enc = up.getEncoded();
+				if(enc!=null && enc.length()>0) {
+					claims.put("preferences", enc);
 				}
 			}catch(Exception e) {}
 			if(Boolean.parseBoolean(renewable)) {

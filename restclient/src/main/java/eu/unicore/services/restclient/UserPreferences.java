@@ -1,5 +1,7 @@
 package eu.unicore.services.restclient;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,5 +68,22 @@ public class UserPreferences {
 	
 	public String get(String name) {
 		return prefs.get(name);
+	}
+
+	private static final Collection<String> _singleValued = Arrays.asList( "xlogin", "role", "group" );
+
+	// parse the preferences in the format stored in SecurityTokens
+	public void parse(Map<String, String[]>preferences) {
+		for(Map.Entry<String, String[]> e: preferences.entrySet()) {
+			String k = e.getKey();
+			String[] v= e.getValue();
+			if(_singleValued.contains(k)) {
+				if("xlogin".equals(k))k="uid";
+				prefs.put(k, v[0]);
+			}
+			else if("supplementaryGroups".equals(k)) {
+				setSupplementaryGroups(v);
+			}
+		}
 	}
 }

@@ -3,6 +3,7 @@ package eu.unicore.services.restclient;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONObject;
@@ -27,7 +28,30 @@ public class TestUtils {
 		p.setSupplementaryGroups("users", "proj1");
 		assertEquals("users+proj1", p.getSupplementaryGroups());
 	}
-	
+
+	@Test
+	public void testUserPreferences2(){
+		UserPreferences p = new UserPreferences();
+		assertEquals("", p.getEncoded());
+		Map<String,String[]>_p = new HashMap<>();
+		_p.put("xlogin", new String[]{"test"});
+		p.parse(_p);
+		assertEquals("test", p.getUid());
+		assertEquals("uid:test", p.getEncoded());
+		_p.put("role", new String[]{"admin"});
+		p.parse(_p);
+		assertEquals("admin", p.getRole());
+		assertTrue(p.getEncoded().contains(("uid:test")));
+		assertTrue(p.getEncoded().contains(("role:admin")));
+		assertTrue(p.getEncoded().contains((",")));
+		_p.put("group", new String[]{"hpc"});
+		p.parse(_p);
+		assertEquals("hpc", p.getGroup());
+		_p.put("supplementaryGroups", new String[]{"users","proj1"});
+		p.parse(_p);
+		assertEquals("users+proj1", p.getSupplementaryGroups());
+	}
+
 	@Test
 	public void testRESTException() {
 		RESTException re = new RESTException(500, "Server error", "some more details");
