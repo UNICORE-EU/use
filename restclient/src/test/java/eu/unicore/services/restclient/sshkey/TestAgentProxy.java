@@ -48,7 +48,6 @@ public class TestAgentProxy {
 		SSHAgentProxy ap = new SSHAgentProxy("./target/SSH_AGENT");
 		assertTrue(ap.isAvailable());
 		Identity i = new Identity("this is the blob".getBytes(),"some comment".getBytes());
-		agent.identities.add(i);
 		byte[] sig = ap.sign(i.getBlob(), "mock data".getBytes());
 		assertEquals("mock signature", new String(sig));
 	}
