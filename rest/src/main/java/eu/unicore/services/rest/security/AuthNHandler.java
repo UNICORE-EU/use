@@ -196,6 +196,12 @@ public class AuthNHandler implements ContainerRequestFilter {
 				tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, bah);
 				logger.debug("Attributes from ETD token: {}", bah);
 			}
+			String userprefs = payload.optString("preferences", null);
+			if(userprefs!=null) {
+				parsePrefsItem(userprefs, tokens);
+				// prevent overriding these
+				tokens.getUserPreferences().put("__fixed__", new String[] {"true"});
+			}
 		}
 	}
 
@@ -240,15 +246,22 @@ public class AuthNHandler implements ContainerRequestFilter {
 	 *  
 	 */
 	private void handleUserPreferences(Message message, SecurityTokens tokens){
+		if(tokens.getUserPreferences().get("__fixed__")!=null) {
+			return;
+		}
 		Enumeration<String>headers = CXFUtils.getServletRequest(message).getHeaders(USER_PREFERENCES_HEADER);
-		Map<String, String[]> preferences = tokens.getUserPreferences();
 		while(headers.hasMoreElements()){
 			String header = headers.nextElement();
-			for(String value: header.split(",")){
-				String[]tok = value.split(":");
-				if(tok.length!=2)throw new AuthorisationException("Invalid format for user preference: "+header);
-				handlePreference(tok[0], tok[1], preferences);
-			}
+			parsePrefsItem(header, tokens);
+		}
+	}
+
+	private void parsePrefsItem(String prefs, SecurityTokens tokens) {
+		Map<String, String[]> preferences = tokens.getUserPreferences();
+		for(String value: prefs.split(",")){
+			String[]tok = value.split(":");
+			if(tok.length!=2)throw new AuthorisationException("Invalid format for user preference: "+prefs);
+			handlePreference(tok[0], tok[1], preferences);
 		}
 	}
 

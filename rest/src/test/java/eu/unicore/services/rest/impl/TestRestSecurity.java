@@ -192,15 +192,26 @@ public class TestRestSecurity {
 				new PasswordSupplierImpl("test123".toCharArray()));
 		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
 		bc.getUserPreferences().put("role", "user");
+		String token = null;
 		try(ClassicHttpResponse response=bc.get(ContentType.TEXT_PLAIN)){
 			assertEquals(200, response.getCode());
-			String token = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+			token = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 			JSONObject t = JWTUtils.getPayload(token);
 			System.out.println(t.toString(2));
 			assertEquals("CN=Demo User, O=UNICORE, C=EU", t.get("sub"));
 			assertTrue(t.getLong("exp")>=exp);
 			assertNotNull(t.get("preferences"));
 		}
+
+		final String _t = token;
+		auth = (msg) -> {
+			msg.addHeader("Authorization", "Bearer "+_t);
+		};
+		bc = new BaseClient(url+"/"+sName+"/User", kernel.getClientConfiguration(), auth);
+		JSONObject reply = bc.getJSON();
+		System.out.println("Service reply: "+reply.toString(2));
+		assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
+		assertEquals("ETD", reply.getString("auth_method"));
 	}
 
 	@Test

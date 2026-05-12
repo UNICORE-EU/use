@@ -86,4 +86,11 @@ public class SSHUtils {
 		return md.digest();
 	}
 
+	public static String getSystemProperty(String key, String def) {
+		String p = System.getProperty(key);
+		if(p==null) {
+			p = System.getenv().getOrDefault(key, def);
+		}
+		return p;
+	}
 }
