@@ -1,11 +1,15 @@
 package eu.unicore.services.restclient.sshkey;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.util.Base64;
+import java.util.StringTokenizer;
 
 import org.apache.commons.io.FileUtils;
+import org.bouncycastle.util.Arrays;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -35,6 +39,7 @@ public class TestAgentProxy {
 	public void testIdentities() throws Exception {
 		SSHAgentProxy ap = new SSHAgentProxy("./target/SSH_AGENT");
 		assertTrue(ap.isAvailable());
+		agent.identities.clear();
 		agent.identities.add(new Identity("this is the blob".getBytes(),"some comment".getBytes()));
 		Identity[] ids = ap.getIdentities();
 		assertEquals(1,  ids.length);
@@ -47,9 +52,34 @@ public class TestAgentProxy {
 	public void testSign() throws Exception {
 		SSHAgentProxy ap = new SSHAgentProxy("./target/SSH_AGENT");
 		assertTrue(ap.isAvailable());
+		agent.keyFile = null;
 		Identity i = new Identity("this is the blob".getBytes(),"some comment".getBytes());
 		byte[] sig = ap.sign(i.getBlob(), "mock data".getBytes());
 		assertEquals("mock signature", new String(sig));
+	}
+
+	@Test
+	public void testAgent() throws Exception {
+		String keyFile = "src/test/resources/ssh/id_ed25519";
+		agent.keyFile = keyFile;
+		String pubkey = FileUtils.readFileToString(new File(keyFile+".pub"), "UTF-8");
+		StringTokenizer st = new StringTokenizer(pubkey);
+		st.nextToken(); // ignored
+		String base64 = st.nextToken();
+		byte[] blob = Base64.getDecoder().decode(base64);
+		byte[] comment = st.nextToken().getBytes();
+		Identity id = new Identity(blob, comment);
+		agent.identities.clear();
+		agent.identities.add(id);
+		SSHAgentProxy ap = new SSHAgentProxy("./target/SSH_AGENT");
+		assertTrue(ap.isAvailable());
+		SSHAgent a = new SSHAgent(ap);
+		a.setVerbose(false);
+		a.selectIdentity(keyFile);
+		assertNotNull(a.id);
+		assertTrue(Arrays.areEqual(a.id.getBlob(), id.getBlob()));
+		assertEquals("ssh-ed25519", a.getAlgorithm());
+		assertNotNull(a.getSigner());
 	}
 
 }

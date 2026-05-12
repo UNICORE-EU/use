@@ -45,12 +45,16 @@ public class SSHAgent {
 	Identity id = null;
 
 	public SSHAgent() throws Exception {
-		ap = SSHAgentProxy.get();
+		this(SSHAgentProxy.get());
+	}
+
+	SSHAgent(SSHAgentProxy ap) throws Exception {
+		this.ap = ap;
 		if(!ap.isAvailable()) {
 			throw new IOException("SSH-Agent is not available");
 		}
 	}
-
+	
 	/**
 	 * choose the identity - if not available in the agent, an exception is thrown
 	 *
