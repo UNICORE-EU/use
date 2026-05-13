@@ -1,21 +1,15 @@
 package eu.unicore.services.restclient.sshkey;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.util.Base64;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.commons.io.FileUtils;
-import org.bouncycastle.asn1.ASN1Encoding;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.util.Arrays;
 
 import com.nimbusds.jose.JOSEException;
@@ -104,14 +98,6 @@ public class SSHAgent {
 		int offset = 8 + description.length();
 		byte[] signature = new byte[rawSignature.length-offset];
 		System.arraycopy(rawSignature, offset, signature, 0, signature.length);
-		if(description.contains("ssh-dss")){
-			try{
-				signature = dsa_convertToDER(signature);
-			}
-			catch(IOException e){
-				throw new GeneralSecurityException(e);
-			}
-		}
 		return signature;
 	}
 
@@ -134,30 +120,15 @@ public class SSHAgent {
 		return new String(dis.readNBytes(len));
 	}
 
-	private void assertIdentity() throws IOException, GeneralSecurityException {
+	void assertIdentity() throws IOException, GeneralSecurityException {
 		if(id==null) {
 			Identity[] ids = ap.getIdentities();
 			if(ids.length>1 && verbose) {
-				System.err.println("NOTE: more than one identity in SSH agent -"
-						+ " you might want to use '--identity <path_to_private_key>'");
+				System.err.println("NOTE: more than one identity is available in the SSH agent - using the first one.");
 			}
 			if(ids.length==0)throw new GeneralSecurityException("No identities loaded in SSH agent!");
 			id = ids[0];
 		}
-	}
-	// signature DSA format
-	private byte[] dsa_convertToDER(byte[] rawSignature) throws IOException {
-		byte[] val = new byte[20];
-		System.arraycopy(rawSignature, 0, val, 0, 20);
-		BigInteger r = new BigInteger(val);
-		System.arraycopy(rawSignature, 20, val, 0, 20);
-		BigInteger s = new BigInteger(val);
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ASN1OutputStream os = ASN1OutputStream.create(bos, ASN1Encoding.DER);
-		DERSequence seq = new DERSequence(new ASN1Integer[]{new ASN1Integer(r),new ASN1Integer(s)});
-		os.writeObject(seq);
-		os.close();
-		return bos.toByteArray();
 	}
 
 	public static boolean isAgentAvailable(){

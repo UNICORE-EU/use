@@ -51,14 +51,14 @@ public class TestSSHAgent {
 
 	@Test
 	public void testSSHAgent() throws Exception {
-		SSHAgent a = setupAgent();
+		SSHAgent a = setupAgent(false);
 		assertEquals("ssh-ed25519", a.getAlgorithm());
 		assertNotNull(a.getSigner());
 	}
 	
 	@Test
 	public void testSSHAgentKey() throws Exception {
-		SSHAgent a = setupAgent();
+		SSHAgent a = setupAgent(true);
 		SSHAgentKey auth = new SSHAgentKey("nobody", a);
 		HttpGet get = new HttpGet("https://foo.com");
 		auth.addAuthenticationHeaders(get);
@@ -66,7 +66,7 @@ public class TestSSHAgent {
 		assertTrue(auth.tokenStillValid());
 	}
 	
-	private SSHAgent setupAgent() throws Exception {
+	private SSHAgent setupAgent(boolean select) throws Exception {
 		String keyFile = "src/test/resources/ssh/id_ed25519";
 		agent.keyFile = keyFile;
 		agent.pass = "test123";
@@ -83,7 +83,8 @@ public class TestSSHAgent {
 		assertTrue(ap.isAvailable());
 		SSHAgent a = new SSHAgent(ap);
 		a.setVerbose(false);
-		a.selectIdentity(keyFile);
+		if(select)a.selectIdentity(keyFile);
+		else a.assertIdentity();
 		assertNotNull(a.id);
 		assertTrue(Arrays.areEqual(a.id.getBlob(), id.getBlob()));
 		return a;
