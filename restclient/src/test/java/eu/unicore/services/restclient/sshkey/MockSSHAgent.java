@@ -18,12 +18,14 @@ import java.util.List;
 
 import eu.unicore.services.restclient.sshkey.SSHAgentProxy.Identity;
 
+// mock but it actually kind of works for the two features that we use
 public class MockSSHAgent {
 
 	private final String path;
 	private volatile boolean stopped = false;
 	List<Identity> identities = new ArrayList<>();
-	String keyFile = null;
+	volatile String keyFile = null;
+	volatile String pass = null;
 
 	public MockSSHAgent(String path) {
 		this.path = path;
@@ -99,14 +101,11 @@ public class MockSSHAgent {
 	}
 	
 	private byte[] doSign(byte[] data) throws Exception {
-		if(keyFile==null) {
-			return "mock signature".getBytes();
-		}
-		PrivateKey pk = SSHUtils.readPrivateKey(new File(keyFile), ()-> "test123".toCharArray());
+		final char[]password = pass.toCharArray();
+		PrivateKey pk = SSHUtils.readPrivateKey(new File(keyFile), ()->password);
 		Signature sig = Signature.getInstance(pk.getAlgorithm());
 		sig.initSign(pk);
 		sig.update(data);
-		System.err.println("Signing with <"+keyFile+">");
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 		byte[] algo = "ssh-ed25519".getBytes();

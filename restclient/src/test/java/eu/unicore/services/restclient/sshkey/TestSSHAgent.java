@@ -9,6 +9,7 @@ import java.util.Base64;
 import java.util.StringTokenizer;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.bouncycastle.util.Arrays;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,7 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.restclient.sshkey.SSHAgentProxy.Identity;
 
-public class TestAgentProxy {
+public class TestSSHAgent {
 
 	static MockSSHAgent agent;
 
@@ -49,19 +50,26 @@ public class TestAgentProxy {
 	}
 
 	@Test
-	public void testSign() throws Exception {
-		SSHAgentProxy ap = new SSHAgentProxy("./target/SSH_AGENT");
-		assertTrue(ap.isAvailable());
-		agent.keyFile = null;
-		Identity i = new Identity("this is the blob".getBytes(),"some comment".getBytes());
-		byte[] sig = ap.sign(i.getBlob(), "mock data".getBytes());
-		assertEquals("mock signature", new String(sig));
+	public void testSSHAgent() throws Exception {
+		SSHAgent a = setupAgent();
+		assertEquals("ssh-ed25519", a.getAlgorithm());
+		assertNotNull(a.getSigner());
 	}
-
+	
 	@Test
-	public void testAgent() throws Exception {
+	public void testSSHAgentKey() throws Exception {
+		SSHAgent a = setupAgent();
+		SSHAgentKey auth = new SSHAgentKey("nobody", a);
+		HttpGet get = new HttpGet("https://foo.com");
+		auth.addAuthenticationHeaders(get);
+		assertNotNull(get.getHeader("Authorization"));
+		assertTrue(auth.tokenStillValid());
+	}
+	
+	private SSHAgent setupAgent() throws Exception {
 		String keyFile = "src/test/resources/ssh/id_ed25519";
 		agent.keyFile = keyFile;
+		agent.pass = "test123";
 		String pubkey = FileUtils.readFileToString(new File(keyFile+".pub"), "UTF-8");
 		StringTokenizer st = new StringTokenizer(pubkey);
 		st.nextToken(); // ignored
@@ -78,8 +86,7 @@ public class TestAgentProxy {
 		a.selectIdentity(keyFile);
 		assertNotNull(a.id);
 		assertTrue(Arrays.areEqual(a.id.getBlob(), id.getBlob()));
-		assertEquals("ssh-ed25519", a.getAlgorithm());
-		assertNotNull(a.getSigner());
+		return a;
 	}
-
+	
 }
