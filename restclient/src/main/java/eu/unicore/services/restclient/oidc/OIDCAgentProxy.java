@@ -19,9 +19,17 @@ public class OIDCAgentProxy {
 	public static boolean isConnectorAvailable(){
 		return System.getenv(OIDC_SOCK)!=null;
 	}
+	private final String path;
+	
+	OIDCAgentProxy(String path){
+		this.path = path;
+	}
+	
+	public OIDCAgentProxy(){
+		this(System.getenv(OIDC_SOCK));
+	}
 
 	public String send(String data) throws Exception {
-		String path = System.getenv(OIDC_SOCK);
 		UnixDomainSocketAddress unixSocketAddress = UnixDomainSocketAddress.of(path);
 		try(SocketChannel channel =  SocketChannel.open(unixSocketAddress);
 		    PrintWriter w = new PrintWriter(Channels.newOutputStream(channel));
@@ -33,5 +41,9 @@ public class OIDCAgentProxy {
         	r.read(result);
         	return result.flip().toString();
         }
+		catch(Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 }
