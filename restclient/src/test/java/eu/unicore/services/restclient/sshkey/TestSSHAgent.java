@@ -59,7 +59,7 @@ public class TestSSHAgent {
 	@Test
 	public void testSSHAgentKey() throws Exception {
 		SSHAgent a = setupAgent(true);
-		SSHAgentKey auth = new SSHAgentKey("nobody", a);
+		SSHAgentKeyAuthN auth = new SSHAgentKeyAuthN("nobody", a);
 		HttpGet get = new HttpGet("https://foo.com");
 		auth.addAuthenticationHeaders(get);
 		assertNotNull(get.getHeader("Authorization"));

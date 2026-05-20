@@ -17,6 +17,7 @@ import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
 import eu.unicore.security.Queue;
 import eu.unicore.security.Role;
+import eu.unicore.security.SecurityException;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.security.Xlogin;

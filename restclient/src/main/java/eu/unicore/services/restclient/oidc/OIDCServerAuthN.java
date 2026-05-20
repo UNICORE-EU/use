@@ -13,38 +13,35 @@ import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.utils.Base64;
 import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.HttpMessage;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.json.JSONObject;
 
+import eu.unicore.security.canl.PasswordCallback;
 import eu.unicore.security.wsutil.client.authn.FilePermHelper;
-import eu.unicore.services.restclient.IAuthCallback;
 import eu.unicore.services.restclient.oidc.OIDCProperties.AuthMode;
-import eu.unicore.services.restclient.utils.UserLogger;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.HttpUtils;
 import eu.unicore.util.httpclient.IClientConfiguration;
 
 /**
  * Gets a Bearer token from an OIDC server.
+ * Handles refresh tokens.
  *
  * @author schuller
  */
-public class OIDCServerAuthN implements IAuthCallback {
+public class OIDCServerAuthN extends TokenBasedAuthN {
 
 	private final OIDCProperties properties;
 
 	private final IClientConfiguration clientConfig;
 
-	String token;
+	PasswordCallback pwdCallback;
+
+	PasswordCallback otpCallback;
 
 	String refreshToken;
-
-	long lastRefresh;
-
-	private UserLogger log = new UserLogger() {};
 
 	public OIDCServerAuthN(OIDCProperties properties, IClientConfiguration clientConfig) 
 	{
@@ -53,20 +50,12 @@ public class OIDCServerAuthN implements IAuthCallback {
 		loadRefreshToken();
 	}
 
-	@Override
-	public void setLogger(UserLogger log) {
-		this.log = log;
+	public void setPasswordCallback(PasswordCallback pwdCallback) {
+		this.pwdCallback = pwdCallback;
 	}
 
-	@Override
-	public void addAuthenticationHeaders(HttpMessage httpMessage) throws Exception {
-		if(refreshToken!=null) {
-			refreshTokenIfNecessary();
-		}
-		if(token==null) {
-			retrieveToken();
-		}
-		httpMessage.setHeader("Authorization", "Bearer "+token);
+	public void setOTPCallback(PasswordCallback otpCallback) {
+		this.otpCallback = otpCallback;
 	}
 
 	@Override
@@ -126,12 +115,19 @@ public class OIDCServerAuthN implements IAuthCallback {
 	protected void retrieveToken() throws Exception {
 		List<BasicNameValuePair> params = new ArrayList<>();
 		params.add(new BasicNameValuePair("grant_type", properties.getGrantType()));
+		params.add(new BasicNameValuePair("username", properties.getUsername()));
+		String pwd = properties.getPassword();
+		if(pwd==null && pwdCallback!=null) {
+			pwd = new String(pwdCallback.getPassword("OIDC server password", null));
+		}
+		params.add(new BasicNameValuePair("password", properties.getPassword()));
 		String otp = properties.getOTP();
+		if("QUERY".equals(otp)){
+			otp = new String(otpCallback.getPassword("OTP verification code", null));
+		}
 		if(otp!=null && !otp.isEmpty()) {
 			params.add(new BasicNameValuePair(properties.getOTPParamName(), otp));
 		}
-		params.add(new BasicNameValuePair("username", properties.getUsername()));
-		params.add(new BasicNameValuePair("password", properties.getPassword()));
 		String scope = properties.getScope();
 		if(scope!=null && !scope.isEmpty()) {
 			params.add(new BasicNameValuePair("scope", properties.getScope()));

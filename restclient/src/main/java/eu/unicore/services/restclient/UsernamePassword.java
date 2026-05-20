@@ -16,6 +16,7 @@ public class UsernamePassword implements IAuthCallback {
 
 	@Override
 	public void addAuthenticationHeaders(HttpMessage httpMessage) throws Exception {
+		httpMessage.removeHeaders("Authorization");
 		httpMessage.addHeader("Authorization", 
 				"Basic "+new String(Base64.encodeBase64((user+":"+password).getBytes())));
 	}

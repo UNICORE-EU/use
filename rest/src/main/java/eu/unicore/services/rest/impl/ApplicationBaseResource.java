@@ -17,8 +17,10 @@ import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.Client;
+import eu.unicore.security.Client.Type;
 import eu.unicore.security.Queue;
 import eu.unicore.security.Role;
+import eu.unicore.security.SecurityException;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.Xlogin;
 import eu.unicore.services.ContainerProperties;
@@ -81,17 +83,19 @@ public class ApplicationBaseResource extends RESTRendererBase {
 			Map<String,String> claims = new HashMap<>();
 			claims.put("etd", "true");
 			try {
-				SecurityTokens tokens = AuthZAttributeStore.getTokens();
-				BasicAttributeHolder attr = (BasicAttributeHolder)tokens.getContext().get(AuthAttributesCollector.ATTRIBUTES);
-				if(attr!=null && attr.uid!=null) {
-					claims.put("uid", attr.uid);
-				}
-				Map<String,String[]> prefs = tokens.getUserPreferences();
-				UserPreferences up = new UserPreferences();
-				up.parse(prefs);
-				String enc = up.getEncoded();
-				if(enc!=null && enc.length()>0) {
-					claims.put("preferences", enc);
+				if(Type.ANONYMOUS!=AuthZAttributeStore.getClient().getType()) {
+					SecurityTokens tokens = AuthZAttributeStore.getTokens();
+					BasicAttributeHolder attr = (BasicAttributeHolder)tokens.getContext().get(AuthAttributesCollector.ATTRIBUTES);
+					if(attr!=null && attr.uid!=null) {
+						claims.put("uid", attr.uid);
+					}
+					Map<String,String[]> prefs = tokens.getUserPreferences();
+					UserPreferences up = new UserPreferences();
+					up.parse(prefs);
+					String enc = up.getEncoded();
+					if(enc!=null && enc.length()>0) {
+						claims.put("preferences", enc);
+					}
 				}
 			}catch(Exception e) {}
 			if(Boolean.parseBoolean(renewable)) {
@@ -104,6 +108,9 @@ public class ApplicationBaseResource extends RESTRendererBase {
 					issuerCred.getSubjectName(), issuerCred.getKey(),
 					claims);
 			return Response.ok().entity(token).build();
+		}
+		catch(SecurityException se) {
+			return handleError(403, "Error creating token", se, logger);
 		}
 		catch(Exception ex) {
 			return handleError("Error creating token", ex, logger);

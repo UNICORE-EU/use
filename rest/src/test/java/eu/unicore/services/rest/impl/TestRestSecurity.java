@@ -41,7 +41,7 @@ import eu.unicore.services.restclient.RESTException;
 import eu.unicore.services.restclient.UsernamePassword;
 import eu.unicore.services.restclient.jwt.JWTUtils;
 import eu.unicore.services.restclient.sshkey.PasswordSupplierImpl;
-import eu.unicore.services.restclient.sshkey.SSHKey;
+import eu.unicore.services.restclient.sshkey.SSHKeyAuthN;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.services.server.JettyServer;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
@@ -174,7 +174,7 @@ public class TestRestSecurity {
 	@Test
 	public void testBaseClientWithJWT() throws Exception {
 		String resource = url+"/"+sName+"/User";
-		IAuthCallback auth = new SSHKey("demouser", new File("src/test/resources/id_ed25519"),
+		IAuthCallback auth = new SSHKeyAuthN("demouser", new File("src/test/resources/id_ed25519"),
 				new PasswordSupplierImpl("test123".toCharArray()));
 		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
 		JSONObject reply = bc.getJSON();
@@ -188,7 +188,7 @@ public class TestRestSecurity {
 				.getTokenValidity();
 		long exp = (long)(now/1000) + tokenValidity;
 		String resource = url+"/"+sName+"/token";
-		IAuthCallback auth = new SSHKey("demouser", new File("src/test/resources/id_ed25519"),
+		IAuthCallback auth = new SSHKeyAuthN("demouser", new File("src/test/resources/id_ed25519"),
 				new PasswordSupplierImpl("test123".toCharArray()));
 		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
 		bc.getUserPreferences().put("role", "user");
@@ -221,7 +221,7 @@ public class TestRestSecurity {
 		long remaining = notAfter - System.currentTimeMillis();
 		long request = (long)(1.1 * remaining);
 		String resource = url+"/"+sName+"/token?lifetime="+request;
-		IAuthCallback auth = new SSHKey("demouser", new File("src/test/resources/id_ed25519"),
+		IAuthCallback auth = new SSHKeyAuthN("demouser", new File("src/test/resources/id_ed25519"),
 				new PasswordSupplierImpl("test123".toCharArray()));
 		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
 		RESTException re = assertThrows(RESTException.class, ()-> bc.get(ContentType.TEXT_PLAIN));
@@ -233,7 +233,7 @@ public class TestRestSecurity {
 	@Test
 	public void testGetCert() throws Exception {
 		String resource = url+"/"+sName+"/certificate";
-		IAuthCallback auth = new SSHKey("demouser", new File("src/test/resources/id_ed25519"),
+		IAuthCallback auth = new SSHKeyAuthN("demouser", new File("src/test/resources/id_ed25519"),
 				new PasswordSupplierImpl("test123".toCharArray()));
 		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
 		try(ClassicHttpResponse response=bc.get(ContentType.TEXT_PLAIN)){
