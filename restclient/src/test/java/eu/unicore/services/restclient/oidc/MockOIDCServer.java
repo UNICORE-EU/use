@@ -93,6 +93,7 @@ public class MockOIDCServer implements Runnable {
 				writeReply(socket);
 			}catch(SocketTimeoutException te) {}
 			catch(Exception ex){
+				ex.printStackTrace();
 				System.out.println("EX: "+ex.getClass().getName());
 			}
 		}
@@ -135,4 +136,7 @@ public class MockOIDCServer implements Runnable {
 		return res;
 	}
 	
+	public Map<String,String>getParams(){
+		return params;
+	}
 }

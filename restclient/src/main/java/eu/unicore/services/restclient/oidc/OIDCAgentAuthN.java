@@ -4,7 +4,7 @@ import java.util.Properties;
 
 import org.json.JSONObject;
 
-public class OIDCAgentAuthN extends TokenBasedAuthN {
+public class OIDCAgentAuthN extends TokenAuthN {
 
 	OIDCAgentProperties agentProperties; 
 

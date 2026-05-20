@@ -7,20 +7,22 @@ import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.hc.core5.http.HttpMessage;
 
-import eu.unicore.security.AuthorisationException;
+import eu.unicore.security.AuthenticationException;
 import eu.unicore.services.restclient.IAuthCallback;
 import eu.unicore.services.restclient.utils.UserLogger;
 import eu.unicore.util.configuration.ConfigurationException;
 
 /**
- * Base class for authenticating using a Bearer token.
+ * Base class for authenticating using a token.
  *
  * @author schuller
  */
-public class TokenBasedAuthN implements IAuthCallback {
+public class TokenAuthN implements IAuthCallback {
 
 	protected String token = null;
+
 	protected String tokenType = "Bearer";
+
 	protected long lastRefresh;
 
 	protected UserLogger log = new UserLogger() {};
@@ -49,12 +51,16 @@ public class TokenBasedAuthN implements IAuthCallback {
 		this.token = token;
 	}
 
+	/**
+	 * get a fresh token
+	 * @throws Exception if token could not be obtained
+	 */
 	protected void retrieveToken() throws Exception {
 		if(token==null)throw new IllegalArgumentException("No token!");
 	}
 
 	/**
-	 * get a fresh token as necessary. By default, this does nothing
+	 * get a fresh token, if necessary. By default, this does nothing
 	 * @throws Exception
 	 */
 	protected void refreshTokenIfNecessary() throws Exception {
@@ -69,12 +75,10 @@ public class TokenBasedAuthN implements IAuthCallback {
 				retrieveToken();
 			}
 		}catch(Exception e) {
-			throw new AuthorisationException("Could not obtain an authentication token", e);
+			throw new AuthenticationException("Could not obtain an authentication token", e);
 		}
-		if(token!=null) {
-			httpMessage.removeHeaders("Authorization");
-			httpMessage.setHeader("Authorization", tokenType+" "+token);
-		}
+		httpMessage.removeHeaders("Authorization");
+		httpMessage.setHeader("Authorization", tokenType+" "+token);
 	}
 
 	@Override

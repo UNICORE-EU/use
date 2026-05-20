@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
@@ -18,7 +19,6 @@ import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.json.JSONObject;
 
-import eu.unicore.security.canl.PasswordCallback;
 import eu.unicore.security.wsutil.client.authn.FilePermHelper;
 import eu.unicore.services.restclient.oidc.OIDCProperties.AuthMode;
 import eu.unicore.util.Log;
@@ -31,15 +31,15 @@ import eu.unicore.util.httpclient.IClientConfiguration;
  *
  * @author schuller
  */
-public class OIDCServerAuthN extends TokenBasedAuthN {
+public class OIDCServerAuthN extends TokenAuthN {
 
 	private final OIDCProperties properties;
 
 	private final IClientConfiguration clientConfig;
 
-	PasswordCallback pwdCallback;
+	Supplier<String> pwdCallback;
 
-	PasswordCallback otpCallback;
+	Supplier<String> otpCallback;
 
 	String refreshToken;
 
@@ -50,11 +50,11 @@ public class OIDCServerAuthN extends TokenBasedAuthN {
 		loadRefreshToken();
 	}
 
-	public void setPasswordCallback(PasswordCallback pwdCallback) {
+	public void setPasswordCallback(Supplier<String> pwdCallback) {
 		this.pwdCallback = pwdCallback;
 	}
 
-	public void setOTPCallback(PasswordCallback otpCallback) {
+	public void setOTPCallback(Supplier<String> otpCallback) {
 		this.otpCallback = otpCallback;
 	}
 
@@ -118,12 +118,12 @@ public class OIDCServerAuthN extends TokenBasedAuthN {
 		params.add(new BasicNameValuePair("username", properties.getUsername()));
 		String pwd = properties.getPassword();
 		if(pwd==null && pwdCallback!=null) {
-			pwd = new String(pwdCallback.getPassword("OIDC server password", null));
+			pwd = pwdCallback.get();
 		}
-		params.add(new BasicNameValuePair("password", properties.getPassword()));
+		params.add(new BasicNameValuePair("password", pwd));
 		String otp = properties.getOTP();
 		if("QUERY".equals(otp)){
-			otp = new String(otpCallback.getPassword("OTP verification code", null));
+			otp = new String(otpCallback.get());
 		}
 		if(otp!=null && !otp.isEmpty()) {
 			params.add(new BasicNameValuePair(properties.getOTPParamName(), otp));
