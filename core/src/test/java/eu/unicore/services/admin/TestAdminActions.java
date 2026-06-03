@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.Kernel;
@@ -15,10 +17,21 @@ import eu.unicore.services.security.TestConfigUtil;
 
 public class TestAdminActions {
 
+	static Kernel k;
+
+	@BeforeAll
+	static void start() throws Exception {
+		k = new Kernel(TestConfigUtil.getInsecureProperties());
+	}
+	
+	@AfterAll
+	static void stop() throws Exception {
+		k.shutdown();
+	}
+
 	@Test
 	public void testAdminActionLoader() throws Exception{
-		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
-		Map<String,AdminAction> act=k.getAdminActions();
+		Map<String,AdminAction> act = k.getAdminActions();
 		assertNotNull(act);
 		for(String s: act.keySet()) {
 			AdminAction a = act.get(s);
@@ -33,9 +46,12 @@ public class TestAdminActions {
 		assertTrue(result.successful());
 		assertEquals("ok", result.getMessage());
 		assertEquals("echo-foo-value", result.getResults().get("foo"));
+	}
 
-		ResourceAvailability ra = (ResourceAvailability)act.get("ToggleResourceAvailability");
-		params.clear();
+	@Test
+	public void testResourceAvailabilityAction() throws Exception{
+		Map<String,String>params = new HashMap<>();
+		ResourceAvailability ra = (ResourceAvailability)k.getAdminActions().get("ToggleResourceAvailability");
 		params.put("resources", "a,b,c");
 		AdminActionResult res = ra.invoke(params, k);
 		assertTrue(res.successful());
@@ -47,5 +63,14 @@ public class TestAdminActions {
 		assertTrue(res.successful());
 		assertFalse(ResourceAvailability.isUnavailable("c"));
 	}
-	
+
+	@Test
+	public void testMemoryUsage() throws Exception{
+		Map<String,String>params = new HashMap<>();
+		GetMemoryUsage ra = (GetMemoryUsage)k.getAdminActions().get("GetMemoryUsage");
+		AdminActionResult res = ra.invoke(params, k);
+		assertTrue(res.successful());
+		System.out.println(res.getMessage());
+		System.out.println(res.getResults());
+	}
 }

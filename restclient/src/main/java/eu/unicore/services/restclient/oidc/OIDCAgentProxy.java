@@ -41,9 +41,5 @@ public class OIDCAgentProxy {
         	r.read(result);
         	return result.flip().toString();
         }
-		catch(Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
 	}
 }
