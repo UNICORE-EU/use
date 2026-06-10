@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.cxf.message.Message;
-import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
-import org.apache.hc.core5.http.HttpMessage;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
@@ -23,9 +23,6 @@ import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.CXFUtils;
 import eu.unicore.security.wsutil.client.OAuthBearerTokenOutInterceptor;
 import eu.unicore.services.rest.RESTUtils;
-import eu.unicore.services.restclient.BaseClient;
-import eu.unicore.services.restclient.IAuthCallback;
-import eu.unicore.services.restclient.RESTException;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
@@ -117,22 +114,19 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 			userData = validate(token, clientCfg);
 		}
 		else {
-			IAuthCallback cb = new IAuthCallback() {
-				@Override
-				public void addAuthenticationHeaders(HttpMessage httpMessage) throws Exception {
-					httpMessage.addHeader("Authorization", "Bearer "+token);
-				}
-			};
-			try{
-				userData = new BaseClient(address, clientCfg, cb).getJSON();
-			}catch(RESTException re) {
-				if(re.getStatus()>=500) {
-					notOK(re.getErrorMessage());
-				}
-			}
+			userData = get(token, clientCfg);
 		}
 		logger.debug("User data: {}", userData);
 		return userData;
+	}
+
+	private JSONObject get(String token, DefaultClientConfiguration clientCfg) throws Exception {
+		HttpGet get = new HttpGet(address);
+		get.addHeader("Authorization", "Bearer "+token);
+		try(CloseableHttpClient client = HttpUtils.client(address, clientCfg)){
+			String reply = client.execute(null, get, HttpClientContext.create(), new BasicHttpClientResponseHandler());
+			return new JSONObject(reply);
+	    }
 	}
 
 	private JSONObject validate(String token, DefaultClientConfiguration clientCfg) throws Exception {
@@ -142,11 +136,12 @@ public class OAuthAuthenticator extends BaseRemoteAuthenticator<JSONObject> {
 	    postParameters.add(new BasicNameValuePair("client_secret", clientSecret));
 	    postParameters.add(new BasicNameValuePair("token", token));
 	    post.setEntity(new UrlEncodedFormEntity(postParameters, Charset.forName("UTF-8")));
-		HttpClient client = HttpUtils.createClient(address, clientCfg);
-		String reply = client.execute(null, post, HttpClientContext.create(), new BasicHttpClientResponseHandler());
-		JSONObject j = new JSONObject(reply);
-		if(!j.optBoolean("active", false))throw new Exception("Token validation failed");
-		return j;
+	    try(CloseableHttpClient client = HttpUtils.client(address, clientCfg)){
+            String reply = client.execute(null, post, HttpClientContext.create(), new BasicHttpClientResponseHandler());
+            JSONObject j = new JSONObject(reply);
+            if(!j.optBoolean("active", false))throw new Exception("Token validation failed");
+            return j;
+	    }
 	}
 
 	@Override
