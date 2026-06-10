@@ -7,8 +7,8 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -49,8 +49,7 @@ import eu.unicore.security.AuthenticationException;
 public class JWTUtils {
 
 	public static String getIssuer(String token) throws Exception {
-		JWT jwt = JWTParser.parse(token);
-		return jwt.getJWTClaimsSet().getIssuer();
+		return JWTParser.parse(token).getJWTClaimsSet().getIssuer();
 	}
 
 	public static JSONObject getPayload(String token) throws Exception {
@@ -71,10 +70,7 @@ public class JWTUtils {
 		return j;
 	}
 
-	final static Map<String,String>etd = new HashMap<>();
-	static{
-		etd.put("etd", "true");
-	}
+	private final static Map<String,String>etd = Collections.singletonMap("etd", "true");
 
 	public static String createETDToken(String user, long lifetime, String issuer, PrivateKey pk) throws Exception {
 		return createJWTToken(user, lifetime, issuer, pk, etd);
@@ -183,10 +179,10 @@ public class JWTUtils {
 					return;
 				}
 			}
-			throw new AuthenticationException("JWT token could not be verified with the available keys");
 		}catch(Exception ex){
 			throw new AuthenticationException("JWT verification failed", ex);
 		}
+		throw new AuthenticationException("JWT token could not be verified with the available keys");
 	}
 
 	public static String createETDToken(String user, long lifetime, String issuer, String hmacSecret) throws Exception {
@@ -216,8 +212,7 @@ public class JWTUtils {
 
 	public static boolean isHMAC(String token) throws AuthenticationException {
 		try {
-			JSONObject headers = JWTUtils.getHeaders(token);
-			return headers.getString("alg").startsWith("HS");
+			return JWTUtils.getHeaders(token).getString("alg").startsWith("HS");
 		}catch(Exception e) {
 			throw new AuthenticationException("Invalid token", e);
 		}

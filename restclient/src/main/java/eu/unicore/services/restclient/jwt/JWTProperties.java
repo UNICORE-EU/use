@@ -22,7 +22,7 @@ import eu.unicore.util.configuration.PropertyMD;
  */
 public class JWTProperties extends PropertiesHelper {
 
-	static final Logger propsLogger=Log.getLogger(Log.CONFIGURATION, JWTProperties.class);
+	static final Logger propsLogger = Log.getLogger(Log.CONFIGURATION, JWTProperties.class);
 
 	@DocumentationReferencePrefix
 	public static final String PREFIX = "jwt.";
@@ -40,11 +40,11 @@ public class JWTProperties extends PropertiesHelper {
 		META.put(PROP_TOKEN_LIFETIME, new PropertyMD("300").setLong().
 				setDescription("Valdity time of issued tokens in seconds"));
 	}
-	
+
 	public JWTProperties(String prefix, Properties properties) {
 		super(prefix, properties, META, propsLogger);
 	}
-	
+
 	public JWTProperties(Properties properties) {
 		super(PREFIX, properties, META, propsLogger);
 	}

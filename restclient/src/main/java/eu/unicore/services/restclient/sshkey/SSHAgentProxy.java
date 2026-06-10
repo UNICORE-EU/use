@@ -30,6 +30,7 @@ public class SSHAgentProxy {
 	}
 
 	private boolean available = false;
+
 	private final String path;
 
 	SSHAgentProxy(String path){

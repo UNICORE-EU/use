@@ -33,8 +33,7 @@ public class RegistryEntryUpdater implements InstanceChecker {
 	public boolean check(Home home, String id) throws Exception {
 		Calendar c = home.getTerminationTime(id);
 		logger.debug("Checking <{} {}> TT = {}", home.getServiceName(), id, (c != null ? c.getTime() : "none"));
-		// if for some reason the TT is null, force a refresh (in contrast to the usual
-		// expiry check)
+		// if the TT is null, force a refresh (in contrast to the usual expiry check)
 		return c == null ? true : (c.compareTo(Calendar.getInstance()) <= 0);
 	}
 

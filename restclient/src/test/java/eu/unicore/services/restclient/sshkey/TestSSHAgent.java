@@ -82,7 +82,7 @@ public class TestSSHAgent {
 		SSHAgentProxy ap = new SSHAgentProxy("./target/SSH_AGENT");
 		assertTrue(ap.isAvailable());
 		SSHAgent a = new SSHAgent(ap);
-		a.setVerbose(false);
+		a.setLogger(null);
 		if(select)a.selectIdentity(keyFile);
 		else a.assertIdentity();
 		assertNotNull(a.id);

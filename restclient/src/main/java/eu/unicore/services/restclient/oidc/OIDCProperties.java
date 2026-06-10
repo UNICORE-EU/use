@@ -13,7 +13,7 @@ import eu.unicore.util.configuration.PropertiesHelper;
 import eu.unicore.util.configuration.PropertyMD;
 
 /**
- * preferences for getting a token from an OIDC token endpoint
+ * Settings for configuring the authentication via an OIDC token endpoint
  *
  * @author schuller
  */

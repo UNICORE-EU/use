@@ -173,7 +173,7 @@ public class BaseClient {
 	/**
 	 * get the JSON representation of this resource
 	 * 
-	 * @param accept - the MediaType to use, if <code>null</code>, "application/json" is used
+	 * @param accept - Content-Type, if <code>null</code>, "application/json" is used
 	 * @throws Exception
 	 */
 	public JSONObject getJSON(ContentType accept) throws Exception {
@@ -181,17 +181,23 @@ public class BaseClient {
 		return asJSON(response);
 	}
 
+	/**
+	 * get content from this resource, returning the response
+	 *
+	 * @param accept
+	 */
 	public ClassicHttpResponse get(ContentType accept) throws Exception {
 		return get(accept, null);
 	}
 
 	/**
+	 * get content from this resource, returning the response
 	 *
 	 * @param accept
 	 * @param headers - custom headers (can be null)
 	 */
 	public ClassicHttpResponse get(ContentType accept, Map<String,String>headers) throws Exception {
-		HttpGet get=new HttpGet(url);
+		HttpGet get = new HttpGet(url);
 		if(accept!=null)get.setHeader("Accept", accept.getMimeType());
 		if(headers!=null){
 			for(Map.Entry<String, String> header: headers.entrySet()){
@@ -202,16 +208,15 @@ public class BaseClient {
 	}
 
 	/**
-	 * put content to this resource, returning the response. The caller must deal with
-	 * the response to avoid resource leaks and blocked connections!
-	 * 
+	 * put content to this resource, returning the response
+	 *
 	 * @param content
 	 * @param type
 	 * @return HttpResponse
 	 * @throws Exception
 	 */
 	public ClassicHttpResponse put(InputStream content, ContentType type) throws Exception {
-		HttpPut put=new HttpPut(url);
+		HttpPut put = new HttpPut(url);
 		put.setEntity(new InputStreamEntity(content, type));
 		return execute(put);
 	}
@@ -220,7 +225,7 @@ public class BaseClient {
 	 * put content to this resource, discarding any response
 	 */
 	public void putQuietly(InputStream content, ContentType type) throws Exception {
-		HttpPut put=new HttpPut(url);
+		HttpPut put = new HttpPut(url);
 		put.setEntity(new InputStreamEntity(content, type));
 		try(ClassicHttpResponse response = execute(put)){
 			EntityUtils.consumeQuietly(response.getEntity());
@@ -234,7 +239,7 @@ public class BaseClient {
 	 * @throws Exception
 	 */
 	public ClassicHttpResponse put(JSONObject content) throws Exception {
-		HttpPut put=new HttpPut(url);
+		HttpPut put = new HttpPut(url);
 		put.setHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
 		put.setEntity(new StringEntity(content.toString(), ContentType.APPLICATION_JSON));
 		return execute(put);
@@ -257,27 +262,28 @@ public class BaseClient {
 	 * @return URL of the newly created resource or null if not available
 	 */
 	public String create(JSONObject content) throws Exception {
-		HttpPost post=new HttpPost(url);
-		post.setHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
-		if(content!=null) {
-			post.setEntity(new StringEntity(content.toString(), ContentType.APPLICATION_JSON));
-		}
-		try(ClassicHttpResponse response = execute(post)){
+		try(ClassicHttpResponse response = post(content)){
 			Header l = response.getFirstHeader("Location");
 			return l!=null? l.getValue():null;
 		}
 	}
 
 	/**
-	 * post the JSON to this resource and return the response. 
-	 * NOTE: the caller is responsible for reading content and closing the response!
+	 * post the JSON to this resource and return the response
 	 */
 	public ClassicHttpResponse post(JSONObject content) throws Exception {
-		HttpPost post=new HttpPost(url);
-		post.setHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
-		if(content!=null) {
-			post.setEntity(new StringEntity(content.toString(), ContentType.APPLICATION_JSON));
-		}
+		HttpEntity entity = content!=null?
+				new StringEntity(content.toString(), ContentType.APPLICATION_JSON) : null;
+		return post(entity, ContentType.APPLICATION_JSON);
+	}
+
+	/**
+	 * post the content to this resource and return the response. 
+	 */
+	public ClassicHttpResponse post(HttpEntity content, ContentType contentType) throws Exception {
+		HttpPost post = new HttpPost(url);
+		if(contentType!=null)post.setHeader("Content-Type", contentType.getMimeType());
+		if(content!=null)post.setEntity(content);
 		return execute(post);
 	}
 
@@ -286,29 +292,17 @@ public class BaseClient {
 	 */
 	public void postQuietly(JSONObject content) throws Exception {
 		try(ClassicHttpResponse response = post(content)){
-			EntityUtils.consume(response.getEntity());
+			EntityUtils.consumeQuietly(response.getEntity());
 		}
-	}
-
-	/**
-	 * post the content to this resource and return the response. 
-	 * NOTE: the caller is responsible for reading content and closing the response!
-	 * 
-	 */
-	public ClassicHttpResponse post(HttpEntity content, ContentType contentType) throws Exception {
-		HttpPost post=new HttpPost(url);
-		if(contentType!=null)post.setHeader("Content-Type", contentType.getMimeType());
-		if(content!=null)post.setEntity(content);
-		return execute(post);
 	}
 
 	/**
 	 * delete this resource
 	 */
 	public void delete() throws Exception {
-		HttpDelete d=new HttpDelete(url);
+		HttpDelete d = new HttpDelete(url);
 		try(ClassicHttpResponse response = execute(d)){
-			EntityUtils.consume(response.getEntity());
+			EntityUtils.consumeQuietly(response.getEntity());
 		}
 	}
 
@@ -393,12 +387,10 @@ public class BaseClient {
 				execWithAuth = true;
 			}
 		}
-
 		if(execWithAuth){
 			method.removeHeaders(SecuritySessionUtils.SESSION_ID_HEADER);
 			response = executeWithAuth(method);			
 		}
-		
 		if(useSessions && sessionKey!=null){
 			try{
 				Header h = response.getFirstHeader(SecuritySessionUtils.SESSION_ID_HEADER);
@@ -445,7 +437,7 @@ public class BaseClient {
 		try{
 			String content = EntityUtils.toString(response.getEntity());
 			try{
-				JSONObject jO=new JSONObject(content);
+				JSONObject jO = new JSONObject(content);
 				for(String key: Arrays.asList("errorMessage", "message")) {
 					errMsg = jO.optString(key, null);
 					if(errMsg!=null)break;

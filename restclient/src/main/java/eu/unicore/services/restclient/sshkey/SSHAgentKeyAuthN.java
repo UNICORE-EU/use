@@ -12,6 +12,7 @@ import com.nimbusds.jwt.SignedJWT;
 
 import eu.unicore.services.restclient.IAuthCallback;
 import eu.unicore.services.restclient.jwt.JWTUtils;
+import eu.unicore.services.restclient.utils.UserLogger;
 
 /**
  * authenticate with a JWT token signed with a private key (SSH key), getting
@@ -65,6 +66,10 @@ public class SSHAgentKeyAuthN implements IAuthCallback {
 
 	protected boolean tokenStillValid() throws IOException {
 		return issued+(500*lifetime)>System.currentTimeMillis();
+	}
+
+	public void setLogger(UserLogger log) {
+		if(agent!=null)agent.setLogger(log);
 	}
 
 }

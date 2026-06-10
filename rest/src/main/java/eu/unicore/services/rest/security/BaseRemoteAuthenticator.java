@@ -3,8 +3,8 @@ package eu.unicore.services.rest.security;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.cxf.message.Message;
@@ -263,8 +263,8 @@ public abstract class BaseRemoteAuthenticator<T> extends ExternalConnectorHelper
 	public void createCache() {
 		cache = CacheBuilder.newBuilder()
 				.maximumSize(100)
-				.expireAfterAccess(300, TimeUnit.SECONDS)
-				.expireAfterWrite(300, TimeUnit.SECONDS)
+				.expireAfterAccess(Duration.ofSeconds(300))
+				.expireAfterWrite(Duration.ofSeconds(300))
 				.build();
 	}
 

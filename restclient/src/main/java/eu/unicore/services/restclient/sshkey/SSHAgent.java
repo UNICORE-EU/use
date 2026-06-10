@@ -22,6 +22,7 @@ import com.nimbusds.jose.jca.JCAContext;
 import com.nimbusds.jose.util.Base64URL;
 
 import eu.unicore.services.restclient.sshkey.SSHAgentProxy.Identity;
+import eu.unicore.services.restclient.utils.UserLogger;
 
 /**
  * support for ssh-agent
@@ -34,9 +35,9 @@ public class SSHAgent {
 
 	private String keyFile;
 
-	private static boolean verbose = false;
-
 	Identity id = null;
+
+	static UserLogger logger = null;
 
 	public SSHAgent() throws Exception {
 		this(SSHAgentProxy.get());
@@ -80,8 +81,8 @@ public class SSHAgent {
 		throw new IOException("No matching identity found in agent");
 	}
 
-	public void setVerbose(boolean verboseS) {
-		verbose = verboseS;
+	public void setLogger(UserLogger log) {
+		logger = log;
 	}
 
 	/**
@@ -123,8 +124,8 @@ public class SSHAgent {
 	void assertIdentity() throws IOException, GeneralSecurityException {
 		if(id==null) {
 			Identity[] ids = ap.getIdentities();
-			if(ids.length>1 && verbose) {
-				System.err.println("NOTE: more than one identity is available in the SSH agent - using the first one.");
+			if(ids.length>1 && logger!=null) {
+				logger.verbose("NOTE: more than one identity is available in the SSH agent - using the first one.");
 			}
 			if(ids.length==0)throw new GeneralSecurityException("No identities loaded in SSH agent!");
 			id = ids[0];
@@ -133,8 +134,8 @@ public class SSHAgent {
 
 	public static boolean isAgentAvailable(){
 		if(Boolean.parseBoolean(SSHUtils.getSystemProperty("UNICORE_NO_SSH_AGENT", "false"))){
-			if(verbose) {
-				System.err.println("Agent DISABLED via environment setting 'UNICORE_NO_SSH_AGENT'");
+			if(logger!=null) {
+				logger.verbose("Agent DISABLED via environment setting 'UNICORE_NO_SSH_AGENT'");
 			}
 			return false;
 		}
