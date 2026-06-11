@@ -3,11 +3,11 @@ package eu.unicore.services.aip.saml;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Logger;
 
@@ -67,8 +67,8 @@ public class SAMLAttributeFetcher
 		{
 			return CacheBuilder.newBuilder()
 					.maximumSize(MAX_ELEMS)
-					.expireAfterAccess(cacheTtl, TimeUnit.SECONDS)
-					.expireAfterWrite(cacheTtl, TimeUnit.SECONDS)
+					.expireAfterAccess(Duration.ofSeconds(cacheTtl))
+					.expireAfterWrite(Duration.ofSeconds(cacheTtl))
 					.build();
 		}
 		else return null;

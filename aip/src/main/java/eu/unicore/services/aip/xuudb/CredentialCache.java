@@ -1,6 +1,6 @@
 package eu.unicore.services.aip.xuudb;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -31,8 +31,8 @@ public class CredentialCache {
 	public CredentialCache(int timeToLive){
 		cache = CacheBuilder.newBuilder()
 				.maximumSize(100)
-				.expireAfterAccess(timeToLive, TimeUnit.SECONDS)
-				.expireAfterWrite(timeToLive, TimeUnit.SECONDS)
+				.expireAfterAccess(Duration.ofSeconds(timeToLive))
+				.expireAfterWrite(Duration.ofSeconds(timeToLive))
 				.build();
 	}
 
