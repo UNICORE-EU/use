@@ -59,8 +59,9 @@ public class TestRestService {
 		int invoked = MockResource.invocationCounter.get();
 		JettyServer server = kernel.getServer();
 		String url = server.getUrls()[0].toExternalForm()+"/rest/"+sName+"/User";
-		BaseClient client = new BaseClient(url, kernel.getClientConfiguration());
-		try(ClassicHttpResponse response = client.get(null)){
+		try(BaseClient client = new BaseClient(url, kernel.getClientConfiguration());
+			ClassicHttpResponse response = client.get(null))
+		{
 			assertEquals(200, response.getCode());
 			assertEquals(invoked+1, MockResource.invocationCounter.get());
 			String reply = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
@@ -87,17 +88,18 @@ public class TestRestService {
 
 		JettyServer server=kernel.getServer();
 		String url = server.getUrls()[0].toExternalForm();
-		BaseClient client = new BaseClient(url+"/rest/test2/foo", kernel.getClientConfiguration());
-		try(ClassicHttpResponse response = client.get(null)){
-			assertEquals(200, response.getCode());
-			String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-			System.out.println("Service 'foo' reply: "+reply);
-		}
-		client.setURL(url+"/rest/test2/bar");
-		try(ClassicHttpResponse response = client.get(null)){
-			assertEquals(200, response.getCode());
-			String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-			System.out.println("Service 'bar' reply: "+reply);
+		try(BaseClient client = new BaseClient(url+"/rest/test2/foo", kernel.getClientConfiguration())) {
+			try(ClassicHttpResponse response = client.get(null)){
+				assertEquals(200, response.getCode());
+				String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+				System.out.println("Service 'foo' reply: "+reply);
+			}
+			client.setURL(url+"/rest/test2/bar");
+			try(ClassicHttpResponse response = client.get(null)){
+				assertEquals(200, response.getCode());
+				String reply=IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+				System.out.println("Service 'bar' reply: "+reply);
+			}
 		}
 	}
 

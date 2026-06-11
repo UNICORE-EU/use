@@ -101,10 +101,12 @@ public class TestSAMLAuthenticatorSigned {
 		MockSAMLServer.sign = true;
 		String resource = url+"/"+sName+"/User";
 		UsernamePassword auth = new UsernamePassword("demouser", "test123");
-		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
-		System.out.println("Accessing: "+resource);
-		JSONObject reply = bc.getJSON();
-		System.out.println("Service reply: "+reply.toString(2));
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth))
+		{
+			System.out.println("Accessing: "+resource);
+			JSONObject reply = bc.getJSON();
+			System.out.println("Service reply: "+reply.toString(2));
+		}
 	}
 
 	@Test
@@ -113,10 +115,11 @@ public class TestSAMLAuthenticatorSigned {
 		MockSAMLServer.sign = false;
 		String resource = url+"/"+sName+"/User";
 		UsernamePassword auth = new UsernamePassword("demouser", "test123");
-		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
-		System.out.println("Accessing: "+resource);
-		RESTException re = assertThrows(RESTException.class, ()->bc.getJSON());
-		assertEquals(403, re.getStatus());
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth)){
+			System.out.println("Accessing: "+resource);
+			RESTException re = assertThrows(RESTException.class, ()->bc.getJSON());
+			assertEquals(403, re.getStatus());
+		}
 	}
 
 	private void invalidateCache() {

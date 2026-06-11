@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.utils.Base64;
 import org.apache.hc.core5.http.ClassicHttpResponse;
@@ -156,10 +156,10 @@ public class OIDCServerAuthN extends TokenAuthN {
 			params.add(new BasicNameValuePair("client_id", clientID));
 			params.add(new BasicNameValuePair("client_secret", clientSecret));
 		}
-		UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
-		post.setEntity(entity);
-		HttpClient client = HttpUtils.createClient(url, clientConfig);
-		try(ClassicHttpResponse response = client.executeOpen(null, post, HttpClientContext.create())){
+		post.setEntity(new UrlEncodedFormEntity(params));
+		try(CloseableHttpClient client = HttpUtils.client(url, clientConfig);
+			ClassicHttpResponse response = client.executeOpen(null, post, HttpClientContext.create()))
+		{
 			String body = "";
 			try{
 				body = EntityUtils.toString(response.getEntity());

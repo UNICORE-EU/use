@@ -123,6 +123,7 @@ public class TestServicesBase {
 		assertNotNull(o.optJSONObject("_links"));
 		assertNotNull(o.getJSONObject("_links").optJSONObject("self"));
 		assertNotNull(o.getJSONObject("_links").optJSONObject("previous"));
+		client.close();
 	}
 
 
@@ -131,18 +132,20 @@ public class TestServicesBase {
 		String url = k.getContainerProperties().getContainerURL()+"/rest";
 		String base  = url+"/"+sName+"/foo/"+
 				k.getHome("counter").getStore().getUniqueIDs().get(0);
-		BaseClient client = new BaseClient(base,k.getClientConfiguration());
-		System.out.println(client.getJSON().toString(2));
-		assertTrue(client.getLink("action:test")!=null);
-		client.pushURL(client.getLink("action:test"));
-		JSONObject r = client.asJSON(client.post(new JSONObject()));
-		assertEquals("OK", r.get("test"));
-		client.popURL();
-		client.pushURL(base+"/actions/nosuchaction");
-		RESTException re = assertThrows(RESTException.class, ()->{
-			client.post(new JSONObject());
-		});
-		assertEquals(404, re.getStatus());
+		try(BaseClient client = new BaseClient(base,k.getClientConfiguration()))
+		{
+			System.out.println(client.getJSON().toString(2));
+			assertTrue(client.getLink("action:test")!=null);
+			client.pushURL(client.getLink("action:test"));
+			JSONObject r = client.asJSON(client.post(new JSONObject()));
+			assertEquals("OK", r.get("test"));
+			client.popURL();
+			client.pushURL(base+"/actions/nosuchaction");
+			RESTException re = assertThrows(RESTException.class, ()->{
+				client.post(new JSONObject());
+			});
+			assertEquals(404, re.getStatus());
+		}
 	}
 
 	@Test
@@ -150,22 +153,24 @@ public class TestServicesBase {
 		String url = k.getContainerProperties().getContainerURL()+"/rest";
 		String base  = url+"/"+sName+"/foo/"+
 				k.getHome("counter").getStore().getUniqueIDs().get(0);
-		BaseClient client = new BaseClient(base,k.getClientConfiguration());
-		System.out.println(client.getJSON().toString(2));
-		assertTrue(client.getLink("action:test")!=null);
-		client.pushURL(client.getLink("action:test"));
-		List<NameValuePair>params = new ArrayList<>();
-		UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
-		ClassicHttpResponse res = client.post(entity, ContentType.APPLICATION_FORM_URLENCODED);
-		String html = EntityUtils.toString(res.getEntity());
-		assertTrue(html.contains("<h2>Properties</h2>"));
-		XmlObject.Factory.parse(html);
-		client.popURL();
-		client.pushURL(base+"/actions/nosuchaction");
-		RESTException re = assertThrows(RESTException.class, ()->{
-			client.post(entity,ContentType.APPLICATION_FORM_URLENCODED);
-		});
-		assertEquals(404, re.getStatus());
+		try(BaseClient client = new BaseClient(base,k.getClientConfiguration()))
+		{
+			System.out.println(client.getJSON().toString(2));
+			assertTrue(client.getLink("action:test")!=null);
+			client.pushURL(client.getLink("action:test"));
+			List<NameValuePair>params = new ArrayList<>();
+			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+			ClassicHttpResponse res = client.post(entity, ContentType.APPLICATION_FORM_URLENCODED);
+			String html = EntityUtils.toString(res.getEntity());
+			assertTrue(html.contains("<h2>Properties</h2>"));
+			XmlObject.Factory.parse(html);
+			client.popURL();
+			client.pushURL(base+"/actions/nosuchaction");
+			RESTException re = assertThrows(RESTException.class, ()->{
+				client.post(entity,ContentType.APPLICATION_FORM_URLENCODED);
+			});
+			assertEquals(404, re.getStatus());
+		}
 	}
 
 	@Test
@@ -173,16 +178,17 @@ public class TestServicesBase {
 		String url = k.getContainerProperties().getContainerURL()+"/rest";
 		String base  = url+"/"+sName+"/foo/"+
 				k.getHome("counter").getStore().getUniqueIDs().get(0);
-		BaseClient client = new BaseClient(base,k.getClientConfiguration());
-		ClassicHttpResponse res = client.get(ContentType.TEXT_HTML);
-		String html = EntityUtils.toString(res.getEntity());
-		XmlObject.Factory.parse(html);
-		// service home endpoint w/ instance list
-		base  = url+"/"+sName+"/foo";
-		client = new BaseClient(base,k.getClientConfiguration());
-		res = client.get(ContentType.TEXT_HTML);
-		html = EntityUtils.toString(res.getEntity());
-		XmlObject.Factory.parse(html);
+		try(BaseClient client = new BaseClient(base,k.getClientConfiguration())){
+			ClassicHttpResponse res = client.get(ContentType.TEXT_HTML);
+			String html = EntityUtils.toString(res.getEntity());
+			XmlObject.Factory.parse(html);
+			// service home endpoint w/ instance list
+			base  = url+"/"+sName+"/foo";
+			client.setURL(base);
+			res = client.get(ContentType.TEXT_HTML);
+			html = EntityUtils.toString(res.getEntity());
+			XmlObject.Factory.parse(html);
+		}
 	}
 
 	public static class HomeApplication extends Application implements USERestApplication {

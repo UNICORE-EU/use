@@ -18,6 +18,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
@@ -141,7 +142,7 @@ public class TestRestSecurity {
 			assertEquals("ETD", reply.getString("auth_method"));
 		}
 	}
-	
+
 
 	@Test
 	public void testBaseClientWithDelegation() throws Exception {
@@ -151,34 +152,38 @@ public class TestRestSecurity {
 
 		JWTServerProperties props = new JWTServerProperties(new Properties());
 		IAuthCallback auth = new JWTDelegation(kernel.getContainerSecurityConfiguration(), props, dn);
-		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
-		String sessionId = null;
-		for(int i=1; i<3; i++){
-			JSONObject reply = bc.getJSON();
-			if(i==1){
-				System.out.println("Service reply: "+reply.toString(2));
-				sessionId = bc.getSessionIDProvider().getSessionID(resource, bc.getSessionKey());
-				assertNotNull(sessionId);
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth))
+		{
+			String sessionId = null;
+			for(int i=1; i<3; i++){
+				JSONObject reply = bc.getJSON();
+				if(i==1){
+					System.out.println("Service reply: "+reply.toString(2));
+					sessionId = bc.getSessionIDProvider().getSessionID(resource, bc.getSessionKey());
+					assertNotNull(sessionId);
+				}
+				else{
+					assertEquals(sessionId, bc.getSessionIDProvider().getSessionID(resource, 
+							bc.getSessionKey()));
+				}
+				assertEquals(dn, reply.getString("dn"));
+				assertEquals(issuer, reply.getString("td_consignor"));
+				assertEquals("ETD", reply.getString("auth_method"));
+				assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
 			}
-			else{
-				assertEquals(sessionId, bc.getSessionIDProvider().getSessionID(resource, 
-						bc.getSessionKey()));
-			}
-			assertEquals(dn, reply.getString("dn"));
-			assertEquals(issuer, reply.getString("td_consignor"));
-			assertEquals("ETD", reply.getString("auth_method"));
-			assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
 		}
 	}
-	
+
 	@Test
 	public void testBaseClientWithJWT() throws Exception {
 		String resource = url+"/"+sName+"/User";
 		IAuthCallback auth = new SSHKeyAuthN("demouser", new File("src/test/resources/id_ed25519"),
 				new PasswordSupplierImpl("test123".toCharArray()));
-		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
-		JSONObject reply = bc.getJSON();
-		System.out.println("Service reply: "+reply.toString(2));
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth))
+		{
+			JSONObject reply = bc.getJSON();
+			System.out.println("Service reply: "+reply.toString(2));
+		}
 	}
 
 	@Test
@@ -190,28 +195,31 @@ public class TestRestSecurity {
 		String resource = url+"/"+sName+"/token";
 		IAuthCallback auth = new SSHKeyAuthN("demouser", new File("src/test/resources/id_ed25519"),
 				new PasswordSupplierImpl("test123".toCharArray()));
-		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
-		bc.getUserPreferences().put("role", "user");
 		String token = null;
-		try(ClassicHttpResponse response=bc.get(ContentType.TEXT_PLAIN)){
-			assertEquals(200, response.getCode());
-			token = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-			JSONObject t = JWTUtils.getPayload(token);
-			System.out.println(t.toString(2));
-			assertEquals("CN=Demo User, O=UNICORE, C=EU", t.get("sub"));
-			assertTrue(t.getLong("exp")>=exp);
-			assertNotNull(t.get("preferences"));
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth))
+		{
+			bc.getUserPreferences().put("role", "user");
+			try(ClassicHttpResponse response=bc.get(ContentType.TEXT_PLAIN)){
+				assertEquals(200, response.getCode());
+				token = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+				JSONObject t = JWTUtils.getPayload(token);
+				System.out.println(t.toString(2));
+				assertEquals("CN=Demo User, O=UNICORE, C=EU", t.get("sub"));
+				assertTrue(t.getLong("exp")>=exp);
+				assertNotNull(t.get("preferences"));
+			}
 		}
-
 		final String _t = token;
 		auth = (msg) -> {
 			msg.addHeader("Authorization", "Bearer "+_t);
 		};
-		bc = new BaseClient(url+"/"+sName+"/User", kernel.getClientConfiguration(), auth);
-		JSONObject reply = bc.getJSON();
-		System.out.println("Service reply: "+reply.toString(2));
-		assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
-		assertEquals("ETD", reply.getString("auth_method"));
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth))
+		{
+			JSONObject reply = bc.getJSON();
+			System.out.println("Service reply: "+reply.toString(2));
+			assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
+			assertEquals("ETD", reply.getString("auth_method"));
+		}
 	}
 
 	@Test
@@ -223,11 +231,13 @@ public class TestRestSecurity {
 		String resource = url+"/"+sName+"/token?lifetime="+request;
 		IAuthCallback auth = new SSHKeyAuthN("demouser", new File("src/test/resources/id_ed25519"),
 				new PasswordSupplierImpl("test123".toCharArray()));
-		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
-		RESTException re = assertThrows(RESTException.class, ()-> bc.get(ContentType.TEXT_PLAIN));
-		assertEquals(HttpStatus.SC_BAD_REQUEST, re.getStatus());
-		System.out.println(re.getErrorMessage());
-		assertTrue(re.getErrorMessage().contains("token lifetime"));
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth))
+		{
+			RESTException re = assertThrows(RESTException.class, ()-> bc.get(ContentType.TEXT_PLAIN));
+			assertEquals(HttpStatus.SC_BAD_REQUEST, re.getStatus());
+			System.out.println(re.getErrorMessage());
+			assertTrue(re.getErrorMessage().contains("token lifetime"));
+		}
 	}
 
 	@Test
@@ -235,8 +245,9 @@ public class TestRestSecurity {
 		String resource = url+"/"+sName+"/certificate";
 		IAuthCallback auth = new SSHKeyAuthN("demouser", new File("src/test/resources/id_ed25519"),
 				new PasswordSupplierImpl("test123".toCharArray()));
-		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
-		try(ClassicHttpResponse response=bc.get(ContentType.TEXT_PLAIN)){
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
+			ClassicHttpResponse response=bc.get(ContentType.TEXT_PLAIN))
+		{
 			assertEquals(200, response.getCode());
 			String pem = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 			X509Certificate cert = X509CertUtils.parse(pem);
@@ -244,49 +255,52 @@ public class TestRestSecurity {
 					cert.getSubjectX500Principal().getName());
 		}
 	}
-	
+
 	@Test
 	public void testQueryFields()throws Exception {
-		HttpClient client = HttpUtils.createClient(url, kernel.getClientConfiguration());
 		// only show certain fields
 		HttpGet get = new HttpGet(url+"/"+sName+"/User?fields=role,dn");
 		IAuthCallback pwd = new UsernamePassword("demouser", "test123");
 		pwd.addAuthenticationHeaders(get);
-		try(ClassicHttpResponse response = client.executeOpen(null, get, HttpClientContext.create())){
-			assertEquals(200, response.getCode());
-			JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
-			System.out.println(reply.toString(2));
-			Set<String>keys = reply.keySet();
-			assertEquals(2, keys.size());
-			assertFalse(keys.contains("auth_method"));
-			assertTrue(keys.contains("dn"));
-			assertTrue(keys.contains("role"));
+		try(CloseableHttpClient client = HttpUtils.client(url, kernel.getClientConfiguration()))
+		{
+			try(ClassicHttpResponse response = client.executeOpen(null, get, HttpClientContext.create()))
+			{
+				assertEquals(200, response.getCode());
+				JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
+				System.out.println(reply.toString(2));
+				Set<String>keys = reply.keySet();
+				assertEquals(2, keys.size());
+				assertFalse(keys.contains("auth_method"));
+				assertTrue(keys.contains("dn"));
+				assertTrue(keys.contains("role"));
+			}
+			// exclude fields
+			get = new HttpGet(url+"/"+sName+"/User?fields=!role,!dn");
+			pwd.addAuthenticationHeaders(get);
+			try(ClassicHttpResponse response = client.executeOpen(null, get, HttpClientContext.create())){
+				assertEquals(200, response.getCode());
+				JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
+				System.out.println(reply.toString(2));
+				Set<String>keys = reply.keySet();
+				assertTrue(keys.size()>0);
+				assertFalse(keys.contains("dn"));
+				assertFalse(keys.contains("role"));
+			}
 		}
-		// exclude fields
-		get = new HttpGet(url+"/"+sName+"/User?fields=!role,!dn");
-		pwd.addAuthenticationHeaders(get);
-		try(ClassicHttpResponse response = client.executeOpen(null, get, HttpClientContext.create())){
-			assertEquals(200, response.getCode());
-			JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
-			System.out.println(reply.toString(2));
-			Set<String>keys = reply.keySet();
-			assertTrue(keys.size()>0);
-			assertFalse(keys.contains("dn"));
-			assertFalse(keys.contains("role"));
-		}
-		
 	}
 
 	@Test
 	public void testUserPreferences()throws Exception {
-		HttpClient client = HttpUtils.createClient(url, kernel.getClientConfiguration());
 		// only show certain fields
 		HttpGet get = new HttpGet(url+"/"+sName+"/User?fields=preferences");
 		IAuthCallback pwd = new UsernamePassword("preftest", "test123");
 		pwd.addAuthenticationHeaders(get);
 		String prefs = "group:spam,xlogin:nobody2,supplementaryGroups:bar,role:admin";
 		get.addHeader(AuthNHandler.USER_PREFERENCES_HEADER, prefs);
-		try(ClassicHttpResponse response = client.executeOpen(null, get, HttpClientContext.create())){
+		try(CloseableHttpClient client = HttpUtils.client(url, kernel.getClientConfiguration());
+			ClassicHttpResponse response = client.executeOpen(null, get, HttpClientContext.create()))
+		{
 			assertEquals(200, response.getCode());
 			JSONObject reply = new JSONObject(IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
 			Set<String>keys = reply.keySet();
@@ -319,7 +333,7 @@ public class TestRestSecurity {
 		@Path("/{uniqueID}")
 		@Produces("application/json")
 		public String getRepresentation(@PathParam("uniqueID") String name, 
-					@QueryParam("fields") String fields) throws Exception {
+				@QueryParam("fields") String fields) throws Exception {
 			invocationCounter.incrementAndGet();
 			parsePropertySpec(fields);
 			return getJSON().toString();

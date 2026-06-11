@@ -185,12 +185,13 @@ public class RegistryHandler implements ISubSystem {
 	}
 
 	public void updatePublicKeys(){
-		ExternalRegistryClient erc = getExternalRegistryClient();
-		if(erc==null)return;
+		if(!usesExternalRegistry())return;
 		Status oldStatus = status;
-		try{
+		try(ExternalRegistryClient erc = getExternalRegistryClient())
+		{
 			doUpdateKeys(erc);
-		}catch(Exception ex){
+		}
+		catch(Exception ex){
 			status = Status.DOWN;
 			if(status!=oldStatus) {
 				logger.error("Could not read public keys from external registry: {]", Log.getDetailMessage(ex));
@@ -240,9 +241,9 @@ public class RegistryHandler implements ISubSystem {
 		}
 
 		private static Pair<Boolean, String>check(String url, Kernel kernel) {
-			final RegistryClient rc = new RegistryClient(url, kernel.getClientConfiguration());
 			Callable<String>task = () -> {
-				try {
+				try(RegistryClient rc = new RegistryClient(url, kernel.getClientConfiguration()))
+				{
 					rc.getJSON();
 					return "OK";
 				}catch(RESTException re) {

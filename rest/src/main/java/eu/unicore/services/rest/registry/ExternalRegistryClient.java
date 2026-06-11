@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
@@ -18,7 +19,7 @@ import eu.unicore.util.Log;
  * 
  * @author schuller
  */
-public class ExternalRegistryClient implements IRegistry {
+public class ExternalRegistryClient implements IRegistry, AutoCloseable {
 
 	private static final Logger logger = Log.getLogger(Log.CLIENT, ExternalRegistryClient.class);
 
@@ -106,4 +107,10 @@ public class ExternalRegistryClient implements IRegistry {
 		return result;
 	}
 
+	@Override
+	public void close() {
+		for(RegistryClient c: clients) {
+			IOUtils.closeQuietly(c);
+		}
+	}
 }

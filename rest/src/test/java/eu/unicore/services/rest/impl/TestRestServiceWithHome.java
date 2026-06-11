@@ -200,6 +200,7 @@ public class TestRestServiceWithHome {
 		client.setURL(url+"/"+sName);
 		// just to check the quiet method
 		client.postQuietly(new JSONObject());
+		client.close();
 	}
 	
 	@Test
@@ -273,6 +274,7 @@ public class TestRestServiceWithHome {
 		// same with ignoring error checking
 		client.putQuietly(setP);
 		client.delete();
+		client.close();
 	}
 
 	@Test
@@ -293,6 +295,7 @@ public class TestRestServiceWithHome {
 		}
 		client.delete();
 		MockResourceWithHome.fail_on_getproperties = false;
+		client.close();
 	}
 
 

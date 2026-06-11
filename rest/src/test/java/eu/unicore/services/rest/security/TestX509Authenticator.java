@@ -76,13 +76,15 @@ public class TestX509Authenticator {
 		IAuthCallback auth = (msg) -> {
 			msg.addHeader("Authorization", "Bearer test123");
 		};
-		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
-		JSONObject reply = bc.getJSON();
-		System.out.println("Service reply: "+reply.toString(2));
-		assertEquals("X509", reply.getJSONObject("client").
-				getString("authenticationMethod"));
-		assertEquals("CN=UNICOREX,O=UNICORE,C=EU", reply.getJSONObject("client").
-				getString("dn"));
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth))
+		{
+			JSONObject reply = bc.getJSON();
+			System.out.println("Service reply: "+reply.toString(2));
+			assertEquals("X509", reply.getJSONObject("client").
+					getString("authenticationMethod"));
+			assertEquals("CN=UNICOREX,O=UNICORE,C=EU", reply.getJSONObject("client").
+					getString("dn"));
+		}
 	}
 
 	@Test

@@ -70,20 +70,22 @@ public class TestRegistryServiceAccessControl {
 		rh.getRegistryClient().addEntry("http://foo", content, null);
 		// check we have read access
 		String url = kernel.getContainerProperties().getContainerURL()+"/rest/registries";
-		BaseClient bc = new BaseClient(url, kernel.getClientConfiguration());
-		assertNotNull(bc.getJSON());
-		url = kernel.getContainerProperties().getContainerURL()+"/rest/registries/default_registry";
-		bc.setURL(url);
-		JSONObject j = bc.getJSON();
-		assertNotNull(j);
-		System.out.println(j.toString(2));
-		// check read access on entry
-		String eID = j.getJSONArray("entries").getJSONObject(0).getString("EntryID");
-		url = kernel.getContainerProperties().getContainerURL()+"/rest/registryentries/"+eID;
-		bc.setURL(url);
-		j = bc.getJSON();
-		assertNotNull(j);
-		System.out.println(j.toString(2));
+		try(BaseClient bc = new BaseClient(url, kernel.getClientConfiguration()))
+		{
+			assertNotNull(bc.getJSON());
+			url = kernel.getContainerProperties().getContainerURL()+"/rest/registries/default_registry";
+			bc.setURL(url);
+			JSONObject j = bc.getJSON();
+			assertNotNull(j);
+			System.out.println(j.toString(2));
+			// check read access on entry
+			String eID = j.getJSONArray("entries").getJSONObject(0).getString("EntryID");
+			url = kernel.getContainerProperties().getContainerURL()+"/rest/registryentries/"+eID;
+			bc.setURL(url);
+			j = bc.getJSON();
+			assertNotNull(j);
+			System.out.println(j.toString(2));
+		}
 	}
 
 }

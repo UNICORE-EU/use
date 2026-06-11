@@ -117,15 +117,17 @@ public class TestOAuthAuthenticator {
 		IAuthCallback auth = (msg) -> {
 			msg.addHeader("Authorization", "Bearer test123");
 		};
-		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
-		JSONObject reply = bc.getJSON();
-		System.out.println("Service reply: "+reply.toString(2));
-		assertEquals("OAUTH", reply.getJSONObject("client").
-				getString("authenticationMethod"));
-		assertEquals("UID=demouser@foo.com", reply.getJSONObject("client").
-				getString("dn"));
-		assertEquals("test123", reply.getJSONObject("client").
-				getJSONObject("xlogin").getString("group"));
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth))
+		{
+			JSONObject reply = bc.getJSON();
+			System.out.println("Service reply: "+reply.toString(2));
+			assertEquals("OAUTH", reply.getJSONObject("client").
+					getString("authenticationMethod"));
+			assertEquals("UID=demouser@foo.com", reply.getJSONObject("client").
+					getString("dn"));
+			assertEquals("test123", reply.getJSONObject("client").
+					getJSONObject("xlogin").getString("group"));
+		}
 	}
 	
 	@Test
@@ -134,15 +136,17 @@ public class TestOAuthAuthenticator {
 		IAuthCallback auth = (msg) -> {
 			msg.addHeader("Authorization", "Bearer sometoken");
 		};
-		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
-		JSONObject reply = bc.getJSON();
-		System.out.println("Service reply: "+reply.toString(2));
-		assertEquals("OAUTH", reply.getJSONObject("client").
-				getString("authenticationMethod"));
-		assertEquals("UID=demouser@foo.com", reply.getJSONObject("client").
-				getString("dn"));
-		assertEquals("test123", reply.getJSONObject("client").
-				getJSONObject("xlogin").getString("group"));
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth))
+		{
+			JSONObject reply = bc.getJSON();
+			System.out.println("Service reply: "+reply.toString(2));
+			assertEquals("OAUTH", reply.getJSONObject("client").
+					getString("authenticationMethod"));
+			assertEquals("UID=demouser@foo.com", reply.getJSONObject("client").
+					getString("dn"));
+			assertEquals("test123", reply.getJSONObject("client").
+					getJSONObject("xlogin").getString("group"));
+		}
 	}
 
 	public static class MyApplication extends Application {

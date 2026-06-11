@@ -1,5 +1,6 @@
 package eu.unicore.services.restclient;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayDeque;
@@ -12,12 +13,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
@@ -49,11 +50,11 @@ import eu.unicore.util.httpclient.SessionIDProviderImpl;
  * 
  * @author schuller
  */
-public class BaseClient {
+public class BaseClient implements Closeable {
 
 	protected static final Logger logger = Log.getLogger(Log.CLIENT, BaseClient.class);
 
-	protected final HttpClient client;
+	protected CloseableHttpClient client;
 
 	protected final IAuthCallback authCallback;
 
@@ -78,14 +79,12 @@ public class BaseClient {
 	}
 
 	public BaseClient(String url, IClientConfiguration security, IAuthCallback authCallback){
-		HttpClient client = HttpUtils.createClient(url, security);
-		this.client = client;
 		this.authCallback = authCallback;
 		this.sessionIDProvider = security.getSessionIDProvider()!=null ?
 				security.getSessionIDProvider() : new SessionIDProviderImpl();
 		this.security = security;
 		this.useSessions = security.useSecuritySessions();
-		this.url = url;
+		setURL(url);
 		setupUserPreferences();
 	}
 
@@ -128,8 +127,11 @@ public class BaseClient {
 	 * set the URL of the resource to access (also clears url "history")
 	 */
 	public void setURL(String url){
+		if(url==null)throw new IllegalArgumentException("URL cannot be null");
 		this.url = url;
 		urlStack.clear();
+		if(client!=null)IOUtils.closeQuietly(client);
+		this.client = HttpUtils.client(url, security);
 	}
 
 	public String getURL(){
@@ -469,6 +471,11 @@ public class BaseClient {
 	 */
 	public void setAutomaticErrorChecking(boolean errorChecking) {
 		this.errorChecking = errorChecking;
+	}
+
+	@Override
+	public void close() {
+		IOUtils.closeQuietly(client);
 	}
 
 	public static Map<String,String> asMap(JSONObject o){

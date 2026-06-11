@@ -89,18 +89,20 @@ public class TestSAMLAuthenticator {
 	public void test1() throws Exception {
 		String resource = url+"/"+sName+"/User";
 		UsernamePassword auth = new UsernamePassword("demouser", "test123");
-		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
-		System.out.println("Accessing: "+resource);
-		JSONObject reply = bc.getJSON();
-		System.out.println("Service reply: "+reply.toString(2));
-		assertEquals("CN=demouser,OU=saml",
-				reply.getJSONObject("client").getString("dn"));
-		assertEquals("UNITY-SAML",
-				reply.getJSONObject("client").getString("authenticationMethod"));
-		assertEquals("user",
-				reply.getJSONObject("client").getJSONObject("role").getString("selected"));
-		assertEquals("demouser",
-				reply.getJSONObject("client").getJSONObject("xlogin").getString("UID"));
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth))
+		{
+			System.out.println("Accessing: "+resource);
+			JSONObject reply = bc.getJSON();
+			System.out.println("Service reply: "+reply.toString(2));
+			assertEquals("CN=demouser,OU=saml",
+					reply.getJSONObject("client").getString("dn"));
+			assertEquals("UNITY-SAML",
+					reply.getJSONObject("client").getString("authenticationMethod"));
+			assertEquals("user",
+					reply.getJSONObject("client").getJSONObject("role").getString("selected"));
+			assertEquals("demouser",
+					reply.getJSONObject("client").getJSONObject("xlogin").getString("UID"));
+		}
 	}
 
 	@Test
@@ -109,18 +111,20 @@ public class TestSAMLAuthenticator {
 		IAuthCallback auth = (msg) -> {
 			msg.addHeader("Authorization", "Bearer test123");
 		};
-		BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
-		System.out.println("Accessing: "+resource);
-		JSONObject reply = bc.getJSON();
-		System.out.println(reply.toString(2));
-		assertEquals("CN=demouser,OU=saml",
-				reply.getJSONObject("client").getString("dn"));
-		assertEquals("UNITY-SAML",
-				reply.getJSONObject("client").getString("authenticationMethod"));
-		assertEquals("user",
-				reply.getJSONObject("client").getJSONObject("role").getString("selected"));
-		assertEquals("demouser",
-				reply.getJSONObject("client").getJSONObject("xlogin").getString("UID"));
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth))
+		{
+			System.out.println("Accessing: "+resource);
+			JSONObject reply = bc.getJSON();
+			System.out.println(reply.toString(2));
+			assertEquals("CN=demouser,OU=saml",
+					reply.getJSONObject("client").getString("dn"));
+			assertEquals("UNITY-SAML",
+					reply.getJSONObject("client").getString("authenticationMethod"));
+			assertEquals("user",
+					reply.getJSONObject("client").getJSONObject("role").getString("selected"));
+			assertEquals("demouser",
+					reply.getJSONObject("client").getJSONObject("xlogin").getString("UID"));
+		}
 	}
 	
 	public static class MyApplication extends Application {
