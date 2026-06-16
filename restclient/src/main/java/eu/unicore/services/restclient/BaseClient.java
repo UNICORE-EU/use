@@ -70,20 +70,27 @@ public class BaseClient implements Closeable {
 
 	protected boolean errorChecking = true;
 
-	protected String url;
+	private String url;
 
 	protected StatusLine status;
 
+	protected ClientFactory clientFactory;
+
 	public BaseClient(String url, IClientConfiguration security){
-		this(url,security,null);
+		this(url, security, null, null);
 	}
 
 	public BaseClient(String url, IClientConfiguration security, IAuthCallback authCallback){
+		this(url, security, authCallback, null);
+	}
+
+	public BaseClient(String url, IClientConfiguration security, IAuthCallback authCallback, ClientFactory clientFactory){
 		this.authCallback = authCallback;
 		this.sessionIDProvider = security.getSessionIDProvider()!=null ?
 				security.getSessionIDProvider() : new SessionIDProviderImpl();
 		this.security = security;
 		this.useSessions = security.useSecuritySessions();
+		this.clientFactory = clientFactory;
 		setURL(url);
 		setupUserPreferences();
 	}
@@ -113,25 +120,33 @@ public class BaseClient implements Closeable {
 	 */
 	public void pushURL(String url){
 		urlStack.push(this.url);
-		this.url = url;
+		doSetURL(url);
 	}
 
 	/**
 	 * revert to the previous URL
 	 */
 	public void popURL() {
-		this.url = urlStack.pop();
+		doSetURL(urlStack.pop());
 	}
 
 	/**
 	 * set the URL of the resource to access (also clears url "history")
 	 */
 	public void setURL(String url){
+		doSetURL(url);
+		urlStack.clear();
+	}
+
+	/**
+	 * set the URL of the resource to access (also clears url "history")
+	 */
+	private void doSetURL(String url){
 		if(url==null)throw new IllegalArgumentException("URL cannot be null");
 		this.url = url;
-		urlStack.clear();
 		if(client!=null)IOUtils.closeQuietly(client);
-		this.client = HttpUtils.client(url, security);
+		this.client = clientFactory!=null ?
+				clientFactory.getClient() : HttpUtils.client(this.url, security);
 	}
 
 	public String getURL(){
@@ -179,8 +194,7 @@ public class BaseClient implements Closeable {
 	 * @throws Exception
 	 */
 	public JSONObject getJSON(ContentType accept) throws Exception {
-		ClassicHttpResponse response = get(accept==null ? ContentType.APPLICATION_JSON : accept);
-		return asJSON(response);
+		return asJSON(get(accept==null ? ContentType.APPLICATION_JSON : accept));
 	}
 
 	/**
@@ -252,7 +266,6 @@ public class BaseClient implements Closeable {
 	 */
 	public void putQuietly(JSONObject content) throws Exception {
 		try(ClassicHttpResponse response = put(content)){
-			checkError(response);
 			EntityUtils.consumeQuietly(response.getEntity());
 		}
 	}
@@ -503,4 +516,9 @@ public class BaseClient implements Closeable {
 		}
 		return o;
 	}
+
+	public static interface ClientFactory{
+		public CloseableHttpClient getClient();
+	}
+
 }

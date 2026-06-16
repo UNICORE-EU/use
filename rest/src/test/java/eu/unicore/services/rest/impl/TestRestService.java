@@ -22,6 +22,7 @@ import eu.unicore.services.restclient.BaseClient;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.server.JettyServer;
 import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
+import eu.unicore.util.httpclient.HttpUtils;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -67,9 +68,16 @@ public class TestRestService {
 			String reply = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 			System.out.println("Service reply: "+reply);
 		}
+		// same, but with a custom httpclient factory
+		try(BaseClient client = new BaseClient(url, kernel.getClientConfiguration(),null,
+				()->HttpUtils.client(url, kernel.getClientConfiguration()));
+			ClassicHttpResponse response = client.get(null))
+		{
+			assertEquals(200, response.getCode());
+		}
 		kernel.getContainerProperties().setProperty("messageLogging.test", "false");
 	}
-
+	
 	@Test
 	public void testDeployTwoServices()throws Exception {
 		DeploymentDescriptorImpl dd = new DeploymentDescriptorImpl();

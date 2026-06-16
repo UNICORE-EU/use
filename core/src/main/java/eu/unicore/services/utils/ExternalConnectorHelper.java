@@ -14,7 +14,6 @@ import java.util.function.Supplier;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.impl.CertificateUtils;
@@ -178,16 +177,12 @@ public class ExternalConnectorHelper implements ExternalSystemConnector {
 	 * @throws Exception
 	 */
 	public static X509Certificate[] getSSLPeer(IAuthnAndTrustConfiguration securityCfg, String host, int port, int timeout) throws Exception {
-		SSLSocket s = null;
-		try {
-			SSLSocketFactory socketFactory = new SocketFactoryCreator2(securityCfg.getCredential(), 
-					securityCfg.getValidator(), null).getSocketFactory();
-			s = (SSLSocket) socketFactory.createSocket();
+		SSLSocketFactory socketFactory = new SocketFactoryCreator2(securityCfg.getCredential(), 
+				securityCfg.getValidator(), null).getSocketFactory();
+		try (SSLSocket s = (SSLSocket) socketFactory.createSocket()){
 			s.connect(new InetSocketAddress(host, port), timeout);
 			s.setSoTimeout(timeout);
 			return CertificateUtils.convertToX509Chain(s.getSession().getPeerCertificates());
-		}finally {
-			IOUtils.closeQuietly(s);
 		}
 	}
 

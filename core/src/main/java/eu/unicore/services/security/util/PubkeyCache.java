@@ -26,7 +26,7 @@ public class PubkeyCache {
 		subject = X500NameUtils.getComparableForm(subject);
 		Collection<PublicKey> keys = map.get(subject);
 		if(keys==null) {
-			keys = new HashSet<PublicKey>();
+			keys = new HashSet<>();
 			map.put(subject, keys);
 		}
 		return keys;
