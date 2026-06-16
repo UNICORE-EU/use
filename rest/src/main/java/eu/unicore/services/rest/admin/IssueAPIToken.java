@@ -26,15 +26,17 @@ public class IssueAPIToken implements AdminAction {
 
 	@Override
 	public String getDescription() {
-		return "parameters: subject, [lifetime, uid] ";
+		return "parameters: subject, [lifetime, renewable, preferences] ";
 	}
 
 	@Override
 	public AdminActionResult invoke(Map<String, String> params, Kernel kernel) {
 		try {
-			String lifetimeParam = params.get("lifetime");
-			String subject = params.get("subject");
-			String uid = params.get("uid");
+			String lifetimeParam = params.remove("lifetime");
+			String subject = params.remove("subject");
+			String preferences = params.remove("preferences");
+			String renewable = params.remove("renewable");
+			if(params.size()>0)throw new IllegalArgumentException("Unknown parameter(s): "+params.keySet());
 			Map<String,String> claims = new HashMap<>();
 			claims.put("etd", "true");
 			JWTServerProperties jwtProps = new JWTServerProperties(kernel.getContainerProperties().getRawProperties());
@@ -45,17 +47,30 @@ public class IssueAPIToken implements AdminAction {
 			long remainingCredentialLifetime = Math.max(0, notAfter.getTime() - System.currentTimeMillis());
 			// if user requested a longer lifetime than is possible, we should fault
 			if(lifetimeParam!=null && lifetime>remainingCredentialLifetime) {
-				return new AdminActionResult(false,
-						"Requested token lifetime is longer than the remaining server certificate validity.");
+				throw new IllegalArgumentException("Requested token lifetime is longer than "
+						+ "the remaining server certificate validity.");
 			}
 			lifetime = Math.min(lifetime, remainingCredentialLifetime);
-			if(uid!=null)claims.put("uid", uid);
+			if(Boolean.parseBoolean(renewable)) {
+				claims.put("renewable", "true");
+			}
+			if(preferences!=null) {
+				checkPrefs(preferences);
+				claims.put("preferences", preferences);
+			}
 			AdminActionResult res = new AdminActionResult(true, "OK");
 			res.addResult("token", JWTUtils.createJWTToken(subject, lifetime,
 					issuerCred.getSubjectName(), issuerCred.getKey(), claims));
 			return res;
 		}catch(Exception e) {
 			return new AdminActionResult(false, Log.getDetailMessage(e));
+		}
+	}
+
+	private void checkPrefs(String prefs) {
+		for(String value: prefs.split(",")){
+			String[]tok = value.split(":");
+			if(tok.length!=2)throw new IllegalArgumentException("Invalid format for user preference: "+prefs);
 		}
 	}
 

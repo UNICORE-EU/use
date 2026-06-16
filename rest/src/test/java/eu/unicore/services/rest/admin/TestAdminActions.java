@@ -1,6 +1,7 @@
 package eu.unicore.services.rest.admin;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -35,8 +36,8 @@ public class TestAdminActions {
 
 	@Test
 	public void testIssueAPITokenAdminAction() throws Exception{
-		Kernel kernel=new Kernel("src/test/resources/use.properties");
-		Map<String,AdminAction> act=kernel.getAdminActions();
+		Kernel kernel = new Kernel("src/test/resources/use.properties");
+		Map<String,AdminAction> act = kernel.getAdminActions();
 		assertNotNull(act);
 		AdminAction aAct = act.get("IssueAPIToken");
 		assertNotNull(aAct);
@@ -44,13 +45,29 @@ public class TestAdminActions {
 		Map<String,String>params = new HashMap<String, String>();
 		params.put("subject", "CN=demouser");
 		params.put("lifetime", "60");
-		params.put("uid", "nobody");
+		params.put("preferences", "uid:nobody");
 		AdminActionResult result = aAct.invoke(params, kernel);
 		assertTrue(result.successful());
 		String token = result.getResults().get("token");
 		JWTUtils.verifyJWTToken(token,
 				kernel.getContainerSecurityConfiguration().getCredential().getCertificate().getPublicKey(),
 				null);
+		assertEquals("uid:nobody", JWTUtils.getPayload(token).get("preferences"));
+
+		params = new HashMap<String, String>();
+		params.put("subject", "CN=demouser");
+		params.put("preferences", "invalid");
+		AdminActionResult result2 = aAct.invoke(params, kernel);
+		assertFalse(result2.successful());
+		assertTrue(result2.getMessage().contains("IllegalArgumentException"));
+
+		params = new HashMap<String, String>();
+		params.put("foo", "ham");
+		params.put("bar", "spam");
+		AdminActionResult result3 = aAct.invoke(params, kernel);
+		assertFalse(result3.successful());
+		assertTrue(result3.getMessage().contains("IllegalArgumentException"));
+		assertTrue(result3.getMessage().contains("foo"));
 	}
 
 }
