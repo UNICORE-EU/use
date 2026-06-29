@@ -62,6 +62,7 @@ public class TestAdminActions {
 		assertTrue(result2.getMessage().contains("IllegalArgumentException"));
 
 		params = new HashMap<String, String>();
+		params.put("subject", "CN=demouser");
 		params.put("foo", "ham");
 		params.put("bar", "spam");
 		AdminActionResult result3 = aAct.invoke(params, kernel);
