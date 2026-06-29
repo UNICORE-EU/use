@@ -6,7 +6,7 @@
   <packaging>pom</packaging>
   <description>UNICORE service container</description>
   <inceptionYear>2010</inceptionYear>
-  <version>6.1.1</version>
+  <version>6.1.2</version>
   <name>UNICORE Services Environment</name>
  
   <parent>
@@ -65,10 +65,10 @@
     <herasaf.version>3.0.2</herasaf.version>
     <json.version>20260522</json.version>
     <gson.version>2.14.0</gson.version>
-    <xuudb.version>2.13.5</xuudb.version>
+    <xuudb.version>2.13.6</xuudb.version>
     <jetty.version>12.1.10</jetty.version>
     <jwt.version>10.9.1</jwt.version>
-    <tink.version>1.21.0</tink.version>
+    <tink.version>1.22.0</tink.version>
     <sshj.version>0.40.0</sshj.version>
     <jna.version>5.19.1</jna.version>
     <mvel.version>2.5.2.Final</mvel.version>

@@ -32,10 +32,13 @@ public class IssueAPIToken implements AdminAction {
 	@Override
 	public AdminActionResult invoke(Map<String, String> params, Kernel kernel) {
 		try {
-			String lifetimeParam = params.remove("lifetime");
 			String subject = params.remove("subject");
-			String preferences = params.remove("preferences");
+			if(subject==null) {
+				throw new IllegalArgumentException("Parameter 'subject' is required.");
+			}
+			String lifetimeParam = params.remove("lifetime");
 			String renewable = params.remove("renewable");
+			String preferences = params.remove("preferences");
 			if(params.size()>0)throw new IllegalArgumentException("Unknown parameter(s): "+params.keySet());
 			Map<String,String> claims = new HashMap<>();
 			claims.put("etd", "true");
