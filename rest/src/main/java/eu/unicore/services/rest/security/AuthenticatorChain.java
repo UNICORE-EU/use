@@ -14,6 +14,7 @@ import java.util.ServiceLoader;
 import org.apache.cxf.message.Message;
 import org.apache.logging.log4j.Logger;
 
+import eu.unicore.security.SecurityException;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.ISubSystem;
@@ -200,5 +201,12 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 	public RESTSecurityProperties getSecurityProperties() { 
 		return sp;
 	}
-	
+
+	public static synchronized AuthenticatorChain getAuthenticatorChain(Kernel k) throws SecurityException {
+		IAuthenticator auth = get(k);
+		if(auth instanceof AuthenticatorChain) {
+			return (AuthenticatorChain)auth;
+		}
+		else throw new SecurityException();
+	}
 }

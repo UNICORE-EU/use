@@ -39,4 +39,12 @@ public interface IAuthenticator {
 		return null;
 	}
 
+	public static interface Settable {
+
+		public String getAuthMethod();
+
+		public boolean set(SecurityTokens tokens, String auth) throws Exception;
+
+	}
+
 }

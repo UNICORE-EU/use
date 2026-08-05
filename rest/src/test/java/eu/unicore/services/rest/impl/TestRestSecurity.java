@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
@@ -18,11 +19,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -311,6 +315,43 @@ public class TestRestSecurity {
 			assertEquals("nobody2", active.getJSONArray("xlogin").get(0));
 			assertEquals("spam", active.getJSONArray("group").get(0));
 			assertEquals("bar", active.getJSONArray("supplementaryGroups").get(0));
+		}
+	}
+
+	@Test
+	public void testSetPassword() throws Exception {
+		String resource = url+"/"+sName+"/setPassword";
+		IAuthCallback auth = new UsernamePassword("preftest", "test123");
+		var params = new ArrayList<NameValuePair>();
+		params.add(new BasicNameValuePair("password", "test123"));
+		var content = new UrlEncodedFormEntity(params);
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
+			ClassicHttpResponse response = bc.post(content, ContentType.APPLICATION_FORM_URLENCODED))
+		{
+			String reply = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+			assertEquals(200, response.getCode());
+			assertTrue(reply.startsWith("OK"));
+		}
+
+		// fail: wrong password
+		auth = new UsernamePassword("preftest", "nope");
+		params = new ArrayList<NameValuePair>();
+		params.add(new BasicNameValuePair("password", "nope123"));
+		content = new UrlEncodedFormEntity(params);
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
+			ClassicHttpResponse response = bc.post(content, ContentType.APPLICATION_FORM_URLENCODED))
+		{}catch(RESTException e) {
+			assertEquals(403, e.getStatus());
+		}
+		
+		// fail: different auth method
+		auth = new SSHKeyAuthN("demouser", new File("src/test/resources/id_ed25519"),
+				new PasswordSupplierImpl("test123".toCharArray()));
+		content = new UrlEncodedFormEntity(params);
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth);
+				ClassicHttpResponse response = bc.post(content, ContentType.APPLICATION_FORM_URLENCODED))
+		{}catch(RESTException e) {
+			assertEquals(403, e.getStatus());
 		}
 	}
 

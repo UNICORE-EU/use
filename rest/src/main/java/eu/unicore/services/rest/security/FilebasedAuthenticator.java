@@ -1,23 +1,30 @@
 package eu.unicore.services.rest.security;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.Console;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.cxf.message.Message;
 import org.apache.logging.log4j.Logger;
 
 import eu.unicore.security.HTTPAuthNTokens;
+import eu.unicore.security.SecurityException;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.wsutil.CXFUtils;
 import eu.unicore.util.Log;
@@ -27,19 +34,24 @@ import eu.unicore.util.Log;
  * @author jrybicki
  * @author schuller 
  */
-public class FilebasedAuthenticator implements IAuthenticator {
+public class FilebasedAuthenticator implements IAuthenticator, IAuthenticator.Settable {
 
 	private static final Logger logger =  Log.getLogger(Log.SECURITY,FilebasedAuthenticator.class);
 
-	private final Map<String,AttributesHolder>db = new HashMap<>();
+	private final Map<String,AttributesHolder> db = new LinkedHashMap<>();
 
 	private File dbFile;
 	private long lastUpdated;
 	private String file;
+	private boolean immutable = false;
 
 	public void setFile(String fileName) {
 		this.file = fileName;
 		this.dbFile = new File(file);
+	}
+
+	public void setImmutable(boolean immutable) {
+		this.immutable = immutable;
 	}
 
 	public String getFile() {
@@ -70,8 +82,48 @@ public class FilebasedAuthenticator implements IAuthenticator {
 		if(dn != null){
 			tokens.setUserName(dn);
 			tokens.setConsignorTrusted(true);
-			tokens.getContext().put(AuthNHandler.USER_AUTHN_METHOD, "PASSWORD_FILE");
+			tokens.getContext().put(AuthNHandler.USER_AUTHN_METHOD, authMethod);
 			logger.debug("Authenticated via local username/password: <{}>", dn);
+		}
+		return true;
+	}
+
+	private static final String authMethod = "PASSWORD_FILE";
+
+	@Override
+	public String getAuthMethod(){
+		return authMethod;
+	}
+
+	@Override
+	public boolean set(SecurityTokens tokens, String password) throws Exception {
+		if(immutable)return false;
+		String dn = null;
+		// validate first
+		HTTPAuthNTokens http = (HTTPAuthNTokens)tokens.getContext().get(SecurityTokens.CTX_LOGIN_HTTP);
+		if(http != null) {
+			dn = usernamePassword(http.getUserName(), http.getPasswd());
+		}
+		if(dn==null) {
+			throw new SecurityException("Not authenticated.");
+		}
+		try {
+			String username = http.getUserName();
+			String line = generateLine(username, password, dn);
+			AttributesHolder ah = new AttributesHolder(line);
+			_lock.lock();
+			db.put(username, ah);
+			var lines = readLines(); 
+			for(int i = 0; i<lines.size(); i++) {
+				String l = lines.get(i);
+				if(l.startsWith(username+":")) {
+					lines.set(i, line);
+				}
+			}
+			writeFile(lines);
+		}
+		finally {
+			_lock.unlock();
 		}
 		return true;
 	}
@@ -81,13 +133,15 @@ public class FilebasedAuthenticator implements IAuthenticator {
 		return "Username/password ["+dbFile+"]";
 	}
 
+	private Lock _lock = new ReentrantLock();
+
 	private synchronized void updateDB() throws IOException {
 		if(lastUpdated == 0 || dbFile.lastModified() > lastUpdated){
-			logger.info("(Re)reading username/password authentication info from <"+dbFile.getAbsolutePath()+">");
-			lastUpdated = dbFile.lastModified();
-			try(BufferedReader bufferedReader = new BufferedReader(new FileReader(dbFile))){
-				String line;
-				while((line = bufferedReader.readLine())!=null) {
+			try {
+				_lock.lock();
+				logger.info("(Re)reading username/password authentication info from <"+dbFile.getAbsolutePath()+">");
+				lastUpdated = dbFile.lastModified();
+				for(String line: readLines()) {
 					if (line.trim().startsWith("#") || line.trim().isEmpty()) {
 						continue;
 					}
@@ -95,10 +149,32 @@ public class FilebasedAuthenticator implements IAuthenticator {
 						AttributesHolder af = new AttributesHolder(line);
 						db.put(af.user,af);
 					}
-					catch(IllegalArgumentException ex){
+					catch(Exception ex){
 						logger.error("Invalid line in user authfile {}: {}", dbFile.getAbsolutePath(), line);
 					}
 				}
+			}finally {
+				_lock.unlock();
+			}
+		}
+	}
+
+	List<String>readLines() throws IOException {
+		List<String>lines = new ArrayList<>();
+		try(BufferedReader bufferedReader = new BufferedReader(new FileReader(dbFile))){
+			String line;
+			while((line = bufferedReader.readLine())!=null) {
+				lines.add(line);
+			}
+		}
+		return lines;
+	}
+
+	void writeFile(List<String> lines) throws IOException {
+		try(BufferedWriter writer = new BufferedWriter(new FileWriter(dbFile))){
+			for(String line: lines) {
+				writer.write(line);
+				writer.newLine();
 			}
 		}
 	}
@@ -166,12 +242,9 @@ public class FilebasedAuthenticator implements IAuthenticator {
 		public final String salt;
 		public final String dn;
 
-		public AttributesHolder(String line) throws IllegalArgumentException {
+		public AttributesHolder(String line) {
 			String[] fields = line.split(":",4);
 			//#user:hash:salt:dn
-			if (fields.length!=4) {
-				throw new IllegalArgumentException();
-			}
 			user=fields[0];
 			hash=fields[1];
 			salt=fields[2];

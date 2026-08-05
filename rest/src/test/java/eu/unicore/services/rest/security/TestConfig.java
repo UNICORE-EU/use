@@ -12,7 +12,6 @@ import org.jvnet.libpam.UnixUser;
 import eu.unicore.security.HTTPAuthNTokens;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.services.Kernel;
-import eu.unicore.services.rest.security.FilebasedAuthenticator.AttributesHolder;
 import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.security.TestConfigUtil;
@@ -51,28 +50,6 @@ public class TestConfig {
 		String dn = tokens.getEffectiveUserName();
 		System.out.println("Authenticated DN : "+dn);
 		assertEquals(demoUser,dn);
-	}
-	
-	@Test
-	public void testGenerateLine() throws Exception {
-		System.out.println("Sample password file line: "+FilebasedAuthenticator
-				.generateLine("demouser", "test123", demoUser));
-		String admin = "CN=Demo Admin";
-		System.out.println("Sample password file line: "+FilebasedAuthenticator
-				.generateLine("admin", "admin", admin));
-		String user2 = "CN=Other User, O=UNICORE, C=EU";
-		System.out.println("Sample password file line: "+FilebasedAuthenticator
-				.generateLine("testuser", "321", user2));
-	}
-	
-	@Test
-	public void testAttribHolder(){
-		String line = "user:hash:salt:CN=a:b";
-		AttributesHolder ah = new AttributesHolder(line);
-		assertEquals("user", ah.user);
-		assertEquals("hash", ah.hash);
-		assertEquals("salt", ah.salt);
-		assertEquals("CN=a:b", ah.dn);
 	}
 
 	@Test

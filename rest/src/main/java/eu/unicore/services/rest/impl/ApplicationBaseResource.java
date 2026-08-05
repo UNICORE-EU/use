@@ -29,6 +29,8 @@ import eu.unicore.services.ISubSystem;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.AuthNHandler;
+import eu.unicore.services.rest.security.AuthenticatorChain;
+import eu.unicore.services.rest.security.IAuthenticator;
 import eu.unicore.services.restclient.UserPreferences;
 import eu.unicore.services.restclient.jwt.JWTUtils;
 import eu.unicore.services.restclient.utils.UnitParser;
@@ -36,7 +38,10 @@ import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.util.Log;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
@@ -248,4 +253,32 @@ public class ApplicationBaseResource extends RESTRendererBase {
 		}catch(Exception ex) {}
 		return props;
 	}
+	
+	@POST
+	@Path("/setPassword")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response setPassword(@FormParam("password") String newPassword) throws Exception {
+		try {
+			var tokens = AuthZAttributeStore.getTokens();
+			var method = (String)tokens.getContext().get(AuthNHandler.USER_AUTHN_METHOD);
+			var authChain = AuthenticatorChain.getAuthenticatorChain(kernel);
+			boolean modified = false;
+			for(IAuthenticator auth: authChain.getChain()) {
+				if(auth instanceof IAuthenticator.Settable) {
+					var sAuth = (IAuthenticator.Settable) auth;
+					if(!method.equals(sAuth.getAuthMethod()))continue;
+					modified = modified || sAuth.set(tokens, newPassword);
+				}
+			}
+			return Response.ok().entity("OK - password was changed successfully.").build();
+		}
+		catch(SecurityException se) {
+				return handleError(403, "Cannot change password", se, logger);
+		}
+		catch(Exception ex) {
+				return handleError("Error changing password", ex, logger);
+		}
+	}
+
 }
