@@ -139,7 +139,7 @@ public class FilebasedAuthenticator implements IAuthenticator, IAuthenticator.Se
 		if(lastUpdated == 0 || dbFile.lastModified() > lastUpdated){
 			try {
 				_lock.lock();
-				logger.info("(Re)reading username/password authentication info from <"+dbFile.getAbsolutePath()+">");
+				logger.info("(Re)reading username/password authentication info from <{}>", dbFile.getAbsolutePath());
 				lastUpdated = dbFile.lastModified();
 				for(String line: readLines()) {
 					if (line.trim().startsWith("#") || line.trim().isEmpty()) {
