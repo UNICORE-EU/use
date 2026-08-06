@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -40,6 +41,7 @@ import eu.unicore.services.rest.RestService;
 import eu.unicore.services.rest.jwt.JWTDelegation;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.AuthNHandler;
+import eu.unicore.services.rest.security.FilebasedAuthenticator;
 import eu.unicore.services.restclient.BaseClient;
 import eu.unicore.services.restclient.IAuthCallback;
 import eu.unicore.services.restclient.RESTException;
@@ -68,6 +70,10 @@ public class TestRestSecurity {
 
 	@BeforeAll
 	public static void startServer()throws Exception{
+		String file = "target/test-userauthfile.txt";
+		try (FileWriter f = new FileWriter(file)){
+			f.write(FilebasedAuthenticator.generateLine("someuser", "test123", "CN=someuser"));
+		}
 		FileUtils.deleteQuietly(new File("target/data"));
 		kernel = new Kernel("src/test/resources/use.properties");
 		kernel.start();			
@@ -321,7 +327,7 @@ public class TestRestSecurity {
 	@Test
 	public void testSetPassword() throws Exception {
 		String resource = url+"/"+sName+"/setPassword";
-		IAuthCallback auth = new UsernamePassword("preftest", "test123");
+		IAuthCallback auth = new UsernamePassword("someuser", "test123");
 		var params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair("password", "test123"));
 		var content = new UrlEncodedFormEntity(params);
@@ -334,7 +340,7 @@ public class TestRestSecurity {
 		}
 
 		// fail: wrong password
-		auth = new UsernamePassword("preftest", "nope");
+		auth = new UsernamePassword("someuser", "nope");
 		params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair("password", "nope123"));
 		content = new UrlEncodedFormEntity(params);

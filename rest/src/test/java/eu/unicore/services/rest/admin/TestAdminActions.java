@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import eu.unicore.services.Kernel;
@@ -69,6 +71,30 @@ public class TestAdminActions {
 		assertFalse(result3.successful());
 		assertTrue(result3.getMessage().contains("IllegalArgumentException"));
 		assertTrue(result3.getMessage().contains("foo"));
+	}
+
+	@Test
+	public void testSetPasswordAdminAction() throws Exception{
+		FileUtils.touch(new File("target","test-userauthfile.txt"));
+		Kernel kernel = new Kernel("src/test/resources/use.properties");
+		Map<String,AdminAction> act = kernel.getAdminActions();
+		assertNotNull(act);
+		AdminAction aAct = act.get("SetPassword");
+		assertNotNull(aAct);
+		assertEquals("SetPassword", aAct.getName());
+		Map<String,String>params = new HashMap<>();
+		assertTrue(aAct.invoke(params, kernel).getMessage().contains("'username' is required"));
+		params.put("username", "demouser2");
+		assertTrue(aAct.invoke(params, kernel).getMessage().contains("'password' is required"));
+		params.put("username", "demouser2");
+		params.put("password", "foo");
+		AdminActionResult result = aAct.invoke(params, kernel);
+		assertFalse(result.successful());
+		params.put("username", "demouser2");
+		params.put("password", "foo");
+		params.put("dn", "CN=test123");
+		result = aAct.invoke(params, kernel);
+		assertTrue(result.successful());
 	}
 
 }

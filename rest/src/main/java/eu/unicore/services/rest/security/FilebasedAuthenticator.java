@@ -107,23 +107,32 @@ public class FilebasedAuthenticator implements IAuthenticator, IAuthenticator.Se
 		if(dn==null) {
 			throw new SecurityException("Not authenticated.");
 		}
+		set(http.getUserName(), password, dn);
+		return true;
+	}
+
+	public boolean set(String username, String password, String dn) throws Exception {
+		if(immutable)return false;
 		try {
-			String username = http.getUserName();
+			_lock.lock();
 			String line = generateLine(username, password, dn);
 			AttributesHolder ah = new AttributesHolder(line);
-			_lock.lock();
 			db.put(username, ah);
-			var lines = readLines(); 
+			var lines = readLines();
+			boolean updated = false;
 			for(int i = 0; i<lines.size(); i++) {
 				String l = lines.get(i);
 				if(l.startsWith(username+":")) {
 					lines.set(i, line);
+					updated = true;
 				}
 			}
+			if(!updated) {
+				lines.add(line);
+			}
 			writeFile(lines);
-		}
-		finally {
-			_lock.unlock();
+		} finally {
+				_lock.unlock();
 		}
 		return true;
 	}
@@ -174,12 +183,11 @@ public class FilebasedAuthenticator implements IAuthenticator, IAuthenticator.Se
 		try(BufferedWriter writer = new BufferedWriter(new FileWriter(dbFile))){
 			for(String line: lines) {
 				writer.write(line);
-				writer.newLine();
 			}
 		}
 	}
 
-	private String usernamePassword(String username, String password) {
+	public String usernamePassword(String username, String password) {
 		AttributesHolder af = db.get(username);
 		if(af == null){
 			return null;
@@ -198,10 +206,8 @@ public class FilebasedAuthenticator implements IAuthenticator, IAuthenticator.Se
 	}
 
 	public static String generateLine(String username,String password,String dn) throws Exception {
-		boolean havePassword = !password.isEmpty();
 		String salt = getSalt();
-		String hash = havePassword?generatePassHash(password, salt):"";
-		return String.format("%s:%s:%s:%s\n",username,hash,salt,dn);
+		return String.format("%s:%s:%s:%s\n", username, generatePassHash(password, salt), salt, dn);
 	}
 
 	private boolean verifyPass(String pass, String hash, String salt) {

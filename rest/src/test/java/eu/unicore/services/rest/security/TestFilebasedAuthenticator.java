@@ -23,7 +23,7 @@ public class TestFilebasedAuthenticator {
 	@Test
 	public void testAuthenticator() throws Exception {
 		Properties p = TestConfigUtil.getInsecureProperties();
-		String file = "target/test-usermapfile.txt";
+		String file = "target/test-userauthfile2.txt";
 		try (FileWriter f = new FileWriter(file)){
 			f.write(FilebasedAuthenticator.generateLine("demouser", "test123", demoUser));
 		}
@@ -63,7 +63,7 @@ public class TestFilebasedAuthenticator {
 	@Test
 	public void testImmutable() throws Exception {
 		Properties p = TestConfigUtil.getInsecureProperties();
-		String file = "target/test-usermapfile.txt";
+		String file = "target/test-userauthfile2.txt";
 		try (FileWriter f = new FileWriter(file)){
 			f.write(FilebasedAuthenticator.generateLine("demouser", "test123", demoUser));
 		}
