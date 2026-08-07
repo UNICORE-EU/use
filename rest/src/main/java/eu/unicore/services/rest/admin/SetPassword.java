@@ -43,15 +43,17 @@ public class SetPassword implements AdminAction {
 			if(params.size()>0)throw new IllegalArgumentException("Unknown parameter(s): "+params.keySet());
 			var authChain = AuthenticatorChain.getAuthenticatorChain(kernel);
 			boolean modified = false;
+			boolean haveUser = false;
 			boolean haveFilebasedAuth = false;
 			for(IAuthenticator auth: authChain.getChain()) {
 				if(auth instanceof FilebasedAuthenticator) {
 					haveFilebasedAuth = true;
 					var fAuth = (FilebasedAuthenticator) auth;
 					if(dn==null) {
-						dn = fAuth.usernamePassword(username, password);
+						dn = fAuth.getDN(username);
 					}
 					if(dn!=null) {
+						haveUser = true;
 						modified = fAuth.set(username, password, dn);
 						if(modified)break;
 					}
@@ -62,7 +64,8 @@ public class SetPassword implements AdminAction {
 			}
 			else {
 				return new AdminActionResult(false, "Password could not be set"
-						+(!haveFilebasedAuth?" (no auth file configured)":""));
+						+(!haveFilebasedAuth?" (no auth file configured)":"")
+						+(!haveUser?" (no such user)":""));
 			}
 		}catch(Exception e) {
 			return new AdminActionResult(false, Log.getDetailMessage(e));

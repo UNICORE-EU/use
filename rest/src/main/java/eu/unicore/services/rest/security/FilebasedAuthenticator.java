@@ -187,6 +187,14 @@ public class FilebasedAuthenticator implements IAuthenticator, IAuthenticator.Se
 		}
 	}
 
+	public String getDN(String username) {
+		AttributesHolder af = db.get(username);
+		if(af == null){
+			return null;
+		}
+		return af.dn;
+	}
+
 	public String usernamePassword(String username, String password) {
 		AttributesHolder af = db.get(username);
 		if(af == null){

@@ -90,6 +90,7 @@ public class TestAdminActions {
 		params.put("password", "foo");
 		AdminActionResult result = aAct.invoke(params, kernel);
 		assertFalse(result.successful());
+		assertTrue(result.getMessage().contains("no such user"));
 		params.put("username", "demouser2");
 		params.put("password", "foo");
 		params.put("dn", "CN=test123");
