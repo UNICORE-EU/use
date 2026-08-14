@@ -72,7 +72,7 @@ public class TestRestSecurity {
 	public static void startServer()throws Exception{
 		String file = "target/test-userauthfile.txt";
 		try (FileWriter f = new FileWriter(file)){
-			f.write(FilebasedAuthenticator.generateLine("someuser", "test123", "CN=someuser"));
+			f.write(FilebasedAuthenticator.generateLine("someuser", "test123", "CN=someuser")+"\n");
 		}
 		FileUtils.deleteQuietly(new File("target/data"));
 		kernel = new Kernel("src/test/resources/use.properties");

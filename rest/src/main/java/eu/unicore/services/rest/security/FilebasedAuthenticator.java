@@ -1,17 +1,16 @@
 package eu.unicore.services.rest.security;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.Console;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -20,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.cxf.message.Message;
 import org.apache.logging.log4j.Logger;
 
@@ -113,23 +113,23 @@ public class FilebasedAuthenticator implements IAuthenticator, IAuthenticator.Se
 
 	public boolean set(String username, String password, String dn) throws Exception {
 		if(immutable)return false;
+		String line = generateLine(username, password, dn);
+		AttributesHolder ah = new AttributesHolder(line);
+		var lines = readLines();
+		boolean updated = false;
+		for(int i = 0; i<lines.size(); i++) {
+			String l = lines.get(i);
+			if(l.startsWith(username+":")) {
+				lines.set(i, line);
+				updated = true;
+			}
+		}
+		if(!updated) {
+			lines.add(line);
+		}
 		try {
 			_lock.lock();
-			String line = generateLine(username, password, dn);
-			AttributesHolder ah = new AttributesHolder(line);
 			db.put(username, ah);
-			var lines = readLines();
-			boolean updated = false;
-			for(int i = 0; i<lines.size(); i++) {
-				String l = lines.get(i);
-				if(l.startsWith(username+":")) {
-					lines.set(i, line);
-					updated = true;
-				}
-			}
-			if(!updated) {
-				lines.add(line);
-			}
 			writeFile(lines);
 		} finally {
 				_lock.unlock();
@@ -169,21 +169,14 @@ public class FilebasedAuthenticator implements IAuthenticator, IAuthenticator.Se
 	}
 
 	List<String>readLines() throws IOException {
-		List<String>lines = new ArrayList<>();
-		try(BufferedReader bufferedReader = new BufferedReader(new FileReader(dbFile))){
-			String line;
-			while((line = bufferedReader.readLine())!=null) {
-				lines.add(line);
-			}
+		try(InputStream is = new FileInputStream(dbFile)){
+			return IOUtils.readLines(is, "UTF-8");
 		}
-		return lines;
 	}
 
 	void writeFile(List<String> lines) throws IOException {
-		try(BufferedWriter writer = new BufferedWriter(new FileWriter(dbFile))){
-			for(String line: lines) {
-				writer.write(line);
-			}
+		try(OutputStream os = new FileOutputStream(dbFile)){
+			IOUtils.writeLines(lines, null, os, "UTF-8");
 		}
 	}
 
@@ -209,13 +202,13 @@ public class FilebasedAuthenticator implements IAuthenticator, IAuthenticator.Se
 		String username = console.readLine("Username:");
 		String password = new String(console.readPassword("Password:"));
 		String dn = new String(console.readLine("DN:"));
-		System.out.println("Add following line to password file");
-		System.out.printf(generateLine(username,password,dn));
+		System.out.println("Add the following line to the password file:");
+		System.out.println(generateLine(username,password,dn));
 	}
 
 	public static String generateLine(String username,String password,String dn) throws Exception {
 		String salt = getSalt();
-		return String.format("%s:%s:%s:%s\n", username, generatePassHash(password, salt), salt, dn);
+		return String.format("%s:%s:%s:%s", username, generatePassHash(password, salt), salt, dn);
 	}
 
 	private boolean verifyPass(String pass, String hash, String salt) {
