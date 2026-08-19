@@ -57,15 +57,15 @@
   </scm>
 
   <properties>
-    <specification.version>11.1.0</specification.version>
+    <specification.version>11.2.0</specification.version>
     <compiler.fork>false</compiler.fork>
     <persistence.version>1.3.3</persistence.version>
-    <secutils.version>5.0.3</secutils.version>
-    <seclib.version>8.2.0</seclib.version>
+    <secutils.version>5.0.4</secutils.version>
+    <seclib.version>8.2.1</seclib.version>
     <herasaf.version>3.0.2</herasaf.version>
-    <json.version>20260719</json.version>
+    <json.version>20260814</json.version>
     <gson.version>2.14.0</gson.version>
-    <xuudb.version>2.13.5</xuudb.version>
+    <xuudb.version>2.13.6</xuudb.version>
     <jetty.version>12.1.12</jetty.version>
     <jwt.version>10.9.1</jwt.version>
     <tink.version>1.23.0</tink.version>
