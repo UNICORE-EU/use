@@ -46,7 +46,7 @@ public class TestSAMLAuthenticator {
 		p.setProperty("persistence.directory", "target/data");
 		p.setProperty("container.security.rest.authentication.order", "SAML SAML2");
 		p.setProperty("container.security.rest.authentication.SAML.class",
-				UnitySAMLAuthenticator.class.getName());
+				SAMLUsernamePasswordAuthenticator.class.getName());
 		p.setProperty("container.security.rest.authentication.SAML.address",
 				"http://localhost:55444/rest/idp/saml");
 		p.setProperty("container.security.rest.authentication.SAML.validate","false");
@@ -56,7 +56,7 @@ public class TestSAMLAuthenticator {
 				"preferredUsername[0]");
 
 		p.setProperty("container.security.rest.authentication.SAML2.class",
-				UnityOAuthAuthenticator.class.getName());
+				SAMLBearerTokenAuthenticator.class.getName());
 		p.setProperty("container.security.rest.authentication.SAML2.address",
 				"http://localhost:55444/rest/idp/saml");
 		p.setProperty("container.security.rest.authentication.SAML2.validate","false");
@@ -64,6 +64,9 @@ public class TestSAMLAuthenticator {
 				"'user'");
 		p.setProperty("container.security.rest.authentication.SAML2.uidAssign",
 				"preferredUsername[0]");
+		p.setProperty("container.security.rest.authentication.SAML2.identityAssign",
+				"'CN='+preferredUsername[0]+',OU=test'");
+
 		kernel = new Kernel(p);
 		kernel.start();			
 		DeploymentDescriptorImpl dd = new DeploymentDescriptorImpl();
@@ -116,7 +119,7 @@ public class TestSAMLAuthenticator {
 			System.out.println("Accessing: "+resource);
 			JSONObject reply = bc.getJSON();
 			System.out.println(reply.toString(2));
-			assertEquals("CN=demouser,OU=saml",
+			assertEquals("CN=demouser,OU=test",
 					reply.getJSONObject("client").getString("dn"));
 			assertEquals("UNITY-SAML",
 					reply.getJSONObject("client").getString("authenticationMethod"));

@@ -12,8 +12,8 @@ public class CoreAuthDefaults implements AuthenticatorDefaults {
 		defs.put("PAM", PAMAuthenticator.class.getName());
 		defs.put("FILE", FilebasedAuthenticator.class.getName());
 		defs.put("OAUTH", OAuthAuthenticator.class.getName());
-		defs.put("UNITY-OAUTH", UnityOAuthAuthenticator.class.getName());
-		defs.put("UNITY-PASSWORD", UnitySAMLAuthenticator.class.getName());
+		defs.put("UNITY-OAUTH", SAMLBearerTokenAuthenticator.class.getName());
+		defs.put("UNITY-PASSWORD", SAMLUsernamePasswordAuthenticator.class.getName());
 		defs.put("SSHKEY", SSHKeyAuthenticator.class.getName());
 	}
 

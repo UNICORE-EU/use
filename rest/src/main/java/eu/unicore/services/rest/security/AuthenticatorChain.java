@@ -106,6 +106,10 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 	static {
 		aliases.put("eu.unicore.uftp.authserver.authenticate.SSHKeyAuthenticator",
 					SSHKeyAuthenticator.class.getName());
+		aliases.put("eu.unicore.services.rest.security.UnityOAuthAuthenticator",
+				SAMLBearerTokenAuthenticator.class.getName());
+		aliases.put("eu.unicore.services.rest.security.UnitySAMLAuthenticator",
+				SAMLUsernamePasswordAuthenticator.class.getName());
 	}
 
 	private IAuthenticator configure(String name, RESTSecurityProperties properties, Kernel kernel) throws ConfigurationException {

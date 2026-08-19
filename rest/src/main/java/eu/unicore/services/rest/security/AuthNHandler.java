@@ -73,6 +73,8 @@ public class AuthNHandler implements ContainerRequestFilter {
 	// key for storing a Bearer token in the security tokens
 	public final static String UC_BEARER_TOKEN = "UC_OAUTH_BEARER_TOKEN";
 
+	private final static String _ETD_FIXED_ATTR = "__fixed__";
+
 	private final SecuritySessionStore sessionStore;
 
 	private final boolean useSessions;
@@ -200,7 +202,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 			if(userprefs!=null) {
 				parsePrefsItem(userprefs, tokens);
 				// prevent overriding these
-				tokens.getUserPreferences().put("__fixed__", new String[] {"true"});
+				tokens.getUserPreferences().put(_ETD_FIXED_ATTR, new String[] {"true"});
 			}
 		}
 	}
@@ -246,7 +248,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 	 *  
 	 */
 	private void handleUserPreferences(Message message, SecurityTokens tokens){
-		if(tokens.getUserPreferences().get("__fixed__")!=null) {
+		if(tokens.getUserPreferences().get(_ETD_FIXED_ATTR)!=null) {
 			return;
 		}
 		Enumeration<String>headers = CXFUtils.getServletRequest(message).getHeaders(USER_PREFERENCES_HEADER);

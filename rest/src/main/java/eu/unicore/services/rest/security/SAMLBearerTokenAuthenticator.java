@@ -20,7 +20,7 @@ import eu.unicore.util.httpclient.DefaultClientConfiguration;
  *
  * @author schuller 
  */
-public class UnityOAuthAuthenticator extends UnityBaseSAMLAuthenticator {
+public class SAMLBearerTokenAuthenticator extends BaseSAMLAuthenticator {
 
 	private final static Collection<String> s = Collections.singletonList("Bearer");
 
@@ -37,7 +37,7 @@ public class UnityOAuthAuthenticator extends UnityBaseSAMLAuthenticator {
 
 	@Override
 	public String toString(){
-		return "Unity SAML with OAuth Bearer token ["+super.toString()+"]";
+		return "SAML with Bearer token ["+super.toString()+"]";
 	}
 
 	@Override

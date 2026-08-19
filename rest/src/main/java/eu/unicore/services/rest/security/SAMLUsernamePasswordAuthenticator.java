@@ -16,7 +16,7 @@ import eu.unicore.util.httpclient.DefaultClientConfiguration;
  *
  * @author schuller 
  */
-public class UnitySAMLAuthenticator extends UnityBaseSAMLAuthenticator {
+public class SAMLUsernamePasswordAuthenticator extends BaseSAMLAuthenticator {
 
 	private final static Collection<String> s = Collections.singletonList("Basic");
 
@@ -27,7 +27,7 @@ public class UnitySAMLAuthenticator extends UnityBaseSAMLAuthenticator {
 
 	@Override
 	public String toString(){
-		return "Unity SAML with username+password ["+super.toString()+"]";
+		return "SAML with username+password ["+super.toString()+"]";
 	}
 
 	@Override

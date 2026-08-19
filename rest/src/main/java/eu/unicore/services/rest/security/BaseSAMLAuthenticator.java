@@ -21,6 +21,7 @@ import eu.unicore.samly2.validators.SSOAuthnAssertionValidator;
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.wsutil.samlclient.AuthnResponseAssertions;
 import eu.unicore.security.wsutil.samlclient.SAMLAuthnClient;
+import eu.unicore.services.rest.RESTUtils;
 import eu.unicore.util.Log;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import jakarta.xml.ws.WebServiceException;
@@ -38,9 +39,9 @@ import jakarta.xml.ws.WebServiceException;
  * 
  * @author schuller 
  */
-public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator<AuthnResponseAssertions> {
+public abstract class BaseSAMLAuthenticator extends BaseRemoteAuthenticator<AuthnResponseAssertions> {
 
-	private static final Logger logger = Log.getLogger(Log.SECURITY,UnityBaseSAMLAuthenticator.class);
+	private static final Logger logger = Log.getLogger(Log.SECURITY,BaseSAMLAuthenticator.class);
 
 	private boolean validate = true;
 
@@ -74,10 +75,12 @@ public abstract class UnityBaseSAMLAuthenticator extends BaseRemoteAuthenticator
 
 	@Override
 	protected String assignIdentity(AuthnResponseAssertions auth, Map<String,Object> attrs){
-		if(auth.getAuthNAssertions().size()>0){
+		if(identityAssign==null && auth.getAuthNAssertions().size()>0){
 			return auth.getAuthNAssertions().get(0).getSubjectName();
 		}
-		return null;
+		else{
+			return RESTUtils.evaluateToString(identityAssign, attrs);
+		}
 	}
 
 	protected void validate(AuthnResponseAssertions authn){
