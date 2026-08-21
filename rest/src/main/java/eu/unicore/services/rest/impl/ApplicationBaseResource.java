@@ -27,6 +27,7 @@ import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.ISubSystem;
 import eu.unicore.services.Kernel;
+import eu.unicore.services.rest.Link;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.AuthNHandler;
 import eu.unicore.services.rest.security.AuthenticatorChain;
@@ -281,4 +282,12 @@ public class ApplicationBaseResource extends RESTRendererBase {
 		}
 	}
 
+	@Override
+	protected void updateLinks(){
+		if(AuthenticatorChain.hasSettable(kernel)){
+			links.add(new Link("setPassword", getBaseURL()+"/setPassword"));
+		}
+		links.add(new Link("issueToken", getBaseURL()+"/token"));
+		links.add(new Link("serverCertificate", getBaseURL()+"/certificate"));
+	}
 }

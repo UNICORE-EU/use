@@ -26,4 +26,14 @@ public class Link {
 		return relation;
 	}
 
+	@Override
+	public int hashCode() {
+		return this.href.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if(other==null || !(other instanceof Link))return false;
+		return this.href.equals(((Link)other).href);
+	}
 }

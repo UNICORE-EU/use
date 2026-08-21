@@ -3,7 +3,6 @@ package eu.unicore.services.rest.impl;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +47,7 @@ public abstract class RESTRendererBase implements KernelInjectable {
 	/**
 	 * list of links to publish in a GET
 	 */
-	protected final Collection<Link> links = new ArrayList<>();
+	protected final Collection<Link> links = new HashSet<>();
 
 	/**
 	 * properties requested in a GET - if empty, 
@@ -82,8 +81,7 @@ public abstract class RESTRendererBase implements KernelInjectable {
 	 * Update/create the links for the current state of the resource.
 	 * (Invoked when the resource's representation is retrieved)
 	 */
-	protected void updateLinks(){
-	}
+	protected void updateLinks() {}
 
 	protected Map<String,Object>getProperties() throws Exception{
 		return new HashMap<>() {

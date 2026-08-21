@@ -349,7 +349,6 @@ public class TestRestSecurity {
 		{}catch(RESTException e) {
 			assertEquals(403, e.getStatus());
 		}
-		
 		// fail: different auth method
 		auth = new SSHKeyAuthN("demouser", new File("src/test/resources/id_ed25519"),
 				new PasswordSupplierImpl("test123".toCharArray()));
@@ -361,6 +360,16 @@ public class TestRestSecurity {
 		}
 	}
 
+	@Test
+	public void testApplicationBaseResource() throws Exception {
+		var a = new ApplicationBaseResource();
+		a.setKernel(kernel);
+		a.setBaseURL("https://foo.org");
+		a.updateLinks();
+		a.updateLinks();
+		assertEquals(3, a.links.size());
+	}
+		
 	public static class MyApplication extends Application {
 		@Override
 		public Set<Class<?>> getClasses() {

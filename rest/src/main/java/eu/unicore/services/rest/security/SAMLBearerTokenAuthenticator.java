@@ -20,7 +20,7 @@ import eu.unicore.util.httpclient.DefaultClientConfiguration;
  *
  * @author schuller 
  */
-public class SAMLBearerTokenAuthenticator extends BaseSAMLAuthenticator {
+public class SAMLBearerTokenAuthenticator extends AbstractSAMLAuthenticator {
 
 	private final static Collection<String> s = Collections.singletonList("Bearer");
 

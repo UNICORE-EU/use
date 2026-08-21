@@ -109,7 +109,7 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 		aliases.put("eu.unicore.services.rest.security.UnityOAuthAuthenticator",
 				SAMLBearerTokenAuthenticator.class.getName());
 		aliases.put("eu.unicore.services.rest.security.UnitySAMLAuthenticator",
-				SAMLUsernamePasswordAuthenticator.class.getName());
+				SAMLBasicAuthenticator.class.getName());
 	}
 
 	private IAuthenticator configure(String name, RESTSecurityProperties properties, Kernel kernel) throws ConfigurationException {
@@ -213,4 +213,12 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 		}
 		else throw new SecurityException();
 	}
+
+	public static boolean hasSettable(Kernel k) {
+		 for(IAuthenticator auth: getAuthenticatorChain(k).getChain()) {
+			 if(auth instanceof Settable)return true;
+		 }
+		 return false;
+	}
+
 }

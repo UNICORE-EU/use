@@ -39,9 +39,9 @@ import jakarta.xml.ws.WebServiceException;
  * 
  * @author schuller 
  */
-public abstract class BaseSAMLAuthenticator extends BaseRemoteAuthenticator<AuthnResponseAssertions> {
+public abstract class AbstractSAMLAuthenticator extends BaseRemoteAuthenticator<AuthnResponseAssertions> {
 
-	private static final Logger logger = Log.getLogger(Log.SECURITY,BaseSAMLAuthenticator.class);
+	private static final Logger logger = Log.getLogger(Log.SECURITY,AbstractSAMLAuthenticator.class);
 
 	private boolean validate = true;
 
@@ -52,7 +52,7 @@ public abstract class BaseSAMLAuthenticator extends BaseRemoteAuthenticator<Auth
 	@Override
 	protected void finalizeInit(){
 		super.finalizeInit();
-		setExternalSystemName("Unity "+simpleAddress);
+		setExternalSystemName("SAML-IdP "+simpleAddress);
 	}
 
 	@Override

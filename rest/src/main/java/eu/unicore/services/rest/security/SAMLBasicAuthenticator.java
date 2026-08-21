@@ -16,7 +16,7 @@ import eu.unicore.util.httpclient.DefaultClientConfiguration;
  *
  * @author schuller 
  */
-public class SAMLUsernamePasswordAuthenticator extends BaseSAMLAuthenticator {
+public class SAMLBasicAuthenticator extends AbstractSAMLAuthenticator {
 
 	private final static Collection<String> s = Collections.singletonList("Basic");
 

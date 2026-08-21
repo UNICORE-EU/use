@@ -40,7 +40,7 @@ public final class PostInvokeHandler extends AbstractPhaseInterceptor<Message> {
 				if(session!=null){
 					response.setHeader(SecuritySessionUtils.SESSION_ID_HEADER, session.getSessionID());
 					response.setHeader(SecuritySessionUtils.SESSION_LIFETIME_HEADER, String.valueOf(session.getLifetime()));
-					clearSession();
+					threadSession.remove();
 				}
 			}
 		}catch(Exception ex){}
@@ -73,11 +73,4 @@ public final class PostInvokeHandler extends AbstractPhaseInterceptor<Message> {
 		threadSession.set(session);
 	}
 
-	public static void clearSession(){
-		threadSession.remove();
-	}
-
-	public static SecuritySession getSession(){
-		return threadSession.get();
-	}
 }

@@ -8,7 +8,9 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
-public class TestRESTRendererBase {
+import eu.unicore.services.rest.Link;
+
+public class TestRESTBaseClasses {
 
 	@Test
 	public void testPropertiesMap() throws Exception {
@@ -27,4 +29,14 @@ public class TestRESTRendererBase {
 		assertEquals("bar", m.get("11"));
 		assertFalse(m.containsKey("2"));
 	}
+
+
+	@Test
+	public void testLink() throws Exception {
+		var l1 = new Link("foo","https://1.org", "");
+		var l2 = new Link("foo2","https://1.org", "2");
+		assertEquals(l1, l2);
+		assertEquals(l1.hashCode(), l2.hashCode());
+	}
+
 }

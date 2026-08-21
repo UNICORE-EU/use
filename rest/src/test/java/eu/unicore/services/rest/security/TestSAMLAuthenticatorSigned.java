@@ -49,7 +49,7 @@ public class TestSAMLAuthenticatorSigned {
 		p.setProperty("persistence.directory", "target/data");
 		p.setProperty("container.security.rest.authentication.order", "SAML SAML2");
 		p.setProperty("container.security.rest.authentication.SAML.class",
-				SAMLUsernamePasswordAuthenticator.class.getName());
+				SAMLBasicAuthenticator.class.getName());
 		p.setProperty("container.security.rest.authentication.SAML.address",
 				"http://localhost:55444/rest/idp/saml");
 		p.setProperty("container.security.rest.authentication.SAML.validate","true");
