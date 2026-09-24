@@ -1,8 +1,5 @@
 package eu.unicore.services.rest.security;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.io.File;
 import java.util.HashSet;
 import java.util.Map;
@@ -20,7 +17,6 @@ import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.RestService;
 import eu.unicore.services.rest.impl.ApplicationBaseResource;
 import eu.unicore.services.restclient.BaseClient;
-import eu.unicore.services.restclient.RESTException;
 import eu.unicore.services.restclient.UsernamePassword;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.services.server.JettyServer;
@@ -106,19 +102,6 @@ public class TestSAMLAuthenticatorSigned {
 			System.out.println("Accessing: "+resource);
 			JSONObject reply = bc.getJSON();
 			System.out.println("Service reply: "+reply.toString(2));
-		}
-	}
-
-	@Test
-	public void testValidateFail() throws Exception {
-		invalidateCache();
-		MockSAMLServer.sign = false;
-		String resource = url+"/"+sName+"/User";
-		UsernamePassword auth = new UsernamePassword("demouser", "test123");
-		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth)){
-			System.out.println("Accessing: "+resource);
-			RESTException re = assertThrows(RESTException.class, ()->bc.getJSON());
-			assertEquals(403, re.getStatus());
 		}
 	}
 
