@@ -10,7 +10,7 @@ import org.apache.xmlbeans.XmlString;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import eu.emi.security.authn.x509.X509Credential;
+import io.imunity.tanl.x509.X509Credential;
 import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.assertion.Assertion;
 import eu.unicore.samly2.proto.AssertionResponse;

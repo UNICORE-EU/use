@@ -3,7 +3,7 @@ package eu.unicore.services.pdp.request.profile;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.emi.security.authn.x509.impl.X500NameUtils;
+import io.imunity.tanl.x509.impl.X500NameUtils;
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
 import eu.unicore.security.XACMLAttribute;

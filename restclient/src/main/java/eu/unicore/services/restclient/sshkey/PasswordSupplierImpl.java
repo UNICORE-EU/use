@@ -1,6 +1,6 @@
 package eu.unicore.services.restclient.sshkey;
 
-import eu.emi.security.authn.x509.helpers.PasswordSupplier;
+import io.imunity.tanl.x509.helpers.PasswordSupplier;
 
 public class PasswordSupplierImpl implements PasswordSupplier {
 	

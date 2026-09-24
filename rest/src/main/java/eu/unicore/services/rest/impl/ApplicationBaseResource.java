@@ -12,9 +12,9 @@ import java.util.Map;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
 
-import eu.emi.security.authn.x509.X509Credential;
-import eu.emi.security.authn.x509.impl.CertificateUtils;
-import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
+import io.imunity.tanl.x509.X509Credential;
+import io.imunity.tanl.x509.impl.CertificateUtils;
+import io.imunity.tanl.x509.impl.CertificateUtils.Encoding;
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.Client;
 import eu.unicore.security.Client.Type;

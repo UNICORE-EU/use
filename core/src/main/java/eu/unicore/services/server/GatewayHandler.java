@@ -26,7 +26,7 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
 
-import eu.emi.security.authn.x509.impl.X500NameUtils;
+import io.imunity.tanl.x509.impl.X500NameUtils;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.ISubSystem;

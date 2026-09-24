@@ -3,8 +3,8 @@ package eu.unicore.services.pdp;
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 
-import eu.emi.security.authn.x509.impl.CertificateUtils;
-import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
+import io.imunity.tanl.x509.impl.CertificateUtils;
+import io.imunity.tanl.x509.impl.CertificateUtils.Encoding;
 import eu.unicore.security.Client;
 import eu.unicore.security.Role;
 import eu.unicore.security.SecurityTokens;

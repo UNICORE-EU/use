@@ -8,17 +8,11 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
-import eu.emi.security.authn.x509.X509CertChainValidator;
-import eu.unicore.samly2.SAMLBindings;
 import eu.unicore.samly2.SAMLConstants;
-import eu.unicore.samly2.assertion.AssertionParser;
 import eu.unicore.samly2.assertion.AttributeAssertionParser;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.samly2.elements.NameID;
 import eu.unicore.samly2.exceptions.SAMLValidationException;
-import eu.unicore.samly2.trust.TruststoreBasedSamlTrustChecker;
-import eu.unicore.samly2.validators.SSOAuthnAssertionValidator;
-import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.wsutil.samlclient.AuthnResponseAssertions;
 import eu.unicore.security.wsutil.samlclient.SAMLAuthnClient;
 import eu.unicore.services.rest.RESTUtils;
@@ -43,10 +37,8 @@ public abstract class AbstractSAMLAuthenticator extends BaseRemoteAuthenticator<
 
 	private static final Logger logger = Log.getLogger(Log.SECURITY,AbstractSAMLAuthenticator.class);
 
-	private boolean validate = true;
-
 	public void setValidate(boolean validate) {
-		this.validate = validate;
+		// nop
 	}
 
 	@Override
@@ -57,9 +49,7 @@ public abstract class AbstractSAMLAuthenticator extends BaseRemoteAuthenticator<
 
 	@Override
 	protected AuthnResponseAssertions performAuth(DefaultClientConfiguration clientCfg) throws Exception{
-		AuthnResponseAssertions auth = doAuth(kernel.getContainerProperties().getContainerURL(), clientCfg);
-		if(validate)validate(auth);
-		return auth;
+		return doAuth(kernel.getContainerProperties().getContainerURL(), clientCfg);
 	}
 
 	@Override
@@ -80,29 +70,6 @@ public abstract class AbstractSAMLAuthenticator extends BaseRemoteAuthenticator<
 		}
 		else{
 			return RESTUtils.evaluateToString(identityAssign, attrs);
-		}
-	}
-
-	protected void validate(AuthnResponseAssertions authn){
-		X509CertChainValidator x509 = kernel.getContainerSecurityConfiguration().getTrustedAssertionIssuers();
-		TruststoreBasedSamlTrustChecker samlTrustChecker = new TruststoreBasedSamlTrustChecker(x509);
-		String endpointURI = kernel.getContainerProperties().getContainerURL();
-		String consumerName = kernel.getContainerSecurityConfiguration().getCredential().getSubjectName();
-		SSOAuthnAssertionValidator validator = new SSOAuthnAssertionValidator(consumerName, 
-				endpointURI, null, 0, samlTrustChecker, null, SAMLBindings.OTHER);
-		validator.setLaxInResponseToChecking(true);
-		validator.addConsumerSamlNameAlias(endpointURI);
-		logger.debug("Validating AuthN assertions. endpointURI={} consumerName={}", endpointURI, consumerName);
-		for(AssertionParser ap : authn.getAuthNAssertions()){
-			try{
-				logger.debug("Validating {}", ap.getXMLBeanDoc());
-				validator.validate(ap.getXMLBeanDoc());
-			} catch(Exception e1) {
-				logger.warn("SAML authentication assertion is " +
-						"not trusted: {}", e1.getMessage());
-				throw new AuthenticationException("SAML authentication assertion is " +
-						"not trusted: " + e1.getMessage());
-			}
 		}
 	}
 

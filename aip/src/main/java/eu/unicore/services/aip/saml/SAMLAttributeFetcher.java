@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
-import eu.emi.security.authn.x509.impl.X500NameUtils;
+import io.imunity.tanl.x509.impl.X500NameUtils;
 import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.attrprofile.ParsedAttribute;
 import eu.unicore.samly2.elements.NameID;

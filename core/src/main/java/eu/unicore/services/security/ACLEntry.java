@@ -1,6 +1,6 @@
 package eu.unicore.services.security;
 
-import eu.emi.security.authn.x509.impl.X500NameUtils;
+import io.imunity.tanl.x509.impl.X500NameUtils;
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
 

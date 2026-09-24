@@ -15,11 +15,11 @@ import java.util.Properties;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 
-import eu.emi.security.authn.x509.X509Credential;
-import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
-import eu.emi.security.authn.x509.impl.CertificateUtils;
-import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
-import eu.emi.security.authn.x509.impl.X500NameUtils;
+import io.imunity.tanl.x509.X509Credential;
+import io.imunity.tanl.x509.helpers.BinaryCertChainValidator;
+import io.imunity.tanl.x509.impl.CertificateUtils;
+import io.imunity.tanl.x509.impl.CertificateUtils.Encoding;
+import io.imunity.tanl.x509.impl.X500NameUtils;
 import eu.unicore.security.canl.AuthnAndTrustProperties;
 import eu.unicore.security.canl.CredentialProperties;
 import eu.unicore.security.canl.LoggingStoreUpdateListener;

@@ -14,7 +14,7 @@ import eu.unicore.services.security.pdp.PDPResult.Decision;
 import eu.unicore.services.security.util.ResourceDescriptor;
 import eu.unicore.util.Log;
 
-import eu.emi.security.authn.x509.impl.X500NameUtils;
+import io.imunity.tanl.x509.impl.X500NameUtils;
 
 /**
  * a PDP based on hard-coded basic rules and per-service rules that are registered

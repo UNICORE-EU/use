@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.Logger;
 
-import eu.emi.security.authn.x509.X509Credential;
+import io.imunity.tanl.x509.X509Credential;
 import eu.unicore.security.Client;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.services.ContainerProperties;

@@ -3,7 +3,7 @@ package eu.unicore.services.aip.xuudb;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 
-import eu.emi.security.authn.x509.impl.X500NameUtils;
+import io.imunity.tanl.x509.impl.X500NameUtils;
 import eu.unicore.xuudb.X509Utils;
 import eu.unicore.xuudb.interfaces.IPublic;
 import eu.unicore.xuudb.xbeans.CheckCertChainResponseDocument;

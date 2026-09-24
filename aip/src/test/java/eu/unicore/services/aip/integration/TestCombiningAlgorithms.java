@@ -11,8 +11,8 @@ import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
 
-import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
-import eu.emi.security.authn.x509.impl.KeystoreCredential;
+import io.imunity.tanl.x509.impl.KeystoreCertChainValidator;
+import io.imunity.tanl.x509.impl.KeystoreCredential;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.services.Kernel;

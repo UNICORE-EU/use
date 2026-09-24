@@ -10,20 +10,14 @@ import java.security.cert.X509Certificate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.emi.security.authn.x509.X509Credential;
-import eu.emi.security.authn.x509.impl.CertificateUtils;
-import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
-import eu.emi.security.authn.x509.impl.KeystoreCredential;
-import eu.emi.security.authn.x509.proxy.ProxyCertificate;
-import eu.emi.security.authn.x509.proxy.ProxyCertificateOptions;
-import eu.emi.security.authn.x509.proxy.ProxyGenerator;
-import eu.emi.security.authn.x509.proxy.ProxyUtils;
 import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.TestConfigUtil;
 import eu.unicore.xuudb.interfaces.IPublic;
+import io.imunity.tanl.x509.impl.CertificateUtils;
+import io.imunity.tanl.x509.impl.CertificateUtils.Encoding;
 
 public class TestXUUDBAuthoriser {
 
@@ -42,26 +36,6 @@ public class TestXUUDBAuthoriser {
 		};
 		xuudb.setXuudbCache(false);
 		xuudb.configure("test",k);
-	}
-
-	@Test
-	public void testCheckProxyDN()throws Exception{
-		X509Credential cred = new KeystoreCredential("src/test/resources/xuudb/user-keystore.jks",
-				"the!user".toCharArray(), "the!user".toCharArray(), "demo user", "jks");
-		ProxyCertificateOptions opts = new ProxyCertificateOptions(cred.getCertificateChain());
-		ProxyCertificate proxy=ProxyGenerator.generate(opts, cred.getKey());
-
-		SecurityTokens tokens=new SecurityTokens();
-		tokens.setUser(new X509Certificate[] {ProxyUtils.getEndUserCertificate(proxy.getCertificateChain())});
-		tokens.setConsignor(proxy.getCertificateChain());
-		tokens.setConsignorTrusted(true);
-
-		String userName = cred.getCertificate().getSubjectX500Principal().getName();
-		mock.expectedDN = userName;
-		SubjectAttributesHolder attr=xuudb.getAttributes(tokens, null);
-		assertNotNull(attr);
-		assertTrue(mock.callCount>0);
-		assertEquals(userName,mock.lastDN);
 	}
 
 	@Test

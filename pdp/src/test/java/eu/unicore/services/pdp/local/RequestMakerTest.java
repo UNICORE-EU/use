@@ -11,7 +11,7 @@ import org.herasaf.xacml.core.context.impl.RequestType;
 import org.herasaf.xacml.core.simplePDP.SimplePDPFactory;
 import org.junit.jupiter.api.Test;
 
-import eu.emi.security.authn.x509.impl.X500NameUtils;
+import io.imunity.tanl.x509.impl.X500NameUtils;
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
 import eu.unicore.security.SubjectAttributesHolder;

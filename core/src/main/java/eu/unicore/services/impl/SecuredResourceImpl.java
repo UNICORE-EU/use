@@ -8,8 +8,8 @@ import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
-import eu.emi.security.authn.x509.X509Credential;
-import eu.emi.security.authn.x509.impl.X500NameUtils;
+import io.imunity.tanl.x509.X509Credential;
+import io.imunity.tanl.x509.impl.X500NameUtils;
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;
 import eu.unicore.security.SecurityTokens;

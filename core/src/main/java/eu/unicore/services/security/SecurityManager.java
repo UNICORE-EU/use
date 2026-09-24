@@ -11,7 +11,7 @@ import java.util.Set;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
-import eu.emi.security.authn.x509.impl.X500NameUtils;
+import io.imunity.tanl.x509.impl.X500NameUtils;
 import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.Client;
 import eu.unicore.security.OperationType;

@@ -11,7 +11,7 @@ import java.util.StringTokenizer;
 import org.apache.commons.io.FileUtils;
 import org.apache.hc.client5.http.utils.Base64;
 
-import eu.emi.security.authn.x509.helpers.PasswordSupplier;
+import io.imunity.tanl.x509.helpers.PasswordSupplier;
 import net.schmizz.sshj.ConfigImpl;
 import net.schmizz.sshj.DefaultConfig;
 import net.schmizz.sshj.common.Buffer;

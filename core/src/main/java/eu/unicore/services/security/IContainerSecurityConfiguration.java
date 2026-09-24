@@ -2,7 +2,7 @@ package eu.unicore.services.security;
 
 import java.security.cert.X509Certificate;
 
-import eu.emi.security.authn.x509.X509CertChainValidator;
+import io.imunity.tanl.x509.X509CertChainValidator;
 import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
 
 /**

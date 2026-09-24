@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
 
-import eu.emi.security.authn.x509.impl.CertificateUtils;
-import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
+import io.imunity.tanl.x509.impl.CertificateUtils;
+import io.imunity.tanl.x509.impl.CertificateUtils.Encoding;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.ExternalSystemConnector.Status;
