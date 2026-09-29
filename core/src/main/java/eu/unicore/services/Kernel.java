@@ -352,6 +352,10 @@ public final class Kernel {
 		homes.put(home.getServiceName(), home);
 	}
 
+	public Collection<Home> getHomes() {
+		return Collections.unmodifiableCollection(homes.values());
+	}
+
 	/**
 	 * Retrieve the container security configuration
 	 */

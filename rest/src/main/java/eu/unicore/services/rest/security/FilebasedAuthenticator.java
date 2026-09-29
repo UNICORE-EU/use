@@ -113,6 +113,7 @@ public class FilebasedAuthenticator implements IAuthenticator, IAuthenticator.Se
 
 	public boolean set(String username, String password, String dn) throws Exception {
 		if(immutable)return false;
+		if(password==null || password.length()==0)throw new IllegalArgumentException("Password cannot be empty");
 		String line = generateLine(username, password, dn);
 		AttributesHolder ah = new AttributesHolder(line);
 		var lines = readLines();

@@ -43,13 +43,12 @@ public class TestKernel {
 			assertTrue(MockHome.startupTaskWasRun);
 			assertTrue(DemoFeature.initWasRun);
 			assertTrue(k.getDeploymentManager().isFeatureEnabled(DemoFeature.NAME));
-			
 			assertFalse(DemoFeature2.initWasRun);
 			assertFalse(k.getDeploymentManager().isFeatureEnabled(DemoFeature2.NAME));
-			
 			assertFalse(DemoFeature3.initWasRun);
 			assertFalse(k.getDeploymentManager().isFeatureEnabled(DemoFeature3.NAME));
-			
+			assertTrue(k.getHomes().size()>0);
+			assertTrue(k.getHome("test") instanceof MockHome);
 		}finally{
 			k.shutdown();
 		}

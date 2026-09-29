@@ -39,6 +39,9 @@ public class SetPassword implements AdminAction {
 			if(password==null) {
 				throw new IllegalArgumentException("Parameter 'password' is required.");
 			}
+			if(password.length()==0) {
+				throw new IllegalArgumentException("Parameter 'password' cannot be empty.");
+			}
 			String dn = params.remove("dn");
 			if(params.size()>0)throw new IllegalArgumentException("Unknown parameter(s): "+params.keySet());
 			var authChain = AuthenticatorChain.getAuthenticatorChain(kernel);
