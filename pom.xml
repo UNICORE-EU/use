@@ -6,7 +6,7 @@
   <packaging>pom</packaging>
   <description>UNICORE service container</description>
   <inceptionYear>2010</inceptionYear>
-  <version>6.2.0</version>
+  <version>6.2.1</version>
   <name>UNICORE Services Environment</name>
  
   <parent>
