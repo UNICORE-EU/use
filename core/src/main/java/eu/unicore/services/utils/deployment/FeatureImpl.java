@@ -18,7 +18,7 @@ import eu.unicore.services.StartupTask;
  */
 public class FeatureImpl implements Feature {
 
-	protected String name;
+	protected final String name;
 
 	protected Kernel kernel;
 
@@ -27,6 +27,10 @@ public class FeatureImpl implements Feature {
 	protected final Map<String, Class<? extends Home>> homeClasses = new HashMap<>();
 
 	protected final List<DeploymentDescriptor> services = new ArrayList<>();
+
+	protected FeatureImpl(String name) {
+		this.name = name;
+	}
 
 	@Override
 	public final List<StartupTask> getStartupTasks(){
@@ -43,18 +47,16 @@ public class FeatureImpl implements Feature {
 		return services;
 	}
 
+	@Override
 	public String getName() {
 		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public Kernel getKernel() {
 		return kernel;
 	}
 
+	@Override
 	public void setKernel(Kernel kernel) {
 		this.kernel = kernel;
 	}
@@ -64,6 +66,7 @@ public class FeatureImpl implements Feature {
 	 * using a config property
 	 * container.feature.NAME.enable=false 
 	 */
+	@Override
 	public boolean isEnabled(){
 		Boolean enable = kernel.getContainerProperties().getBooleanValue("feature."+name+".enable");
 		if(enable==null)enable=Boolean.TRUE;
@@ -80,6 +83,7 @@ public class FeatureImpl implements Feature {
 		return enable;
 	}
 
+	@Override
 	public void initialise() throws Exception {}
 
 	public String toString(){

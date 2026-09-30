@@ -27,7 +27,7 @@ public class RegistryFeature extends FeatureImpl {
 	private boolean isSharedRegistry = false;
 
 	public RegistryFeature() {
-		this.name = "Registry";
+		super(SERVICE_NAME);
 	}
 
 	public boolean isSharedRegistry() {
@@ -56,9 +56,7 @@ public class RegistryFeature extends FeatureImpl {
 		new RegistryStartupTask(kernel).run();
 	}
 
-	/**
-	 * REST service descriptor for local/shared Registry
-	 */
+
 	public static class RegistryServiceDescriptor extends DeploymentDescriptorImpl {
 
 		public RegistryServiceDescriptor(Kernel kernel){
@@ -74,23 +72,19 @@ public class RegistryFeature extends FeatureImpl {
 		}
 	}
 
-	/**
-	 * REST application for local/shared Registry
-	 */
+
 	public static class RegistryApplication extends Application implements USERestApplication {
 
 		@Override
 		public Set<Class<?>> getClasses() {
-			Set<Class<?>>classes=new HashSet<>();
+			Set<Class<?>>classes = new HashSet<>();
 			classes.add(Registries.class);
 			return classes;
 		}
 
 	}
 
-	/**
-	 * REST service descriptor for registry entries
-	 */
+
 	public static class RegistryServiceEntryDescriptor extends DeploymentDescriptorImpl {
 
 		public RegistryServiceEntryDescriptor(Kernel kernel){
@@ -106,14 +100,12 @@ public class RegistryFeature extends FeatureImpl {
 		}
 	}
 
-	/**
-	 * REST application for registry entries
-	 */
+
 	public static class RegistryEntryApplication extends Application implements USERestApplication {
 
 		@Override
 		public Set<Class<?>> getClasses() {
-			Set<Class<?>>classes=new HashSet<>();
+			Set<Class<?>>classes = new HashSet<>();
 			classes.add(RegistryEntries.class);
 			return classes;
 		}

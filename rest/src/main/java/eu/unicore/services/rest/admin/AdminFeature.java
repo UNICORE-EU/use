@@ -17,24 +17,17 @@ import jakarta.ws.rs.core.Application;
  */
 public class AdminFeature extends FeatureImpl {
 
-	public AdminFeature(Kernel kernel) {
-		this();
-		setKernel(kernel);
-	}
-
 	public AdminFeature() {
-		this.name = "Admin";
+		super("Admin");
 	}
 
+	@Override
 	public void setKernel(Kernel kernel) {
 		super.setKernel(kernel);
 		services.add(new AdminServiceDescriptor(kernel));
 	}
 
-	/**
-	 * REST application
-	 */
-	public static class AdminApplication extends Application implements USERestApplication {
+	public static class AdminRESTApplication extends Application implements USERestApplication {
 
 		@Override
 		public Set<Class<?>> getClasses() {
@@ -44,9 +37,6 @@ public class AdminFeature extends FeatureImpl {
 		}
 	}
 
-	/**
-	 * REST service descriptor
-	 */
 	public static class AdminServiceDescriptor extends DeploymentDescriptorImpl {
 
 		public AdminServiceDescriptor(Kernel kernel){
@@ -58,7 +48,7 @@ public class AdminFeature extends FeatureImpl {
 			super();
 			this.name = "admin";
 			this.type = RestService.TYPE;
-			this.implementationClass = AdminApplication.class;
+			this.implementationClass = AdminRESTApplication.class;
 		}
 	}
 

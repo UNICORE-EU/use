@@ -10,6 +10,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import eu.unicore.services.Feature;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.restclient.BaseClient;
 import eu.unicore.services.security.TestConfigUtil;
@@ -26,7 +27,9 @@ public class TestAdminService {
 		p.setProperty("persistence.directory", "target/data");
 		kernel = new Kernel(p);
 		kernel.startSynchronous();
-		kernel.getDeploymentManager().deployFeature(new AdminFeature(kernel));
+		Feature ft = new AdminFeature();
+		ft.setKernel(kernel);
+		kernel.getDeploymentManager().deployFeature(ft);
 	}
 
 	@AfterAll
