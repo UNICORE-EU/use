@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Properties;
 
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -44,6 +46,11 @@ public class TestAdminService {
 		JSONObject mock = o.getJSONObject("action:mock");
 		System.out.println(mock.toString(2));
 		assertTrue(mock.getString("description").contains("echoes incoming parameters"));
+		// trigger the html rep
+		try(ClassicHttpResponse r = client.get(ContentType.TEXT_HTML)){
+			assertEquals(200, r.getCode());
+		}
+		client.close();
 	}
 	
 	@Test
