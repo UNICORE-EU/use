@@ -22,7 +22,7 @@ public class DeploymentDescriptorImpl implements DeploymentDescriptor {
 	
 	protected Class<?> implementationClass;
 
-	protected final List<StartupTask>initTasks=new ArrayList<>();
+	protected final List<StartupTask>initTasks = new ArrayList<>();
 
 	protected Kernel kernel;
 

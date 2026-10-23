@@ -1,7 +1,6 @@
 package eu.unicore.services;
 
 import java.util.Calendar;
-import java.util.Properties;
 
 import org.apache.logging.log4j.Logger;
 
@@ -24,15 +23,6 @@ public class USEContainer {
 
 	public final String getHeader() {
 		return "UNICORE Container (USE)" + " version " + Kernel.getVersion();
-	}
-
-	/**
-	 * @param config - configuration properties
-	 * @param name - the name of this container
-	 */
-	public USEContainer(Properties config, String name) throws Exception {
-		this.kernel = new Kernel(config);
-		this.name = name;
 	}
 
 	/**
@@ -72,24 +62,22 @@ public class USEContainer {
 		logger.info(msg);
 	}
 
+	static Kernel _kernel;
+	
 	/**
 	 * start the container
-	 * 
-	 * args: mandatory config file name
-	 * 
+	 *
+	 * args: mandatory config file name and optional "server name"
+	 *
 	 */
 	public static void main(String[] args) throws Exception {
-		if (args.length == 0) {
-			System.err.println("ERROR: Configuration file name path must be provided as the first argument. " +
-					"Server NOT started.");
-			System.exit(1);
-		}
 		try{
 			System.out.println("Reading config from " + args[0]);
 			String name = null;
 			if (args.length > 1)
 				name = args[1];
 			USEContainer use = new USEContainer(args[0], name);
+			_kernel = use.kernel;
 			use.startSynchronous();
 		}catch(Throwable ex){
 			ex.printStackTrace();

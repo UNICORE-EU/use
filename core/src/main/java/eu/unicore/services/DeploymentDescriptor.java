@@ -1,11 +1,10 @@
 package eu.unicore.services;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
  * Specify deployment metadata for USE services
- *  
+ *
  * @author schuller
  */ 
 public interface DeploymentDescriptor extends KernelInjectable
@@ -14,7 +13,7 @@ public interface DeploymentDescriptor extends KernelInjectable
 	public String getName();
 	
 	/**
-	 * the service type ('rest', 'cxf', ...)
+	 * the service type (e.g. 'rest')
 	 */
 	public String getType();
 	
@@ -31,14 +30,10 @@ public interface DeploymentDescriptor extends KernelInjectable
 	/**
 	 * init tasks to be executed after deployment
 	 */
-	public default List<StartupTask> getInitTasks(){
-		return Collections.emptyList();
-	}
+	public List<StartupTask> getInitTasks();
 
 	public Kernel getKernel();
-	
-	public default boolean isEnabled() {
-		return true;
-	}
+
+	public boolean isEnabled();
 
 }

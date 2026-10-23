@@ -56,12 +56,23 @@ public class TestKernel {
 
 	@Test
 	public void testUSEContainer() throws Exception {
-		USEContainer uas=new USEContainer("src/test/resources/conf/use.properties", "TEST");
+		USEContainer use = new USEContainer("src/test/resources/conf/use.properties", "TEST");
 		try{
-			uas.startSynchronous();
+			use.startSynchronous();
 		}
 		finally{
-			uas.getKernel().shutdown();
+			use.getKernel().shutdown();
+		}
+	}
+
+	@Test
+	public void testUSEContainerMain() throws Exception {
+		String[] args = {"src/test/resources/conf/use.properties", "TEST"};
+		try{
+			USEContainer.main(args);
+		}
+		finally{
+			USEContainer._kernel.shutdown();
 		}
 	}
 
