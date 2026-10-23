@@ -46,7 +46,7 @@ public class JWTHelper {
 
 	public String createETDToken(String user, long lifetime) throws Exception {
 		if(preferences.getHMACSecret()!=null){
-			return JWTUtils.createETDToken(user, lifetime, serverDN, 
+			return JWTUtils.createETDTokenHMAC(user, lifetime, serverDN, 
 					preferences.getHMACSecret());
 		}
 		else {
@@ -57,10 +57,8 @@ public class JWTHelper {
 
 	public void verifyJWTToken(String token, String requiredAudience) throws Exception {
 		if(preferences.getHMACSecret()!=null && JWTUtils.isHMAC(token)) {
-			try{
-				JWTUtils.verifyJWTToken(token, preferences.getHMACSecret(), requiredAudience);
-				return;
-			}catch(Exception ex) {}
+			JWTUtils.verifyJWTToken(token, preferences.getHMACSecret(), requiredAudience);
+			return;
 		}
 		String issuer = JWTUtils.getIssuer(token);
 		Collection<PublicKey> pks = keyCache.getPublicKeys(issuer);

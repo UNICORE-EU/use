@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.PhaseInterceptorChain;
@@ -12,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
 
-import io.imunity.tanl.x509.impl.X500NameUtils;
 import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.AuthorisationException;
 import eu.unicore.security.Client;
@@ -24,6 +24,7 @@ import eu.unicore.security.wsutil.SecuritySessionStore;
 import eu.unicore.security.wsutil.SecuritySessionUtils;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.impl.PostInvokeHandler;
+import eu.unicore.services.rest.impl.Tokens;
 import eu.unicore.services.rest.jwt.JWTHelper;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.restclient.jwt.JWTUtils;
@@ -50,7 +51,7 @@ import jakarta.ws.rs.container.ContainerRequestFilter;
  * 
  * @author schuller
  */
-public class AuthNHandler implements ContainerRequestFilter {
+public final class AuthNHandler implements ContainerRequestFilter {
 
 	private static final Logger logger = Log.getLogger(Log.SECURITY, AuthNHandler.class);
 
@@ -67,8 +68,8 @@ public class AuthNHandler implements ContainerRequestFilter {
 
 	// key for storing the authentication method in the security tokens
 	public final static String USER_AUTHN_METHOD = "User-Authentication-Method";
-	// key for storing the "renewable" property of a ETD token in the security tokens
-	public final static String ETD_RENEWABLE = "ETD-Token-Renewable";
+	// key for storing the "renewable" property of a API token in the security tokens
+	public final static String RENEWABLE_API_TOKEN = "API-Token-Renewable";
 
 	// key for storing a Bearer token in the security tokens
 	public final static String UC_BEARER_TOKEN = "UC_OAUTH_BEARER_TOKEN";
@@ -95,6 +96,7 @@ public class AuthNHandler implements ContainerRequestFilter {
 			cache.update(secConfig.getCredential().getCertificate());
 		}catch(Exception ex){}
 		this.jwt = new JWTHelper(p, kernel.getContainerSecurityConfiguration(), cache);
+		setupTokenExpiryChecker();
 	}
 
 	@Override
@@ -143,35 +145,30 @@ public class AuthNHandler implements ContainerRequestFilter {
 	 * @param token
 	 * @return null if client is authenticated, a 'forbidden' response otherwise 
 	 */
-	private void process(Message message, SecurityTokens token) {
-		token.setClientIP(establishClientIP(message));
-		processDelegation(message, token);
-		if(token.getConsignorName()!=null && token.isConsignorTrusted()){
-			// valid delegation - continue with the request
-			return;
-		}
-		// no delegation - invoke direct authentication chain
-		processNoDelegation(message, token);
-	}
-
-	private void processDelegation(Message message, SecurityTokens tokens){
+	private void process(Message message, SecurityTokens tokens) {
+		tokens.setClientIP(establishClientIP(message));
 		String bearer = CXFUtils.getBearerToken(message);
 		if(bearer != null){
 			try{
-				validateJWT(bearer, tokens);
+				handleDelegatedAuthN(bearer, tokens);
 			}catch(Exception ex){
 				throw new WebApplicationException(ex, 403);
 			}
+			if(tokens.getConsignorName()!=null && tokens.isConsignorTrusted()){
+				// valid delegation - continue with the request
+				return;
+			}
 		}
+		// no delegation - invoke direct authentication chain
+		authenticate(message, tokens);
 	}
 
 	/**
-	 * check syntax and validate.
-	 *
-	 * no-op if the token is not a well-formed JWT token,
-	 * or if it is not a delegation token
+	 * Process trust delegation via ETD or API token. If the token is not
+	 * a well-formed JWT token, or if it is not a trust delegation token,
+	 * do nothing.
 	 */
-	private void validateJWT(String bearerToken, SecurityTokens tokens) throws Exception {
+	private void handleDelegatedAuthN(String bearerToken, SecurityTokens tokens) throws Exception {
 		JSONObject payload;
 		try{
 			// syntax check first
@@ -179,36 +176,48 @@ public class AuthNHandler implements ContainerRequestFilter {
 		}catch(Exception jtd){
 			return;
 		}
+		boolean etd = Boolean.parseBoolean(payload.optString("etd", null));
+		boolean isAPIToken = Boolean.parseBoolean(payload.optString("apitoken", null));
+		if(! (etd || isAPIToken)) {
+			return;
+		}
+		if(isAPIToken) {
+			String jti = payload.optString("jti", "__none__");
+			if(!Tokens.checkTokenExists(kernel, jti)) {
+				throw new AuthenticationException("Unknown or expired API token.");
+			}
+			tokens.getContext().put(USER_AUTHN_METHOD, "APITOKEN");
+			Boolean renewable = Boolean.parseBoolean(payload.optString("renewable", "false"));
+			tokens.getContext().put(RENEWABLE_API_TOKEN, renewable);
+		}
+		if(etd){
+			tokens.getContext().put(USER_AUTHN_METHOD, "ETD");
+		}
+		jwt.verifyJWTToken(bearerToken, serverDN);
 		String subject = payload.optString("sub", null);
 		String issuer = payload.optString("iss", null);
-		boolean etd = Boolean.parseBoolean(payload.optString("etd", null));
-		boolean isDelegationToken = etd && subject!=null && issuer!=null && subject!=issuer;
-		if(isDelegationToken){
-			jwt.verifyJWTToken(bearerToken, serverDN);
-			tokens.setUserName(subject);
-			tokens.setConsignorTrusted(true);
-			tokens.setConsignorName(issuer);
-			tokens.getContext().put(USER_AUTHN_METHOD, "ETD");
-			Boolean renewable = Boolean.parseBoolean(payload.optString("renewable", "false"));
-			tokens.getContext().put(ETD_RENEWABLE, renewable);
-			logger.debug("Trust delegated authentication as <{}> via JWT issued by <{}>", subject, issuer);
-			// process delegated attributes - only if the token came from this server
-			BasicAttributeHolder bah = assignAttributes(payload);
-			if(bah!=null && serverDN!=null && X500NameUtils.equal(issuer, serverDN)) {
-				tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, bah);
-				logger.debug("Attributes from ETD token: {}", bah);
-			}
-			String userprefs = payload.optString("preferences", null);
-			if(userprefs!=null) {
-				parsePrefsItem(userprefs, tokens);
-				// prevent overriding these
-				tokens.getUserPreferences().put(_ETD_FIXED_ATTR, new String[] {"true"});
-			}
+		tokens.setUserName(subject);
+		tokens.setConsignorTrusted(true);
+		tokens.setConsignorName(issuer);
+		String method = isAPIToken? " API token " : " ";
+		logger.debug("Trust delegated authentication as <{}> via JWT{}issued by <{}>", method, subject, issuer);
+		// process delegated attributes - only if the token came from this server
+		BasicAttributeHolder bah = assignAttributes(payload);
+		if(bah!=null && isAPIToken) {
+			tokens.getContext().put(AuthAttributesCollector.ATTRIBUTES, bah);
+			logger.debug("Attributes from ETD token: {}", bah);
 		}
+		String userprefs = payload.optString("preferences", null);
+		if(userprefs!=null) {
+			parsePrefsItem(userprefs, tokens);
+			// prevent overriding these
+			tokens.getUserPreferences().put(_ETD_FIXED_ATTR, new String[] {"true"});
+		}
+		tokens.getContext().put(UC_BEARER_TOKEN, bearerToken);
 	}
 
-	private void processNoDelegation(Message message, SecurityTokens token){
-		IAuthenticator auth = kernel.getAttribute(IAuthenticator.class);
+	private void authenticate(Message message, SecurityTokens token){
+		AuthenticatorChain auth = AuthenticatorChain.getAuthenticatorChain(kernel);
 		boolean haveCredentials  = auth.authenticate(message, token);
 		if(!haveCredentials
 				&& auth.getSecurityProperties().forbidNoCreds()
@@ -317,4 +326,22 @@ public class AuthNHandler implements ContainerRequestFilter {
 		}
 		return bah;
 	}
+
+	private static boolean _checkerRunning;
+	
+	private synchronized void setupTokenExpiryChecker() {
+		if(!_checkerRunning) {
+			logger.info("Setting up API token expiry check.");
+			kernel.getContainerProperties().getThreadingServices().getScheduledExecutorService().
+				scheduleWithFixedDelay(()->{
+					try {
+						Tokens.runCleanup(kernel);
+					}catch(Exception e) {
+						Log.logException("Error running API token expiry check", e);
+					}
+				}, 30, 3600, TimeUnit.SECONDS);
+			_checkerRunning = true;
+		}
+	}
+
 }

@@ -72,8 +72,8 @@ public class JWTUtils {
 
 	private final static Map<String,String>etd = Collections.singletonMap("etd", "true");
 
-	public static String createETDToken(String user, long lifetime, String issuer, PrivateKey pk) throws Exception {
-		return createJWTToken(user, lifetime, issuer, pk, etd);
+	public static String createETDToken(String subject, long lifetime, String issuer, PrivateKey pk) throws Exception {
+		return createJWTToken(subject, lifetime, issuer, pk, etd);
 	}
 
 	public static String createJWTToken(String user, long lifetime, String issuer, PrivateKey pk, 
@@ -87,10 +87,10 @@ public class JWTUtils {
 		return sig.serialize();
 	}
 
-	public static JWTClaimsSet buildClaimsSet(String user, long lifetime, String issuer, Map<String,String> claims) throws Exception {
+	public static JWTClaimsSet buildClaimsSet(String subject, long lifetime, String issuer, Map<String,String> claims) throws Exception {
 		JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder(); 
 		builder.issueTime(new Date(System.currentTimeMillis()))
-				.subject(user)
+				.subject(subject)
 				.issuer(issuer)
 				.expirationTime(new Date(System.currentTimeMillis() + (lifetime * 1000)));
 		if(claims!=null){
@@ -185,11 +185,28 @@ public class JWTUtils {
 		throw new AuthenticationException("JWT token could not be verified with the available keys");
 	}
 
-	public static String createETDToken(String user, long lifetime, String issuer, String hmacSecret) throws Exception {
-		return createJWTToken(user, lifetime, issuer, hmacSecret, etd);
+	/**
+	 * Create a token signed with an HMAC secret
+	 *
+	 * @param user
+	 * @param lifetime
+	 * @param issuer
+	 * @param hmacSecret
+	 */
+	public static String createETDTokenHMAC(String user, long lifetime, String issuer, String hmacSecret) throws Exception {
+		return createJWTTokenHMAC(user, lifetime, issuer, hmacSecret, etd);
 	}
 
-	public static String createJWTToken(String user, long lifetime, String issuer, String hmacSecret, Map<String,String>claims) throws Exception {
+	/**
+	 * Create a token signed with an HMAC secret
+	 *
+	 * @param user
+	 * @param lifetime
+	 * @param issuer
+	 * @param hmacSecret
+	 * @param claims
+	 */
+	public static String createJWTTokenHMAC(String user, long lifetime, String issuer, String hmacSecret, Map<String,String>claims) throws Exception {
 		JWTClaimsSet claimsSet = buildClaimsSet(user, lifetime, issuer, claims);
 		JWSSigner signer = new MACSigner(hmacSecret);
 		JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);

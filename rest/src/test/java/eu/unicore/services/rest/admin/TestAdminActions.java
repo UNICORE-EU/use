@@ -37,7 +37,7 @@ public class TestAdminActions {
 	}
 
 	@Test
-	public void testIssueAPITokenAdminAction() throws Exception{
+	public void testIssueAPIToken() throws Exception{
 		Kernel kernel = new Kernel("src/test/resources/use.properties");
 		Map<String,AdminAction> act = kernel.getAdminActions();
 		assertNotNull(act);
@@ -49,13 +49,16 @@ public class TestAdminActions {
 		params.put("lifetime", "60");
 		params.put("preferences", "uid:nobody");
 		AdminActionResult result = aAct.invoke(params, kernel);
-		assertTrue(result.successful());
+		assertTrue(result.successful(), result.getMessage());
 		String token = result.getResults().get("token");
 		JWTUtils.verifyJWTToken(token,
 				kernel.getContainerSecurityConfiguration().getCredential().getCertificate().getPublicKey(),
 				null);
 		assertEquals("uid:nobody", JWTUtils.getPayload(token).get("preferences"));
-
+		assertEquals("CN=demouser", JWTUtils.getPayload(token).get("sub"));
+		System.out.println(JWTUtils.getPayload(token).toString(2));
+		String jti = JWTUtils.getPayload(token).getString("jti");
+		assertNotNull(jti);
 		params = new HashMap<String, String>();
 		params.put("subject", "CN=demouser");
 		params.put("preferences", "invalid");
@@ -71,6 +74,70 @@ public class TestAdminActions {
 		assertFalse(result3.successful());
 		assertTrue(result3.getMessage().contains("IllegalArgumentException"));
 		assertTrue(result3.getMessage().contains("foo"));
+	}
+
+	@Test
+	public void testRevokeAPIToken() throws Exception{
+		Kernel kernel = new Kernel("src/test/resources/use.properties");
+		Map<String,AdminAction> act = kernel.getAdminActions();
+		assertNotNull(act);
+		AdminAction createAction = act.get("IssueAPIToken");
+		Map<String,String>cparams = new HashMap<>();
+		cparams.put("subject", "CN=revoke1");
+		cparams.put("lifetime", "60");
+		AdminActionResult result = createAction.invoke(cparams, kernel);
+		String token = result.getResults().get("token");
+		String jti = JWTUtils.getPayload(token).getString("jti");
+		assertNotNull(jti);
+
+		AdminAction revokeAction = act.get("RevokeAPIToken");
+		assertNotNull(revokeAction);
+		assertEquals("RevokeAPIToken", revokeAction.getName());
+		
+		Map<String,String> params = new HashMap<>();
+		assertFalse(revokeAction.invoke(params, kernel).successful());
+
+		params.put("subject", "test");
+		params.put("tokenID", "foo");
+		result = revokeAction.invoke(params, kernel);
+		assertFalse(result.successful());
+		assertTrue(result.getMessage().contains("Only one"));
+		
+		params.put("subject", "test");
+		params.put("wrongParam", "foo");
+		result = revokeAction.invoke(params, kernel);
+		assertFalse(result.successful());
+		assertTrue(result.getMessage().contains("Unknown parameter"));
+		assertTrue(result.getMessage().contains("wrongParam"));
+
+		// delete by ID
+		params = new HashMap<>();
+		params.put("tokenID", jti);
+		AdminActionResult result4 = revokeAction.invoke(params, kernel);
+		assertTrue(result4.successful());
+		assertTrue(result4.getMessage().contains("<1> token(s) revoked"), result4.getMessage());
+
+		// delete by subject
+		cparams.put("subject", "CN=revoke2");
+		createAction.invoke(cparams, kernel);
+		params.clear();
+		params.put("subject", "CN=revoke2");
+		result4 = revokeAction.invoke(params, kernel);
+		assertTrue(result4.getMessage().contains("<1> token(s) revoked"), result4.getMessage());
+		assertTrue(result4.successful());
+
+		cparams.put("subject", "CN=foo1");
+		createAction.invoke(cparams, kernel);
+		cparams.put("subject", "CN=foo1");
+		createAction.invoke(cparams, kernel);
+		cparams.put("subject", "CN=foo2");
+		createAction.invoke(cparams, kernel);
+		// delete by subject regexp
+		params.clear();
+		params.put("subjectsMatch", ".*foo.*");
+		result4 = revokeAction.invoke(params, kernel);
+		assertTrue(result4.successful());	
+		assertTrue(result4.getMessage().contains("<3> token(s) revoked"), result4.getMessage());
 	}
 
 	@Test

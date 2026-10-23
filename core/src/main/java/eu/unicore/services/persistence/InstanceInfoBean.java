@@ -14,7 +14,7 @@ import eu.unicore.persist.annotations.Table;
 @Table(name="WSRFInstanceInformation")
 public class InstanceInfoBean implements Serializable {
 
-	private static final long serialVersionUID=1L;
+	private static final long serialVersionUID = 1L;
 
 	@ID
 	public String uniqueID;
@@ -26,29 +26,29 @@ public class InstanceInfoBean implements Serializable {
 	public String terminates;
 
 	@Column(name="millis")
-	private long date;
+	public long date;
 
-	private long subscriberCount=0;
+	// extra info field
+	public String about = "";
 
 	public InstanceInfoBean(String uniqueID, String serviceName, Calendar terminationTime){
-		this.uniqueID=uniqueID;
-		this.serviceName=serviceName;
+		this.uniqueID = uniqueID;
+		this.serviceName = serviceName;
 		if(terminationTime!=null){
-			this.terminates=terminationTime.getTime().toString();
-			this.date=terminationTime.getTimeInMillis();
+			this.terminates = terminationTime.getTime().toString();
+			this.date = terminationTime.getTimeInMillis();
 		}
 		else{
-			this.terminates="infinite";
-			this.date=0;
+			this.terminates = "infinite";
+			this.date = 0;
 		}
 	}
 
-	//needed by persistence lib
-
+	// needed by persistence lib
 	public String getUniqueID(){
 		return uniqueID;
 	}
-	
+
 	public String getServiceName(){
 		return serviceName;
 	}
@@ -59,19 +59,6 @@ public class InstanceInfoBean implements Serializable {
 
 	public String getDate(){
 		return String.valueOf(date);
-	}
-
-	public String getSubscriberCount(){
-		return String.valueOf(subscriberCount);
-	}
-
-	public void incrementSubscriberCount(){
-		subscriberCount++;
-	}
-
-	public void decrementSubscriberCount(){
-		subscriberCount--;
-		if(subscriberCount<0)subscriberCount=0;
 	}
 
 	public static Calendar getCalendar(String dateMillis){

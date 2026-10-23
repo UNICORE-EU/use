@@ -9,43 +9,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hc.core5.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
 
-import io.imunity.tanl.x509.X509Credential;
-import io.imunity.tanl.x509.impl.CertificateUtils;
-import io.imunity.tanl.x509.impl.CertificateUtils.Encoding;
-import eu.unicore.security.AuthenticationException;
 import eu.unicore.security.Client;
-import eu.unicore.security.Client.Type;
 import eu.unicore.security.Queue;
 import eu.unicore.security.Role;
 import eu.unicore.security.SecurityException;
-import eu.unicore.security.SecurityTokens;
 import eu.unicore.security.Xlogin;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.ExternalSystemConnector;
 import eu.unicore.services.ISubSystem;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.rest.Link;
-import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.services.rest.security.AuthNHandler;
 import eu.unicore.services.rest.security.AuthenticatorChain;
 import eu.unicore.services.rest.security.IAuthenticator;
-import eu.unicore.services.restclient.UserPreferences;
-import eu.unicore.services.restclient.jwt.JWTUtils;
 import eu.unicore.services.restclient.utils.UnitParser;
-import eu.unicore.services.security.AuthAttributesCollector;
-import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.util.Log;
+import io.imunity.tanl.x509.impl.CertificateUtils;
+import io.imunity.tanl.x509.impl.CertificateUtils.Encoding;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -59,68 +48,9 @@ public class ApplicationBaseResource extends RESTRendererBase {
 
 	private static final Logger logger = Log.getLogger(Log.SERVICES, ApplicationBaseResource.class);
 
-	@GET
 	@Path("/token")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response getToken(@QueryParam("lifetime")String lifetimeParam,
-			@QueryParam("renewable")String renewable,
-			@QueryParam("limited")String limited)
-			throws Exception {
-		try {
-			String method = (String)AuthZAttributeStore.getTokens().getContext().get(AuthNHandler.USER_AUTHN_METHOD);
-			if("ETD".equals(method)) {
-				if(!(Boolean)AuthZAttributeStore.getTokens().getContext().get(AuthNHandler.ETD_RENEWABLE)) {
-					throw new AuthenticationException("Cannot create token when authenticating with a non-renewable token!");
-				}
-			}
-			JWTServerProperties jwtProps = new JWTServerProperties(kernel.getContainerProperties().getRawProperties());
-			String user = AuthZAttributeStore.getClient().getDistinguishedName();
-			X509Credential issuerCred =  kernel.getContainerSecurityConfiguration().getCredential();
-			long lifetime = lifetimeParam!=null? Long.valueOf(lifetimeParam): jwtProps.getTokenValidity();
-			// make sure it's not longer than the remaining credential lifetime
-			Date notAfter = issuerCred.getCertificate().getNotAfter();
-			long remainingCredentialLifetime = Math.max(0, notAfter.getTime() - System.currentTimeMillis());
-			// if user requested a longer lifetime than is possible, we should fault
-			if(lifetimeParam!=null && lifetime>remainingCredentialLifetime) {
-				return createErrorResponse(HttpStatus.SC_BAD_REQUEST,
-						"Requested token lifetime is longer than the remaining server certificate validity.");
-			}
-			lifetime = Math.min(lifetime, remainingCredentialLifetime);
-			Map<String,String> claims = new HashMap<>();
-			claims.put("etd", "true");
-			try {
-				if(Type.ANONYMOUS!=AuthZAttributeStore.getClient().getType()) {
-					SecurityTokens tokens = AuthZAttributeStore.getTokens();
-					BasicAttributeHolder attr = (BasicAttributeHolder)tokens.getContext().get(AuthAttributesCollector.ATTRIBUTES);
-					if(attr!=null && attr.uid!=null) {
-						claims.put("uid", attr.uid);
-					}
-					Map<String,String[]> prefs = tokens.getUserPreferences();
-					UserPreferences up = new UserPreferences();
-					up.parse(prefs);
-					String enc = up.getEncoded();
-					if(enc!=null && enc.length()>0) {
-						claims.put("preferences", enc);
-					}
-				}
-			}catch(Exception e) {}
-			if(Boolean.parseBoolean(renewable)) {
-				claims.put("renewable", "true");
-			}
-			if(Boolean.parseBoolean(limited)) {
-				claims.put("aud", issuerCred.getSubjectName());
-			}
-			String token = JWTUtils.createJWTToken(user, lifetime,
-					issuerCred.getSubjectName(), issuerCred.getKey(),
-					claims);
-			return Response.ok().entity(token).build();
-		}
-		catch(SecurityException se) {
-			return handleError(403, "Error creating token", se, logger);
-		}
-		catch(Exception ex) {
-			return handleError("Error creating token", ex, logger);
-		}
+	public Tokens getTokenResource(){
+		return new Tokens(kernel, getBaseURL()+"/token");
 	}
 
 	@GET

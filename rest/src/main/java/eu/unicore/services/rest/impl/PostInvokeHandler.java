@@ -73,4 +73,8 @@ public final class PostInvokeHandler extends AbstractPhaseInterceptor<Message> {
 		threadSession.set(session);
 	}
 
+	public static void clearSession(){
+		threadSession.remove();
+	}
+
 }

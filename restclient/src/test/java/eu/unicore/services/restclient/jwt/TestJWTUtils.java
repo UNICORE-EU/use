@@ -24,7 +24,7 @@ public class TestJWTUtils {
 	@Test
 	public void testHMAC() throws Exception {
 		String key = "12345678901234567890123456789012";
-		String token = JWTUtils.createJWTToken("demouser", 72000, "demouser", key, null);
+		String token = JWTUtils.createJWTTokenHMAC("demouser", 72000, "demouser", key, null);
 		assertTrue(JWTUtils.isHMAC(token));
 		JSONObject payload = JWTUtils.getPayload(token);
 		assertEquals("demouser", payload.getString("sub"));
@@ -41,7 +41,7 @@ public class TestJWTUtils {
 		String audience = "CN=my server";
 		var claims = new HashMap<String,String>();
 		claims.put("aud", audience);
-		String token = JWTUtils.createJWTToken("demouser", 72000, "demouser", key, claims);
+		String token = JWTUtils.createJWTTokenHMAC("demouser", 72000, "demouser", key, claims);
 		
 		assertTrue(JWTUtils.isHMAC(token));
 		JSONObject payload = JWTUtils.getPayload(token);
@@ -61,7 +61,7 @@ public class TestJWTUtils {
 		String audience = "CN=my server";
 		var claims = new HashMap<String,String>();
 		claims.put("aud", audience);
-		String token = JWTUtils.createJWTToken("demouser", 72000, "demouser", key, claims);
+		String token = JWTUtils.createJWTTokenHMAC("demouser", 72000, "demouser", key, claims);
 
 		assertTrue(JWTUtils.isHMAC(token));
 		JSONObject payload = JWTUtils.getPayload(token);
@@ -83,7 +83,7 @@ public class TestJWTUtils {
 		byte[] secret = new byte[384];
 		new Random().nextBytes(secret);
 		String key = new String(secret);
-		String token = JWTUtils.createJWTToken("demouser", -7200, "demouser", key, null);
+		String token = JWTUtils.createJWTTokenHMAC("demouser", -7200, "demouser", key, null);
 
 		JSONObject payload = JWTUtils.getPayload(token);
 		assertEquals("demouser", payload.getString("sub"));

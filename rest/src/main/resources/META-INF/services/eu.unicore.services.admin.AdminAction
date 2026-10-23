@@ -1,3 +1,4 @@
 # admin actions in the USE REST module
 eu.unicore.services.rest.admin.IssueAPIToken
+eu.unicore.services.rest.admin.RevokeAPIToken
 eu.unicore.services.rest.admin.SetPassword

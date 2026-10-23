@@ -28,8 +28,7 @@ public class Persistence implements Store {
 
 	private PersistenceProperties persistenceProperties;
 
-	// shared storage for the termination times on this server
-	private static Persist<InstanceInfoBean> terminationTime;
+	private Persist<InstanceInfoBean> terminationTime;
 
 	private String serviceName;
 
@@ -40,7 +39,7 @@ public class Persistence implements Store {
 		this.kernel = kernel;
 		this.serviceName = serviceName;
 		persistenceProperties = kernel.getPersistenceProperties();
-		initTerminationTimeStore();
+		terminationTime = kernel.getPersistenceManager().getInfoStore();
 		p = PersistenceFactory.get(persistenceProperties).getPersist(ResourceBean.class, serviceName);
 	}
 
@@ -155,15 +154,9 @@ public class Persistence implements Store {
 	public void setTerminationTime(String uniqueID, Calendar c)throws Exception{
 		InstanceInfoBean t=terminationTime.getForUpdate(uniqueID,100,TimeUnit.MILLISECONDS);
 		try{
-			t=new InstanceInfoBean(uniqueID,serviceName,c);
+			t = new InstanceInfoBean(uniqueID,serviceName,c);
 		}finally{
 			terminationTime.write(t);
-		}
-	}
-
-	private synchronized void initTerminationTimeStore() throws Exception {
-		if(terminationTime==null) {
-			terminationTime = PersistenceFactory.get(persistenceProperties).getPersist(InstanceInfoBean.class);
 		}
 	}
 

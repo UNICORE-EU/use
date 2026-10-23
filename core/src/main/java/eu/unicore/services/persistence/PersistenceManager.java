@@ -6,6 +6,9 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
+import eu.unicore.persist.Persist;
+import eu.unicore.persist.PersistenceFactory;
+import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.persist.impl.LockSupport;
 import eu.unicore.services.ContainerProperties;
 import eu.unicore.services.Kernel;
@@ -26,8 +29,10 @@ public class PersistenceManager {
 
 	private LockSupport lockSupport;
 
+	private Persist<InstanceInfoBean> infoStore;
+
 	private final Kernel kernel;
-	
+
 	public PersistenceManager(Kernel kernel){
 		this.kernel=kernel;
 	}
@@ -38,13 +43,13 @@ public class PersistenceManager {
 	 */
 	synchronized void init(){
 		if(!haveInit){
-			haveInit=true;
+			haveInit = true;
 			try{
-				String clazz=kernel.getContainerProperties().getValue(ContainerProperties.PERSIST_CLASSNAME);
+				String clazz = kernel.getContainerProperties().getValue(ContainerProperties.PERSIST_CLASSNAME);
 				if(clazz.startsWith("de.fzj.unicore.wsrflite")) {
 					clazz = clazz.replace("de.fzj.unicore.wsrflite", "eu.unicore.services");
 				}
-				persistClass=Class.forName(clazz);
+				persistClass = Class.forName(clazz);
 				logger.info("Using '{}' for permanent storage.", persistClass.getName());
 			}
 			catch(Exception e){
@@ -107,5 +112,13 @@ public class PersistenceManager {
 			lockSupport=new LockSupport("__use_internal__");
 		}
 		return lockSupport;
-	}	
+	}
+
+	public synchronized Persist<InstanceInfoBean> getInfoStore() throws Exception {
+		if(infoStore==null) {
+			PersistenceProperties pp = kernel.getPersistenceProperties();
+			infoStore = PersistenceFactory.get(pp).getPersist(InstanceInfoBean.class);
+		}
+		return infoStore;
+	}
 }

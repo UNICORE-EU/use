@@ -23,11 +23,10 @@ public class TestInfoBean {
 		configSource.setProperty(PersistenceProperties.DB_IMPL, H2Persist.class.getName());
 		Persist<InstanceInfoBean>p=PersistenceFactory.get(configSource).getPersist(InstanceInfoBean.class);		
 		InstanceInfoBean b1=new InstanceInfoBean("123","test",null);
-		b1.incrementSubscriberCount();
-		b1.incrementSubscriberCount();
+		b1.about = "test";
 		p.write(b1);
 		InstanceInfoBean b2=p.read("123");
-		assertEquals("2", b2.getSubscriberCount());
+		assertEquals("test", b2.about);
 		p.shutdown();
 		FileUtils.deleteQuietly(tmp);
 	}

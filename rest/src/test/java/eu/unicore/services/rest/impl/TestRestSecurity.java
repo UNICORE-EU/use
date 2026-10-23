@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
@@ -55,7 +56,6 @@ import eu.unicore.services.utils.deployment.DeploymentDescriptorImpl;
 import eu.unicore.util.httpclient.HttpUtils;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Application;
@@ -197,7 +197,7 @@ public class TestRestSecurity {
 	}
 
 	@Test
-	public void testIssueToken() throws Exception {
+	public void testAPITokens() throws Exception {
 		long now = System.currentTimeMillis();
 		long tokenValidity = new JWTServerProperties(kernel.getContainerProperties().getRawProperties())
 				.getTokenValidity();
@@ -212,8 +212,9 @@ public class TestRestSecurity {
 			try(ClassicHttpResponse response=bc.get(ContentType.TEXT_PLAIN)){
 				assertEquals(200, response.getCode());
 				token = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+				System.out.println(token);
 				JSONObject t = JWTUtils.getPayload(token);
-				System.out.println(t.toString(2));
+				System.out.println("Reply: "+t.toString(2));
 				assertEquals("CN=Demo User, O=UNICORE, C=EU", t.get("sub"));
 				assertTrue(t.getLong("exp")>=exp);
 				assertNotNull(t.get("preferences"));
@@ -223,12 +224,22 @@ public class TestRestSecurity {
 		auth = (msg) -> {
 			msg.addHeader("Authorization", "Bearer "+_t);
 		};
+		resource = url+"/"+sName+"/User";
 		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth))
 		{
 			JSONObject reply = bc.getJSON();
 			System.out.println("Service reply: "+reply.toString(2));
 			assertTrue(Boolean.parseBoolean(String.valueOf(reply.get("td_status"))));
-			assertEquals("ETD", reply.getString("auth_method"));
+			assertEquals("APITOKEN", reply.getString("auth_method"));
+		}
+		// invalidate the token
+		try(BaseClient bc = new BaseClient(url+"/"+sName+"/token", kernel.getClientConfiguration(), auth))
+		{
+			bc.delete();
+		}
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth)){
+			RESTException re = assertThrows(RESTException.class, ()->bc.getJSON());
+			assertEquals(403, re.getStatus());
 		}
 	}
 
@@ -247,6 +258,25 @@ public class TestRestSecurity {
 			assertEquals(HttpStatus.SC_BAD_REQUEST, re.getStatus());
 			System.out.println(re.getErrorMessage());
 			assertTrue(re.getErrorMessage().contains("token lifetime"));
+		}
+	}
+
+	@Test
+	public void testUnknownToken() throws Exception {
+		String iss = kernel.getContainerSecurityConfiguration().getCredential().
+				getCertificate().getSubjectX500Principal().getName();
+		final String _t = JWTUtils.createJWTToken("CN=fo", 300, iss, 
+				kernel.getContainerSecurityConfiguration().getCredential().getKey(),
+				Collections.singletonMap("apitoken", "true"));
+		System.out.println(_t);
+		IAuthCallback auth = (msg) -> {
+			msg.addHeader("Authorization", "Bearer "+_t);
+		};
+		String resource = url+"/"+sName+"/User";
+		try(BaseClient bc = new BaseClient(resource, kernel.getClientConfiguration(), auth))
+		{
+			RESTException re = assertThrows(RESTException.class, ()->{bc.getJSON();});
+			assertEquals(403, re.getStatus());
 		}
 	}
 
@@ -386,10 +416,9 @@ public class TestRestSecurity {
 		static final AtomicInteger invocationCounter=new AtomicInteger(0);
 
 		@GET
-		@Path("/{uniqueID}")
+		@Path("/User")
 		@Produces("application/json")
-		public String getRepresentation(@PathParam("uniqueID") String name, 
-				@QueryParam("fields") String fields) throws Exception {
+		public String getRepresentation(@QueryParam("fields") String fields) throws Exception {
 			invocationCounter.incrementAndGet();
 			parsePropertySpec(fields);
 			return getJSON().toString();

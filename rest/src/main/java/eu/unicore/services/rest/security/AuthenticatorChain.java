@@ -201,7 +201,6 @@ public class AuthenticatorChain implements IAuthenticator, ISubSystem {
 		return Collections.unmodifiableCollection(connectors);
 	}
 
-	@Override
 	public RESTSecurityProperties getSecurityProperties() { 
 		return sp;
 	}

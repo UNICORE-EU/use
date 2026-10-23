@@ -4,13 +4,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.imunity.tanl.x509.X509Credential;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.admin.AdminAction;
 import eu.unicore.services.admin.AdminActionResult;
+import eu.unicore.services.rest.impl.Tokens;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
-import eu.unicore.services.restclient.jwt.JWTUtils;
 import eu.unicore.util.Log;
+import io.imunity.tanl.x509.X509Credential;
 
 /**
  * Allows to issue an API token
@@ -41,7 +41,6 @@ public class IssueAPIToken implements AdminAction {
 			String preferences = params.remove("preferences");
 			if(params.size()>0)throw new IllegalArgumentException("Unknown parameter(s): "+params.keySet());
 			Map<String,String> claims = new HashMap<>();
-			claims.put("etd", "true");
 			JWTServerProperties jwtProps = new JWTServerProperties(kernel.getContainerProperties().getRawProperties());
 			X509Credential issuerCred =  kernel.getContainerSecurityConfiguration().getCredential();
 			long lifetime = lifetimeParam!=null? Long.valueOf(lifetimeParam): jwtProps.getTokenValidity();
@@ -61,9 +60,9 @@ public class IssueAPIToken implements AdminAction {
 				checkPrefs(preferences);
 				claims.put("preferences", preferences);
 			}
+			String token = Tokens.issueToken(kernel, subject, lifetime, issuerCred, claims);
 			AdminActionResult res = new AdminActionResult(true, "OK");
-			res.addResult("token", JWTUtils.createJWTToken(subject, lifetime,
-					issuerCred.getSubjectName(), issuerCred.getKey(), claims));
+			res.addResult("token", token);
 			return res;
 		}catch(Exception e) {
 			return new AdminActionResult(false, Log.getDetailMessage(e));
