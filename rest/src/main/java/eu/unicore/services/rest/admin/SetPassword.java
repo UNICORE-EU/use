@@ -19,11 +19,6 @@ import eu.unicore.util.Log;
 public class SetPassword implements AdminAction {
 
 	@Override
-	public String getName() {
-		return "SetPassword";
-	}
-
-	@Override
 	public String getDescription() {
 		return "parameters: username, password, [dn] ";
 	}

@@ -15,12 +15,7 @@ import eu.unicore.services.Kernel;
  * 
  * @author schuller
  */
-public class ResourceAvailability implements AdminAction {
-
-	@Override
-	public String getName() {
-		return "ToggleResourceAvailability";
-	}
+public class ToggleResourceAvailability implements AdminAction {
 
 	@Override
 	public String getDescription() {

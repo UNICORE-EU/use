@@ -4,13 +4,8 @@ import java.util.Map;
 
 import eu.unicore.services.Kernel;
 
-public class MockAdminAction implements AdminAction {
+public class Mock implements AdminAction {
 
-	@Override
-	public String getName() {
-		return "mock";
-	}
-	
 	@Override
 	public String getDescription() {
 		return "Echos all incoming parameters";

@@ -15,11 +15,6 @@ import eu.unicore.services.Kernel;
 public class GetMemoryUsage implements AdminAction {
 
 	@Override
-	public String getName() {
-		return "GetMemoryUsage";
-	}
-
-	@Override
 	public String getDescription() {
 		return "get an overview of the server process' memory usage";
 	}

@@ -10,6 +10,7 @@ import eu.unicore.services.admin.AdminActionResult;
 import eu.unicore.services.rest.impl.Tokens;
 import eu.unicore.services.rest.jwt.JWTServerProperties;
 import eu.unicore.util.Log;
+import eu.unicore.util.Pair;
 import io.imunity.tanl.x509.X509Credential;
 
 /**
@@ -18,11 +19,6 @@ import io.imunity.tanl.x509.X509Credential;
  * @author schuller
  */
 public class IssueAPIToken implements AdminAction {
-
-	@Override
-	public String getName() {
-		return "IssueAPIToken";
-	}
 
 	@Override
 	public String getDescription() {
@@ -60,9 +56,10 @@ public class IssueAPIToken implements AdminAction {
 				checkPrefs(preferences);
 				claims.put("preferences", preferences);
 			}
-			String token = Tokens.issueToken(kernel, subject, lifetime, issuerCred, claims);
+			Pair<String,String> token = Tokens.issueToken(kernel, subject, lifetime, issuerCred, claims);
 			AdminActionResult res = new AdminActionResult(true, "OK");
-			res.addResult("token", token);
+			res.addResult("tokenID", token.getM1());
+			res.addResult("token", token.getM2());
 			return res;
 		}catch(Exception e) {
 			return new AdminActionResult(false, Log.getDetailMessage(e));

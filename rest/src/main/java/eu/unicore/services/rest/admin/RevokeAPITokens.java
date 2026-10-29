@@ -15,16 +15,11 @@ import eu.unicore.services.rest.impl.Tokens;
 import eu.unicore.util.Log;
 
 /**
- * Allows to revoken API token(s) based on subject or token ID
+ * Allows to revoke API token(s) based on subject or token ID
  *
  * @author schuller
  */
-public class RevokeAPIToken implements AdminAction {
-
-	@Override
-	public String getName() {
-		return "RevokeAPIToken";
-	}
+public class RevokeAPITokens implements AdminAction {
 
 	@Override
 	public String getDescription() {
@@ -55,29 +50,22 @@ public class RevokeAPIToken implements AdminAction {
 				}
 			}
 			else {
-				boolean match = subjectsMatch!=null;
-				// This is slow. TBD add a search thing to the persist lib
 				List<String>tokenIDs = store.getIDs("service", Tokens.service);
-				boolean delete = false;
-				for(String id: tokenIDs) {
+				if(subjectsMatch!=null) {
+					List<String>potentialMatches = store.findIDs("data", subjectsMatch);
+					tokenIDs.retainAll(potentialMatches);
+					tokensRevoked = tokenIDs.size();
+					for(String i: tokenIDs)store.remove(i);
+				}
+				else for(String id: tokenIDs) {
 					var i = store.read(id);
-					delete = false;
-					if(match) {
-						if(i.about.matches(subjectsMatch)) {
-							delete = true;
-						}
-					}
-					else if(subject.equals(i.about)) {
-						delete = true;
-					}
-					if(delete) {
+					if(subject.equals(i.about)) {
 						store.remove(id);
 						tokensRevoked++;
 					}
 				}
 			}
-			AdminActionResult res = new AdminActionResult(true, "OK, <"+tokensRevoked+"> token(s) revoked");
-			return res;
+			return new AdminActionResult(true, "OK, <"+tokensRevoked+"> token(s) revoked");
 		}catch(Exception e) {
 			return new AdminActionResult(false, Log.getDetailMessage(e));
 		}

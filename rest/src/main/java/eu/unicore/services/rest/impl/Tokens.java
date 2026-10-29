@@ -28,6 +28,7 @@ import eu.unicore.services.security.AuthAttributesCollector;
 import eu.unicore.services.security.AuthAttributesCollector.BasicAttributeHolder;
 import eu.unicore.services.security.util.AuthZAttributeStore;
 import eu.unicore.util.Log;
+import eu.unicore.util.Pair;
 import io.imunity.tanl.x509.X509Credential;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -98,8 +99,8 @@ public class Tokens extends RESTRendererBase {
 			if(Boolean.parseBoolean(renewable)) {
 				claims.put("renewable", "true");
 			}
-			String token = issueToken(kernel, user, remainingCredentialLifetime, issuerCred, claims);
-			return Response.ok().entity(token).build();
+			Pair<String,String>token = issueToken(kernel, user, lifetime, issuerCred, claims);
+			return Response.ok().entity(token.getM2()).build();
 		}
 		catch(SecurityException se) {
 			return handleError(403, "Error creating token", se, logger);
@@ -161,10 +162,10 @@ public class Tokens extends RESTRendererBase {
 	 * @param lifetime
 	 * @param issuerCred
 	 * @param claims
-	 * @return
+	 * @return pair of tokenID, token
 	 * @throws Exception
 	 */
-	public static String issueToken(Kernel kernel,
+	public static Pair<String, String> issueToken(Kernel kernel,
 			String user, long lifetime, X509Credential issuerCred, Map<String,String> claims)
 	throws Exception {
 		Map<String,String> _claims = new HashMap<>();
@@ -181,7 +182,8 @@ public class Tokens extends RESTRendererBase {
 		InstanceInfoBean info = new InstanceInfoBean(tokenID, service, tt);
 		info.about = user;
 		kernel.getPersistenceManager().getInfoStore().write(info);
-		return token;
+		logger.info("New API token issued for <{}> tokenID={} lifetime={}s", user, tokenID, lifetime);
+		return new Pair<>(tokenID, token);
 	}
 
 	public static boolean checkTokenExists(Kernel kernel, String tokenID) throws Exception {

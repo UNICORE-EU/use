@@ -21,7 +21,7 @@ import eu.unicore.services.Kernel;
 import eu.unicore.services.KernelInjectable;
 import eu.unicore.services.Model;
 import eu.unicore.services.Resource;
-import eu.unicore.services.admin.ResourceAvailability;
+import eu.unicore.services.admin.ToggleResourceAvailability;
 import eu.unicore.services.exceptions.ResourceUnavailableException;
 import eu.unicore.services.exceptions.ResourceUnknownException;
 import eu.unicore.services.impl.SecuredResourceImpl;
@@ -144,7 +144,7 @@ public final class USERestInvoker extends JAXRSInvoker {
 
 				// get and inject the resource and the model
 				if(home!=null && resourceID!=null){
-					if(ResourceAvailability.isUnavailable(resourceID)){
+					if(ToggleResourceAvailability.isUnavailable(resourceID)){
 						throw new ResourceUnavailableException("Resource <"+resourceID
 								+"> set to unavailable by an administrator.");
 					}

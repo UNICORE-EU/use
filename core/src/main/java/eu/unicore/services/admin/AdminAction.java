@@ -14,9 +14,11 @@ import eu.unicore.services.Kernel;
 public interface AdminAction {
 
 	/**
-	 * gets the name of this action
+	 * gets the name of this action. Defaults to the class name
 	 */
-	public String getName();
+	public default String getName() {
+		return getClass().getSimpleName();
+	}
 
 	/**
 	 * gets the single line summary (including at least the accepted parameter names) 

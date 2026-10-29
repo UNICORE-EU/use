@@ -37,9 +37,9 @@ public class TestAdminActions {
 			AdminAction a = act.get(s);
 			System.out.println(a.getName()+" - "+a.getDescription());
 		}
-		AdminAction aAct=act.get("mock");
+		AdminAction aAct=act.get("Mock");
 		assertNotNull(aAct);
-		assertEquals("mock", aAct.getName());
+		assertEquals("Mock", aAct.getName());
 		Map<String,String>params = new HashMap<>();
 		params.put("foo", "foo-value");
 		AdminActionResult result=aAct.invoke(params, k);
@@ -51,17 +51,17 @@ public class TestAdminActions {
 	@Test
 	public void testResourceAvailabilityAction() throws Exception{
 		Map<String,String>params = new HashMap<>();
-		ResourceAvailability ra = (ResourceAvailability)k.getAdminActions().get("ToggleResourceAvailability");
+		ToggleResourceAvailability ra = (ToggleResourceAvailability)k.getAdminActions().get("ToggleResourceAvailability");
 		params.put("resources", "a,b,c");
 		AdminActionResult res = ra.invoke(params, k);
 		assertTrue(res.successful());
-		assertTrue(ResourceAvailability.isUnavailable("a"));
-		assertTrue(ResourceAvailability.isUnavailable("b"));
-		assertTrue(ResourceAvailability.isUnavailable("c"));
+		assertTrue(ToggleResourceAvailability.isUnavailable("a"));
+		assertTrue(ToggleResourceAvailability.isUnavailable("b"));
+		assertTrue(ToggleResourceAvailability.isUnavailable("c"));
 		params.put("resources", "c");
 		res = ra.invoke(params, k);
 		assertTrue(res.successful());
-		assertFalse(ResourceAvailability.isUnavailable("c"));
+		assertFalse(ToggleResourceAvailability.isUnavailable("c"));
 	}
 
 	@Test
