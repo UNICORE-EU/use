@@ -293,7 +293,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 				logger.info("  -) " + X500NameUtils.getReadableForm(c.getSubjectX500Principal()));
 		} catch (ConfigurationException e)
 		{
-			logger.info("Trusted SAML assertion issuers truststore is not defined! " +
+			logger.debug("Trusted SAML assertion issuers truststore is not defined! " +
 					"Validating Unity assertions will not work.");
 			setTrustedAssertionIssuers(new BinaryCertChainValidator(false));
 		}
@@ -302,7 +302,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		setDefaultVOs(defaultVos.toArray(new String[0]));
 
 		if (isGatewayEnabled()) {
-			logger.info("Enabling gateway support");
+			logger.info("Enabling Gateway support");
 			setGatewayRegistrationEnabled(properties.getBooleanValue(PROP_AUTOREGISTER_WITH_GATEWAY));
 			if (isGatewayRegistrationEnabled()) {
 				setGatewayRegistrationUpdateInterval(properties.getIntValue(
@@ -319,7 +319,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 				setHaveFixedGatewayCertificate(true);
 			}
 		} else {
-			logger.info("Gateway support is turned OFF globally, none of gateway settings will be used.");
+			logger.info("Gateway support is disabled.");
 			setGatewayRegistrationEnabled(false);
 			setGatewayWaitingEnabled(false);
 		}
@@ -374,7 +374,7 @@ public class ContainerSecurityProperties extends DefaultContainerSecurityConfigu
 		try (InputStream is = new BufferedInputStream(new FileInputStream(certFile))){
 			return CertificateUtils.loadCertificate(is, encoding);
 		} catch (IOException e) {
-			throw new ConfigurationException("Can not load the gateway's certificate '" + 
+			throw new ConfigurationException("Can not load the Gateway's certificate '" + 
 					certFile +"'", e);
 		}
 	}

@@ -89,7 +89,7 @@ public class GatewayHandler implements ISubSystem {
 			try {
 				X509Certificate[] cert = ConnectionUtil.getPeerCertificate(clientConfiguration, gwUrl, 
 						(int)(timeout-(System.currentTimeMillis()-start)), logger);
-				logger.info("Successfully connected to gateway at {}", gwUrl);
+				logger.info("Successfully connected to Gateway at {}", gwUrl);
 				if (!secConfiguration.haveFixedGatewayCertificate()) {
 					secConfiguration.setGatewayCertificate(cert[0]);
 					logger.info("Gateway's DN was autodetected and will be used for signature checking: {}",
@@ -134,7 +134,7 @@ public class GatewayHandler implements ISubSystem {
 		if (lastChecked+2000>System.currentTimeMillis())
 			return;
 		if(gwURL.contains(myHost)){
-			statusMessage="N/A (no gateway used)";
+			statusMessage="N/A (no Gateway used)";
 		}
 		else{
 			try {
@@ -199,7 +199,7 @@ public class GatewayHandler implements ISubSystem {
 				} catch (UnknownHostException e) {
 					msg = "Gateway host is unknown: " + e;
 				} catch (IOException e) {
-					msg = "Can't contact gateway: " + e;
+					msg = "Can't contact Gateway: " + e;
 				}
 				return new Pair<>(cert,msg);
 			}
@@ -255,18 +255,18 @@ public class GatewayHandler implements ISubSystem {
 		        post.setEntity(new UrlEncodedFormEntity(nvps, Charset.forName("UTF-8")));
 		        try(ClassicHttpResponse response = client.executeOpen(null, post, HttpClientContext.create())){
 		        	if(response.getCode() != HttpStatus.SC_CREATED){
-		        		logger.warn("Could not register with gateway at {}, will try again!",gwAddress);
+		        		logger.warn("Could not register with Gateway at {}, will try again!",gwAddress);
 		        	}
 		        	EntityUtils.consumeQuietly(response.getEntity());
 		        }
-				logger.debug("(Re-)registered with gateway at {}", gwAddress);
+				logger.debug("(Re-)registered with Gateway at {}", gwAddress);
 			}catch(Exception e){
-				Log.logException("Could not contact gateway at "+gwAddress,e,logger);
+				Log.logException("Could not contact Gateway at "+gwAddress,e,logger);
 			}
 		}
 
 		private String extractGWAddress(String base)throws MalformedURLException{
-			URL u=new URL(base);
+			URL u = new URL(base);
 			return u.toString().split(u.getPath())[0];
 		}
 	}

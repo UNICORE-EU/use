@@ -538,38 +538,26 @@ public final class SecurityManager {
 	 * checks whether the given client has the server identity
 	 */
 	public boolean isServer(Client c){
-		if (c==null)
-			throw new IllegalArgumentException("client can not be null");
-		X509Certificate serverCert = getServerCert();
-		if (serverCert == null)
-			return false;
-
-		String dn = serverCert.getSubjectX500Principal().getName();
-		if(logger.isTraceEnabled()){
-			logger.trace("Check server=<{}> vs client=<{}>",
-					X500NameUtils.getReadableForm(serverCert.getSubjectX500Principal()),
-					X500NameUtils.getReadableForm(c.getDistinguishedName()));
-		}
-		return X500NameUtils.equal(dn, c.getDistinguishedName());
+		assert c!=null;
+		String serverDN = getServerIdentity();
+		return serverDN!=null ? X500NameUtils.equal(serverDN, c.getDistinguishedName()) : false;
 	}
 
 	/**
 	 * checks whether the given DN is the server identity
 	 */
 	public boolean isServer(String callerDn){
-		X509Certificate serverCert = getServerCert();
-		return serverCert == null ? false : X500NameUtils.equal(
-				serverCert.getSubjectX500Principal(), callerDn);
+		String serverDN = getServerIdentity();
+		return serverDN!= null ? X500NameUtils.equal(serverDN, callerDn) : false;
 	}
 
 	/**
 	 * checks whether the given client has the "trusted agent" role
 	 */
 	private static boolean isTrustedAgent(Client c){
-		try{
-			return IAttributeSource.ROLE_TRUSTED_AGENT.equals(c.getRole().getName());
-		}catch(Exception e){}
-		return false;
+		assert c!=null;
+		assert c.getRole()!=null;
+		return IAttributeSource.ROLE_TRUSTED_AGENT.equals(c.getRole().getName());
 	}
 
 	public void setConfiguration(ContainerSecurityProperties sp) {
@@ -592,31 +580,23 @@ public final class SecurityManager {
 		ContainerSecurityProperties sp = kernel.getContainerSecurityConfiguration();
 		String order = sp.getDAPOrder(); 
 		if (order == null) {
-			logger.info("No dynamic attribute source is defined in the configuration, " +
+			logger.debug("No dynamic attribute source is defined in the configuration, " +
 					"users won't have any dynamic incarnation attributes assigned");
 			return new NullAttributeSource();
 		}
 		return new DynamicAttributeSourcesChain(kernel);
 	}
 
-	@SuppressWarnings("unchecked")
 	private static UnicoreXPDP createPDP(Kernel kernel) {
 		ContainerSecurityProperties secProps = kernel.getContainerSecurityConfiguration();
 		if (!secProps.isAccessControlEnabled()) {
+			logger.info("Access control is DISABLED");
 			return new AcceptingPdp();
 		}
-		Class<? extends UnicoreXPDP> pdpClazz = secProps.getPDPClass();
-		//this is as use-pdp is not available at compile time and still we want to provide a sensible default for admins.
-		if (pdpClazz == null) {
-			try {
-				pdpClazz = (Class<? extends UnicoreXPDP>) Class.forName("eu.unicore.services.pdp.local.LocalHerasafPDP");
-			} catch (ClassNotFoundException e) {
-				throw new ConfigurationException("The default eu.unicore.services.pdp.local.LocalHerasafPDP PDP is not available and PDP was not configured.");
-			}
-		}
 		try {
+			Class<? extends UnicoreXPDP> pdpClazz = secProps.getPDPClass();
 			Constructor<? extends UnicoreXPDP> constructor = pdpClazz.getConstructor();
-			logger.info("Using PDP class <{}>", pdpClazz.getName());
+			logger.info("Access control enabled, using PDP <{}>", pdpClazz.getName());
 			UnicoreXPDP pdp = constructor.newInstance();
 			pdp.setKernel(kernel);
 			return pdp;

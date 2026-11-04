@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Logger;
 
-import eu.unicore.persist.PersistenceFactory;
 import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.security.wsutil.SecuritySessionStore;
 import eu.unicore.services.admin.AdminAction;
@@ -481,8 +480,7 @@ public final class Kernel {
 			// these are done only at server startup
 			securityManager = new SecurityManager(this);
 			jettyConfiguration = new ContainerHttpServerProperties(properties);
-			PersistenceFactory pf = PersistenceFactory.get(new PersistenceProperties(properties));
-			persistenceProperties = pf.getConfig();
+			persistenceProperties = new PersistenceProperties(properties);
 		}
 	}
 
@@ -632,7 +630,7 @@ public final class Kernel {
 	private void registerDefaultFactories() {
 		ServiceLoader.load(ServiceFactory.class).forEach( factory -> {
 			serviceFactories.put(factory.getType(), factory);
-			logger.info("Registered '{}' for service type '{}'", factory.getClass().getName(), factory.getType());
+			logger.debug("Registered '{}' for service type '{}'", factory.getClass().getName(), factory.getType());
 		});
 	}
 

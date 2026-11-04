@@ -22,7 +22,7 @@ public class DeploymentManager {
 	private final Map<String,Feature> features = new HashMap<>();
 
 	public DeploymentManager(Kernel kernel) {
-		this.kernel=kernel;
+		this.kernel = kernel;
 	}
 
 	public synchronized void deployService(Service service) {
@@ -43,13 +43,8 @@ public class DeploymentManager {
 	}
 
 	public synchronized void deployService(DeploymentDescriptor info) {
-		ServiceFactory sf=kernel.getServiceFactory(info.getType());
-		Service service = sf.build(info);
-		deployService(service);
-	}
-
-	public final Kernel getKernel(){
-		return kernel;
+		ServiceFactory sf = kernel.getServiceFactory(info.getType());
+		deployService(sf.build(info));
 	}
 
 	public boolean deployFeature(Feature ft){
@@ -78,7 +73,7 @@ public class DeploymentManager {
 					}
 				}
 				ft.initialise();
-				logger.info("Feature {} v{} successfully deployed.", ftName, ftVersion);
+				logger.info("Feature <{} v{}> successfully deployed.", ftName, ftVersion);
 			}
 			else{
 				logger.info("Feature <{}> disabled, skipping.", ftName);

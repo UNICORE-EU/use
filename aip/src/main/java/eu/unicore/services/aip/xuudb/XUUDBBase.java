@@ -25,7 +25,7 @@ import eu.unicore.util.httpclient.HttpUtils;
  */
 public abstract class XUUDBBase<T> extends ExternalConnectorHelper implements IAttributeSourceBase {
 
-	protected static final Logger logger = Log.getLogger(Log.SECURITY, XUUDBBase.class);
+	protected static final Logger logger = Log.getLogger(Log.SECURITY+".xuudb", XUUDBBase.class);
 
 	public static final int DEFAULT_PORT = 34463;
 	public static final String DEFAULT_HOST = "https://localhost";
@@ -46,10 +46,10 @@ public abstract class XUUDBBase<T> extends ExternalConnectorHelper implements IA
 		this.name = name;
 		this.kernel = kernel;
 		setupURL();
-		logger.info("Attribute source '{}': connecting to <{}>", name, getXUUDBUrl());
 		initCache();
 		xuudb = createEndpoint();
 		setExternalSystemName(name);
+		logger.info("Attribute source '{}': connecting to <{}>", name, getXUUDBUrl());
 		setCheckService(kernel.getContainerProperties().getThreadingServices().getExecutorService());
 		setCheckSupplier(()->checkConnection());
 	}

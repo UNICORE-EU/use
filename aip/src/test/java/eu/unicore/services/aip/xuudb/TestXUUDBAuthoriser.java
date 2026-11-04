@@ -2,6 +2,7 @@ package eu.unicore.services.aip.xuudb;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileInputStream;
@@ -15,6 +16,7 @@ import eu.unicore.security.SubjectAttributesHolder;
 import eu.unicore.services.Kernel;
 import eu.unicore.services.security.IAttributeSource;
 import eu.unicore.services.security.TestConfigUtil;
+import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.xuudb.interfaces.IPublic;
 import io.imunity.tanl.x509.impl.CertificateUtils;
 import io.imunity.tanl.x509.impl.CertificateUtils.Encoding;
@@ -23,10 +25,11 @@ public class TestXUUDBAuthoriser {
 
 	XUUDBAttributeSource xuudb;
 	MockXUUDB mock;
-	
+	Kernel k;
+
 	@BeforeEach
 	public void setUp()throws Exception{
-		Kernel k=new Kernel(TestConfigUtil.getInsecureProperties());
+		k=new Kernel(TestConfigUtil.getInsecureProperties());
 		mock=new MockXUUDB();
 		xuudb=new XUUDBAttributeSource() {
 			@Override
@@ -64,5 +67,14 @@ public class TestXUUDBAuthoriser {
 		assertEquals(1,attr.getDefaultIncarnationAttributes().get(IAttributeSource.ATTRIBUTE_ROLE).length);
 		assertEquals("user",attr.getDefaultIncarnationAttributes().get(IAttributeSource.ATTRIBUTE_ROLE)[0]);
 	}
-	
+
+	@Test
+	public void testConfigError()throws Exception{
+		String u = "htt://invalid_url";
+		var x =new XUUDBAttributeSource(){};
+		x.setXuudbHost(u);
+		x.setXuudbPort(12345);
+		ConfigurationException ce = assertThrows(ConfigurationException.class, ()->x.configure("test",k));
+		assertTrue(ce.getMessage().contains("invalid_url"));
+	}
 }

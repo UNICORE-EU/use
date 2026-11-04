@@ -11,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.util.BlockingArrayQueue;
 
 import eu.unicore.persist.Persist;
-import eu.unicore.persist.PersistenceException;
 import eu.unicore.persist.PersistenceFactory;
 import eu.unicore.persist.PersistenceProperties;
 import eu.unicore.services.messaging.impl.MessageBean;
@@ -45,7 +44,7 @@ public class MessagingImpl implements IMessaging{
 		this.providers = new HashMap<>();
 	}
 
-	protected Persist<MessageBean>createStore()throws PersistenceException{
+	protected Persist<MessageBean>createStore()throws Exception{
 		return PersistenceFactory.get(persistenceProperties).getPersist(MessageBean.class);
 	} 
 	

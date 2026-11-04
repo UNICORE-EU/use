@@ -59,7 +59,7 @@
   <properties>
     <specification.version>11.3.0</specification.version>
     <compiler.fork>false</compiler.fork>
-    <persistence.version>1.3.3</persistence.version>
+    <persistence.version>1.4.1</persistence.version>
     <secutils.version>5.1.0</secutils.version>
     <seclib.version>8.3.0</seclib.version>
     <herasaf.version>3.0.2</herasaf.version>

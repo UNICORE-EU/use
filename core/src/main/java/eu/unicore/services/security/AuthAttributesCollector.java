@@ -1,7 +1,6 @@
 package eu.unicore.services.security;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,11 +85,6 @@ public class AuthAttributesCollector implements IAttributeSource {
 			this.role = role;
 		}
 
-		@Override
-		public String toString() {
-			return String.format("role=%s uid=%s groups=%s", role, uid,
-						groups!=null ? Arrays.asList(groups) : "[]");
-		}
 	}
-	
+
 }

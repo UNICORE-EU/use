@@ -40,9 +40,8 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 			throw new SubsystemUnavailableException("Attribute source "+name+" unavailable");
 		}
 		SubjectAttributesHolder map;
-		X509Certificate cert = (X509Certificate) tokens.getEffectiveUserCertificate();
-		boolean workUsingCertificate = tokens.getUserCertificate() != null;
-		if (workUsingCertificate) {
+		X509Certificate cert = tokens.getEffectiveUserCertificate();
+		if (cert!=null) {
 			map = cacheCredentials ? cache.read(cert) : null;
 			if (map == null) {
 				map = checkUserCert(tokens);
@@ -70,7 +69,7 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 			return new WSClientFactory(kernel.getClientConfiguration()).
 					createPlainWSProxy(IPublic.class, getXUUDBUrl() + IPublic.SERVICE_NAME);
 		} catch (Exception e) {
-			throw new ConfigurationException("Error setting up client for <"+getXUUDBUrl()+">");	
+			throw new ConfigurationException("Error creating connection to <"+getXUUDBUrl()+">", e);	
 		}
 	}
 
@@ -86,9 +85,6 @@ public class XUUDBAttributeSource extends XUUDBBase<IPublic> implements
 		CheckDataType check = in.addNewCheckCertificate();
 		check.setGcID(gcID);
 		X509Certificate cert = tokens.getEffectiveUserCertificate();
-		if (cert == null) {
-			return checkDN(tokens);
-		}
 		try {
 			check.setCertInPEM(X509Utils.getPEMStringFromX509(cert));
 			logger.debug("XUUDB request: {}", in);

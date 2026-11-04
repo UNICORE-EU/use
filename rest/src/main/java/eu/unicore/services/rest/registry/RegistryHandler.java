@@ -194,7 +194,7 @@ public class RegistryHandler implements ISubSystem {
 		catch(Exception ex){
 			status = Status.DOWN;
 			if(status!=oldStatus) {
-				logger.error("Could not read public keys from external registry: {]", Log.getDetailMessage(ex));
+				logger.error("Could not read public keys from external registry: {}", Log.getDetailMessage(ex));
 			}
 		}
 	}

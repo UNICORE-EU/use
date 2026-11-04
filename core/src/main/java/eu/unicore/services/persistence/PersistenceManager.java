@@ -34,12 +34,11 @@ public class PersistenceManager {
 	private final Kernel kernel;
 
 	public PersistenceManager(Kernel kernel){
-		this.kernel=kernel;
+		this.kernel = kernel;
 	}
 
 	/**
-	 * initialise persistence manager: load persistence class configured via 
-	 * container property {@link ContainerProperties#PERSIST_CLASSNAME}
+	 * load persistence class configured via container property {@link ContainerProperties#PERSIST_CLASSNAME}
 	 */
 	synchronized void init(){
 		if(!haveInit){
@@ -50,7 +49,7 @@ public class PersistenceManager {
 					clazz = clazz.replace("de.fzj.unicore.wsrflite", "eu.unicore.services");
 				}
 				persistClass = Class.forName(clazz);
-				logger.info("Using '{}' for permanent storage.", persistClass.getName());
+				logger.debug("Using '{}' for permanent storage.", persistClass.getName());
 			}
 			catch(Exception e){
 				throw new ConfigurationException(Log.createFaultMessage(
