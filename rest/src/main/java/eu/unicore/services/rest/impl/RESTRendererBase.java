@@ -24,7 +24,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 /**
- * Helper class providing help for the basic rendering of REST resources in
+ * Helper class providing basic rendering of REST resources in
  * JSON and HTML, including rendering of links
  *
  * @author schuller
